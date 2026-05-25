@@ -1,0 +1,20 @@
+import { redirect } from "next/navigation";
+import { getAuthUser } from "@/lib/auth";
+import CourseForm from "@/components/CourseForm";
+
+export default async function NewCoursePage() {
+  const auth = await getAuthUser();
+  if (!auth || auth.role !== "admin") redirect("/login");
+
+  return (
+    <div>
+      <div className="mb-8">
+        <h1 className="text-2xl font-bold text-gray-900">สร้างคอร์สใหม่</h1>
+        <p className="text-gray-500 text-sm mt-1">กรอกรายละเอียดคอร์สและกำหนดรอบเรียน</p>
+      </div>
+      <div className="bg-white rounded-2xl border border-gray-100 p-8">
+        <CourseForm mode="create" />
+      </div>
+    </div>
+  );
+}

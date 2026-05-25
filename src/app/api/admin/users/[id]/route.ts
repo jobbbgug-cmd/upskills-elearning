@@ -1,0 +1,53 @@
+import { NextRequest, NextResponse } from "next/server";
+import bcrypt from "bcryptjs";
+import { connectDB } from "@/lib/mongodb";
+import User from "@/models/User";
+import { getAuthUser } from "@/lib/auth";
+
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  try {
+    const auth = await getAuthUser();
+    if (!auth || auth.role !== "admin") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    await connectDB();
+    const { id } = await params;
+    const body = await req.json();
+
+    const update: Record<string, unknown> = {};
+
+    if (body.role !== undefined) {
+      if (!["student", "teacher", "admin"].includes(body.role))
+        return NextResponse.json({ error: "Role ไม่ถูกต้อง" }, { status: 400 });
+      update.role = body.role;
+    }
+    if (body.name !== undefined) update.name = body.name;
+    if (body.email !== undefined) update.email = body.email;
+    if (body.gradeLevel !== undefined) update.gradeLevel = body.gradeLevel;
+    if (body.status !== undefined) update.status = body.status;
+
+    if (body.password) {
+      if (body.password.length < 6)
+        return NextResponse.json({ error: "รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร" }, { status: 400 });
+      update.password = await bcrypt.hash(body.password, 10);
+    }
+
+    const user = await User.findByIdAndUpdate(id, update, { new: true }).select("-password");
+    if (!user) return NextResponse.json({ error: "ไม่พบผู้ใช้" }, { status: 404 });
+    return NextResponse.json(JSON.parse(JSON.stringify(user)));
+  } catch {
+    return NextResponse.json({ error: "เกิดข้อผิดพลาด" }, { status: 500 });
+  }
+}
+
+export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  try {
+    const auth = await getAuthUser();
+    if (!auth || auth.role !== "admin") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    await connectDB();
+    const { id } = await params;
+    if (auth.userId === id) return NextResponse.json({ error: "ไม่สามารถลบบัญชีตัวเองได้" }, { status: 400 });
+    await User.findByIdAndDelete(id);
+    return NextResponse.json({ message: "ลบผู้ใช้สำเร็จ" });
+  } catch {
+    return NextResponse.json({ error: "เกิดข้อผิดพลาด" }, { status: 500 });
+  }
+}
