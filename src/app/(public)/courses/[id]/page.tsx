@@ -59,7 +59,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
     }).lean();
     myRecs.forEach((b) => {
       myBookings[b.sessionId.toString()] = {
-        bookingId: b._id.toString(),
+        bookingId: (b._id as { toString(): string }).toString(),
         seatNumber: b.seatNumber as number,
         status: b.status,
         slipImage: b.slipImage ?? "",
