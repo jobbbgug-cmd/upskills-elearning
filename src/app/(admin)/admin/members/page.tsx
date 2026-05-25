@@ -6,7 +6,7 @@ interface PendingUser {
   _id: string;
   name: string;
   email: string;
-  role: "student" | "teacher";
+  role: "student" | "teacher" | "admin";
   gradeLevel?: string;
   status: "pending" | "approved" | "rejected";
   contactChannel?: string;
