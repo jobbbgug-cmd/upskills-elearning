@@ -51,6 +51,10 @@ export default function CourseForm({ course, mode, teacherMode = false, teacherN
     qrCodeImage: course?.qrCodeImage ?? "",
     bankAccount: course?.bankAccount ?? "",
     bankName: course?.bankName ?? "",
+    linkDigital: course?.linkDigital ?? "",
+    linkClip: course?.linkClip ?? "",
+    linkSupplementary: course?.linkSupplementary ?? "",
+    linkFullbook: course?.linkFullbook ?? "",
   });
 
   const [sessions, setSessions] = useState<Session[]>(
@@ -381,6 +385,56 @@ export default function CourseForm({ course, mode, teacherMode = false, teacherN
               onChange={(e) => setForm({ ...form, bankName: e.target.value })}
               className={inputClass}
               placeholder="เช่น นาย สมชาย ใจดี"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Teaching materials links */}
+      <div className="border border-blue-200 bg-blue-50 rounded-2xl p-5 space-y-4">
+        <div>
+          <h3 className="text-sm font-semibold text-blue-800 mb-0.5">ลิงก์สื่อการสอน</h3>
+          <p className="text-xs text-blue-600">นักเรียนที่ได้รับอนุมัติจะเห็นลิงก์เหล่านี้</p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">สื่อดิจิทัล</label>
+            <input
+              type="url"
+              value={form.linkDigital}
+              onChange={(e) => setForm({ ...form, linkDigital: e.target.value })}
+              className={inputClass}
+              placeholder="https://..."
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">คลิป</label>
+            <input
+              type="url"
+              value={form.linkClip}
+              onChange={(e) => setForm({ ...form, linkClip: e.target.value })}
+              className={inputClass}
+              placeholder="https://..."
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">สื่อประกอบการสอน</label>
+            <input
+              type="url"
+              value={form.linkSupplementary}
+              onChange={(e) => setForm({ ...form, linkSupplementary: e.target.value })}
+              className={inputClass}
+              placeholder="https://..."
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">สื่อฯ เต็มเล่ม</label>
+            <input
+              type="url"
+              value={form.linkFullbook}
+              onChange={(e) => setForm({ ...form, linkFullbook: e.target.value })}
+              className={inputClass}
+              placeholder="https://..."
             />
           </div>
         </div>

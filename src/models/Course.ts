@@ -25,6 +25,10 @@ export interface ICourseDocument extends Document {
   qrCodeImage: string;
   bankAccount: string;
   bankName: string;
+  linkDigital?: string;
+  linkClip?: string;
+  linkSupplementary?: string;
+  linkFullbook?: string;
   createdAt: Date;
 }
 
@@ -53,6 +57,10 @@ const CourseSchema = new Schema<ICourseDocument>(
     qrCodeImage: { type: String, default: "" },
     bankAccount: { type: String, default: "" },
     bankName: { type: String, default: "" },
+    linkDigital: { type: String, default: "" },
+    linkClip: { type: String, default: "" },
+    linkSupplementary: { type: String, default: "" },
+    linkFullbook: { type: String, default: "" },
   },
   { timestamps: true }
 );

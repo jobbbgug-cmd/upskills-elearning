@@ -29,6 +29,10 @@ export interface ICourse {
   qrCodeImage?: string;
   bankAccount?: string;
   bankName?: string;
+  linkDigital?: string;
+  linkClip?: string;
+  linkSupplementary?: string;
+  linkFullbook?: string;
   createdAt: string;
 }
 

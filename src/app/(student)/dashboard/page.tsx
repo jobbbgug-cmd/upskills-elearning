@@ -6,7 +6,7 @@ import { connectDB } from "@/lib/mongodb";
 import Booking from "@/models/Booking";
 import User from "@/models/User";
 import { ICourse, ISession } from "@/types";
-import { Calendar, Clock, BookOpen } from "lucide-react";
+import { Calendar, Clock, BookOpen, GraduationCap } from "lucide-react";
 import Badge from "@/components/ui/Badge";
 import MeetButton from "@/components/MeetButton";
 
@@ -145,17 +145,25 @@ function BookingCard({ course, session, status }: { course: ICourse; session?: I
         </div>
       </div>
 
-      {/* Meet button — full width below, only for upcoming with link */}
-      {session?.zoomLink && status === "upcoming" && (
-        <div className="mt-4 pt-4 border-t border-gray-50">
+      {/* Buttons row */}
+      <div className="mt-4 pt-4 border-t border-gray-50 flex flex-wrap gap-2">
+        {session?.zoomLink && status === "upcoming" && (
           <MeetButton
             sessionDate={session.date}
             startTime={session.startTime}
             endTime={session.endTime}
             meetLink={session.zoomLink}
           />
-        </div>
-      )}
+        )}
+        <Link
+          href={`/learn/${course._id}`}
+          className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white transition-colors"
+          style={{ background: "linear-gradient(90deg,#7c3aed,#6d28d9)" }}
+        >
+          <GraduationCap className="w-4 h-4" />
+          เข้าคอร์สเรียน
+        </Link>
+      </div>
     </div>
   );
 }
