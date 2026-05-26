@@ -16,8 +16,10 @@ export default async function LearnPage({ params }: { params: Promise<{ courseId
 
   await connectDB();
 
+  const isAdmin = auth.role === "admin" || auth.role === "teacher";
+
   const [booking, rawCourse] = await Promise.all([
-    Booking.findOne({ userId: auth.userId, courseId, status: "confirmed" }).lean(),
+    isAdmin ? Promise.resolve(true) : Booking.findOne({ userId: auth.userId, courseId, status: "confirmed" }).lean(),
     Course.findById(courseId).lean(),
   ]);
 
