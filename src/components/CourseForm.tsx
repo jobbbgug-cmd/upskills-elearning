@@ -1,9 +1,11 @@
 "use client";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { ICourse, GradeLevel } from "@/types";
 import { Plus, Trash2, Upload, BookOpen, RefreshCw } from "lucide-react";
+
+interface Teacher { _id: string; name: string; email: string; }
 
 function genJitsiLink() {
   const chars = "abcdefghijkmnpqrstuvwxyz23456789";
@@ -61,9 +63,18 @@ export default function CourseForm({ course, mode, teacherMode = false, teacherN
     })) ?? [{ date: "", startTime: "09:00", endTime: "11:00", maxCapacity: 10, zoomLink: "" }]
   );
 
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading]   = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError]       = useState("");
+  const [teachers, setTeachers] = useState<Teacher[]>([]);
+
+  useEffect(() => {
+    if (!teacherMode) {
+      fetch("/api/admin/users/teachers")
+        .then((r) => r.json())
+        .then((data) => { if (Array.isArray(data)) setTeachers(data); });
+    }
+  }, [teacherMode]);
 
   const toggleGrade = (grade: GradeLevel) => {
     setForm((f) => ({
@@ -187,14 +198,27 @@ export default function CourseForm({ course, mode, teacherMode = false, teacherN
         </div>
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-1.5">ชื่อผู้สอน *</label>
-          <input
-            required
-            value={form.instructor}
-            onChange={(e) => setForm({ ...form, instructor: e.target.value })}
-            className={`${inputClass} ${teacherMode ? "bg-gray-50 text-gray-500 cursor-not-allowed" : ""}`}
-            placeholder="เช่น อาจารย์สมชาย"
-            readOnly={teacherMode}
-          />
+          {teacherMode ? (
+            <input
+              value={form.instructor}
+              readOnly
+              className={`${inputClass} bg-gray-50 text-gray-500 cursor-not-allowed`}
+            />
+          ) : (
+            <select
+              required
+              value={form.instructor}
+              onChange={(e) => setForm({ ...form, instructor: e.target.value })}
+              className={inputClass}
+            >
+              <option value="">— เลือกครูผู้สอน —</option>
+              {teachers.map((t) => (
+                <option key={t._id} value={t.name}>
+                  {t.name} ({t.email})
+                </option>
+              ))}
+            </select>
+          )}
         </div>
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-1.5">หมวดหมู่ *</label>

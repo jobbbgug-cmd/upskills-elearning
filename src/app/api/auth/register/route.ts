@@ -4,7 +4,7 @@ import User from "@/models/User";
 
 export async function POST(req: NextRequest) {
   try {
-    const { name, email, role, gradeLevel, contactChannel, contactId } = await req.json();
+    const { name, email, role, gradeLevel, teacherId, teacherName, contactChannel, contactId } = await req.json();
 
     if (!name || !email) {
       return NextResponse.json({ error: "กรุณากรอกข้อมูลให้ครบ" }, { status: 400 });
@@ -24,7 +24,13 @@ export async function POST(req: NextRequest) {
     }
 
     const resolvedGradeLevel = userRole === "teacher" ? "ทุกระดับชั้น" : (gradeLevel ?? "");
-    await User.create({ name, email, role: userRole, gradeLevel: resolvedGradeLevel, status: "pending", password: "", contactChannel, contactId });
+    await User.create({
+      name, email, role: userRole,
+      gradeLevel: resolvedGradeLevel,
+      teacherId: userRole === "student" ? (teacherId ?? "") : "",
+      teacherName: userRole === "student" ? (teacherName ?? "") : "",
+      status: "pending", password: "", contactChannel, contactId,
+    });
 
     return NextResponse.json({ message: "ส่งคำขอสมัครสมาชิกสำเร็จ รอการอนุมัติจาก Admin" });
   } catch (err) {

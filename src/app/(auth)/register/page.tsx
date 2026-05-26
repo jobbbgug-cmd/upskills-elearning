@@ -1,9 +1,11 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowLeft, CheckCircle, User, GraduationCap, ChevronDown } from "lucide-react";
 import { GradeLevel } from "@/types";
+
+interface Teacher { _id: string; name: string; }
 
 const GRADE_LEVELS: GradeLevel[] = [
   "ป.1", "ป.2", "ป.3", "ป.4", "ป.5", "ป.6",
@@ -12,12 +14,12 @@ const GRADE_LEVELS: GradeLevel[] = [
 ];
 
 const CONTACT_CHANNELS = [
-  { value: "LINE",      label: "LINE",      icon: "💬", placeholder: "LINE ID เช่น @username หรือ 0812345678" },
-  { value: "Facebook",  label: "Facebook",  icon: "📘", placeholder: "ชื่อ Facebook หรือ URL โปรไฟล์" },
-  { value: "Instagram", label: "Instagram", icon: "📸", placeholder: "Instagram @username" },
-  { value: "WhatsApp",  label: "WhatsApp",  icon: "📞", placeholder: "เบอร์โทร WhatsApp เช่น 0812345678" },
-  { value: "Email",     label: "Email",     icon: "✉️", placeholder: "อีเมลสำรอง เช่น name@gmail.com" },
-  { value: "SMS",       label: "SMS",       icon: "📱", placeholder: "เบอร์โทรศัพท์ เช่น 0812345678" },
+  { value: "LINE",      label: "LINE",      logo: "/logos/LINE.png",      emoji: "💬", placeholder: "LINE ID เช่น @username หรือ 0812345678" },
+  { value: "Facebook",  label: "Facebook",  logo: "/logos/Facebook.png",  emoji: "📘", placeholder: "ชื่อ Facebook หรือ URL โปรไฟล์" },
+  { value: "Instagram", label: "Instagram", logo: "/logos/Instagram.png", emoji: "📸", placeholder: "Instagram @username" },
+  { value: "WhatsApp",  label: "WhatsApp",  logo: "/logos/WhatsApp.png",  emoji: "📞", placeholder: "เบอร์โทร WhatsApp เช่น 0812345678" },
+  { value: "Email",     label: "Email",     logo: "/logos/Email.png",     emoji: "✉️", placeholder: "อีเมลสำรอง เช่น name@gmail.com" },
+  { value: "SMS",       label: "SMS",       logo: "/logos/sms.png",       emoji: "📱", placeholder: "เบอร์โทรศัพท์ เช่น 0812345678" },
 ];
 
 export default function RegisterPage() {
@@ -26,12 +28,21 @@ export default function RegisterPage() {
     email: "",
     role: "student" as "student" | "teacher",
     gradeLevel: "" as GradeLevel | "",
+    teacherId: "",
+    teacherName: "",
     contactChannel: "",
     contactId: "",
   });
-  const [error, setError] = useState("");
+  const [error, setError]     = useState("");
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [teachers, setTeachers] = useState<Teacher[]>([]);
+
+  useEffect(() => {
+    fetch("/api/teachers").then((r) => r.json()).then((data) => {
+      if (Array.isArray(data)) setTeachers(data);
+    });
+  }, []);
 
   const selectedChannel = CONTACT_CHANNELS.find((c) => c.value === form.contactChannel);
 
@@ -70,7 +81,8 @@ export default function RegisterPage() {
           <h2 className="text-xl font-bold text-gray-900 mb-2">ส่งคำขอสำเร็จ!</h2>
           <p className="text-gray-500 text-sm leading-relaxed mb-2">
             คำขอสมัครสมาชิกของคุณถูกส่งแล้ว<br />
-            Admin จะตรวจสอบและส่ง <strong>Username / Password</strong><br />
+            {form.teacherName && <><strong className="text-violet-600">ครู {form.teacherName}</strong> จะตรวจสอบและ</>}
+            ส่ง <strong>Username / Password</strong><br />
             ให้ทาง <strong className="text-indigo-600">{selectedChannel?.icon} {form.contactChannel}</strong>
           </p>
           <p className="text-sm font-medium text-gray-700 bg-gray-50 rounded-xl px-4 py-2 mb-6">
@@ -133,16 +145,32 @@ export default function RegisterPage() {
             className="w-full bg-gray-100 rounded-2xl px-4 py-3.5 text-sm text-gray-700 placeholder-gray-400 outline-none focus:ring-2 focus:ring-violet-400"
           />
 
-          {/* Grade level — student only */}
+          {/* Grade level + Teacher — student only */}
           {form.role === "student" && (
-            <select
-              value={form.gradeLevel}
-              onChange={(e) => setForm({ ...form, gradeLevel: e.target.value as GradeLevel })}
-              className="w-full bg-gray-100 rounded-2xl px-4 py-3.5 text-sm text-gray-700 outline-none focus:ring-2 focus:ring-violet-400"
-            >
-              <option value="">-- ระดับชั้นที่กำลังเรียน --</option>
-              {GRADE_LEVELS.map((g) => <option key={g} value={g}>{g}</option>)}
-            </select>
+            <>
+              <select
+                value={form.gradeLevel}
+                onChange={(e) => setForm({ ...form, gradeLevel: e.target.value as GradeLevel })}
+                className="w-full bg-gray-100 rounded-2xl px-4 py-3.5 text-sm text-gray-700 outline-none focus:ring-2 focus:ring-violet-400"
+              >
+                <option value="">-- ระดับชั้นที่กำลังเรียน --</option>
+                {GRADE_LEVELS.map((g) => <option key={g} value={g}>{g}</option>)}
+              </select>
+
+              <select
+                value={form.teacherId}
+                onChange={(e) => {
+                  const selected = teachers.find((t) => t._id === e.target.value);
+                  setForm({ ...form, teacherId: e.target.value, teacherName: selected?.name ?? "" });
+                }}
+                className="w-full bg-gray-100 rounded-2xl px-4 py-3.5 text-sm text-gray-700 outline-none focus:ring-2 focus:ring-violet-400"
+              >
+                <option value="">-- ครู/อาจารย์ผู้สอน --</option>
+                {teachers.map((t) => (
+                  <option key={t._id} value={t._id}>{t.name}</option>
+                ))}
+              </select>
+            </>
           )}
 
           {/* Contact channel */}
@@ -163,7 +191,11 @@ export default function RegisterPage() {
                       active ? "border-violet-500 bg-violet-50" : "border-gray-200 hover:border-gray-300 bg-white"
                     }`}
                   >
-                    <span className="text-xl leading-none">{ch.icon}</span>
+                    {ch.logo ? (
+                      <img src={ch.logo} alt={ch.label} className="w-7 h-7 object-contain" />
+                    ) : (
+                      <span className="text-xl leading-none">{ch.emoji}</span>
+                    )}
                     <span className={`text-xs font-semibold ${active ? "text-violet-700" : "text-gray-600"}`}>
                       {ch.label}
                     </span>
@@ -175,7 +207,11 @@ export default function RegisterPage() {
             {/* Contact ID input — shown after selecting channel */}
             {form.contactChannel && (
               <div className="flex items-center gap-2 bg-violet-50 border-2 border-violet-200 rounded-2xl px-4 py-3">
-                <span className="text-lg shrink-0">{selectedChannel?.icon}</span>
+                {selectedChannel?.logo ? (
+                  <img src={selectedChannel.logo} alt={selectedChannel.label} className="w-5 h-5 object-contain shrink-0" />
+                ) : (
+                  <span className="text-lg shrink-0">{selectedChannel?.emoji}</span>
+                )}
                 <input
                   required
                   value={form.contactId}
