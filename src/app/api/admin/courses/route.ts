@@ -6,12 +6,13 @@ import Course from "@/models/Course";
 export async function GET() {
   try {
     const auth = await getAuthUser();
-    if (!auth || auth.role !== "admin") {
+    if (!auth || (auth.role !== "admin" && auth.role !== "teacher")) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     await connectDB();
-    const courses = await Course.find().sort({ createdAt: -1 });
+    const filter = auth.role === "admin" ? {} : { instructorId: auth.userId };
+    const courses = await Course.find(filter).sort({ createdAt: -1 });
     return NextResponse.json({ courses });
   } catch (err) {
     console.error(err);
@@ -22,12 +23,18 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   try {
     const auth = await getAuthUser();
-    if (!auth || auth.role !== "admin") {
+    if (!auth || (auth.role !== "admin" && auth.role !== "teacher")) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const body = await req.json();
     await connectDB();
+
+    if (auth.role === "teacher") {
+      body.instructorId = auth.userId;
+      body.instructor = auth.name;
+    }
+
     const course = await Course.create(body);
     return NextResponse.json({ course }, { status: 201 });
   } catch (err) {

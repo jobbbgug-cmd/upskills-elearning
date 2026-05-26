@@ -70,7 +70,7 @@ export default async function HomePage() {
           {[
             { icon: BookOpen, label: "คอร์สทั้งหมด", value: courses.length + "+" },
             { icon: Users, label: "ที่นั่งต่อรอบ", value: "10 คน" },
-            { icon: Video, label: "สอนสดผ่าน", value: "Zoom" },
+            { icon: Video, label: "สอนสดผ่าน", value: "Jitsi Meet" },
           ].map(({ icon: Icon, label, value }) => (
             <div key={label}>
               <Icon className="w-7 h-7 text-indigo-500 mx-auto mb-2" />

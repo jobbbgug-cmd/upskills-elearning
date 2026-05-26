@@ -9,17 +9,18 @@ import Badge from "@/components/ui/Badge";
 import { BookOpen, Plus, Pencil } from "lucide-react";
 import DeleteCourseButton from "./DeleteCourseButton";
 
-async function getCourses() {
+async function getCourses(role: string, userId: string) {
   await connectDB();
-  const courses = await Course.find().sort({ createdAt: -1 }).lean();
+  const filter = role === "admin" ? {} : { instructorId: userId };
+  const courses = await Course.find(filter).sort({ createdAt: -1 }).lean();
   return JSON.parse(JSON.stringify(courses)) as ICourse[];
 }
 
 export default async function AdminCoursesPage() {
   const auth = await getAuthUser();
-  if (!auth || auth.role !== "admin") redirect("/login");
+  if (!auth || (auth.role !== "admin" && auth.role !== "teacher")) redirect("/login");
 
-  const courses = await getCourses();
+  const courses = await getCourses(auth.role, auth.userId);
 
   return (
     <div>

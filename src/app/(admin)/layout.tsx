@@ -5,14 +5,16 @@ import { useEffect, useState } from "react";
 import { LayoutDashboard, ListChecks, Users, LogOut, Images, UserCog, UserCheck } from "lucide-react";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  const [pendingCount, setPendingCount]         = useState(0);
-  const [pendingBookings, setPendingBookings]   = useState(0);
+  const [pendingCount, setPendingCount]       = useState(0);
+  const [pendingBookings, setPendingBookings] = useState(0);
+  const [role, setRole]                       = useState<string>("");
 
   useEffect(() => {
     const load = async () => {
-      const [usersRes, bookingsRes] = await Promise.all([
+      const [usersRes, bookingsRes, meRes] = await Promise.all([
         fetch("/api/admin/users/pending"),
         fetch("/api/admin/bookings/pending"),
+        fetch("/api/auth/me"),
       ]);
       if (usersRes.ok) {
         const data = await usersRes.json();
@@ -22,11 +24,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         const data = await bookingsRes.json();
         setPendingBookings(data.count ?? 0);
       }
+      if (meRes.ok) {
+        const data = await meRes.json();
+        setRole(data.user?.role ?? "");
+      }
     };
     load();
     const interval = setInterval(load, 30000);
     return () => clearInterval(interval);
   }, []);
+
+  const isAdmin = role === "admin";
 
   return (
     <div className="min-h-screen flex bg-gray-50">
@@ -51,10 +59,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               </span>
             )}
           </Link>
-          <Link href="/admin/users" className="flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg text-gray-700 hover:bg-gray-50 hover:text-indigo-600 transition-colors">
-            <UserCog className="w-4 h-4" />
-            จัดการผู้ใช้
-          </Link>
+          {isAdmin && (
+            <Link href="/admin/users" className="flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg text-gray-700 hover:bg-gray-50 hover:text-indigo-600 transition-colors">
+              <UserCog className="w-4 h-4" />
+              จัดการผู้ใช้
+            </Link>
+          )}
           <Link href="/admin/courses" className="flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg text-gray-700 hover:bg-gray-50 hover:text-indigo-600 transition-colors">
             <ListChecks className="w-4 h-4" />
             จัดการคอร์ส
@@ -68,10 +78,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               </span>
             )}
           </Link>
-          <Link href="/admin/banners" className="flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg text-gray-700 hover:bg-gray-50 hover:text-indigo-600 transition-colors">
-            <Images className="w-4 h-4" />
-            จัดการแบนเนอร์
-          </Link>
+          {isAdmin && (
+            <Link href="/admin/banners" className="flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg text-gray-700 hover:bg-gray-50 hover:text-indigo-600 transition-colors">
+              <Images className="w-4 h-4" />
+              จัดการแบนเนอร์
+            </Link>
+          )}
         </nav>
         <div className="p-3 border-t border-gray-100">
           <Link href="/" className="flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg text-gray-500 hover:bg-red-50 hover:text-red-600 transition-colors">

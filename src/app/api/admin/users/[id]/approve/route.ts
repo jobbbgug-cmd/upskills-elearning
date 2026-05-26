@@ -12,7 +12,7 @@ function generatePassword(length = 10): string {
 export async function POST(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const auth = await getAuthUser();
-    if (!auth || auth.role !== "admin") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (!auth || (auth.role !== "admin" && auth.role !== "teacher")) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     await connectDB();
     const { id } = await params;

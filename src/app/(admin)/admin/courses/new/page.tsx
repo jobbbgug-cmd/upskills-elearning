@@ -4,7 +4,7 @@ import CourseForm from "@/components/CourseForm";
 
 export default async function NewCoursePage() {
   const auth = await getAuthUser();
-  if (!auth || auth.role !== "admin") redirect("/login");
+  if (!auth || (auth.role !== "admin" && auth.role !== "teacher")) redirect("/login");
 
   return (
     <div>
@@ -13,7 +13,11 @@ export default async function NewCoursePage() {
         <p className="text-gray-500 text-sm mt-1">กรอกรายละเอียดคอร์สและกำหนดรอบเรียน</p>
       </div>
       <div className="bg-white rounded-2xl border border-gray-100 p-8">
-        <CourseForm mode="create" />
+        <CourseForm
+          mode="create"
+          teacherMode={auth.role === "teacher"}
+          teacherName={auth.name}
+        />
       </div>
     </div>
   );

@@ -6,7 +6,7 @@ import Booking from "@/models/Booking";
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const auth = await getAuthUser();
-    if (!auth || auth.role !== "admin") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (!auth || (auth.role !== "admin" && auth.role !== "teacher")) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const { action } = await req.json(); // "approve" | "reject"
     if (!["approve", "reject"].includes(action))

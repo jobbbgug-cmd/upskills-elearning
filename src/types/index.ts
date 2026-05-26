@@ -21,6 +21,7 @@ export interface ICourse {
   coverImage: string;
   gradeLevels: GradeLevel[];
   instructor: string;
+  instructorId?: string;
   category: string;
   sessions: ISession[];
   price: number;

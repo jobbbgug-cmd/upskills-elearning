@@ -17,6 +17,7 @@ export interface ICourseDocument extends Document {
   coverImage: string;
   gradeLevels: string[];
   instructor: string;
+  instructorId: string;
   category: string;
   sessions: ISessionDocument[];
   price: number;
@@ -44,6 +45,7 @@ const CourseSchema = new Schema<ICourseDocument>(
     coverImage: { type: String, default: "" },
     gradeLevels: [{ type: String }],
     instructor: { type: String, required: true },
+    instructorId: { type: String, default: "" },
     category: { type: String, required: true },
     sessions: [SessionSchema],
     price: { type: Number, default: 0 },

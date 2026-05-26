@@ -28,9 +28,11 @@ interface Session {
 interface CourseFormProps {
   course?: ICourse;
   mode: "create" | "edit";
+  teacherMode?: boolean;
+  teacherName?: string;
 }
 
-export default function CourseForm({ course, mode }: CourseFormProps) {
+export default function CourseForm({ course, mode, teacherMode = false, teacherName = "" }: CourseFormProps) {
   const router = useRouter();
   const fileRef    = useRef<HTMLInputElement>(null);
   const qrFileRef  = useRef<HTMLInputElement>(null);
@@ -40,7 +42,7 @@ export default function CourseForm({ course, mode }: CourseFormProps) {
     description: course?.description ?? "",
     coverImage: course?.coverImage ?? "",
     gradeLevels: course?.gradeLevels ?? [] as GradeLevel[],
-    instructor: course?.instructor ?? "",
+    instructor: course?.instructor ?? (teacherMode ? teacherName : ""),
     category: course?.category ?? "",
     price: course?.price ?? 0,
     isActive: course?.isActive ?? true,
@@ -185,7 +187,14 @@ export default function CourseForm({ course, mode }: CourseFormProps) {
         </div>
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-1.5">ชื่อผู้สอน *</label>
-          <input required value={form.instructor} onChange={(e) => setForm({ ...form, instructor: e.target.value })} className={inputClass} placeholder="เช่น อาจารย์สมชาย" />
+          <input
+            required
+            value={form.instructor}
+            onChange={(e) => setForm({ ...form, instructor: e.target.value })}
+            className={`${inputClass} ${teacherMode ? "bg-gray-50 text-gray-500 cursor-not-allowed" : ""}`}
+            placeholder="เช่น อาจารย์สมชาย"
+            readOnly={teacherMode}
+          />
         </div>
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-1.5">หมวดหมู่ *</label>

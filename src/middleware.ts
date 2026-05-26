@@ -5,7 +5,7 @@ async function getUser(token: string) {
   try {
     const secret = new TextEncoder().encode(process.env.JWT_SECRET!);
     const { payload } = await jwtVerify(token, secret);
-    return payload as { userId: string; email: string; role: string };
+    return payload as { userId: string; email: string; name: string; role: string };
   } catch {
     return null;
   }
@@ -19,12 +19,8 @@ export async function middleware(req: NextRequest) {
 
   // Redirect logged-in users away from auth pages
   if (user && (pathname === "/login" || pathname === "/register")) {
-    return NextResponse.redirect(new URL(user.role === "admin" ? "/admin" : "/dashboard", req.url));
-  }
-
-  // Protect /teacher — teacher and admin only
-  if (pathname.startsWith("/teacher") && (!user || (user.role !== "teacher" && user.role !== "admin"))) {
-    return NextResponse.redirect(new URL("/login", req.url));
+    const dest = user.role === "admin" || user.role === "teacher" ? "/admin" : "/dashboard";
+    return NextResponse.redirect(new URL(dest, req.url));
   }
 
   // Protect /dashboard
@@ -32,8 +28,8 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL("/login", req.url));
   }
 
-  // Protect /admin — admin only
-  if (pathname.startsWith("/admin") && (!user || user.role !== "admin")) {
+  // Protect /admin — admin or teacher only
+  if (pathname.startsWith("/admin") && (!user || (user.role !== "admin" && user.role !== "teacher"))) {
     return NextResponse.redirect(new URL("/login", req.url));
   }
 

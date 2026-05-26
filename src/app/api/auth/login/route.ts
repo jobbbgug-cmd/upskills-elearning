@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "อีเมลหรือรหัสผ่านไม่ถูกต้อง" }, { status: 401 });
     }
 
-    const token = signToken({ userId: user._id.toString(), email: user.email, role: user.role });
+    const token = signToken({ userId: user._id.toString(), email: user.email, name: user.name, role: user.role });
 
     const res = NextResponse.json({
       user: { _id: user._id, name: user.name, email: user.email, role: user.role, gradeLevel: user.gradeLevel },

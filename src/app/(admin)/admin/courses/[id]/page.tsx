@@ -18,11 +18,14 @@ async function getCourse(id: string): Promise<ICourse | null> {
 
 export default async function EditCoursePage({ params }: { params: Promise<{ id: string }> }) {
   const auth = await getAuthUser();
-  if (!auth || auth.role !== "admin") redirect("/login");
+  if (!auth || (auth.role !== "admin" && auth.role !== "teacher")) redirect("/login");
 
   const { id } = await params;
   const course = await getCourse(id);
   if (!course) notFound();
+
+  // Teacher can only edit their own courses
+  if (auth.role === "teacher" && course.instructorId !== auth.userId) redirect("/admin/courses");
 
   return (
     <div>
@@ -31,7 +34,12 @@ export default async function EditCoursePage({ params }: { params: Promise<{ id:
         <p className="text-gray-500 text-sm mt-1">{course.title}</p>
       </div>
       <div className="bg-white rounded-2xl border border-gray-100 p-8">
-        <CourseForm course={course} mode="edit" />
+        <CourseForm
+          course={course}
+          mode="edit"
+          teacherMode={auth.role === "teacher"}
+          teacherName={auth.name}
+        />
       </div>
     </div>
   );
