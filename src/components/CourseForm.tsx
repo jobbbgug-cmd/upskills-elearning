@@ -2,7 +2,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { ICourse, GradeLevel } from "@/types";
+import { ICourse, GradeLevel, ISmartPpt, IYoutubeClip, IDownloadItem } from "@/types";
 import { Plus, Trash2, Upload, BookOpen, RefreshCw } from "lucide-react";
 
 interface Teacher { _id: string; name: string; email: string; }
@@ -55,7 +55,16 @@ export default function CourseForm({ course, mode, teacherMode = false, teacherN
     linkClip: course?.linkClip ?? "",
     linkSupplementary: course?.linkSupplementary ?? "",
     linkFullbook: course?.linkFullbook ?? "",
+    linkDownload: course?.linkDownload ?? "",
+    ebookPdfUrl: course?.ebookPdfUrl ?? "",
   });
+
+  const [smartPpts, setSmartPpts] = useState<ISmartPpt[]>(course?.smartPpts ?? []);
+  const [teachingClips, setTeachingClips] = useState<IYoutubeClip[]>(course?.teachingClips ?? []);
+  const [summaryClips, setSummaryClips] = useState<IYoutubeClip[]>(course?.summaryClips ?? []);
+  const [downloadFree, setDownloadFree] = useState<IDownloadItem[]>(course?.downloadFree ?? []);
+  const [downloadTeacherCard, setDownloadTeacherCard] = useState<IDownloadItem[]>(course?.downloadTeacherCard ?? []);
+  const [downloadAksorn, setDownloadAksorn] = useState<IDownloadItem[]>(course?.downloadAksorn ?? []);
 
   const [sessions, setSessions] = useState<Session[]>(
     course?.sessions?.map((s) => ({
@@ -141,7 +150,7 @@ export default function CourseForm({ course, mode, teacherMode = false, teacherN
     setLoading(true);
     setError("");
     try {
-      const payload = { ...form, sessions };
+      const payload = { ...form, sessions, smartPpts, teachingClips, summaryClips, downloadFree, downloadTeacherCard, downloadAksorn };
       const url = mode === "create" ? "/api/admin/courses" : `/api/admin/courses/${course?._id}`;
       const method = mode === "create" ? "POST" : "PUT";
       const res = await fetch(url, {
@@ -390,54 +399,99 @@ export default function CourseForm({ course, mode, teacherMode = false, teacherN
         </div>
       </div>
 
-      {/* Teaching materials links */}
+      {/* ── Quick links + ebook ── */}
       <div className="border border-blue-200 bg-blue-50 rounded-2xl p-5 space-y-4">
         <div>
-          <h3 className="text-sm font-semibold text-blue-800 mb-0.5">ลิงก์สื่อการสอน</h3>
-          <p className="text-xs text-blue-600">นักเรียนที่ได้รับอนุมัติจะเห็นลิงก์เหล่านี้</p>
+          <h3 className="text-sm font-semibold text-blue-800 mb-0.5">ลิงก์ปุ่มนำทาง (4 วงกลมสีส้ม)</h3>
+          <p className="text-xs text-blue-600">ใส่ URL ภายนอก หรือเว้นว่างเพื่อใช้ anchor ในหน้าเรียน</p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">สื่อดิจิทัล</label>
-            <input
-              type="url"
-              value={form.linkDigital}
-              onChange={(e) => setForm({ ...form, linkDigital: e.target.value })}
-              className={inputClass}
-              placeholder="https://..."
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">คลิป</label>
-            <input
-              type="url"
-              value={form.linkClip}
-              onChange={(e) => setForm({ ...form, linkClip: e.target.value })}
-              className={inputClass}
-              placeholder="https://..."
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">สื่อประกอบการสอน</label>
-            <input
-              type="url"
-              value={form.linkSupplementary}
-              onChange={(e) => setForm({ ...form, linkSupplementary: e.target.value })}
-              className={inputClass}
-              placeholder="https://..."
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">สื่อฯ เต็มเล่ม</label>
-            <input
-              type="url"
-              value={form.linkFullbook}
-              onChange={(e) => setForm({ ...form, linkFullbook: e.target.value })}
-              className={inputClass}
-              placeholder="https://..."
-            />
-          </div>
+          {[
+            { label: "สื่อดิจิทัล", key: "linkDigital" as const },
+            { label: "คลิป", key: "linkClip" as const },
+            { label: "สื่อประกอบการสอน", key: "linkSupplementary" as const },
+            { label: "สื่อฯ เต็มเล่ม", key: "linkFullbook" as const },
+            { label: "ดาวน์โหลดสื่อ (ปุ่มใหญ่)", key: "linkDownload" as const },
+            { label: "e-Book PDF URL (กดหน้าปก)", key: "ebookPdfUrl" as const },
+          ].map(({ label, key }) => (
+            <div key={key}>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">{label}</label>
+              <input
+                type="url"
+                value={form[key] as string}
+                onChange={(e) => setForm({ ...form, [key]: e.target.value })}
+                className={inputClass}
+                placeholder="https://..."
+              />
+            </div>
+          ))}
         </div>
+      </div>
+
+      {/* ── เนื้อหาการเรียน ── */}
+      <div className="border border-green-200 bg-green-50 rounded-2xl p-5 space-y-6">
+        <h3 className="text-sm font-semibold text-green-800">เนื้อหาการเรียน</h3>
+
+        {/* Smart PPT */}
+        <ArraySection<ISmartPpt>
+          title="Smart PPT"
+          items={smartPpts}
+          setItems={setSmartPpts}
+          defaultItem={{ title: "", thumbnailUrl: "", pptUrl: "" }}
+          inputClass={inputClass}
+          fields={[
+            { key: "title", label: "ชื่อ PPT", placeholder: "เช่น หน่วยที่ 1" },
+            { key: "thumbnailUrl", label: "URL รูปปก", placeholder: "https://..." },
+            { key: "pptUrl", label: "URL ไฟล์ PPT / Google Slides", placeholder: "https://..." },
+          ]}
+        />
+
+        {/* คลิปประกอบการสอน */}
+        <ArraySection<IYoutubeClip>
+          title="คลิปประกอบการสอน"
+          items={teachingClips}
+          setItems={setTeachingClips}
+          defaultItem={{ title: "", youtubeUrl: "" }}
+          inputClass={inputClass}
+          fields={[
+            { key: "title", label: "ชื่อคลิป", placeholder: "เช่น หน่วยที่ 1 ตอนที่ 1" },
+            { key: "youtubeUrl", label: "YouTube URL", placeholder: "https://youtu.be/..." },
+          ]}
+        />
+
+        {/* คลิปอักษรเรียนสรุป */}
+        <ArraySection<IYoutubeClip>
+          title="คลิปอักษรเรียนสรุป"
+          items={summaryClips}
+          setItems={setSummaryClips}
+          defaultItem={{ title: "", youtubeUrl: "" }}
+          inputClass={inputClass}
+          fields={[
+            { key: "title", label: "ชื่อคลิป", placeholder: "เช่น สรุปหน่วยที่ 1" },
+            { key: "youtubeUrl", label: "YouTube URL", placeholder: "https://youtu.be/..." },
+          ]}
+        />
+
+        {/* Download groups */}
+        {[
+          { label: "สื่อประกอบการสอน [ดาวน์โหลดฟรี]", items: downloadFree, setItems: setDownloadFree },
+          { label: "สื่อประกอบการสอน [เฉพาะลูกค้าอักษร (ยื่นบัตรครู)]", items: downloadTeacherCard, setItems: setDownloadTeacherCard },
+          { label: "สื่อประกอบการสอน [เฉพาะลูกค้าอักษร]", items: downloadAksorn, setItems: setDownloadAksorn },
+        ].map(({ label, items, setItems }) => (
+          <ArraySection<IDownloadItem>
+            key={label}
+            title={label}
+            items={items}
+            setItems={setItems}
+            defaultItem={{ title: "", thumbnailUrl: "", fileUrl: "" }}
+            inputClass={inputClass}
+            fields={[
+              { key: "title", label: "ชื่อไฟล์", placeholder: "เช่น แผนการสอน" },
+              { key: "thumbnailUrl", label: "URL รูปปก", placeholder: "https://..." },
+              { key: "fileUrl", label: "URL ไฟล์ดาวน์โหลด", placeholder: "https://..." },
+            ]}
+          />
+        ))}
       </div>
 
       {error && (
@@ -461,5 +515,62 @@ export default function CourseForm({ course, mode, teacherMode = false, teacherN
         </button>
       </div>
     </form>
+  );
+}
+
+/* ── Reusable dynamic array section ── */
+interface FieldDef { key: string; label: string; placeholder: string; }
+
+function ArraySection<T extends object>({
+  title, items, setItems, defaultItem, inputClass, fields,
+}: {
+  title: string;
+  items: T[];
+  setItems: React.Dispatch<React.SetStateAction<T[]>>;
+  defaultItem: T;
+  inputClass: string;
+  fields: FieldDef[];
+}) {
+  const add = () => setItems((prev) => [...prev, { ...defaultItem }]);
+  const remove = (i: number) => setItems((prev) => prev.filter((_, idx) => idx !== i));
+  const update = (i: number, key: string, value: string) =>
+    setItems((prev) => prev.map((item, idx) => idx === i ? { ...item, [key]: value } as T : item));
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-xs font-semibold text-gray-700">{title}</span>
+        <button type="button" onClick={add} className="flex items-center gap-1 text-xs text-indigo-600 hover:text-indigo-800 font-medium">
+          <Plus className="w-3.5 h-3.5" /> เพิ่ม
+        </button>
+      </div>
+      {items.length === 0 && (
+        <p className="text-xs text-gray-400 italic">ยังไม่มีรายการ กด "+ เพิ่ม" เพื่อเพิ่ม</p>
+      )}
+      <div className="space-y-2">
+        {items.map((item, i) => (
+          <div key={i} className="bg-white rounded-xl border border-gray-200 p-3 space-y-2">
+            <div className="flex justify-end">
+              <button type="button" onClick={() => remove(i)} className="text-red-400 hover:text-red-600">
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
+            </div>
+            <div className={`grid gap-2 ${fields.length >= 3 ? "grid-cols-1" : "grid-cols-2"}`}>
+              {fields.map(({ key, label, placeholder }) => (
+                <div key={key}>
+                  <label className="text-xs text-gray-500 mb-0.5 block">{label}</label>
+                  <input
+                    value={(item as Record<string, string>)[key] ?? ""}
+                    onChange={(e) => update(i, key, e.target.value)}
+                    className={inputClass}
+                    placeholder={placeholder}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }

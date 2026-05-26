@@ -14,6 +14,10 @@ export interface ISession {
   zoomLink?: string;
 }
 
+export interface IYoutubeClip { title: string; youtubeUrl: string; }
+export interface ISmartPpt { title: string; thumbnailUrl: string; pptUrl: string; }
+export interface IDownloadItem { title: string; thumbnailUrl: string; fileUrl: string; }
+
 export interface ICourse {
   _id: string;
   title: string;
@@ -33,6 +37,14 @@ export interface ICourse {
   linkClip?: string;
   linkSupplementary?: string;
   linkFullbook?: string;
+  linkDownload?: string;
+  ebookPdfUrl?: string;
+  smartPpts?: ISmartPpt[];
+  teachingClips?: IYoutubeClip[];
+  summaryClips?: IYoutubeClip[];
+  downloadFree?: IDownloadItem[];
+  downloadTeacherCard?: IDownloadItem[];
+  downloadAksorn?: IDownloadItem[];
   createdAt: string;
 }
 
