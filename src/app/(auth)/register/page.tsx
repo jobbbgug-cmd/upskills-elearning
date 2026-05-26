@@ -83,7 +83,7 @@ export default function RegisterPage() {
             คำขอสมัครสมาชิกของคุณถูกส่งแล้ว<br />
             {form.teacherName && <><strong className="text-violet-600">ครู {form.teacherName}</strong> จะตรวจสอบและ</>}
             ส่ง <strong>Username / Password</strong><br />
-            ให้ทาง <strong className="text-indigo-600">{selectedChannel?.icon} {form.contactChannel}</strong>
+            ให้ทาง <strong className="text-indigo-600">{selectedChannel?.emoji} {form.contactChannel}</strong>
           </p>
           <p className="text-sm font-medium text-gray-700 bg-gray-50 rounded-xl px-4 py-2 mb-6">
             {form.contactId}
