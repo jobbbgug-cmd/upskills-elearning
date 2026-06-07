@@ -2,19 +2,31 @@ import { notFound } from "next/navigation";
 import Image from "next/image";
 import { connectDB } from "@/lib/mongodb";
 import Course from "@/models/Course";
-import { ICourse } from "@/types";
+import CourseContent from "@/models/CourseContent";
+import { ICourse, ICourseContent } from "@/types";
 import { getAuthUser } from "@/lib/auth";
 import Booking from "@/models/Booking";
 import Badge from "@/components/ui/Badge";
 import CourseBooking from "./CourseBooking";
-import { BookOpen, Users, Calendar, Clock, Video } from "lucide-react";
+import VideoPlayerSection from "@/components/VideoPlayerSection";
+import {
+  BookOpen, Users, Calendar, Clock, Video,
+  FileText, Play, Download,
+} from "lucide-react";
 
-async function getCourse(id: string): Promise<ICourse | null> {
+async function getCourseWithContent(id: string): Promise<{ course: ICourse; content: ICourseContent | null } | null> {
   await connectDB();
   try {
-    const course = await Course.findById(id).lean();
-    if (!course) return null;
-    return JSON.parse(JSON.stringify(course)) as ICourse;
+    const raw = await Course.findById(id).lean();
+    if (!raw) return null;
+    const course = JSON.parse(JSON.stringify(raw)) as ICourse;
+
+    let content: ICourseContent | null = null;
+    if (course.contentId) {
+      const rawContent = await CourseContent.findById(course.contentId).lean();
+      if (rawContent) content = JSON.parse(JSON.stringify(rawContent)) as ICourseContent;
+    }
+    return { course, content };
   } catch {
     return null;
   }
@@ -22,19 +34,18 @@ async function getCourse(id: string): Promise<ICourse | null> {
 
 export default async function CourseDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const course = await getCourse(id);
-  if (!course) notFound();
+  const result = await getCourseWithContent(id);
+  if (!result) notFound();
 
+  const { course, content } = result;
   const auth = await getAuthUser();
 
-  // Fetch ALL active bookings for this course to sync bookedSeats accurately
   await connectDB();
   const allBookings = await Booking.find({
     courseId: id,
     status: { $in: ["pending_payment", "confirmed"] },
   }).lean();
 
-  // Build sessionId -> seatNumbers map from real booking records
   const sessionSeatsMap: Record<string, number[]> = {};
   allBookings.forEach((b) => {
     const sid = b.sessionId.toString();
@@ -42,7 +53,6 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
     if (b.seatNumber) sessionSeatsMap[sid].push(b.seatNumber as number);
   });
 
-  // Override session.bookedSeats with actual DB data
   course.sessions = course.sessions.map((s) => ({
     ...s,
     bookedSeats: sessionSeatsMap[s._id] ?? s.bookedSeats ?? [],
@@ -72,11 +82,23 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
     .filter((s) => s.date.slice(0, 10) >= todayStr)
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
+  // Resolve content (contentId takes priority, fall back to course-embedded)
+  const ebookCoverUrl   = content?.ebookCoverUrl   || course.coverImage       || "";
+  const ebookPdfUrl     = content?.ebookPdfUrl     || course.ebookPdfUrl      || "";
+  const smartPpts       = content?.smartPpts       ?? course.smartPpts        ?? [];
+  const teachingClips   = content?.teachingClips   ?? course.teachingClips   ?? [];
+  const summaryClips    = content?.summaryClips    ?? course.summaryClips    ?? [];
+  const downloadFree    = content?.downloadFree    ?? course.downloadFree    ?? [];
+  const downloadTeacherCard = content?.downloadTeacherCard ?? course.downloadTeacherCard ?? [];
+  const downloadAksorn  = content?.downloadAksorn  ?? course.downloadAksorn  ?? [];
+
   return (
     <div className="max-w-5xl mx-auto px-4 py-10">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Left column */}
+
+        {/* ── Left column ── */}
         <div className="lg:col-span-2 space-y-6">
+
           {/* Cover image */}
           <div className="relative h-64 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-2xl overflow-hidden">
             {course.coverImage ? (
@@ -124,9 +146,134 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
               </div>
             </div>
           </div>
+
+          {/* ── สื่อการเรียนการสอน ── */}
+          <div className="space-y-4">
+            <h2 className="text-lg font-bold text-gray-900">สื่อการเรียนการสอน</h2>
+
+            {/* 1. e-Book */}
+            <ContentSection
+              icon={<BookOpen className="w-5 h-5 text-red-500" />}
+              title="e-Book"
+              accentColor="red"
+            >
+              {ebookPdfUrl || ebookCoverUrl ? (
+                <a
+                  href={ebookPdfUrl || "#"}
+                  target={ebookPdfUrl ? "_blank" : undefined}
+                  rel="noopener noreferrer"
+                  className={`inline-block group ${!ebookPdfUrl ? "pointer-events-none" : ""}`}
+                >
+                  <div className="relative w-36 rounded-xl overflow-hidden shadow group-hover:shadow-lg transition-shadow border border-gray-100">
+                    {ebookCoverUrl ? (
+                      <Image src={ebookCoverUrl} alt={course.title} width={144} height={192} className="object-cover w-full" />
+                    ) : (
+                      <div className="w-36 h-48 bg-gradient-to-br from-red-50 to-red-100 flex items-center justify-center">
+                        <BookOpen className="w-12 h-12 text-red-300" />
+                      </div>
+                    )}
+                    {ebookPdfUrl && (
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 flex items-end transition-colors">
+                        <span className="w-full text-center text-xs font-semibold text-white bg-red-500/80 py-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                          เปิดดู PDF →
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </a>
+              ) : (
+                <EmptyState />
+              )}
+            </ContentSection>
+
+            {/* 2. Smart PPT */}
+            <ContentSection
+              icon={<FileText className="w-5 h-5 text-purple-500" />}
+              title="Smart PPT"
+              accentColor="purple"
+            >
+              {smartPpts.length > 0 ? (
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                  {smartPpts.map((ppt, i) => (
+                    <a
+                      key={i}
+                      href={ppt.pptUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group block bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-md transition-shadow"
+                    >
+                      <div className="aspect-video bg-gradient-to-br from-purple-50 to-purple-100 overflow-hidden flex items-center justify-center">
+                        {ppt.thumbnailUrl ? (
+                          <img src={ppt.thumbnailUrl} alt={ppt.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200" />
+                        ) : (
+                          <FileText className="w-8 h-8 text-purple-300" />
+                        )}
+                      </div>
+                      <div className="p-2">
+                        <p className="text-xs font-medium text-gray-700 line-clamp-2">{ppt.title}</p>
+                      </div>
+                    </a>
+                  ))}
+                </div>
+              ) : (
+                <EmptyState />
+              )}
+            </ContentSection>
+
+            {/* 4. คลิปประกอบการสอน */}
+            <ContentSection
+              icon={<Play className="w-5 h-5 text-red-500" />}
+              title="คลิปประกอบการสอน"
+              accentColor="red"
+            >
+              {teachingClips.length > 0 ? (
+                <VideoPlayerSection title="คลิปประกอบการสอน" clips={teachingClips} accentColor="red" />
+              ) : (
+                <EmptyState />
+              )}
+            </ContentSection>
+
+            {/* 5. คลิปอักษรเรียนสรุป */}
+            <ContentSection
+              icon={<Play className="w-5 h-5 text-pink-500" />}
+              title="คลิปอักษรเรียนสรุป"
+              accentColor="pink"
+            >
+              {summaryClips.length > 0 ? (
+                <VideoPlayerSection title="คลิปอักษรเรียนสรุป" clips={summaryClips} accentColor="pink" />
+              ) : (
+                <EmptyState />
+              )}
+            </ContentSection>
+
+            {/* 6. สื่อประกอบการสอน */}
+            <ContentSection
+              icon={<Download className="w-5 h-5 text-amber-500" />}
+              title="สื่อประกอบการสอน"
+              accentColor="amber"
+            >
+              <div className="space-y-4">
+                <DownloadSubGroup
+                  label="ดาวน์โหลดฟรี"
+                  items={downloadFree}
+                  variant="free"
+                />
+                <DownloadSubGroup
+                  label="เฉพาะลูกค้าอักษร (ยื่นบัตรครู)"
+                  items={downloadTeacherCard}
+                  variant="teacher"
+                />
+                <DownloadSubGroup
+                  label="เฉพาะลูกค้าอักษร"
+                  items={downloadAksorn}
+                  variant="aksorn"
+                />
+              </div>
+            </ContentSection>
+          </div>
         </div>
 
-        {/* Right column — booking */}
+        {/* ── Right column — booking ── */}
         <div className="lg:col-span-1">
           <div className="bg-white rounded-2xl border border-gray-100 p-5 sticky top-20">
             <div className="text-center mb-5">
@@ -152,6 +299,103 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+/* ── Shared UI components ── */
+
+function EmptyState() {
+  return (
+    <div className="flex items-center gap-2 text-gray-400 text-sm italic py-2">
+      <span className="w-1.5 h-1.5 rounded-full bg-gray-300 shrink-0" />
+      ยังไม่มีข้อมูล
+    </div>
+  );
+}
+
+function ContentSection({
+  icon, title, accentColor, children,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  accentColor: "red" | "blue" | "purple" | "pink" | "amber";
+  children: React.ReactNode;
+}) {
+  const borderMap = {
+    red: "border-red-200",
+    blue: "border-blue-200",
+    purple: "border-purple-200",
+    pink: "border-pink-200",
+    amber: "border-amber-200",
+  };
+  const headerMap = {
+    red: "bg-red-50",
+    blue: "bg-blue-50",
+    purple: "bg-purple-50",
+    pink: "bg-pink-50",
+    amber: "bg-amber-50",
+  };
+
+  return (
+    <div className={`border ${borderMap[accentColor]} rounded-2xl overflow-hidden`}>
+      <div className={`${headerMap[accentColor]} px-4 py-3 flex items-center gap-2`}>
+        {icon}
+        <h3 className="font-semibold text-gray-900 text-sm">{title}</h3>
+      </div>
+      <div className="p-4 bg-white">{children}</div>
+    </div>
+  );
+}
+
+
+function DownloadSubGroup({
+  label, items, variant,
+}: {
+  label: string;
+  items: { title: string; thumbnailUrl: string; fileUrl: string }[];
+  variant: "free" | "teacher" | "aksorn";
+}) {
+  const variantStyle = {
+    free: { badge: "bg-green-100 text-green-700 border-green-200", dot: "bg-green-400" },
+    teacher: { badge: "bg-blue-100 text-blue-700 border-blue-200", dot: "bg-blue-400" },
+    aksorn: { badge: "bg-amber-100 text-amber-700 border-amber-200", dot: "bg-amber-400" },
+  }[variant];
+
+  return (
+    <div>
+      <div className="flex items-center gap-2 mb-2">
+        <span className={`w-2 h-2 rounded-full shrink-0 ${variantStyle.dot}`} />
+        <span className={`text-xs font-semibold px-2 py-0.5 rounded-full border ${variantStyle.badge}`}>
+          {label}
+        </span>
+      </div>
+
+      {items.length === 0 ? (
+        <EmptyState />
+      ) : (
+        <div className="flex flex-wrap gap-3 pl-4">
+          {items.map((item, i) => (
+            <a
+              key={i}
+              href={item.fileUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              download
+              className="group flex flex-col items-center w-20"
+            >
+              <div className="w-20 h-24 bg-gray-50 rounded-xl border border-gray-200 overflow-hidden flex items-center justify-center group-hover:shadow-md transition-shadow">
+                {item.thumbnailUrl ? (
+                  <img src={item.thumbnailUrl} alt={item.title} className="w-full h-full object-cover" />
+                ) : (
+                  <FileText className="w-8 h-8 text-gray-300" />
+                )}
+              </div>
+              <p className="text-xs text-center text-gray-600 mt-1 font-medium leading-snug line-clamp-2">{item.title}</p>
+            </a>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

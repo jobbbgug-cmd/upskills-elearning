@@ -31,6 +31,7 @@ export interface ICourseDocument extends Document {
   linkFullbook?: string;
   linkDownload?: string;
   ebookPdfUrl?: string;
+  contentId?: mongoose.Types.ObjectId;
   smartPpts?: { title: string; thumbnailUrl: string; pptUrl: string }[];
   teachingClips?: { title: string; youtubeUrl: string }[];
   summaryClips?: { title: string; youtubeUrl: string }[];
@@ -86,6 +87,7 @@ const CourseSchema = new Schema<ICourseDocument>(
     linkFullbook: { type: String, default: "" },
     linkDownload: { type: String, default: "" },
     ebookPdfUrl: { type: String, default: "" },
+    contentId: { type: Schema.Types.ObjectId, ref: "CourseContent", default: null },
     smartPpts: [SmartPptSchema],
     teachingClips: [YoutubeClipSchema],
     summaryClips: [YoutubeClipSchema],

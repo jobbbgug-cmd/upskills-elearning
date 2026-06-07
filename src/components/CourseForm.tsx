@@ -1,9 +1,12 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import Image from "next/image";
-import { ICourse, GradeLevel, ISmartPpt, IYoutubeClip, IDownloadItem } from "@/types";
-import { Plus, Trash2, Upload, BookOpen, RefreshCw } from "lucide-react";
+import { ICourse, GradeLevel } from "@/types";
+import { Plus, Trash2, Upload, BookOpen, RefreshCw, ExternalLink, Pencil } from "lucide-react";
+
+interface ContentOption { _id: string; name: string; description: string; }
 
 interface Teacher { _id: string; name: string; email: string; }
 
@@ -59,12 +62,8 @@ export default function CourseForm({ course, mode, teacherMode = false, teacherN
     ebookPdfUrl: course?.ebookPdfUrl ?? "",
   });
 
-  const [smartPpts, setSmartPpts] = useState<ISmartPpt[]>(course?.smartPpts ?? []);
-  const [teachingClips, setTeachingClips] = useState<IYoutubeClip[]>(course?.teachingClips ?? []);
-  const [summaryClips, setSummaryClips] = useState<IYoutubeClip[]>(course?.summaryClips ?? []);
-  const [downloadFree, setDownloadFree] = useState<IDownloadItem[]>(course?.downloadFree ?? []);
-  const [downloadTeacherCard, setDownloadTeacherCard] = useState<IDownloadItem[]>(course?.downloadTeacherCard ?? []);
-  const [downloadAksorn, setDownloadAksorn] = useState<IDownloadItem[]>(course?.downloadAksorn ?? []);
+  const [contentId, setContentId] = useState<string>(course?.contentId ?? "");
+  const [contentOptions, setContentOptions] = useState<ContentOption[]>([]);
 
   const [sessions, setSessions] = useState<Session[]>(
     course?.sessions?.map((s) => ({
@@ -87,6 +86,9 @@ export default function CourseForm({ course, mode, teacherMode = false, teacherN
         .then((r) => r.json())
         .then((data) => { if (Array.isArray(data)) setTeachers(data); });
     }
+    fetch("/api/admin/content")
+      .then((r) => r.json())
+      .then((data) => { if (Array.isArray(data.contents)) setContentOptions(data.contents); });
   }, [teacherMode]);
 
   const toggleGrade = (grade: GradeLevel) => {
@@ -150,7 +152,7 @@ export default function CourseForm({ course, mode, teacherMode = false, teacherN
     setLoading(true);
     setError("");
     try {
-      const payload = { ...form, sessions, smartPpts, teachingClips, summaryClips, downloadFree, downloadTeacherCard, downloadAksorn };
+      const payload = { ...form, sessions, contentId: contentId || null };
       const url = mode === "create" ? "/api/admin/courses" : `/api/admin/courses/${course?._id}`;
       const method = mode === "create" ? "POST" : "PUT";
       const res = await fetch(url, {
@@ -429,69 +431,62 @@ export default function CourseForm({ course, mode, teacherMode = false, teacherN
       </div>
 
       {/* ── เนื้อหาการเรียน ── */}
-      <div className="border border-green-200 bg-green-50 rounded-2xl p-5 space-y-6">
-        <h3 className="text-sm font-semibold text-green-800">เนื้อหาการเรียน</h3>
+      <div className="border border-green-200 bg-green-50 rounded-2xl p-5 space-y-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-sm font-semibold text-green-800">เนื้อหาการเรียน</h3>
+            <p className="text-xs text-green-600 mt-0.5">เลือกชุดเนื้อหาที่จะใช้กับคอร์สนี้</p>
+          </div>
+          <Link
+            href="/admin/content/new"
+            target="_blank"
+            className="flex items-center gap-1 text-xs text-green-700 hover:text-green-900 font-medium"
+          >
+            <ExternalLink className="w-3.5 h-3.5" />
+            จัดการชุดเนื้อหา
+          </Link>
+        </div>
 
-        {/* Smart PPT */}
-        <ArraySection<ISmartPpt>
-          title="Smart PPT"
-          items={smartPpts}
-          setItems={setSmartPpts}
-          defaultItem={{ title: "", thumbnailUrl: "", pptUrl: "" }}
-          inputClass={inputClass}
-          fields={[
-            { key: "title", label: "ชื่อ PPT", placeholder: "เช่น หน่วยที่ 1" },
-            { key: "thumbnailUrl", label: "URL รูปปก", placeholder: "https://..." },
-            { key: "pptUrl", label: "URL ไฟล์ PPT / Google Slides", placeholder: "https://..." },
-          ]}
-        />
+        <div>
+          <select
+            value={contentId}
+            onChange={(e) => setContentId(e.target.value)}
+            className={`${inputClass} bg-white`}
+          >
+            <option value="">— ไม่ใช้ชุดเนื้อหา —</option>
+            {contentOptions.map((c) => (
+              <option key={c._id} value={c._id}>
+                {c.name}
+                {c.description ? ` — ${c.description}` : ""}
+              </option>
+            ))}
+          </select>
+          {contentOptions.length === 0 && (
+            <p className="text-xs text-gray-400 mt-1.5">
+              ยังไม่มีชุดเนื้อหา{" "}
+              <Link href="/admin/content/new" target="_blank" className="text-green-600 underline">
+                สร้างชุดเนื้อหาใหม่
+              </Link>
+            </p>
+          )}
+        </div>
 
-        {/* คลิปประกอบการสอน */}
-        <ArraySection<IYoutubeClip>
-          title="คลิปประกอบการสอน"
-          items={teachingClips}
-          setItems={setTeachingClips}
-          defaultItem={{ title: "", youtubeUrl: "" }}
-          inputClass={inputClass}
-          fields={[
-            { key: "title", label: "ชื่อคลิป", placeholder: "เช่น หน่วยที่ 1 ตอนที่ 1" },
-            { key: "youtubeUrl", label: "YouTube URL", placeholder: "https://youtu.be/..." },
-          ]}
-        />
-
-        {/* คลิปอักษรเรียนสรุป */}
-        <ArraySection<IYoutubeClip>
-          title="คลิปอักษรเรียนสรุป"
-          items={summaryClips}
-          setItems={setSummaryClips}
-          defaultItem={{ title: "", youtubeUrl: "" }}
-          inputClass={inputClass}
-          fields={[
-            { key: "title", label: "ชื่อคลิป", placeholder: "เช่น สรุปหน่วยที่ 1" },
-            { key: "youtubeUrl", label: "YouTube URL", placeholder: "https://youtu.be/..." },
-          ]}
-        />
-
-        {/* Download groups */}
-        {[
-          { label: "สื่อประกอบการสอน [ดาวน์โหลดฟรี]", items: downloadFree, setItems: setDownloadFree },
-          { label: "สื่อประกอบการสอน [เฉพาะลูกค้าอักษร (ยื่นบัตรครู)]", items: downloadTeacherCard, setItems: setDownloadTeacherCard },
-          { label: "สื่อประกอบการสอน [เฉพาะลูกค้าอักษร]", items: downloadAksorn, setItems: setDownloadAksorn },
-        ].map(({ label, items, setItems }) => (
-          <ArraySection<IDownloadItem>
-            key={label}
-            title={label}
-            items={items}
-            setItems={setItems}
-            defaultItem={{ title: "", thumbnailUrl: "", fileUrl: "" }}
-            inputClass={inputClass}
-            fields={[
-              { key: "title", label: "ชื่อไฟล์", placeholder: "เช่น แผนการสอน" },
-              { key: "thumbnailUrl", label: "URL รูปปก", placeholder: "https://..." },
-              { key: "fileUrl", label: "URL ไฟล์ดาวน์โหลด", placeholder: "https://..." },
-            ]}
-          />
-        ))}
+        {contentId && (
+          <div className="flex items-center gap-2 text-xs text-green-700 bg-green-100 rounded-xl px-3 py-2">
+            <BookOpen className="w-3.5 h-3.5 shrink-0" />
+            <span>
+              ใช้ชุดเนื้อหา: <strong>{contentOptions.find((c) => c._id === contentId)?.name}</strong>
+            </span>
+            <Link
+              href={`/admin/content/${contentId}`}
+              target="_blank"
+              className="ml-auto flex items-center gap-1 hover:underline"
+            >
+              <Pencil className="w-3 h-3" />
+              แก้ไข
+            </Link>
+          </div>
+        )}
       </div>
 
       {error && (
@@ -518,59 +513,3 @@ export default function CourseForm({ course, mode, teacherMode = false, teacherN
   );
 }
 
-/* ── Reusable dynamic array section ── */
-interface FieldDef { key: string; label: string; placeholder: string; }
-
-function ArraySection<T extends object>({
-  title, items, setItems, defaultItem, inputClass, fields,
-}: {
-  title: string;
-  items: T[];
-  setItems: React.Dispatch<React.SetStateAction<T[]>>;
-  defaultItem: T;
-  inputClass: string;
-  fields: FieldDef[];
-}) {
-  const add = () => setItems((prev) => [...prev, { ...defaultItem }]);
-  const remove = (i: number) => setItems((prev) => prev.filter((_, idx) => idx !== i));
-  const update = (i: number, key: string, value: string) =>
-    setItems((prev) => prev.map((item, idx) => idx === i ? { ...item, [key]: value } as T : item));
-
-  return (
-    <div>
-      <div className="flex items-center justify-between mb-2">
-        <span className="text-xs font-semibold text-gray-700">{title}</span>
-        <button type="button" onClick={add} className="flex items-center gap-1 text-xs text-indigo-600 hover:text-indigo-800 font-medium">
-          <Plus className="w-3.5 h-3.5" /> เพิ่ม
-        </button>
-      </div>
-      {items.length === 0 && (
-        <p className="text-xs text-gray-400 italic">ยังไม่มีรายการ กด "+ เพิ่ม" เพื่อเพิ่ม</p>
-      )}
-      <div className="space-y-2">
-        {items.map((item, i) => (
-          <div key={i} className="bg-white rounded-xl border border-gray-200 p-3 space-y-2">
-            <div className="flex justify-end">
-              <button type="button" onClick={() => remove(i)} className="text-red-400 hover:text-red-600">
-                <Trash2 className="w-3.5 h-3.5" />
-              </button>
-            </div>
-            <div className={`grid gap-2 ${fields.length >= 3 ? "grid-cols-1" : "grid-cols-2"}`}>
-              {fields.map(({ key, label, placeholder }) => (
-                <div key={key}>
-                  <label className="text-xs text-gray-500 mb-0.5 block">{label}</label>
-                  <input
-                    value={(item as Record<string, string>)[key] ?? ""}
-                    onChange={(e) => update(i, key, e.target.value)}
-                    className={inputClass}
-                    placeholder={placeholder}
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}

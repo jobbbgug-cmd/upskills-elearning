@@ -5,7 +5,8 @@ import { getAuthUser } from "@/lib/auth";
 import { connectDB } from "@/lib/mongodb";
 import Booking from "@/models/Booking";
 import Course from "@/models/Course";
-import { ICourse } from "@/types";
+import CourseContent from "@/models/CourseContent";
+import { ICourse, ICourseContent } from "@/types";
 import { ArrowLeft, Monitor, Play, Download, BookOpen, FileText } from "lucide-react";
 import VideoSection from "@/components/VideoSection";
 
@@ -27,14 +28,29 @@ export default async function LearnPage({ params }: { params: Promise<{ courseId
 
   const course = JSON.parse(JSON.stringify(rawCourse)) as ICourse;
 
+  // โหลดเนื้อหาจาก ContentSet ถ้ามี contentId ไม่งั้นใช้ข้อมูลที่อยู่บน course โดยตรง
+  let content: ICourseContent | null = null;
+  if (course.contentId) {
+    const rawContent = await CourseContent.findById(course.contentId).lean();
+    if (rawContent) content = JSON.parse(JSON.stringify(rawContent)) as ICourseContent;
+  }
+
+  const ebookCoverUrl    = content?.ebookCoverUrl    || course.coverImage        || "";
+  const ebookPdfUrl      = content?.ebookPdfUrl      || course.ebookPdfUrl       || "";
+  const smartPpts        = content?.smartPpts        ?? course.smartPpts         ?? [];
+  const teachingClips    = content?.teachingClips    ?? course.teachingClips     ?? [];
+  const summaryClips     = content?.summaryClips     ?? course.summaryClips      ?? [];
+  const downloadFree     = content?.downloadFree     ?? course.downloadFree      ?? [];
+  const downloadTeacherCard = content?.downloadTeacherCard ?? course.downloadTeacherCard ?? [];
+  const downloadAksorn   = content?.downloadAksorn   ?? course.downloadAksorn    ?? [];
+
   const hasContent =
-    course.ebookPdfUrl ||
-    (course.smartPpts?.length ?? 0) > 0 ||
-    (course.teachingClips?.length ?? 0) > 0 ||
-    (course.summaryClips?.length ?? 0) > 0 ||
-    (course.downloadFree?.length ?? 0) > 0 ||
-    (course.downloadTeacherCard?.length ?? 0) > 0 ||
-    (course.downloadAksorn?.length ?? 0) > 0;
+    ebookPdfUrl ||
+    smartPpts.length > 0 ||
+    teachingClips.length > 0 ||
+    summaryClips.length > 0 ||
+    downloadTeacherCard.length > 0 ||
+    downloadAksorn.length > 0;
 
   const NAV_BUTTONS = [
     { label: "สื่อดิจิทัล",        Icon: Monitor,  href: "#ebook"    },
@@ -100,17 +116,17 @@ export default async function LearnPage({ params }: { params: Promise<{ courseId
       )}
 
       {/* ── e-Book section ── */}
-      {(course.coverImage || course.ebookPdfUrl) && (
+      {(ebookCoverUrl || ebookPdfUrl) && (
         <section id="ebook" className="mb-10 scroll-mt-20">
           <h2 className="flex items-center gap-2 text-base font-bold text-gray-900 mb-4">
             <span className="text-red-600 font-extrabold text-lg">📚</span>
             e-Book
           </h2>
-          {course.ebookPdfUrl ? (
-            <a href={course.ebookPdfUrl} target="_blank" rel="noopener noreferrer" className="inline-block group">
+          {ebookPdfUrl ? (
+            <a href={ebookPdfUrl} target="_blank" rel="noopener noreferrer" className="inline-block group">
               <div className="relative w-48 rounded-xl overflow-hidden shadow-lg group-hover:shadow-xl transition-shadow">
-                {course.coverImage ? (
-                  <Image src={course.coverImage} alt={course.title} width={192} height={256} className="object-cover w-full" />
+                {ebookCoverUrl ? (
+                  <Image src={ebookCoverUrl} alt={course.title} width={192} height={256} className="object-cover w-full" />
                 ) : (
                   <div className="w-48 h-64 bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center">
                     <BookOpen className="w-16 h-16 text-indigo-300" />
@@ -123,16 +139,16 @@ export default async function LearnPage({ params }: { params: Promise<{ courseId
                 </div>
               </div>
             </a>
-          ) : course.coverImage ? (
+          ) : ebookCoverUrl ? (
             <div className="relative w-48 rounded-xl overflow-hidden shadow-lg">
-              <Image src={course.coverImage} alt={course.title} width={192} height={256} className="object-cover w-full" />
+              <Image src={ebookCoverUrl} alt={course.title} width={192} height={256} className="object-cover w-full" />
             </div>
           ) : null}
         </section>
       )}
 
       {/* ── Smart PPT ── */}
-      {(course.smartPpts?.length ?? 0) > 0 && (
+      {smartPpts.length > 0 && (
         <section id="smartppt" className="mb-10 scroll-mt-20">
           <h2 className="flex items-center gap-2 text-base font-bold text-gray-900 mb-4">
             <span className="w-6 h-6 bg-red-500 rounded-full flex items-center justify-center shrink-0">
@@ -141,7 +157,7 @@ export default async function LearnPage({ params }: { params: Promise<{ courseId
             Smart PPT
           </h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-            {course.smartPpts!.map((ppt, i) => (
+            {smartPpts.map((ppt, i) => (
               <a
                 key={i}
                 href={ppt.pptUrl}
@@ -169,37 +185,21 @@ export default async function LearnPage({ params }: { params: Promise<{ courseId
 
       {/* ── คลิปประกอบการสอน ── */}
       <div id="clips" className="scroll-mt-20">
-        {(course.teachingClips?.length ?? 0) > 0 && (
-          <VideoSection title="คลิปประกอบการสอน" clips={course.teachingClips!} sectionId="teachingclips" />
+        {teachingClips.length > 0 && (
+          <VideoSection title="คลิปประกอบการสอน" clips={teachingClips} sectionId="teachingclips" />
         )}
-
-        {/* ── คลิปอักษรเรียนสรุป ── */}
-        {(course.summaryClips?.length ?? 0) > 0 && (
-          <VideoSection title="คลิปอักษรเรียนสรุป" clips={course.summaryClips!} sectionId="summaryclips" />
+        {summaryClips.length > 0 && (
+          <VideoSection title="คลิปอักษรเรียนสรุป" clips={summaryClips} sectionId="summaryclips" />
         )}
       </div>
 
       {/* ── สื่อประกอบการสอน (downloads) ── */}
-      {((course.downloadFree?.length ?? 0) > 0 ||
-        (course.downloadTeacherCard?.length ?? 0) > 0 ||
-        (course.downloadAksorn?.length ?? 0) > 0) && (
+      {(downloadFree.length > 0 || downloadTeacherCard.length > 0 || downloadAksorn.length > 0) && (
         <section id="downloads" className="scroll-mt-20 mb-10">
           <h2 className="text-base font-bold text-gray-900 mb-4">สื่อประกอบการสอน</h2>
-
-          {/* ดาวน์โหลดฟรี */}
-          {(course.downloadFree?.length ?? 0) > 0 && (
-            <DownloadGroup label="ดาวน์โหลดฟรี" items={course.downloadFree!} />
-          )}
-
-          {/* เฉพาะลูกค้าอักษร (ยื่นบัตรครู) */}
-          {(course.downloadTeacherCard?.length ?? 0) > 0 && (
-            <DownloadGroup label="เฉพาะลูกค้าอักษร (ยื่นบัตรครู)" items={course.downloadTeacherCard!} />
-          )}
-
-          {/* เฉพาะลูกค้าอักษร */}
-          {(course.downloadAksorn?.length ?? 0) > 0 && (
-            <DownloadGroup label="เฉพาะลูกค้าอักษร" items={course.downloadAksorn!} />
-          )}
+          {downloadFree.length > 0 && <DownloadGroup label="ดาวน์โหลดฟรี" items={downloadFree} />}
+          {downloadTeacherCard.length > 0 && <DownloadGroup label="เฉพาะลูกค้าอักษร (ยื่นบัตรครู)" items={downloadTeacherCard} />}
+          {downloadAksorn.length > 0 && <DownloadGroup label="เฉพาะลูกค้าอักษร" items={downloadAksorn} />}
         </section>
       )}
     </div>

@@ -17,6 +17,20 @@ export interface ISession {
 export interface IYoutubeClip { title: string; youtubeUrl: string; }
 export interface ISmartPpt { title: string; thumbnailUrl: string; pptUrl: string; }
 export interface IDownloadItem { title: string; thumbnailUrl: string; fileUrl: string; }
+export interface ICourseContent {
+  _id: string;
+  name: string;
+  description: string;
+  ebookCoverUrl: string;
+  ebookPdfUrl: string;
+  smartPpts: ISmartPpt[];
+  teachingClips: IYoutubeClip[];
+  summaryClips: IYoutubeClip[];
+  downloadFree: IDownloadItem[];
+  downloadTeacherCard: IDownloadItem[];
+  downloadAksorn: IDownloadItem[];
+  createdAt: string;
+}
 
 export interface ICourse {
   _id: string;
@@ -39,6 +53,7 @@ export interface ICourse {
   linkFullbook?: string;
   linkDownload?: string;
   ebookPdfUrl?: string;
+  contentId?: string;
   smartPpts?: ISmartPpt[];
   teachingClips?: IYoutubeClip[];
   summaryClips?: IYoutubeClip[];
