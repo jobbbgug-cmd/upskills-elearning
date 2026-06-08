@@ -32,6 +32,22 @@ async function getCourseWithContent(id: string): Promise<{ course: ICourse; cont
   }
 }
 
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const result = await getCourseWithContent(id);
+  if (!result) return {};
+  const { course } = result;
+  return {
+    title: course.title,
+    description: course.description || `คอร์ส ${course.title} สอนโดย ${course.instructor}`,
+    openGraph: {
+      title: course.title,
+      description: course.description || `คอร์ส ${course.title} สอนโดย ${course.instructor}`,
+      images: course.coverImage ? [{ url: course.coverImage }] : [],
+    },
+  };
+}
+
 export default async function CourseDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const result = await getCourseWithContent(id);
