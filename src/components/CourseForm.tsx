@@ -401,35 +401,6 @@ export default function CourseForm({ course, mode, teacherMode = false, teacherN
         </div>
       </div>
 
-      {/* ── Quick links + ebook ── */}
-      <div className="border border-blue-200 bg-blue-50 rounded-2xl p-5 space-y-4">
-        <div>
-          <h3 className="text-sm font-semibold text-blue-800 mb-0.5">ลิงก์ปุ่มนำทาง (4 วงกลมสีส้ม)</h3>
-          <p className="text-xs text-blue-600">ใส่ URL ภายนอก หรือเว้นว่างเพื่อใช้ anchor ในหน้าเรียน</p>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {[
-            { label: "สื่อดิจิทัล", key: "linkDigital" as const },
-            { label: "คลิป", key: "linkClip" as const },
-            { label: "สื่อประกอบการสอน", key: "linkSupplementary" as const },
-            { label: "สื่อฯ เต็มเล่ม", key: "linkFullbook" as const },
-            { label: "ดาวน์โหลดสื่อ (ปุ่มใหญ่)", key: "linkDownload" as const },
-            { label: "e-Book PDF URL (กดหน้าปก)", key: "ebookPdfUrl" as const },
-          ].map(({ label, key }) => (
-            <div key={key}>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">{label}</label>
-              <input
-                type="url"
-                value={form[key] as string}
-                onChange={(e) => setForm({ ...form, [key]: e.target.value })}
-                className={inputClass}
-                placeholder="https://..."
-              />
-            </div>
-          ))}
-        </div>
-      </div>
-
       {/* ── เนื้อหาการเรียน ── */}
       <div className="border border-green-200 bg-green-50 rounded-2xl p-5 space-y-4">
         <div className="flex items-center justify-between">
