@@ -6,8 +6,8 @@ export interface ICourseContentDocument extends Document {
   ebookCoverUrl: string;
   ebookPdfUrl: string;
   smartPpts: { title: string; thumbnailUrl: string; pptUrl: string }[];
-  teachingClips: { title: string; youtubeUrl: string }[];
-  summaryClips: { title: string; youtubeUrl: string }[];
+  teachingClips: { title: string; youtubeUrl: string; group: string; duration: string }[];
+  summaryClips: { title: string; youtubeUrl: string; group: string; duration: string }[];
   downloadFree: { title: string; thumbnailUrl: string; fileUrl: string }[];
   downloadTeacherCard: { title: string; thumbnailUrl: string; fileUrl: string }[];
   downloadAksorn: { title: string; thumbnailUrl: string; fileUrl: string }[];
@@ -15,7 +15,7 @@ export interface ICourseContentDocument extends Document {
 }
 
 const YoutubeClipSchema = new Schema(
-  { title: { type: String, default: "" }, youtubeUrl: { type: String, default: "" }, group: { type: String, default: "" } },
+  { title: { type: String, default: "" }, youtubeUrl: { type: String, default: "" }, group: { type: String, default: "" }, duration: { type: String, default: "" } },
   { _id: false }
 );
 

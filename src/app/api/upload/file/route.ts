@@ -10,6 +10,10 @@ const ALLOWED_TYPES: Record<string, string> = {
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document": "docx",
   "application/vnd.ms-excel": "xls",
   "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": "xlsx",
+  "application/zip": "zip",
+  "application/x-zip-compressed": "zip",
+  "application/x-zip": "zip",
+  "multipart/x-zip": "zip",
   "image/jpeg": "jpg",
   "image/png": "png",
   "image/webp": "webp",
@@ -31,7 +35,7 @@ export async function POST(req: NextRequest) {
     const ext = ALLOWED_TYPES[file.type];
     if (!ext) {
       return NextResponse.json(
-        { error: "ไม่รองรับประเภทไฟล์นี้ (รองรับ: PDF, PPT, PPTX, DOC, DOCX, XLS, XLSX, รูปภาพ)" },
+        { error: "ไม่รองรับประเภทไฟล์นี้ (รองรับ: PDF, PPT, PPTX, DOC, DOCX, XLS, XLSX, ZIP, รูปภาพ)" },
         { status: 400 }
       );
     }

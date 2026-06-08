@@ -1,8 +1,8 @@
 "use client";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import { Play, Search, X, ChevronDown, ChevronRight } from "lucide-react";
 
-interface Clip { title: string; youtubeUrl: string; group?: string; }
+interface Clip { title: string; youtubeUrl: string; group?: string; duration?: string; }
 type IndexedClip = Clip & { realIdx: number };
 
 function getYouTubeId(url: string): string | null {
@@ -21,11 +21,19 @@ export default function VideoPlayerSection({
 }) {
   const [selectedIdx, setSelectedIdx] = useState(0);
   const [query, setQuery] = useState("");
-  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(() => {
-    const s = new Set<string>();
-    clips.forEach((c) => { if (c.group) s.add(c.group); });
-    return s;
-  });
+  const [panelHeight, setPanelHeight] = useState<number | null>(null);
+  const videoRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = videoRef.current;
+    if (!el) return;
+    const obs = new ResizeObserver(() => setPanelHeight(el.offsetHeight));
+    obs.observe(el);
+    setPanelHeight(el.offsetHeight);
+    return () => obs.disconnect();
+  }, []);
+
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
 
   const hasGroups = useMemo(() => clips.some((c) => c.group), [clips]);
 
@@ -66,10 +74,8 @@ export default function VideoPlayerSection({
     ? "ring-pink-400 bg-pink-50"
     : "ring-red-400 bg-amber-50";
 
-  const groupHeaderActive   = accentColor === "pink" ? "bg-pink-500 text-white"   : "bg-orange-500 text-white";
-  const groupHeaderInactive = accentColor === "pink" ? "bg-pink-50 text-pink-800" : "bg-orange-50 text-orange-800";
-  const groupIconActive     = accentColor === "pink" ? "text-pink-200"             : "text-orange-200";
-  const groupIconInactive   = accentColor === "pink" ? "text-pink-400"             : "text-orange-400";
+  const groupHeaderCls = accentColor === "pink" ? "bg-pink-500 text-white" : "bg-orange-500 text-white";
+  const groupIconCls   = accentColor === "pink" ? "text-pink-200"          : "text-orange-200";
 
   const ClipRow = ({ clip }: { clip: IndexedClip }) => {
     const isActive = clip.realIdx === selectedIdx;
@@ -99,9 +105,14 @@ export default function VideoPlayerSection({
             </div>
           )}
         </div>
-        <p className={`text-xs leading-snug line-clamp-2 flex-1 ${isActive ? "font-semibold text-gray-900" : "text-gray-600"}`}>
-          {clip.title}
-        </p>
+        <div className="flex-1 min-w-0">
+          <p className={`text-xs leading-snug line-clamp-2 ${isActive ? "font-semibold text-gray-900" : "text-gray-600"}`}>
+            {clip.title}
+          </p>
+          {clip.duration && (
+            <p className="text-[10px] text-gray-400 mt-0.5">{clip.duration} นาที</p>
+          )}
+        </div>
       </button>
     );
   };
@@ -110,7 +121,7 @@ export default function VideoPlayerSection({
     <div className="flex gap-4">
       {/* ── Left: Player ── */}
       <div className="flex-1 min-w-0 space-y-2">
-        <div className="rounded-xl overflow-hidden bg-black aspect-video shadow">
+        <div ref={videoRef} className="rounded-xl overflow-hidden bg-black aspect-video shadow">
           {selected && videoId ? (
             <iframe
               key={videoId}
@@ -146,7 +157,10 @@ export default function VideoPlayerSection({
       </div>
 
       {/* ── Right: Search + List ── */}
-      <div className="w-72 shrink-0 border border-gray-200 rounded-xl overflow-hidden flex flex-col">
+      <div
+        className="w-72 shrink-0 border border-gray-200 rounded-xl overflow-hidden flex flex-col"
+        style={panelHeight ? { height: panelHeight } : undefined}
+      >
         {/* Search */}
         <div className="flex items-center gap-2 px-3 py-2 border-b border-gray-100 bg-gray-50 shrink-0">
           <Search className="w-3.5 h-3.5 text-gray-400 shrink-0" />
@@ -171,18 +185,15 @@ export default function VideoPlayerSection({
           ) : hasGroups && groupedFiltered ? (
             <>
               {Array.from(groupedFiltered.map.entries()).map(([groupName, groupClips]) => {
-                const isExpanded  = expandedGroups.has(groupName);
-                const hasActive   = groupClips.some((c) => c.realIdx === selectedIdx);
+                const isExpanded = expandedGroups.has(groupName);
                 return (
                   <div key={groupName}>
                     <button
                       onClick={() => toggleGroup(groupName)}
-                      className={`w-full flex items-center gap-2 px-3 py-2.5 text-left transition-colors ${
-                        hasActive ? groupHeaderActive : `${groupHeaderInactive} hover:opacity-90`
-                      }`}
+                      className={`w-full flex items-center gap-2 px-3 py-2.5 text-left transition-opacity hover:opacity-90 ${groupHeaderCls}`}
                     >
-                      <div className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 bg-white/20`}>
-                        <Play className={`w-3 h-3 fill-current ${hasActive ? groupIconActive : groupIconInactive}`} />
+                      <div className="w-6 h-6 rounded-lg flex items-center justify-center shrink-0 bg-white/20">
+                        <Play className={`w-3 h-3 fill-current ${groupIconCls}`} />
                       </div>
                       <span className="text-xs font-semibold flex-1 line-clamp-2 leading-snug">
                         {groupName}

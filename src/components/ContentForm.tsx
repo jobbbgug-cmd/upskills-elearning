@@ -354,7 +354,7 @@ function ContentArraySection<T extends object>({
                             accept={
                               uploadType === "image"
                                 ? "image/*"
-                                : ".pdf,.ppt,.pptx,.doc,.docx,.xls,.xlsx,image/*"
+                                : ".pdf,.ppt,.pptx,.doc,.docx,.xls,.xlsx,.zip,image/*"
                             }
                             onChange={(e) => handleUpload(e, i, key, uploadType)}
                           />
@@ -400,18 +400,19 @@ function ContentArraySection<T extends object>({
 
 interface ClipGroup {
   groupName: string;
-  clips: { title: string; youtubeUrl: string }[];
+  clips: { title: string; youtubeUrl: string; duration: string }[];
 }
 
 function toGroups(clips: IYoutubeClip[]): ClipGroup[] {
-  const map = new Map<string, { title: string; youtubeUrl: string }[]>();
-  const ungrouped: { title: string; youtubeUrl: string }[] = [];
+  const map = new Map<string, { title: string; youtubeUrl: string; duration: string }[]>();
+  const ungrouped: { title: string; youtubeUrl: string; duration: string }[] = [];
   for (const c of clips) {
+    const entry = { title: c.title, youtubeUrl: c.youtubeUrl, duration: c.duration ?? "" };
     if (c.group) {
       if (!map.has(c.group)) map.set(c.group, []);
-      map.get(c.group)!.push({ title: c.title, youtubeUrl: c.youtubeUrl });
+      map.get(c.group)!.push(entry);
     } else {
-      ungrouped.push({ title: c.title, youtubeUrl: c.youtubeUrl });
+      ungrouped.push(entry);
     }
   }
   const groups: ClipGroup[] = Array.from(map.entries()).map(([groupName, cs]) => ({ groupName, clips: cs }));
@@ -421,7 +422,7 @@ function toGroups(clips: IYoutubeClip[]): ClipGroup[] {
 
 function fromGroups(groups: ClipGroup[]): IYoutubeClip[] {
   return groups.flatMap((g) =>
-    g.clips.map((c) => ({ title: c.title, youtubeUrl: c.youtubeUrl, group: g.groupName || "" }))
+    g.clips.map((c) => ({ title: c.title, youtubeUrl: c.youtubeUrl, duration: c.duration ?? "", group: g.groupName || "" }))
   );
 }
 
@@ -448,10 +449,10 @@ function ClipGroupSection({
   const setGroupName = (gi: number, val: string) =>
     update(groups.map((g, i) => (i === gi ? { ...g, groupName: val } : g)));
   const addClip = (gi: number) =>
-    update(groups.map((g, i) => (i === gi ? { ...g, clips: [...g.clips, { title: "", youtubeUrl: "" }] } : g)));
+    update(groups.map((g, i) => (i === gi ? { ...g, clips: [...g.clips, { title: "", youtubeUrl: "", duration: "" }] } : g)));
   const removeClip = (gi: number, ci: number) =>
     update(groups.map((g, i) => (i === gi ? { ...g, clips: g.clips.filter((_, j) => j !== ci) } : g)));
-  const setClipField = (gi: number, ci: number, key: "title" | "youtubeUrl", val: string) =>
+  const setClipField = (gi: number, ci: number, key: "title" | "youtubeUrl" | "duration", val: string) =>
     update(
       groups.map((g, i) =>
         i === gi ? { ...g, clips: g.clips.map((c, j) => (j === ci ? { ...c, [key]: val } : c)) } : g
@@ -510,12 +511,20 @@ function ClipGroupSection({
               {group.clips.map((clip, ci) => (
                 <div key={ci} className="flex items-start gap-2 bg-gray-50 rounded-lg p-2">
                   <div className="flex-1 space-y-1.5">
-                    <input
-                      value={clip.title}
-                      onChange={(e) => setClipField(gi, ci, "title", e.target.value)}
-                      className={inputClass}
-                      placeholder="ชื่อคลิป เช่น การทำงานร่วมกันของอวัยวะ"
-                    />
+                    <div className="flex gap-2">
+                      <input
+                        value={clip.title}
+                        onChange={(e) => setClipField(gi, ci, "title", e.target.value)}
+                        className="flex-1 min-w-0 px-4 py-2.5 border border-gray-300 rounded-xl text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                        placeholder="ชื่อคลิป เช่น การทำงานร่วมกันของอวัยวะ"
+                      />
+                      <input
+                        value={clip.duration}
+                        onChange={(e) => setClipField(gi, ci, "duration", e.target.value)}
+                        className="w-14 shrink-0 px-2 py-2.5 border border-gray-300 rounded-xl text-xs text-center text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                        placeholder="10.02"
+                      />
+                    </div>
                     <input
                       value={clip.youtubeUrl}
                       onChange={(e) => setClipField(gi, ci, "youtubeUrl", e.target.value)}

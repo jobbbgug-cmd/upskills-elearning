@@ -96,14 +96,14 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
     <div className="py-10">
 
       {/* ── Top section: info + booking (constrained width) ── */}
-      <div className="max-w-5xl mx-auto px-4 mb-10">
+      <div className="max-w-[1200px] mx-auto px-4 mb-10">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
           {/* Left column */}
           <div className="lg:col-span-2 space-y-6">
 
             {/* Cover image */}
-            <div className="relative h-64 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-2xl overflow-hidden">
+            <div className="relative h-96 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-2xl overflow-hidden">
               {course.coverImage ? (
                 <Image src={course.coverImage} alt={course.title} fill className="object-cover" />
               ) : (
@@ -153,7 +153,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
 
           {/* Right column — booking */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-2xl border border-gray-100 p-5">
+            <div className="bg-white rounded-2xl border border-gray-100 p-5 h-96 flex flex-col justify-center">
               <div className="text-center mb-5">
                 <div className="text-3xl font-bold text-indigo-600 mb-1">
                   {course.price === 0 ? "ฟรี" : `฿${course.price.toLocaleString()}`}
@@ -196,12 +196,12 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
               rel="noopener noreferrer"
               className={`inline-block group ${!ebookPdfUrl ? "pointer-events-none" : ""}`}
             >
-              <div className="relative w-36 rounded-xl overflow-hidden shadow group-hover:shadow-lg transition-shadow border border-gray-100">
+              <div className="relative w-72 rounded-xl overflow-hidden shadow group-hover:shadow-lg transition-shadow border border-gray-100">
                 {ebookCoverUrl ? (
-                  <Image src={ebookCoverUrl} alt={course.title} width={144} height={192} className="object-cover w-full" />
+                  <Image src={ebookCoverUrl} alt={course.title} width={288} height={384} className="object-cover w-full" />
                 ) : (
-                  <div className="w-36 h-48 bg-gradient-to-br from-red-50 to-red-100 flex items-center justify-center">
-                    <BookOpen className="w-12 h-12 text-red-300" />
+                  <div className="w-72 h-96 bg-gradient-to-br from-red-50 to-red-100 flex items-center justify-center">
+                    <BookOpen className="w-20 h-20 text-red-300" />
                   </div>
                 )}
                 {ebookPdfUrl && (
@@ -225,7 +225,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
           accentColor="purple"
         >
           {smartPpts.length > 0 ? (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 gap-5">
               {smartPpts.map((ppt, i) => (
                 <a
                   key={i}
@@ -234,15 +234,15 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
                   rel="noopener noreferrer"
                   className="group block bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-md transition-shadow"
                 >
-                  <div className="aspect-video bg-gradient-to-br from-purple-50 to-purple-100 overflow-hidden flex items-center justify-center">
+                  <div className="aspect-[4/3] bg-gradient-to-br from-purple-50 to-purple-100 overflow-hidden flex items-center justify-center">
                     {ppt.thumbnailUrl ? (
                       <img src={ppt.thumbnailUrl} alt={ppt.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200" />
                     ) : (
-                      <FileText className="w-8 h-8 text-purple-300" />
+                      <FileText className="w-10 h-10 text-purple-300" />
                     )}
                   </div>
-                  <div className="p-2">
-                    <p className="text-xs font-medium text-gray-700 line-clamp-2">{ppt.title}</p>
+                  <div className="p-2.5">
+                    <p className="text-sm font-medium text-gray-700 line-clamp-2">{ppt.title}</p>
                   </div>
                 </a>
               ))}

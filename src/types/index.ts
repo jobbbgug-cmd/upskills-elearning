@@ -14,7 +14,7 @@ export interface ISession {
   zoomLink?: string;
 }
 
-export interface IYoutubeClip { title: string; youtubeUrl: string; group?: string; }
+export interface IYoutubeClip { title: string; youtubeUrl: string; group?: string; duration?: string; }
 export interface ISmartPpt { title: string; thumbnailUrl: string; pptUrl: string; }
 export interface IDownloadItem { title: string; thumbnailUrl: string; fileUrl: string; }
 export interface ICourseContent {
