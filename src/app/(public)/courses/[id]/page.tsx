@@ -97,6 +97,32 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
 
       {/* ── Top section: info + booking (constrained width) ── */}
       <div className="max-w-[1200px] mx-auto px-4 mb-10">
+
+        {/* Title row — full width with shortcut buttons at far right */}
+        <div className="flex items-start justify-between gap-4 mb-6">
+          <div>
+            <div className="flex flex-wrap gap-2 mb-2">
+              <Badge variant="info">{course.category}</Badge>
+              {course.gradeLevels.map((g) => <Badge key={g}>{g}</Badge>)}
+            </div>
+            <h1 className="text-3xl font-bold text-gray-900">{course.title}</h1>
+          </div>
+          <div className="flex gap-4 shrink-0">
+            <a href="#clips" className="flex flex-col items-center gap-1.5 group">
+              <div className="w-14 h-14 rounded-full bg-amber-400 group-hover:bg-amber-500 transition-colors flex items-center justify-center shadow">
+                <Play className="w-6 h-6 text-white fill-white" />
+              </div>
+              <span className="text-xs font-medium text-gray-600 text-center leading-tight">คลิป</span>
+            </a>
+            <a href="#downloads" className="flex flex-col items-center gap-1.5 group">
+              <div className="w-14 h-14 rounded-full bg-amber-400 group-hover:bg-amber-500 transition-colors flex items-center justify-center shadow">
+                <Download className="w-6 h-6 text-white" />
+              </div>
+              <span className="text-xs font-medium text-gray-600 text-center leading-tight">สื่อประกอบ<br/>การสอน</span>
+            </a>
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
           {/* Left column */}
@@ -115,11 +141,6 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
 
             {/* Course info */}
             <div>
-              <div className="flex flex-wrap gap-2 mb-3">
-                <Badge variant="info">{course.category}</Badge>
-                {course.gradeLevels.map((g) => <Badge key={g}>{g}</Badge>)}
-              </div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-3">{course.title}</h1>
               <div className="flex items-center gap-2 text-gray-500 text-sm mb-4">
                 <Users className="w-4 h-4" />
                 <span>สอนโดย {course.instructor}</span>
@@ -127,28 +148,6 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
               <p className="text-gray-600 leading-relaxed">{course.description}</p>
             </div>
 
-            {/* Course details */}
-            <div className="bg-white rounded-2xl p-5 border border-gray-100">
-              <h2 className="font-semibold text-gray-900 mb-4">รายละเอียดคอร์ส</h2>
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div className="flex items-center gap-2 text-gray-600">
-                  <Calendar className="w-4 h-4 text-indigo-500" />
-                  <span>{course.sessions.length} รอบเรียน</span>
-                </div>
-                <div className="flex items-center gap-2 text-gray-600">
-                  <Users className="w-4 h-4 text-indigo-500" />
-                  <span>สูงสุด {course.sessions[0]?.maxCapacity ?? 10} คน/รอบ</span>
-                </div>
-                <div className="flex items-center gap-2 text-gray-600">
-                  <Video className="w-4 h-4 text-indigo-500" />
-                  <span>สอนสดผ่าน Jitsi Meet</span>
-                </div>
-                <div className="flex items-center gap-2 text-gray-600">
-                  <Clock className="w-4 h-4 text-indigo-500" />
-                  <span>{course.sessions[0] ? `${course.sessions[0].startTime} - ${course.sessions[0].endTime}` : "-"}</span>
-                </div>
-              </div>
-            </div>
           </div>
 
           {/* Right column — booking */}
@@ -179,6 +178,31 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
         </div>
       </div>
 
+      {/* ── รายละเอียดคอร์ส — full width ── */}
+      <div className="max-w-[1200px] mx-auto px-4 mb-4">
+        <div className="bg-white rounded-2xl p-5 border border-gray-100">
+          <h2 className="font-semibold text-gray-900 mb-4">รายละเอียดคอร์ส</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
+            <div className="flex items-center gap-2 text-gray-600">
+              <Calendar className="w-4 h-4 text-indigo-500" />
+              <span>{course.sessions.length} รอบเรียน</span>
+            </div>
+            <div className="flex items-center gap-2 text-gray-600">
+              <Users className="w-4 h-4 text-indigo-500" />
+              <span>สูงสุด {course.sessions[0]?.maxCapacity ?? 10} คน/รอบ</span>
+            </div>
+            <div className="flex items-center gap-2 text-gray-600">
+              <Video className="w-4 h-4 text-indigo-500" />
+              <span>สอนสดผ่าน Jitsi Meet</span>
+            </div>
+            <div className="flex items-center gap-2 text-gray-600">
+              <Clock className="w-4 h-4 text-indigo-500" />
+              <span>{course.sessions[0] ? `${course.sessions[0].startTime} - ${course.sessions[0].endTime}` : "-"}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* ── สื่อการเรียนการสอน — full width ── */}
       <div className="max-w-[1200px] mx-auto px-4 space-y-4">
         <h2 className="text-lg font-bold text-gray-900">สื่อการเรียนการสอน</h2>
@@ -188,6 +212,18 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
           icon={<BookOpen className="w-5 h-5 text-red-500" />}
           title="e-Book"
           accentColor="red"
+          action={ebookPdfUrl ? (
+            <a
+              href={ebookPdfUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              download
+              className="flex items-center gap-1.5 px-3 py-1.5 border border-gray-300 rounded-lg text-xs text-gray-600 hover:bg-white transition-colors"
+            >
+              <Download className="w-3.5 h-3.5" />
+              ดาวน์โหลดสื่อ
+            </a>
+          ) : undefined}
         >
           {ebookPdfUrl || ebookCoverUrl ? (
             <a
@@ -253,6 +289,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
         </ContentSection>
 
         {/* 3. คลิปประกอบการสอน */}
+        <div id="clips" className="scroll-mt-6">
         <ContentSection
           icon={<Play className="w-5 h-5 text-red-500" />}
           title="คลิปประกอบการสอน"
@@ -264,6 +301,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
             <EmptyState />
           )}
         </ContentSection>
+        </div>
 
         {/* 4. คลิปอักษรเรียนสรุป */}
         <ContentSection
@@ -279,6 +317,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
         </ContentSection>
 
         {/* 5. สื่อประกอบการสอน */}
+        <div id="downloads" className="scroll-mt-6">
         <ContentSection
           icon={<Download className="w-5 h-5 text-amber-500" />}
           title="สื่อประกอบการสอน"
@@ -302,6 +341,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
             />
           </div>
         </ContentSection>
+        </div>
       </div>
     </div>
   );
@@ -319,11 +359,12 @@ function EmptyState() {
 }
 
 function ContentSection({
-  icon, title, accentColor, children,
+  icon, title, accentColor, action, children,
 }: {
   icon: React.ReactNode;
   title: string;
   accentColor: "red" | "blue" | "purple" | "pink" | "amber";
+  action?: React.ReactNode;
   children: React.ReactNode;
 }) {
   const borderMap = {
@@ -345,7 +386,8 @@ function ContentSection({
     <div className={`border ${borderMap[accentColor]} rounded-2xl overflow-hidden`}>
       <div className={`${headerMap[accentColor]} px-4 py-3 flex items-center gap-2`}>
         {icon}
-        <h3 className="font-semibold text-gray-900 text-sm">{title}</h3>
+        <h3 className="font-semibold text-gray-900 text-sm flex-1">{title}</h3>
+        {action}
       </div>
       <div className="p-4 bg-white">{children}</div>
     </div>
@@ -378,7 +420,7 @@ function DownloadSubGroup({
       {items.length === 0 ? (
         <EmptyState />
       ) : (
-        <div className="flex flex-wrap gap-3 pl-4">
+        <div className="flex flex-wrap gap-4 pl-4">
           {items.map((item, i) => (
             <a
               key={i}
@@ -386,16 +428,16 @@ function DownloadSubGroup({
               target="_blank"
               rel="noopener noreferrer"
               download
-              className="group flex flex-col items-center w-20"
+              className="group flex flex-col items-center w-36"
             >
-              <div className="w-20 h-24 bg-gray-50 rounded-xl border border-gray-200 overflow-hidden flex items-center justify-center group-hover:shadow-md transition-shadow">
+              <div className="w-36 h-44 bg-gray-50 rounded-xl border border-gray-200 overflow-hidden flex items-center justify-center group-hover:shadow-md transition-shadow">
                 {item.thumbnailUrl ? (
                   <img src={item.thumbnailUrl} alt={item.title} className="w-full h-full object-cover" />
                 ) : (
-                  <FileText className="w-8 h-8 text-gray-300" />
+                  <FileText className="w-12 h-12 text-gray-300" />
                 )}
               </div>
-              <p className="text-xs text-center text-gray-600 mt-1 font-medium leading-snug line-clamp-2">{item.title}</p>
+              <p className="text-sm text-center text-gray-600 mt-2 font-medium leading-snug line-clamp-2">{item.title}</p>
             </a>
           ))}
         </div>
