@@ -44,11 +44,12 @@ export async function GET() {
   }
 
   const courseStats = courses.map((c) => {
-    const stats = bookingMap[c._id.toString()] ?? { confirmed: 0, pending: 0, cancelled: 0, byMonth: {} };
+    const id = (c._id as { toString(): string }).toString();
+    const stats = bookingMap[id] ?? { confirmed: 0, pending: 0, cancelled: 0, byMonth: {} };
     const revenue = stats.confirmed * c.price;
     const pendingRevenue = stats.pending * c.price;
     return {
-      _id: c._id.toString(),
+      _id: id,
       title: c.title,
       instructor: c.instructor,
       price: c.price,

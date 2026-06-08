@@ -20,8 +20,9 @@ export async function GET() {
       const course = b.courseId as unknown as ICourse;
       const session = course.sessions?.find((s: ISession) => s._id?.toString() === b.sessionId?.toString());
       if (!session) return null;
+      const bookingId = (b._id as { toString(): string }).toString();
       return {
-        bookingId: b._id.toString(),
+        bookingId,
         courseId: course._id.toString(),
         courseTitle: course.title,
         coverImage: course.coverImage ?? "",

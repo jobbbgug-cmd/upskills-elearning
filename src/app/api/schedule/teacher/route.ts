@@ -30,9 +30,10 @@ export async function GET() {
     countMap[key] = (countMap[key] ?? 0) + 1;
   });
 
-  const events = courses.flatMap((c) =>
-    (c.sessions ?? []).map((s) => ({
-      courseId: c._id.toString(),
+  const events = courses.flatMap((c) => {
+    const courseId = (c._id as { toString(): string }).toString();
+    return (c.sessions ?? []).map((s: { _id: { toString(): string }; date: Date; startTime: string; endTime: string; zoomLink?: string; maxCapacity: number }) => ({
+      courseId,
       courseTitle: c.title,
       instructor: c.instructor,
       coverImage: c.coverImage ?? "",
@@ -41,10 +42,10 @@ export async function GET() {
       startTime: s.startTime,
       endTime: s.endTime,
       zoomLink: s.zoomLink ?? "",
-      confirmedStudents: countMap[`${c._id}_${s._id}`] ?? 0,
+      confirmedStudents: countMap[`${courseId}_${s._id.toString()}`] ?? 0,
       maxCapacity: s.maxCapacity,
-    }))
-  ).sort((a, b) => a.date.localeCompare(b.date));
+    }));
+  }).sort((a, b) => a.date.localeCompare(b.date));
 
   return NextResponse.json({ events });
 }
