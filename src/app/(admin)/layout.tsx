@@ -2,7 +2,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { LayoutDashboard, ListChecks, Users, LogOut, Images, UserCog, UserCheck, BookOpen } from "lucide-react";
+import { LayoutDashboard, ListChecks, Users, LogOut, Images, UserCog, UserCheck, BookOpen, TrendingUp, CalendarDays } from "lucide-react";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const [pendingCount, setPendingCount]       = useState(0);
@@ -72,6 +72,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <Link href="/admin/content" className="flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg text-gray-700 hover:bg-gray-50 hover:text-indigo-600 transition-colors">
             <BookOpen className="w-4 h-4" />
             เนื้อหาการเรียน
+          </Link>
+          <Link href="/admin/schedule" className="flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg text-gray-700 hover:bg-gray-50 hover:text-indigo-600 transition-colors">
+            <CalendarDays className="w-4 h-4" />
+            ตารางสอน
+          </Link>
+          <Link href="/admin/revenue" className="flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg text-gray-700 hover:bg-gray-50 hover:text-indigo-600 transition-colors">
+            <TrendingUp className="w-4 h-4" />
+            รายได้
           </Link>
           <Link href="/admin/bookings" className="flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg text-gray-700 hover:bg-gray-50 hover:text-indigo-600 transition-colors">
             <Users className="w-4 h-4" />

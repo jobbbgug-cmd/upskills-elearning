@@ -1,0 +1,38 @@
+import { NextResponse } from "next/server";
+import { getAuthUser } from "@/lib/auth";
+import { connectDB } from "@/lib/mongodb";
+import Booking from "@/models/Booking";
+import { ICourse, ISession } from "@/types";
+
+export async function GET() {
+  const auth = await getAuthUser();
+  if (!auth) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  await connectDB();
+
+  const bookings = await Booking.find({ userId: auth.userId, status: "confirmed" })
+    .populate("courseId")
+    .lean();
+
+  const events = bookings
+    .filter((b) => b.courseId && typeof b.courseId === "object")
+    .map((b) => {
+      const course = b.courseId as unknown as ICourse;
+      const session = course.sessions?.find((s: ISession) => s._id?.toString() === b.sessionId?.toString());
+      if (!session) return null;
+      return {
+        bookingId: b._id.toString(),
+        courseId: course._id.toString(),
+        courseTitle: course.title,
+        coverImage: course.coverImage ?? "",
+        date: new Date(session.date).toISOString().slice(0, 10),
+        startTime: session.startTime,
+        endTime: session.endTime,
+        zoomLink: session.zoomLink ?? "",
+      };
+    })
+    .filter(Boolean)
+    .sort((a, b) => a!.date.localeCompare(b!.date));
+
+  return NextResponse.json({ events });
+}
