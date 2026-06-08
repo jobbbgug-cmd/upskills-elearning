@@ -194,28 +194,18 @@ export default function ContentForm({ content, mode }: ContentFormProps) {
           ]}
         />
 
-        <ContentArraySection<IYoutubeClip>
+        <ClipGroupSection
           title="คลิปประกอบการสอน"
           items={teachingClips}
           setItems={setTeachingClips}
-          defaultItem={{ title: "", youtubeUrl: "" }}
           inputClass={inputClass}
-          fields={[
-            { key: "title", label: "ชื่อคลิป", placeholder: "เช่น หน่วยที่ 1 ตอนที่ 1" },
-            { key: "youtubeUrl", label: "YouTube URL", placeholder: "https://youtu.be/..." },
-          ]}
         />
 
-        <ContentArraySection<IYoutubeClip>
+        <ClipGroupSection
           title="คลิปอักษรเรียนสรุป"
           items={summaryClips}
           setItems={setSummaryClips}
-          defaultItem={{ title: "", youtubeUrl: "" }}
           inputClass={inputClass}
-          fields={[
-            { key: "title", label: "ชื่อคลิป", placeholder: "เช่น สรุปหน่วยที่ 1" },
-            { key: "youtubeUrl", label: "YouTube URL", placeholder: "https://youtu.be/..." },
-          ]}
         />
 
         {/* สื่อประกอบการสอน — parent section */}
@@ -398,6 +388,150 @@ function ContentArraySection<T extends object>({
                   </div>
                 );
               })}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ── Clip group section ── */
+
+interface ClipGroup {
+  groupName: string;
+  clips: { title: string; youtubeUrl: string }[];
+}
+
+function toGroups(clips: IYoutubeClip[]): ClipGroup[] {
+  const map = new Map<string, { title: string; youtubeUrl: string }[]>();
+  const ungrouped: { title: string; youtubeUrl: string }[] = [];
+  for (const c of clips) {
+    if (c.group) {
+      if (!map.has(c.group)) map.set(c.group, []);
+      map.get(c.group)!.push({ title: c.title, youtubeUrl: c.youtubeUrl });
+    } else {
+      ungrouped.push({ title: c.title, youtubeUrl: c.youtubeUrl });
+    }
+  }
+  const groups: ClipGroup[] = Array.from(map.entries()).map(([groupName, cs]) => ({ groupName, clips: cs }));
+  if (ungrouped.length > 0) groups.push({ groupName: "", clips: ungrouped });
+  return groups;
+}
+
+function fromGroups(groups: ClipGroup[]): IYoutubeClip[] {
+  return groups.flatMap((g) =>
+    g.clips.map((c) => ({ title: c.title, youtubeUrl: c.youtubeUrl, group: g.groupName || "" }))
+  );
+}
+
+function ClipGroupSection({
+  title,
+  items,
+  setItems,
+  inputClass,
+}: {
+  title: string;
+  items: IYoutubeClip[];
+  setItems: React.Dispatch<React.SetStateAction<IYoutubeClip[]>>;
+  inputClass: string;
+}) {
+  const [groups, setGroups] = useState<ClipGroup[]>(() => toGroups(items));
+
+  const update = (newGroups: ClipGroup[]) => {
+    setGroups(newGroups);
+    setItems(fromGroups(newGroups));
+  };
+
+  const addGroup = () => update([...groups, { groupName: "", clips: [] }]);
+  const removeGroup = (gi: number) => update(groups.filter((_, i) => i !== gi));
+  const setGroupName = (gi: number, val: string) =>
+    update(groups.map((g, i) => (i === gi ? { ...g, groupName: val } : g)));
+  const addClip = (gi: number) =>
+    update(groups.map((g, i) => (i === gi ? { ...g, clips: [...g.clips, { title: "", youtubeUrl: "" }] } : g)));
+  const removeClip = (gi: number, ci: number) =>
+    update(groups.map((g, i) => (i === gi ? { ...g, clips: g.clips.filter((_, j) => j !== ci) } : g)));
+  const setClipField = (gi: number, ci: number, key: "title" | "youtubeUrl", val: string) =>
+    update(
+      groups.map((g, i) =>
+        i === gi ? { ...g, clips: g.clips.map((c, j) => (j === ci ? { ...c, [key]: val } : c)) } : g
+      )
+    );
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-xs font-semibold text-gray-700">{title}</span>
+        <button
+          type="button"
+          onClick={addGroup}
+          className="flex items-center gap-1 text-xs text-green-700 hover:text-green-900 font-medium"
+        >
+          <Plus className="w-3.5 h-3.5" /> เพิ่มหัวข้อ
+        </button>
+      </div>
+
+      {groups.length === 0 && (
+        <p className="text-xs text-gray-400 italic">กด "+ เพิ่มหัวข้อ" เพื่อสร้างกลุ่มคลิป</p>
+      )}
+
+      <div className="space-y-3">
+        {groups.map((group, gi) => (
+          <div key={gi} className="border border-orange-200 rounded-xl overflow-hidden">
+            {/* Group header */}
+            <div className="flex items-center gap-2 bg-orange-50 px-3 py-2 border-b border-orange-100">
+              <input
+                value={group.groupName}
+                onChange={(e) => setGroupName(gi, e.target.value)}
+                className="flex-1 text-xs font-semibold bg-transparent outline-none placeholder:text-orange-300 text-orange-900"
+                placeholder="ชื่อหัวข้อ เช่น หน่วยที่ 1 ตัวเรา พืช และสัตว์"
+              />
+              <button
+                type="button"
+                onClick={() => addClip(gi)}
+                className="flex items-center gap-1 text-xs text-green-600 hover:text-green-800 font-medium shrink-0"
+              >
+                <Plus className="w-3 h-3" /> เพิ่มคลิป
+              </button>
+              <button
+                type="button"
+                onClick={() => removeGroup(gi)}
+                className="text-red-400 hover:text-red-600 shrink-0"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
+            </div>
+
+            {/* Clips */}
+            <div className="p-3 space-y-2 bg-white">
+              {group.clips.length === 0 && (
+                <p className="text-xs text-gray-400 italic">กด "+ เพิ่มคลิป" เพื่อเพิ่มคลิปในหัวข้อนี้</p>
+              )}
+              {group.clips.map((clip, ci) => (
+                <div key={ci} className="flex items-start gap-2 bg-gray-50 rounded-lg p-2">
+                  <div className="flex-1 space-y-1.5">
+                    <input
+                      value={clip.title}
+                      onChange={(e) => setClipField(gi, ci, "title", e.target.value)}
+                      className={inputClass}
+                      placeholder="ชื่อคลิป เช่น การทำงานร่วมกันของอวัยวะ"
+                    />
+                    <input
+                      value={clip.youtubeUrl}
+                      onChange={(e) => setClipField(gi, ci, "youtubeUrl", e.target.value)}
+                      className={inputClass}
+                      placeholder="YouTube URL https://youtu.be/..."
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => removeClip(gi, ci)}
+                    className="text-red-400 hover:text-red-600 mt-1 shrink-0"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              ))}
             </div>
           </div>
         ))}

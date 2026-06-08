@@ -93,211 +93,215 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
   const downloadAksorn  = content?.downloadAksorn  ?? course.downloadAksorn  ?? [];
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-10">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <div className="py-10">
 
-        {/* ── Left column ── */}
-        <div className="lg:col-span-2 space-y-6">
+      {/* ── Top section: info + booking (constrained width) ── */}
+      <div className="max-w-5xl mx-auto px-4 mb-10">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
-          {/* Cover image */}
-          <div className="relative h-64 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-2xl overflow-hidden">
-            {course.coverImage ? (
-              <Image src={course.coverImage} alt={course.title} fill className="object-cover" />
-            ) : (
-              <div className="flex items-center justify-center h-full">
-                <BookOpen className="w-20 h-20 text-indigo-300" />
-              </div>
-            )}
-          </div>
+          {/* Left column */}
+          <div className="lg:col-span-2 space-y-6">
 
-          {/* Course info */}
-          <div>
-            <div className="flex flex-wrap gap-2 mb-3">
-              <Badge variant="info">{course.category}</Badge>
-              {course.gradeLevels.map((g) => <Badge key={g}>{g}</Badge>)}
-            </div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-3">{course.title}</h1>
-            <div className="flex items-center gap-2 text-gray-500 text-sm mb-4">
-              <Users className="w-4 h-4" />
-              <span>สอนโดย {course.instructor}</span>
-            </div>
-            <p className="text-gray-600 leading-relaxed">{course.description}</p>
-          </div>
-
-          {/* Course details */}
-          <div className="bg-white rounded-2xl p-5 border border-gray-100">
-            <h2 className="font-semibold text-gray-900 mb-4">รายละเอียดคอร์ส</h2>
-            <div className="grid grid-cols-2 gap-4 text-sm">
-              <div className="flex items-center gap-2 text-gray-600">
-                <Calendar className="w-4 h-4 text-indigo-500" />
-                <span>{course.sessions.length} รอบเรียน</span>
-              </div>
-              <div className="flex items-center gap-2 text-gray-600">
-                <Users className="w-4 h-4 text-indigo-500" />
-                <span>สูงสุด {course.sessions[0]?.maxCapacity ?? 10} คน/รอบ</span>
-              </div>
-              <div className="flex items-center gap-2 text-gray-600">
-                <Video className="w-4 h-4 text-indigo-500" />
-                <span>สอนสดผ่าน Jitsi Meet</span>
-              </div>
-              <div className="flex items-center gap-2 text-gray-600">
-                <Clock className="w-4 h-4 text-indigo-500" />
-                <span>{course.sessions[0] ? `${course.sessions[0].startTime} - ${course.sessions[0].endTime}` : "-"}</span>
-              </div>
-            </div>
-          </div>
-
-          {/* ── สื่อการเรียนการสอน ── */}
-          <div className="space-y-4">
-            <h2 className="text-lg font-bold text-gray-900">สื่อการเรียนการสอน</h2>
-
-            {/* 1. e-Book */}
-            <ContentSection
-              icon={<BookOpen className="w-5 h-5 text-red-500" />}
-              title="e-Book"
-              accentColor="red"
-            >
-              {ebookPdfUrl || ebookCoverUrl ? (
-                <a
-                  href={ebookPdfUrl || "#"}
-                  target={ebookPdfUrl ? "_blank" : undefined}
-                  rel="noopener noreferrer"
-                  className={`inline-block group ${!ebookPdfUrl ? "pointer-events-none" : ""}`}
-                >
-                  <div className="relative w-36 rounded-xl overflow-hidden shadow group-hover:shadow-lg transition-shadow border border-gray-100">
-                    {ebookCoverUrl ? (
-                      <Image src={ebookCoverUrl} alt={course.title} width={144} height={192} className="object-cover w-full" />
-                    ) : (
-                      <div className="w-36 h-48 bg-gradient-to-br from-red-50 to-red-100 flex items-center justify-center">
-                        <BookOpen className="w-12 h-12 text-red-300" />
-                      </div>
-                    )}
-                    {ebookPdfUrl && (
-                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 flex items-end transition-colors">
-                        <span className="w-full text-center text-xs font-semibold text-white bg-red-500/80 py-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                          เปิดดู PDF →
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                </a>
+            {/* Cover image */}
+            <div className="relative h-64 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-2xl overflow-hidden">
+              {course.coverImage ? (
+                <Image src={course.coverImage} alt={course.title} fill className="object-cover" />
               ) : (
-                <EmptyState />
+                <div className="flex items-center justify-center h-full">
+                  <BookOpen className="w-20 h-20 text-indigo-300" />
+                </div>
               )}
-            </ContentSection>
+            </div>
 
-            {/* 2. Smart PPT */}
-            <ContentSection
-              icon={<FileText className="w-5 h-5 text-purple-500" />}
-              title="Smart PPT"
-              accentColor="purple"
-            >
-              {smartPpts.length > 0 ? (
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                  {smartPpts.map((ppt, i) => (
-                    <a
-                      key={i}
-                      href={ppt.pptUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="group block bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-md transition-shadow"
-                    >
-                      <div className="aspect-video bg-gradient-to-br from-purple-50 to-purple-100 overflow-hidden flex items-center justify-center">
-                        {ppt.thumbnailUrl ? (
-                          <img src={ppt.thumbnailUrl} alt={ppt.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200" />
-                        ) : (
-                          <FileText className="w-8 h-8 text-purple-300" />
-                        )}
-                      </div>
-                      <div className="p-2">
-                        <p className="text-xs font-medium text-gray-700 line-clamp-2">{ppt.title}</p>
-                      </div>
-                    </a>
-                  ))}
+            {/* Course info */}
+            <div>
+              <div className="flex flex-wrap gap-2 mb-3">
+                <Badge variant="info">{course.category}</Badge>
+                {course.gradeLevels.map((g) => <Badge key={g}>{g}</Badge>)}
+              </div>
+              <h1 className="text-3xl font-bold text-gray-900 mb-3">{course.title}</h1>
+              <div className="flex items-center gap-2 text-gray-500 text-sm mb-4">
+                <Users className="w-4 h-4" />
+                <span>สอนโดย {course.instructor}</span>
+              </div>
+              <p className="text-gray-600 leading-relaxed">{course.description}</p>
+            </div>
+
+            {/* Course details */}
+            <div className="bg-white rounded-2xl p-5 border border-gray-100">
+              <h2 className="font-semibold text-gray-900 mb-4">รายละเอียดคอร์ส</h2>
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div className="flex items-center gap-2 text-gray-600">
+                  <Calendar className="w-4 h-4 text-indigo-500" />
+                  <span>{course.sessions.length} รอบเรียน</span>
+                </div>
+                <div className="flex items-center gap-2 text-gray-600">
+                  <Users className="w-4 h-4 text-indigo-500" />
+                  <span>สูงสุด {course.sessions[0]?.maxCapacity ?? 10} คน/รอบ</span>
+                </div>
+                <div className="flex items-center gap-2 text-gray-600">
+                  <Video className="w-4 h-4 text-indigo-500" />
+                  <span>สอนสดผ่าน Jitsi Meet</span>
+                </div>
+                <div className="flex items-center gap-2 text-gray-600">
+                  <Clock className="w-4 h-4 text-indigo-500" />
+                  <span>{course.sessions[0] ? `${course.sessions[0].startTime} - ${course.sessions[0].endTime}` : "-"}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Right column — booking */}
+          <div className="lg:col-span-1">
+            <div className="bg-white rounded-2xl border border-gray-100 p-5">
+              <div className="text-center mb-5">
+                <div className="text-3xl font-bold text-indigo-600 mb-1">
+                  {course.price === 0 ? "ฟรี" : `฿${course.price.toLocaleString()}`}
+                </div>
+                <p className="text-sm text-gray-500">ต่อคน ต่อรอบ</p>
+              </div>
+
+              {futureSessions.length === 0 ? (
+                <div className="text-center py-8 text-gray-400">
+                  <Calendar className="w-10 h-10 mx-auto mb-2 opacity-50" />
+                  <p className="text-sm">ยังไม่มีรอบเรียนที่เปิด</p>
                 </div>
               ) : (
-                <EmptyState />
-              )}
-            </ContentSection>
-
-            {/* 4. คลิปประกอบการสอน */}
-            <ContentSection
-              icon={<Play className="w-5 h-5 text-red-500" />}
-              title="คลิปประกอบการสอน"
-              accentColor="red"
-            >
-              {teachingClips.length > 0 ? (
-                <VideoPlayerSection title="คลิปประกอบการสอน" clips={teachingClips} accentColor="red" />
-              ) : (
-                <EmptyState />
-              )}
-            </ContentSection>
-
-            {/* 5. คลิปอักษรเรียนสรุป */}
-            <ContentSection
-              icon={<Play className="w-5 h-5 text-pink-500" />}
-              title="คลิปอักษรเรียนสรุป"
-              accentColor="pink"
-            >
-              {summaryClips.length > 0 ? (
-                <VideoPlayerSection title="คลิปอักษรเรียนสรุป" clips={summaryClips} accentColor="pink" />
-              ) : (
-                <EmptyState />
-              )}
-            </ContentSection>
-
-            {/* 6. สื่อประกอบการสอน */}
-            <ContentSection
-              icon={<Download className="w-5 h-5 text-amber-500" />}
-              title="สื่อประกอบการสอน"
-              accentColor="amber"
-            >
-              <div className="space-y-4">
-                <DownloadSubGroup
-                  label="ดาวน์โหลดฟรี"
-                  items={downloadFree}
-                  variant="free"
+                <CourseBooking
+                  course={course}
+                  sessions={futureSessions}
+                  myBookings={myBookings}
+                  isLoggedIn={!!auth}
                 />
-                <DownloadSubGroup
-                  label="เฉพาะลูกค้าอักษร (ยื่นบัตรครู)"
-                  items={downloadTeacherCard}
-                  variant="teacher"
-                />
-                <DownloadSubGroup
-                  label="เฉพาะลูกค้าอักษร"
-                  items={downloadAksorn}
-                  variant="aksorn"
-                />
-              </div>
-            </ContentSection>
-          </div>
-        </div>
-
-        {/* ── Right column — booking ── */}
-        <div className="lg:col-span-1">
-          <div className="bg-white rounded-2xl border border-gray-100 p-5 sticky top-20">
-            <div className="text-center mb-5">
-              <div className="text-3xl font-bold text-indigo-600 mb-1">
-                {course.price === 0 ? "ฟรี" : `฿${course.price.toLocaleString()}`}
-              </div>
-              <p className="text-sm text-gray-500">ต่อคน ต่อรอบ</p>
+              )}
             </div>
-
-            {futureSessions.length === 0 ? (
-              <div className="text-center py-8 text-gray-400">
-                <Calendar className="w-10 h-10 mx-auto mb-2 opacity-50" />
-                <p className="text-sm">ยังไม่มีรอบเรียนที่เปิด</p>
-              </div>
-            ) : (
-              <CourseBooking
-                course={course}
-                sessions={futureSessions}
-                myBookings={myBookings}
-                isLoggedIn={!!auth}
-              />
-            )}
           </div>
         </div>
+      </div>
+
+      {/* ── สื่อการเรียนการสอน — full width ── */}
+      <div className="max-w-[1200px] mx-auto px-4 space-y-4">
+        <h2 className="text-lg font-bold text-gray-900">สื่อการเรียนการสอน</h2>
+
+        {/* 1. e-Book */}
+        <ContentSection
+          icon={<BookOpen className="w-5 h-5 text-red-500" />}
+          title="e-Book"
+          accentColor="red"
+        >
+          {ebookPdfUrl || ebookCoverUrl ? (
+            <a
+              href={ebookPdfUrl || "#"}
+              target={ebookPdfUrl ? "_blank" : undefined}
+              rel="noopener noreferrer"
+              className={`inline-block group ${!ebookPdfUrl ? "pointer-events-none" : ""}`}
+            >
+              <div className="relative w-36 rounded-xl overflow-hidden shadow group-hover:shadow-lg transition-shadow border border-gray-100">
+                {ebookCoverUrl ? (
+                  <Image src={ebookCoverUrl} alt={course.title} width={144} height={192} className="object-cover w-full" />
+                ) : (
+                  <div className="w-36 h-48 bg-gradient-to-br from-red-50 to-red-100 flex items-center justify-center">
+                    <BookOpen className="w-12 h-12 text-red-300" />
+                  </div>
+                )}
+                {ebookPdfUrl && (
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 flex items-end transition-colors">
+                    <span className="w-full text-center text-xs font-semibold text-white bg-red-500/80 py-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                      เปิดดู PDF →
+                    </span>
+                  </div>
+                )}
+              </div>
+            </a>
+          ) : (
+            <EmptyState />
+          )}
+        </ContentSection>
+
+        {/* 2. Smart PPT */}
+        <ContentSection
+          icon={<FileText className="w-5 h-5 text-purple-500" />}
+          title="Smart PPT"
+          accentColor="purple"
+        >
+          {smartPpts.length > 0 ? (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+              {smartPpts.map((ppt, i) => (
+                <a
+                  key={i}
+                  href={ppt.pptUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group block bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-md transition-shadow"
+                >
+                  <div className="aspect-video bg-gradient-to-br from-purple-50 to-purple-100 overflow-hidden flex items-center justify-center">
+                    {ppt.thumbnailUrl ? (
+                      <img src={ppt.thumbnailUrl} alt={ppt.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200" />
+                    ) : (
+                      <FileText className="w-8 h-8 text-purple-300" />
+                    )}
+                  </div>
+                  <div className="p-2">
+                    <p className="text-xs font-medium text-gray-700 line-clamp-2">{ppt.title}</p>
+                  </div>
+                </a>
+              ))}
+            </div>
+          ) : (
+            <EmptyState />
+          )}
+        </ContentSection>
+
+        {/* 3. คลิปประกอบการสอน */}
+        <ContentSection
+          icon={<Play className="w-5 h-5 text-red-500" />}
+          title="คลิปประกอบการสอน"
+          accentColor="red"
+        >
+          {teachingClips.length > 0 ? (
+            <VideoPlayerSection title="คลิปประกอบการสอน" clips={teachingClips} accentColor="red" />
+          ) : (
+            <EmptyState />
+          )}
+        </ContentSection>
+
+        {/* 4. คลิปอักษรเรียนสรุป */}
+        <ContentSection
+          icon={<Play className="w-5 h-5 text-pink-500" />}
+          title="คลิปอักษรเรียนสรุป"
+          accentColor="pink"
+        >
+          {summaryClips.length > 0 ? (
+            <VideoPlayerSection title="คลิปอักษรเรียนสรุป" clips={summaryClips} accentColor="pink" />
+          ) : (
+            <EmptyState />
+          )}
+        </ContentSection>
+
+        {/* 5. สื่อประกอบการสอน */}
+        <ContentSection
+          icon={<Download className="w-5 h-5 text-amber-500" />}
+          title="สื่อประกอบการสอน"
+          accentColor="amber"
+        >
+          <div className="space-y-4">
+            <DownloadSubGroup
+              label="ดาวน์โหลดฟรี"
+              items={downloadFree}
+              variant="free"
+            />
+            <DownloadSubGroup
+              label="เฉพาะลูกค้าอักษร (ยื่นบัตรครู)"
+              items={downloadTeacherCard}
+              variant="teacher"
+            />
+            <DownloadSubGroup
+              label="เฉพาะลูกค้าอักษร"
+              items={downloadAksorn}
+              variant="aksorn"
+            />
+          </div>
+        </ContentSection>
       </div>
     </div>
   );

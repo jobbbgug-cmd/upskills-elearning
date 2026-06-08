@@ -15,7 +15,7 @@ export interface ICourseContentDocument extends Document {
 }
 
 const YoutubeClipSchema = new Schema(
-  { title: { type: String, default: "" }, youtubeUrl: { type: String, default: "" } },
+  { title: { type: String, default: "" }, youtubeUrl: { type: String, default: "" }, group: { type: String, default: "" } },
   { _id: false }
 );
 
