@@ -4,6 +4,7 @@ import { getAuthUser } from "@/lib/auth";
 import { connectDB } from "@/lib/mongodb";
 import CourseContent from "@/models/CourseContent";
 import { ICourseContent } from "@/types";
+import Image from "next/image";
 import { Plus, Pencil, Trash2, BookOpen } from "lucide-react";
 import DeleteContentButton from "./DeleteContentButton";
 
@@ -54,8 +55,12 @@ export default async function ContentListPage() {
 
             return (
               <div key={c._id} className="bg-white rounded-2xl border border-gray-100 p-5 flex items-center gap-4">
-                <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center shrink-0">
-                  <BookOpen className="w-6 h-6 text-green-600" />
+                <div className="w-12 h-16 overflow-hidden shrink-0 bg-green-100 rounded flex items-center justify-center">
+                  {c.ebookCoverUrl ? (
+                    <Image src={c.ebookCoverUrl} alt={c.name} width={48} height={64} className="w-full h-full object-contain" />
+                  ) : (
+                    <BookOpen className="w-6 h-6 text-green-600" />
+                  )}
                 </div>
                 <div className="flex-1 min-w-0">
                   <h3 className="font-semibold text-gray-900 truncate">{c.name}</h3>
