@@ -541,6 +541,14 @@ function ClipGroupSection({
                   </button>
                 </div>
               ))}
+              {/* ปุ่มเพิ่มคลิปด้านล่าง */}
+              <button
+                type="button"
+                onClick={() => addClip(gi)}
+                className="w-full flex items-center justify-center gap-1.5 py-2 rounded-lg border border-dashed border-green-300 text-xs text-green-600 hover:bg-green-50 hover:border-green-400 transition-colors font-medium mt-1"
+              >
+                <Plus className="w-3.5 h-3.5" /> เพิ่มคลิป
+              </button>
             </div>
           </div>
         ))}
