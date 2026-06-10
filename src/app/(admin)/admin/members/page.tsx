@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
 import { Clock, CheckCircle, XCircle, Copy, Check, User, GraduationCap, RefreshCw } from "lucide-react";
+import ConfirmDialog from "@/components/ui/ConfirmDialog";
 
 interface PendingUser {
   _id: string;
@@ -27,6 +28,7 @@ export default function AdminMembersPage() {
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState<string | null>(null);
   const [approved, setApproved] = useState<ApproveResult[]>([]);
+  const [confirmDialog, setConfirmDialog] = useState<{ open: boolean; type: "approve" | "reject"; user: PendingUser | null }>({ open: false, type: "approve", user: null });
   const [copied, setCopied] = useState<string | null>(null);
   const [tab, setTab] = useState<"pending" | "all">("pending");
   const [allUsers, setAllUsers] = useState<PendingUser[]>([]);
@@ -44,7 +46,7 @@ export default function AdminMembersPage() {
 
   useEffect(() => { loadPending(); }, [loadPending]);
 
-  const handleApprove = async (user: PendingUser) => {
+  const doApprove = async (user: PendingUser) => {
     setProcessing(user._id);
     const res = await fetch(`/api/admin/users/${user._id}/approve`, { method: "POST" });
     const data = await res.json();
@@ -56,13 +58,19 @@ export default function AdminMembersPage() {
     setProcessing(null);
   };
 
-  const handleReject = async (id: string) => {
-    if (!confirm("ปฏิเสธคำขอนี้?")) return;
+  const doReject = async (id: string) => {
     setProcessing(id);
     await fetch(`/api/admin/users/${id}/reject`, { method: "POST" });
     setUsers((prev) => prev.filter((u) => u._id !== id));
     setAllUsers((prev) => prev.map((u) => u._id === id ? { ...u, status: "rejected" } : u));
     setProcessing(null);
+  };
+
+  const handleConfirmAction = () => {
+    const { type, user } = confirmDialog;
+    if (!user) return;
+    if (type === "approve") doApprove(user);
+    else doReject(user._id);
   };
 
   const copyText = (text: string, key: string) => {
@@ -87,6 +95,15 @@ export default function AdminMembersPage() {
 
   return (
     <div>
+      <ConfirmDialog
+        open={confirmDialog.open}
+        title={confirmDialog.type === "approve" ? `อนุมัติ ${confirmDialog.user?.name}?` : `ปฏิเสธ ${confirmDialog.user?.name}?`}
+        message={confirmDialog.type === "approve" ? "ระบบจะสร้างรหัสผ่านและส่งให้ผู้ใช้" : "คำขอสมัครสมาชิกนี้จะถูกปฏิเสธ"}
+        confirmLabel={confirmDialog.type === "approve" ? "อนุมัติ" : "ปฏิเสธ"}
+        type={confirmDialog.type === "approve" ? "success" : "danger"}
+        onConfirm={handleConfirmAction}
+        onCancel={() => setConfirmDialog((d) => ({ ...d, open: false }))}
+      />
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
@@ -192,7 +209,7 @@ export default function AdminMembersPage() {
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   <button
-                    onClick={() => handleApprove(u)}
+                    onClick={() => setConfirmDialog({ open: true, type: "approve", user: u })}
                     disabled={processing === u._id}
                     className="flex items-center gap-1.5 px-4 py-2 bg-green-600 text-white text-sm font-semibold rounded-xl hover:bg-green-700 disabled:opacity-50 transition-colors"
                   >
@@ -200,7 +217,7 @@ export default function AdminMembersPage() {
                     {processing === u._id ? "กำลังดำเนินการ..." : "อนุมัติ"}
                   </button>
                   <button
-                    onClick={() => handleReject(u._id)}
+                    onClick={() => setConfirmDialog({ open: true, type: "reject", user: u })}
                     disabled={processing === u._id}
                     className="flex items-center gap-1.5 px-4 py-2 bg-red-50 text-red-600 text-sm font-semibold rounded-xl hover:bg-red-100 disabled:opacity-50 transition-colors border border-red-200"
                   >

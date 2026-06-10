@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { Search, Shield, User, GraduationCap, Trash2, ChevronDown, Pencil, X, Eye, EyeOff, Copy, Check } from "lucide-react";
+import ConfirmDialog from "@/components/ui/ConfirmDialog";
 
 interface UserItem {
   _id: string;
@@ -46,6 +47,7 @@ export default function AdminUsersPage() {
   const [showPass, setShowPass]     = useState(false);
   const [saveError, setSaveError]   = useState("");
   const [copied, setCopied]         = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState<{ open: boolean; id: string; name: string }>({ open: false, id: "", name: "" });
 
   const load = async () => {
     setLoading(true);
@@ -101,8 +103,7 @@ export default function AdminUsersPage() {
     setUpdating(null);
   };
 
-  const deleteUser = async (id: string, name: string) => {
-    if (!confirm(`ลบบัญชี "${name}" ?`)) return;
+  const deleteUser = async (id: string) => {
     const res = await fetch(`/api/admin/users/${id}`, { method: "DELETE" });
     if (res.ok) setUsers((prev) => prev.filter((u) => u._id !== id));
   };
@@ -126,6 +127,15 @@ export default function AdminUsersPage() {
 
   return (
     <div>
+      <ConfirmDialog
+        open={deleteConfirm.open}
+        title={`ลบบัญชี?`}
+        message={`"${deleteConfirm.name}" จะถูกลบถาวร ไม่สามารถกู้คืนได้`}
+        confirmLabel="ลบ"
+        type="danger"
+        onConfirm={() => deleteUser(deleteConfirm.id)}
+        onCancel={() => setDeleteConfirm((d) => ({ ...d, open: false }))}
+      />
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-gray-900">จัดการผู้ใช้</h1>
         <p className="text-gray-500 text-sm mt-1">แก้ไขข้อมูล เปลี่ยน Role และรหัสผ่านของผู้ใช้</p>
@@ -232,7 +242,7 @@ export default function AdminUsersPage() {
                           className="p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors" title="แก้ไข">
                           <Pencil className="w-4 h-4" />
                         </button>
-                        <button onClick={() => deleteUser(u._id, u.name)}
+                        <button onClick={() => setDeleteConfirm({ open: true, id: u._id, name: u.name })}
                           className="p-1.5 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors" title="ลบ">
                           <Trash2 className="w-4 h-4" />
                         </button>

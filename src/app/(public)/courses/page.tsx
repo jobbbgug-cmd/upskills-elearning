@@ -57,15 +57,56 @@ export default async function CoursesPage({
   const visibleGrades = activeGroup ? activeGroup.grades : ALL_GRADE_LEVELS;
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-10">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">คอร์สทั้งหมด</h1>
-        <p className="text-gray-500">เลือกระดับชั้นหรือหมวดหมู่เพื่อกรองคอร์สที่เหมาะกับคุณ</p>
+    <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="mb-6">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1">คอร์สทั้งหมด</h1>
+        <p className="text-gray-500 text-sm">เลือกระดับชั้นหรือหมวดหมู่เพื่อกรองคอร์สที่เหมาะกับคุณ</p>
+      </div>
+
+      {/* Mobile filter chips — horizontal scroll */}
+      <div className="lg:hidden mb-5 -mx-4 px-4 overflow-x-auto">
+        <div className="flex gap-2 pb-2" style={{ minWidth: "max-content" }}>
+          <Link href="/courses"
+            className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap border transition-colors ${!gradeLevel && !gradeGroup && !category ? "bg-indigo-600 text-white border-indigo-600" : "bg-white border-gray-200 text-gray-600 hover:border-indigo-300"}`}>
+            ทั้งหมด
+          </Link>
+          {activeGroup ? (
+            <>
+              <Link href="/courses" className="px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap border bg-white border-gray-200 text-gray-500 hover:border-indigo-300">
+                ← กลับ
+              </Link>
+              <Link href={`/courses?gradeGroup=${encodeURIComponent(activeGroup.label)}${category ? `&category=${category}` : ""}`}
+                className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap border transition-colors ${gradeGroup && !gradeLevel ? "bg-indigo-600 text-white border-indigo-600" : "bg-white border-gray-200 text-gray-700 hover:border-indigo-300"}`}>
+                {activeGroup.label} (ทั้งหมด)
+              </Link>
+              {visibleGrades.map((g) => (
+                <Link key={g} href={`/courses?gradeGroup=${encodeURIComponent(activeGroup.label)}&gradeLevel=${encodeURIComponent(g)}${category ? `&category=${category}` : ""}`}
+                  className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap border transition-colors ${gradeLevel === g ? "bg-indigo-600 text-white border-indigo-600" : "bg-white border-gray-200 text-gray-600 hover:border-indigo-300"}`}>
+                  {g}
+                </Link>
+              ))}
+            </>
+          ) : (
+            GRADE_GROUPS.map((group) => (
+              <Link key={group.label} href={`/courses?gradeGroup=${encodeURIComponent(group.label)}${category ? `&category=${category}` : ""}`}
+                className="px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap border bg-white border-gray-200 text-gray-600 hover:border-indigo-300 transition-colors">
+                {group.label}
+              </Link>
+            ))
+          )}
+          {categories.map((cat) => (
+            <Link key={cat}
+              href={`/courses?${gradeGroup ? `gradeGroup=${encodeURIComponent(gradeGroup)}&` : ""}${gradeLevel ? `gradeLevel=${encodeURIComponent(gradeLevel)}&` : ""}category=${cat}`}
+              className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap border transition-colors ${category === cat ? "bg-purple-600 text-white border-purple-600" : "bg-white border-gray-200 text-gray-600 hover:border-purple-300"}`}>
+              {cat}
+            </Link>
+          ))}
+        </div>
       </div>
 
       <div className="flex flex-col lg:flex-row gap-8">
-        {/* Sidebar Filters */}
-        <aside className="lg:w-56 shrink-0">
+        {/* Sidebar Filters — desktop only */}
+        <aside className="hidden lg:block lg:w-56 shrink-0">
           <div className="bg-white rounded-2xl p-5 border border-gray-100 sticky top-20">
             <div className="mb-6">
               <h3 className="font-semibold text-gray-900 mb-3 text-sm uppercase tracking-wide">ระดับชั้น</h3>

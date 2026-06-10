@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState, useMemo } from "react";
 import Image from "next/image";
-import { ChevronLeft, ChevronRight, BookOpen, Users, Clock, Video, Calendar } from "lucide-react";
+import { ChevronLeft, ChevronRight, BookOpen, Users, Clock, Video, Calendar, GraduationCap } from "lucide-react";
 
 interface TeachingSession {
   courseId: string;
@@ -27,6 +27,7 @@ export default function TeacherSchedulePage() {
   const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [filter, setFilter] = useState<"all" | "upcoming" | "past">("upcoming");
+  const [selectedTeacher, setSelectedTeacher] = useState<string>("all");
   const today = toDateStr(new Date());
 
   const [calYear, setCalYear] = useState(new Date().getFullYear());
@@ -38,7 +39,18 @@ export default function TeacherSchedulePage() {
       .then((d) => { setEvents(d.events ?? []); setLoading(false); });
   }, []);
 
-  const eventDates = useMemo(() => new Set(events.map((e) => e.date)), [events]);
+  // Unique teachers sorted alphabetically
+  const teachers = useMemo(() => {
+    const map = new Map<string, string>();
+    events.forEach((e) => { if (!map.has(e.instructor)) map.set(e.instructor, e.instructor); });
+    return Array.from(map.keys()).sort();
+  }, [events]);
+
+  const visibleEvents = useMemo(() =>
+    selectedTeacher === "all" ? events : events.filter((e) => e.instructor === selectedTeacher),
+  [events, selectedTeacher]);
+
+  const eventDates = useMemo(() => new Set(visibleEvents.map((e) => e.date)), [visibleEvents]);
 
   const calDays = useMemo(() => {
     const first = new Date(calYear, calMonth, 1).getDay();
@@ -59,12 +71,12 @@ export default function TeacherSchedulePage() {
   }
 
   const filteredEvents = useMemo(() => {
-    let list = events;
+    let list = visibleEvents;
     if (selectedDate) list = list.filter((e) => e.date === selectedDate);
     else if (filter === "upcoming") list = list.filter((e) => e.date >= today);
     else if (filter === "past") list = list.filter((e) => e.date < today);
     return list;
-  }, [events, selectedDate, filter, today]);
+  }, [visibleEvents, selectedDate, filter, today]);
 
   const grouped = useMemo(() => {
     const map = new Map<string, TeachingSession[]>();
@@ -80,17 +92,35 @@ export default function TeacherSchedulePage() {
     return dt.toLocaleDateString("th-TH", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
   }
 
-  const upcomingCount = events.filter((e) => e.date >= today).length;
-  const pastCount = events.filter((e) => e.date < today).length;
-  const todayCount = events.filter((e) => e.date === today).length;
+  const upcomingCount = visibleEvents.filter((e) => e.date >= today).length;
+  const pastCount = visibleEvents.filter((e) => e.date < today).length;
+  const todayCount = visibleEvents.filter((e) => e.date === today).length;
 
   if (loading) return <div className="text-center py-20 text-gray-400 text-sm">กำลังโหลด...</div>;
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">ตารางสอน</h1>
-        <p className="text-sm text-gray-500 mt-0.5">ตารางการสอนทั้งหมดของคุณ</p>
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">ตารางสอน</h1>
+          <p className="text-sm text-gray-500 mt-0.5">ตารางการสอนทั้งหมด</p>
+        </div>
+        {/* Teacher filter — show only when there are multiple teachers */}
+        {teachers.length > 1 && (
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            <GraduationCap className="w-4 h-4 text-gray-400 shrink-0" />
+            <select
+              value={selectedTeacher}
+              onChange={(e) => { setSelectedTeacher(e.target.value); setSelectedDate(null); }}
+              className="flex-1 sm:flex-none text-sm border border-gray-200 rounded-xl px-3 py-2 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-300 sm:min-w-[180px]"
+            >
+              <option value="all">ครูทั้งหมด ({teachers.length} คน)</option>
+              {teachers.map((t) => (
+                <option key={t} value={t}>{t}</option>
+              ))}
+            </select>
+          </div>
+        )}
       </div>
 
       {/* Summary */}

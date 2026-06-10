@@ -62,15 +62,15 @@ export default async function DashboardPage() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-4 mb-8">
+      <div className="grid grid-cols-3 gap-3 mb-8">
         {[
           { label: "คอร์สที่จอง", value: bookings.length, color: "text-indigo-600 bg-indigo-50" },
           { label: "รอเรียน", value: upcoming.length, color: "text-green-600 bg-green-50" },
           { label: "เรียนแล้ว", value: past.length, color: "text-gray-600 bg-gray-50" },
         ].map((stat) => (
-          <div key={stat.label} className={`${stat.color} rounded-2xl p-4 text-center`}>
-            <div className="text-2xl font-bold">{stat.value}</div>
-            <div className="text-sm mt-0.5 opacity-80">{stat.label}</div>
+          <div key={stat.label} className={`${stat.color} rounded-2xl p-3 sm:p-4 text-center`}>
+            <div className="text-xl sm:text-2xl font-bold">{stat.value}</div>
+            <div className="text-xs sm:text-sm mt-0.5 opacity-80 leading-tight">{stat.label}</div>
           </div>
         ))}
       </div>

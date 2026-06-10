@@ -115,26 +115,26 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
       <div className="max-w-[1200px] mx-auto px-4 mb-10">
 
         {/* Title row — full width with shortcut buttons at far right */}
-        <div className="flex items-start justify-between gap-4 mb-6">
-          <div>
+        <div className="flex items-start justify-between gap-3 mb-6">
+          <div className="min-w-0">
             <div className="flex flex-wrap gap-2 mb-2">
               <Badge variant="info">{course.category}</Badge>
               {course.gradeLevels.map((g) => <Badge key={g}>{g}</Badge>)}
             </div>
-            <h1 className="text-3xl font-bold text-gray-900">{course.title}</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">{course.title}</h1>
           </div>
-          <div className="flex gap-4 shrink-0">
-            <a href="#clips" className="flex flex-col items-center gap-1.5 group">
-              <div className="w-14 h-14 rounded-full bg-amber-400 group-hover:bg-amber-500 transition-colors flex items-center justify-center shadow">
-                <Play className="w-6 h-6 text-white fill-white" />
+          <div className="flex gap-3 sm:gap-4 shrink-0">
+            <a href="#clips" className="flex flex-col items-center gap-1 group">
+              <div className="w-11 h-11 sm:w-14 sm:h-14 rounded-full bg-amber-400 group-hover:bg-amber-500 transition-colors flex items-center justify-center shadow">
+                <Play className="w-5 h-5 sm:w-6 sm:h-6 text-white fill-white" />
               </div>
               <span className="text-xs font-medium text-gray-600 text-center leading-tight">คลิป</span>
             </a>
-            <a href="#downloads" className="flex flex-col items-center gap-1.5 group">
-              <div className="w-14 h-14 rounded-full bg-amber-400 group-hover:bg-amber-500 transition-colors flex items-center justify-center shadow">
-                <Download className="w-6 h-6 text-white" />
+            <a href="#downloads" className="flex flex-col items-center gap-1 group">
+              <div className="w-11 h-11 sm:w-14 sm:h-14 rounded-full bg-amber-400 group-hover:bg-amber-500 transition-colors flex items-center justify-center shadow">
+                <Download className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
               </div>
-              <span className="text-xs font-medium text-gray-600 text-center leading-tight">สื่อประกอบ<br/>การสอน</span>
+              <span className="text-xs font-medium text-gray-600 text-center leading-tight">สื่อ<br/>ประกอบ</span>
             </a>
           </div>
         </div>
@@ -168,7 +168,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
 
           {/* Right column — booking */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-2xl border border-gray-100 p-5 h-96 flex flex-col justify-center">
+            <div className="bg-white rounded-2xl border border-gray-100 p-5 flex flex-col justify-center min-h-[200px] lg:h-96">
               <div className="text-center mb-5">
                 <div className="text-3xl font-bold text-indigo-600 mb-1">
                   {course.price === 0 ? "ฟรี" : `฿${course.price.toLocaleString()}`}
@@ -248,11 +248,11 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
               rel="noopener noreferrer"
               className={`inline-block group ${!ebookPdfUrl ? "pointer-events-none" : ""}`}
             >
-              <div className="relative w-72 rounded-xl overflow-hidden shadow group-hover:shadow-lg transition-shadow border border-gray-100">
+              <div className="relative w-full max-w-[288px] rounded-xl overflow-hidden shadow group-hover:shadow-lg transition-shadow border border-gray-100">
                 {ebookCoverUrl ? (
                   <Image src={ebookCoverUrl} alt={course.title} width={288} height={384} className="object-cover w-full" />
                 ) : (
-                  <div className="w-72 h-96 bg-gradient-to-br from-red-50 to-red-100 flex items-center justify-center">
+                  <div className="w-full max-w-[288px] h-96 bg-gradient-to-br from-red-50 to-red-100 flex items-center justify-center">
                     <BookOpen className="w-20 h-20 text-red-300" />
                   </div>
                 )}

@@ -1,10 +1,11 @@
 "use client";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { ICourse, GradeLevel } from "@/types";
 import { Plus, Trash2, Upload, BookOpen, RefreshCw, ExternalLink, Pencil } from "lucide-react";
+import Toast from "@/components/ui/Toast";
 
 interface ContentOption { _id: string; name: string; description: string; }
 
@@ -78,7 +79,9 @@ export default function CourseForm({ course, mode, teacherMode = false, teacherN
   const [loading, setLoading]   = useState(false);
   const [uploading, setUploading] = useState(false);
   const [error, setError]       = useState("");
+  const [toast, setToast]       = useState<{ message: string; type: "success" | "error" } | null>(null);
   const [teachers, setTeachers] = useState<Teacher[]>([]);
+  const closeToast = useCallback(() => setToast(null), []);
 
   useEffect(() => {
     if (!teacherMode) {
@@ -147,8 +150,24 @@ export default function CourseForm({ course, mode, teacherMode = false, teacherN
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (form.gradeLevels.length === 0) { setError("กรุณาเลือกระดับชั้นอย่างน้อย 1 ระดับ"); return; }
-    if (sessions.some((s) => !s.date)) { setError("กรุณากรอกวันที่ทุกรอบ"); return; }
+    if (!form.description?.trim()) {
+      const msg = "กรุณาระบุคำอธิบายคอร์ส";
+      setError(msg);
+      setToast({ message: msg, type: "error" });
+      return;
+    }
+    if (form.gradeLevels.length === 0) {
+      const msg = "กรุณาเลือกระดับชั้นอย่างน้อย 1 ระดับ";
+      setError(msg);
+      setToast({ message: msg, type: "error" });
+      return;
+    }
+    if (sessions.some((s) => !s.date)) {
+      const msg = "กรุณากรอกวันที่ทุกรอบ";
+      setError(msg);
+      setToast({ message: msg, type: "error" });
+      return;
+    }
     setLoading(true);
     setError("");
     try {
@@ -161,8 +180,14 @@ export default function CourseForm({ course, mode, teacherMode = false, teacherN
         body: JSON.stringify(payload),
       });
       const data = await res.json();
-      if (!res.ok) setError(data.error ?? "เกิดข้อผิดพลาด");
-      else router.push("/admin/courses");
+      if (!res.ok) {
+        const msg = data.error ?? "เกิดข้อผิดพลาด";
+        setError(msg);
+        setToast({ message: msg, type: "error" });
+      } else {
+        setToast({ message: mode === "create" ? "สร้างคอร์สสำเร็จ!" : "บันทึกสำเร็จ!", type: "success" });
+        setTimeout(() => router.push("/admin/courses"), 1200);
+      }
     } finally {
       setLoading(false);
     }
@@ -171,6 +196,8 @@ export default function CourseForm({ course, mode, teacherMode = false, teacherN
   const inputClass = "w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent";
 
   return (
+    <>
+      {toast && <Toast message={toast.message} type={toast.type} onClose={closeToast} />}
     <form onSubmit={handleSubmit} className="space-y-8">
       {/* Cover image */}
       <div>
@@ -481,6 +508,7 @@ export default function CourseForm({ course, mode, teacherMode = false, teacherN
         </button>
       </div>
     </form>
+    </>
   );
 }
 

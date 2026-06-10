@@ -1,8 +1,9 @@
 "use client";
-import { useState, useRef } from "react";
+import { useState, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { ICourseContent, ISmartPpt, IYoutubeClip, IDownloadItem } from "@/types";
 import { Plus, Trash2, Upload, BookOpen, FileText } from "lucide-react";
+import Toast from "@/components/ui/Toast";
 
 interface ContentFormProps {
   content?: ICourseContent;
@@ -26,13 +27,20 @@ export default function ContentForm({ content, mode }: ContentFormProps) {
   const [downloadAksorn, setDownloadAksorn] = useState<IDownloadItem[]>(content?.downloadAksorn ?? []);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
+  const closeToast = useCallback(() => setToast(null), []);
 
   const inputClass =
     "w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim()) { setError("กรุณาใส่ชื่อชุดเนื้อหา"); return; }
+    if (!name.trim()) {
+      const msg = "กรุณาใส่ชื่อชุดเนื้อหา";
+      setError(msg);
+      setToast({ message: msg, type: "error" });
+      return;
+    }
     setLoading(true);
     setError("");
     try {
@@ -41,8 +49,14 @@ export default function ContentForm({ content, mode }: ContentFormProps) {
       const method = mode === "create" ? "POST" : "PUT";
       const res = await fetch(url, { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
       const data = await res.json();
-      if (!res.ok) setError(data.error ?? "เกิดข้อผิดพลาด");
-      else router.push("/admin/content");
+      if (!res.ok) {
+        const msg = data.error ?? "เกิดข้อผิดพลาด";
+        setError(msg);
+        setToast({ message: msg, type: "error" });
+      } else {
+        setToast({ message: mode === "create" ? "สร้างเนื้อหาสำเร็จ!" : "บันทึกสำเร็จ!", type: "success" });
+        setTimeout(() => router.push("/admin/content"), 1200);
+      }
     } finally {
       setLoading(false);
     }
@@ -74,6 +88,8 @@ export default function ContentForm({ content, mode }: ContentFormProps) {
   };
 
   return (
+    <>
+      {toast && <Toast message={toast.message} type={toast.type} onClose={closeToast} />}
     <form onSubmit={handleSubmit} className="space-y-8">
       {/* ชื่อและคำอธิบาย */}
       <div className="space-y-4">
@@ -258,6 +274,7 @@ export default function ContentForm({ content, mode }: ContentFormProps) {
         </button>
       </div>
     </form>
+    </>
   );
 }
 

@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import { CheckCircle, XCircle, Clock3, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
+import ConfirmDialog from "@/components/ui/ConfirmDialog";
 
 interface BookingRow {
   _id: string;
@@ -29,6 +30,7 @@ export default function AdminBookingsPage() {
   const [search, setSearch]           = useState("");
   const [previewSlip, setPreviewSlip] = useState<string | null>(null);
   const [acting, setActing]           = useState<string | null>(null);
+  const [confirmBooking, setConfirmBooking] = useState<{ open: boolean; id: string; action: "approve" | "reject" }>({ open: false, id: "", action: "approve" });
 
   const load = async () => {
     setLoading(true);
@@ -71,6 +73,15 @@ export default function AdminBookingsPage() {
 
   return (
     <div>
+      <ConfirmDialog
+        open={confirmBooking.open}
+        title={confirmBooking.action === "approve" ? "อนุมัติการชำระเงิน?" : "ปฏิเสธการชำระเงิน?"}
+        message={confirmBooking.action === "approve" ? "ยืนยันว่าสลิปถูกต้องและอนุมัติการจองนี้" : "การจองนี้จะถูกปฏิเสธ นักเรียนจะไม่ได้เข้าเรียน"}
+        confirmLabel={confirmBooking.action === "approve" ? "อนุมัติ" : "ปฏิเสธ"}
+        type={confirmBooking.action === "approve" ? "success" : "danger"}
+        onConfirm={() => act(confirmBooking.id, confirmBooking.action)}
+        onCancel={() => setConfirmBooking((d) => ({ ...d, open: false }))}
+      />
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900">ตรวจสอบการชำระเงิน</h1>
         <p className="text-gray-500 text-sm mt-1">ตรวจสอบสลิปและอนุมัติการจองคอร์ส</p>
@@ -164,11 +175,11 @@ export default function AdminBookingsPage() {
                 {/* Actions */}
                 {isPending && (
                   <div className="flex md:flex-col gap-2 justify-end shrink-0">
-                    <button onClick={() => act(booking._id, "approve")} disabled={acting === booking._id}
+                    <button onClick={() => setConfirmBooking({ open: true, id: booking._id, action: "approve" })} disabled={acting === booking._id}
                       className="flex items-center gap-1.5 px-4 py-2.5 bg-green-500 hover:bg-green-600 text-white text-sm font-semibold rounded-xl transition-colors disabled:opacity-50 whitespace-nowrap">
                       <CheckCircle className="w-4 h-4" /> อนุมัติ
                     </button>
-                    <button onClick={() => act(booking._id, "reject")} disabled={acting === booking._id}
+                    <button onClick={() => setConfirmBooking({ open: true, id: booking._id, action: "reject" })} disabled={acting === booking._id}
                       className="flex items-center gap-1.5 px-4 py-2.5 bg-red-100 hover:bg-red-200 text-red-600 text-sm font-semibold rounded-xl transition-colors disabled:opacity-50 whitespace-nowrap">
                       <XCircle className="w-4 h-4" /> ปฏิเสธ
                     </button>
