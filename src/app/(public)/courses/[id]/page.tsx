@@ -145,11 +145,17 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
           <div className="lg:col-span-2 space-y-6">
 
             {/* Cover image */}
-            <div className="relative h-96 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-2xl overflow-hidden">
+            <div className="bg-gradient-to-br from-indigo-100 to-purple-100 rounded-2xl overflow-hidden">
               {course.coverImage ? (
-                <Image src={course.coverImage} alt={course.title} fill className="object-cover" />
+                <Image
+                  src={course.coverImage}
+                  alt={course.title}
+                  width={800}
+                  height={600}
+                  className="w-full h-auto object-contain"
+                />
               ) : (
-                <div className="flex items-center justify-center h-full">
+                <div className="flex items-center justify-center h-64">
                   <BookOpen className="w-20 h-20 text-indigo-300" />
                 </div>
               )}

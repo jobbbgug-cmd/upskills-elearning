@@ -11,7 +11,6 @@ interface Props {
 
 export default function BannerSlider({ banners }: Props) {
   const [current, setCurrent] = useState(0);
-
   const next = useCallback(() => setCurrent((c) => (c + 1) % banners.length), [banners.length]);
   const prev = () => setCurrent((c) => (c - 1 + banners.length) % banners.length);
 

@@ -114,18 +114,17 @@ function BookingCard({ course, session, status }: { course: ICourse; session?: I
   return (
     <div className={`bg-white rounded-2xl border ${status === "upcoming" ? "border-indigo-100" : "border-gray-100"} p-5`}>
       <div className="flex gap-4">
-        <div className="relative w-20 h-20 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-xl overflow-hidden shrink-0">
+        {/* Thumbnail — landscape 16:9 */}
+        <div className="relative w-32 h-20 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-xl overflow-hidden shrink-0 flex items-center justify-center">
           {course.coverImage ? (
             <Image src={course.coverImage} alt={course.title} fill className="object-cover" />
           ) : (
-            <div className="flex items-center justify-center h-full">
-              <BookOpen className="w-8 h-8 text-indigo-300" />
-            </div>
+            <BookOpen className="w-8 h-8 text-indigo-300" />
           )}
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2">
-            <h3 className="font-semibold text-gray-900 text-sm line-clamp-1">{course.title}</h3>
+            <h3 className="font-semibold text-gray-900 text-sm line-clamp-2">{course.title}</h3>
             <Badge variant={status === "upcoming" ? "success" : "default"} className="shrink-0">
               {status === "upcoming" ? "รอเรียน" : "เรียนแล้ว"}
             </Badge>

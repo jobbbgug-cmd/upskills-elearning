@@ -11,7 +11,6 @@ function getYouTubeId(url: string): string | null {
 }
 
 export default function VideoPlayerSection({
-  title,
   clips,
   accentColor = "red",
 }: {
@@ -22,7 +21,15 @@ export default function VideoPlayerSection({
   const [selectedIdx, setSelectedIdx] = useState(0);
   const [query, setQuery] = useState("");
   const [panelHeight, setPanelHeight] = useState<number | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
   const videoRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
   useEffect(() => {
     const el = videoRef.current;
@@ -66,23 +73,29 @@ export default function VideoPlayerSection({
       return next;
     });
 
+  const handleSelect = (idx: number) => {
+    setSelectedIdx(idx);
+    if (isMobile && videoRef.current) {
+      setTimeout(() => {
+        videoRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 50);
+    }
+  };
+
   const selected = clips[selectedIdx];
   const videoId = selected ? getYouTubeId(selected.youtubeUrl) : null;
 
-  const playBg     = accentColor === "pink" ? "bg-pink-500"  : "bg-red-500";
-  const ringColor  = accentColor === "pink"
-    ? "ring-pink-400 bg-pink-50"
-    : "ring-red-400 bg-amber-50";
-
-  const groupHeaderCls = accentColor === "pink" ? "bg-pink-500 text-white" : "bg-orange-500 text-white";
-  const groupIconCls   = accentColor === "pink" ? "text-pink-200"          : "text-orange-200";
+  const playBg        = accentColor === "pink" ? "bg-pink-500"   : "bg-red-500";
+  const ringColor     = accentColor === "pink" ? "ring-pink-400 bg-pink-50"  : "ring-red-400 bg-amber-50";
+  const groupHeaderCls = accentColor === "pink" ? "bg-pink-500 text-white"   : "bg-orange-500 text-white";
+  const groupIconCls   = accentColor === "pink" ? "text-pink-200"            : "text-orange-200";
 
   const ClipRow = ({ clip }: { clip: IndexedClip }) => {
     const isActive = clip.realIdx === selectedIdx;
     const thumbId  = getYouTubeId(clip.youtubeUrl);
     return (
       <button
-        onClick={() => setSelectedIdx(clip.realIdx)}
+        onClick={() => handleSelect(clip.realIdx)}
         className={`w-full flex items-center gap-3 px-3 py-2.5 text-left transition-colors ${
           isActive ? `ring-inset ring-2 ${ringColor}` : "hover:bg-gray-50"
         }`}
@@ -117,9 +130,54 @@ export default function VideoPlayerSection({
     );
   };
 
+  const ClipList = () => (
+    <>
+      {filtered.length === 0 ? (
+        <div className="py-6 text-center text-xs text-gray-400">ไม่พบคลิปที่ค้นหา</div>
+      ) : hasGroups && groupedFiltered ? (
+        <>
+          {Array.from(groupedFiltered.map.entries()).map(([groupName, groupClips]) => {
+            const isExpanded = expandedGroups.has(groupName);
+            return (
+              <div key={groupName}>
+                <button
+                  onClick={() => toggleGroup(groupName)}
+                  className={`w-full flex items-center gap-2 px-3 py-2.5 text-left transition-opacity hover:opacity-90 ${groupHeaderCls}`}
+                >
+                  <div className="w-6 h-6 rounded-lg flex items-center justify-center shrink-0 bg-white/20">
+                    <Play className={`w-3 h-3 fill-current ${groupIconCls}`} />
+                  </div>
+                  <span className="text-xs font-semibold flex-1 line-clamp-2 leading-snug">{groupName}</span>
+                  {isExpanded
+                    ? <ChevronDown className="w-4 h-4 shrink-0 opacity-70" />
+                    : <ChevronRight className="w-4 h-4 shrink-0 opacity-70" />}
+                </button>
+                {isExpanded && (
+                  <div className="divide-y divide-gray-50">
+                    {groupClips.map((clip) => <ClipRow key={clip.realIdx} clip={clip} />)}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+          {groupedFiltered.ungrouped.length > 0 && (
+            <div className="divide-y divide-gray-50">
+              {groupedFiltered.ungrouped.map((clip) => <ClipRow key={clip.realIdx} clip={clip} />)}
+            </div>
+          )}
+        </>
+      ) : (
+        <div className="divide-y divide-gray-50">
+          {filtered.map((clip) => <ClipRow key={clip.realIdx} clip={clip} />)}
+        </div>
+      )}
+    </>
+  );
+
   return (
-    <div className="flex gap-4">
-      {/* ── Left: Player ── */}
+    <div className="flex flex-col md:flex-row gap-4">
+
+      {/* ── Player (full width on mobile, flex-1 on desktop) ── */}
       <div className="flex-1 min-w-0 space-y-2">
         <div ref={videoRef} className="rounded-xl overflow-hidden bg-black aspect-video shadow">
           {selected && videoId ? (
@@ -156,10 +214,10 @@ export default function VideoPlayerSection({
         )}
       </div>
 
-      {/* ── Right: Search + List ── */}
+      {/* ── Clip list panel ── */}
       <div
-        className="w-72 shrink-0 border border-gray-200 rounded-xl overflow-hidden flex flex-col"
-        style={panelHeight ? { height: panelHeight } : undefined}
+        className="w-full md:w-72 shrink-0 border border-gray-200 rounded-xl overflow-hidden flex flex-col"
+        style={!isMobile && panelHeight ? { height: panelHeight } : undefined}
       >
         {/* Search */}
         <div className="flex items-center gap-2 px-3 py-2 border-b border-gray-100 bg-gray-50 shrink-0">
@@ -178,50 +236,9 @@ export default function VideoPlayerSection({
           )}
         </div>
 
-        {/* List */}
-        <div className="flex-1 overflow-y-auto bg-white">
-          {filtered.length === 0 ? (
-            <div className="py-6 text-center text-xs text-gray-400">ไม่พบคลิปที่ค้นหา</div>
-          ) : hasGroups && groupedFiltered ? (
-            <>
-              {Array.from(groupedFiltered.map.entries()).map(([groupName, groupClips]) => {
-                const isExpanded = expandedGroups.has(groupName);
-                return (
-                  <div key={groupName}>
-                    <button
-                      onClick={() => toggleGroup(groupName)}
-                      className={`w-full flex items-center gap-2 px-3 py-2.5 text-left transition-opacity hover:opacity-90 ${groupHeaderCls}`}
-                    >
-                      <div className="w-6 h-6 rounded-lg flex items-center justify-center shrink-0 bg-white/20">
-                        <Play className={`w-3 h-3 fill-current ${groupIconCls}`} />
-                      </div>
-                      <span className="text-xs font-semibold flex-1 line-clamp-2 leading-snug">
-                        {groupName}
-                      </span>
-                      {isExpanded
-                        ? <ChevronDown className="w-4 h-4 shrink-0 opacity-70" />
-                        : <ChevronRight className="w-4 h-4 shrink-0 opacity-70" />
-                      }
-                    </button>
-                    {isExpanded && (
-                      <div className="divide-y divide-gray-50">
-                        {groupClips.map((clip) => <ClipRow key={clip.realIdx} clip={clip} />)}
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-              {groupedFiltered.ungrouped.length > 0 && (
-                <div className="divide-y divide-gray-50">
-                  {groupedFiltered.ungrouped.map((clip) => <ClipRow key={clip.realIdx} clip={clip} />)}
-                </div>
-              )}
-            </>
-          ) : (
-            <div className="divide-y divide-gray-50">
-              {filtered.map((clip) => <ClipRow key={clip.realIdx} clip={clip} />)}
-            </div>
-          )}
+        {/* List — scrollable, capped height on mobile */}
+        <div className="flex-1 overflow-y-auto bg-white max-h-72 md:max-h-none">
+          <ClipList />
         </div>
 
         {/* Footer */}
