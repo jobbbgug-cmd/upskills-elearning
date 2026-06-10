@@ -92,6 +92,7 @@ export interface AuthResponse {
 export interface IBanner {
   _id: string;
   imageUrl: string;
+  mobileImageUrl?: string;
   title: string;
   subtitle: string;
   linkUrl: string;

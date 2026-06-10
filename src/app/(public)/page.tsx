@@ -32,12 +32,14 @@ export default async function HomePage() {
 
   return (
     <div>
-      {/* Banner Slider */}
+      {/* Banner Slider — -mt-16 ดึงขึ้นทับด้านหลัง navbar (64px) */}
       {banners.length > 0 ? (
-        <BannerSlider banners={banners} />
+        <div className="-mt-16">
+          <BannerSlider banners={banners} />
+        </div>
       ) : (
         /* Fallback hero when no banners */
-        <section className="bg-gradient-to-br from-indigo-600 via-indigo-700 to-purple-800 text-white py-20 px-4">
+        <section className="-mt-16 bg-gradient-to-br from-indigo-600 via-indigo-700 to-purple-800 text-white py-20 px-4 pt-36">
           <div className="max-w-5xl mx-auto text-center">
             <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
               จองที่นั่งเรียน<br />

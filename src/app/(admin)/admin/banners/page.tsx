@@ -1,25 +1,29 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
-import { Plus, Trash2, Upload, GripVertical, Eye, EyeOff } from "lucide-react";
+import { Plus, Trash2, Upload, GripVertical, Eye, EyeOff, Monitor, Smartphone } from "lucide-react";
 import { IBanner } from "@/types";
 
 const DEFAULT_COLORS = ["#1e1b4b", "#0f172a", "#1e3a5f", "#14532d", "#450a0a", "#1c1917"];
 
+const EMPTY_FORM = {
+  imageUrl: "",
+  mobileImageUrl: "",
+  title: "",
+  subtitle: "",
+  linkUrl: "",
+  linkText: "ดูรายละเอียด",
+  bgColor: "#1e1b4b",
+};
+
 export default function AdminBannersPage() {
   const [banners, setBanners] = useState<IBanner[]>([]);
   const [loading, setLoading] = useState(true);
-  const [uploading, setUploading] = useState(false);
-  const [form, setForm] = useState({
-    imageUrl: "",
-    title: "",
-    subtitle: "",
-    linkUrl: "",
-    linkText: "ดูรายละเอียด",
-    bgColor: "#1e1b4b",
-  });
+  const [uploading, setUploading] = useState<"desktop" | "mobile" | null>(null);
+  const [form, setForm] = useState(EMPTY_FORM);
   const [showForm, setShowForm] = useState(false);
-  const fileRef = useRef<HTMLInputElement>(null);
+  const desktopFileRef = useRef<HTMLInputElement>(null);
+  const mobileFileRef  = useRef<HTMLInputElement>(null);
 
   const load = async () => {
     setLoading(true);
@@ -30,28 +34,34 @@ export default function AdminBannersPage() {
 
   useEffect(() => { load(); }, []);
 
-  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>, target: "desktop" | "mobile") => {
     const file = e.target.files?.[0];
     if (!file) return;
-    setUploading(true);
+    setUploading(target);
     const fd = new FormData();
     fd.append("file", file);
     const res = await fetch("/api/upload", { method: "POST", body: fd });
     const data = await res.json();
-    if (res.ok) setForm((f) => ({ ...f, imageUrl: data.url }));
-    setUploading(false);
+    if (res.ok) {
+      setForm((f) => ({
+        ...f,
+        [target === "desktop" ? "imageUrl" : "mobileImageUrl"]: data.url,
+      }));
+    }
+    setUploading(null);
+    e.target.value = "";
   };
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.imageUrl) return alert("กรุณาอัปโหลดรูปภาพก่อน");
+    if (!form.imageUrl) return alert("กรุณาอัปโหลดรูปภาพ Desktop ก่อน");
     const res = await fetch("/api/admin/banners", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ ...form, order: banners.length }),
     });
     if (res.ok) {
-      setForm({ imageUrl: "", title: "", subtitle: "", linkUrl: "", linkText: "ดูรายละเอียด", bgColor: "#1e1b4b" });
+      setForm(EMPTY_FORM);
       setShowForm(false);
       load();
     }
@@ -92,32 +102,77 @@ export default function AdminBannersPage() {
       {showForm && (
         <div className="bg-white rounded-2xl border border-gray-200 p-6 mb-6">
           <h2 className="font-semibold text-gray-900 mb-5">แบนเนอร์ใหม่</h2>
-          <form onSubmit={handleCreate} className="space-y-4">
-            {/* Image upload */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">รูปภาพแบนเนอร์ *</label>
-              <div className="flex items-start gap-4">
-                {form.imageUrl ? (
-                  <div className="relative w-48 h-28 rounded-xl overflow-hidden border border-gray-200 shrink-0">
-                    <Image src={form.imageUrl} alt="preview" fill className="object-cover" />
-                  </div>
-                ) : (
-                  <div className="w-48 h-28 rounded-xl bg-gray-100 flex items-center justify-center shrink-0 border-2 border-dashed border-gray-300">
-                    <span className="text-xs text-gray-400">ยังไม่มีรูป</span>
-                  </div>
-                )}
-                <div>
-                  <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleUpload} />
+          <form onSubmit={handleCreate} className="space-y-5">
+
+            {/* Image uploads — side by side */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Desktop image */}
+              <div className="border border-gray-200 rounded-2xl p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <Monitor className="w-4 h-4 text-indigo-500" />
+                  <span className="text-sm font-semibold text-gray-700">รูป Desktop *</span>
+                  <span className="text-xs text-gray-400">แนะนำ 1920×1080px</span>
+                </div>
+                <div className="flex flex-col gap-3">
+                  {form.imageUrl ? (
+                    <div className="relative w-full h-32 rounded-xl overflow-hidden border border-gray-200">
+                      <Image src={form.imageUrl} alt="desktop preview" fill className="object-cover" />
+                      <button
+                        type="button"
+                        onClick={() => setForm((f) => ({ ...f, imageUrl: "" }))}
+                        className="absolute top-2 right-2 w-6 h-6 bg-red-500 text-white rounded-full text-xs flex items-center justify-center hover:bg-red-600"
+                      >×</button>
+                    </div>
+                  ) : (
+                    <div className="w-full h-32 rounded-xl bg-gray-50 border-2 border-dashed border-gray-300 flex items-center justify-center">
+                      <span className="text-xs text-gray-400">ยังไม่มีรูป</span>
+                    </div>
+                  )}
+                  <input ref={desktopFileRef} type="file" accept="image/*" className="hidden" onChange={(e) => handleUpload(e, "desktop")} />
                   <button
                     type="button"
-                    onClick={() => fileRef.current?.click()}
-                    disabled={uploading}
-                    className="flex items-center gap-2 px-4 py-2 border-2 border-dashed border-gray-300 rounded-xl text-sm text-gray-500 hover:border-indigo-400 hover:text-indigo-600 transition-colors disabled:opacity-50"
+                    onClick={() => desktopFileRef.current?.click()}
+                    disabled={uploading === "desktop"}
+                    className="flex items-center justify-center gap-2 py-2 border-2 border-dashed border-gray-300 rounded-xl text-sm text-gray-500 hover:border-indigo-400 hover:text-indigo-600 transition-colors disabled:opacity-50"
                   >
                     <Upload className="w-4 h-4" />
-                    {uploading ? "กำลังอัปโหลด..." : "อัปโหลดรูป"}
+                    {uploading === "desktop" ? "กำลังอัปโหลด..." : "อัปโหลดรูป Desktop"}
                   </button>
-                  <p className="text-xs text-gray-400 mt-1.5">แนะนำ 1200×420px</p>
+                </div>
+              </div>
+
+              {/* Mobile image */}
+              <div className="border border-gray-200 rounded-2xl p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <Smartphone className="w-4 h-4 text-green-500" />
+                  <span className="text-sm font-semibold text-gray-700">รูป Mobile</span>
+                  <span className="text-xs text-gray-400">แนะนำ 750×1000px</span>
+                </div>
+                <div className="flex flex-col gap-3">
+                  {form.mobileImageUrl ? (
+                    <div className="relative w-full h-32 rounded-xl overflow-hidden border border-gray-200">
+                      <Image src={form.mobileImageUrl} alt="mobile preview" fill className="object-cover" />
+                      <button
+                        type="button"
+                        onClick={() => setForm((f) => ({ ...f, mobileImageUrl: "" }))}
+                        className="absolute top-2 right-2 w-6 h-6 bg-red-500 text-white rounded-full text-xs flex items-center justify-center hover:bg-red-600"
+                      >×</button>
+                    </div>
+                  ) : (
+                    <div className="w-full h-32 rounded-xl bg-gray-50 border-2 border-dashed border-gray-300 flex items-center justify-center text-center px-4">
+                      <span className="text-xs text-gray-400">ไม่บังคับ — ถ้าไม่ใส่จะใช้รูป Desktop แทน</span>
+                    </div>
+                  )}
+                  <input ref={mobileFileRef} type="file" accept="image/*" className="hidden" onChange={(e) => handleUpload(e, "mobile")} />
+                  <button
+                    type="button"
+                    onClick={() => mobileFileRef.current?.click()}
+                    disabled={uploading === "mobile"}
+                    className="flex items-center justify-center gap-2 py-2 border-2 border-dashed border-gray-300 rounded-xl text-sm text-gray-500 hover:border-green-400 hover:text-green-600 transition-colors disabled:opacity-50"
+                  >
+                    <Upload className="w-4 h-4" />
+                    {uploading === "mobile" ? "กำลังอัปโหลด..." : "อัปโหลดรูป Mobile"}
+                  </button>
                 </div>
               </div>
             </div>
@@ -168,10 +223,7 @@ export default function AdminBannersPage() {
                       type="button"
                       onClick={() => setForm({ ...form, bgColor: c })}
                       className="w-8 h-8 rounded-lg border-2 transition-all"
-                      style={{
-                        background: c,
-                        borderColor: form.bgColor === c ? "#6366f1" : "transparent",
-                      }}
+                      style={{ background: c, borderColor: form.bgColor === c ? "#6366f1" : "transparent" }}
                     />
                   ))}
                   <input
@@ -210,12 +262,26 @@ export default function AdminBannersPage() {
             <div key={banner._id} className={`bg-white rounded-2xl border p-4 flex items-center gap-4 transition-opacity ${banner.isActive ? "border-gray-200" : "border-gray-100 opacity-60"}`}>
               <GripVertical className="w-5 h-5 text-gray-300 shrink-0" />
 
-              {/* Preview */}
-              <div
-                className="relative w-32 h-20 rounded-xl overflow-hidden shrink-0"
-                style={{ background: banner.bgColor }}
-              >
-                <Image src={banner.imageUrl} alt={banner.title || "banner"} fill className="object-cover" />
+              {/* Previews */}
+              <div className="flex gap-2 shrink-0">
+                <div className="relative w-28 h-16 rounded-xl overflow-hidden" style={{ background: banner.bgColor }}>
+                  <Image src={banner.imageUrl} alt="desktop" fill className="object-cover" />
+                  <div className="absolute bottom-0 left-0 right-0 flex items-center justify-center pb-0.5">
+                    <span className="text-[9px] text-white/70 bg-black/30 px-1 rounded">Desktop</span>
+                  </div>
+                </div>
+                {banner.mobileImageUrl ? (
+                  <div className="relative w-10 h-16 rounded-xl overflow-hidden" style={{ background: banner.bgColor }}>
+                    <Image src={banner.mobileImageUrl} alt="mobile" fill className="object-cover" />
+                    <div className="absolute bottom-0 left-0 right-0 flex items-center justify-center pb-0.5">
+                      <span className="text-[9px] text-white/70 bg-black/30 px-0.5 rounded">Mobile</span>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="w-10 h-16 rounded-xl bg-gray-100 border border-dashed border-gray-300 flex items-center justify-center">
+                    <Smartphone className="w-3 h-3 text-gray-300" />
+                  </div>
+                )}
               </div>
 
               {/* Info */}
@@ -227,8 +293,10 @@ export default function AdminBannersPage() {
                 )}
               </div>
 
-              {/* Color swatch */}
-              <div className="w-6 h-6 rounded-full border border-gray-200 shrink-0" style={{ background: banner.bgColor }} title={banner.bgColor} />
+              {/* Mobile badge */}
+              <span className={`text-xs px-2 py-0.5 rounded-full font-medium shrink-0 ${banner.mobileImageUrl ? "bg-green-50 text-green-600" : "bg-gray-100 text-gray-400"}`}>
+                {banner.mobileImageUrl ? "มีรูป Mobile" : "ไม่มีรูป Mobile"}
+              </span>
 
               {/* Status badge */}
               <span className={`text-xs px-2.5 py-1 rounded-full font-medium shrink-0 ${banner.isActive ? "bg-green-50 text-green-700" : "bg-gray-100 text-gray-500"}`}>

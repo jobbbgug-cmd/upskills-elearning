@@ -23,24 +23,38 @@ export default function BannerSlider({ banners }: Props) {
   if (banners.length === 0) return null;
 
   return (
-    <div className="relative w-full overflow-hidden" style={{ height: "calc(100svh - 64px)" }}>
+    <div className="relative w-full overflow-hidden" style={{ height: "100svh" }}>
       {banners.map((b, i) => (
         <div
           key={b._id}
           className="absolute inset-0 transition-opacity duration-700"
           style={{ opacity: i === current ? 1 : 0, zIndex: i === current ? 1 : 0 }}
         >
-          {/* Background image — full cover */}
-          <Image
-            src={b.imageUrl}
-            alt={b.title || "banner"}
-            fill
-            className="object-cover object-center"
-            priority={i === 0}
-          />
+          {/* Desktop image */}
+          <div className="hidden md:block absolute inset-0">
+            <Image
+              src={b.imageUrl}
+              alt={b.title || "banner"}
+              fill
+              className="object-cover object-center"
+              priority={i === 0}
+            />
+          </div>
+          {/* Mobile image (ถ้าไม่มีให้ใช้รูป desktop แทน) */}
+          <div className="md:hidden absolute inset-0">
+            <Image
+              src={b.mobileImageUrl || b.imageUrl}
+              alt={b.title || "banner"}
+              fill
+              className="object-cover object-center"
+              priority={i === 0}
+            />
+          </div>
 
-          {/* Subtle overlay for text readability only */}
+          {/* Overlay for text readability */}
           <div className="absolute inset-0" style={{ background: "rgba(0,0,0,0.25)" }} />
+          {/* Top gradient — ช่วยให้ navbar transparent อ่านได้ชัด */}
+          <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-black/50 to-transparent" />
 
           {/* Text overlay */}
           {(b.title || b.subtitle || b.linkUrl) && (
