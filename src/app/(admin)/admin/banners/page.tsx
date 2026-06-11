@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
-import { Plus, Trash2, Upload, GripVertical, Eye, EyeOff, Monitor, Smartphone } from "lucide-react";
+import { Plus, Trash2, Upload, GripVertical, Eye, EyeOff, Monitor, Smartphone, Pencil } from "lucide-react";
 import { IBanner } from "@/types";
 
 const DEFAULT_COLORS = ["#1e1b4b", "#0f172a", "#1e3a5f", "#14532d", "#450a0a", "#1c1917"];
@@ -22,6 +22,7 @@ export default function AdminBannersPage() {
   const [uploading, setUploading] = useState<"desktop" | "mobile" | null>(null);
   const [form, setForm] = useState(EMPTY_FORM);
   const [showForm, setShowForm] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const desktopFileRef = useRef<HTMLInputElement>(null);
   const mobileFileRef  = useRef<HTMLInputElement>(null);
 
@@ -52,18 +53,44 @@ export default function AdminBannersPage() {
     e.target.value = "";
   };
 
-  const handleCreate = async (e: React.FormEvent) => {
+  const openEdit = (banner: IBanner) => {
+    setForm({
+      imageUrl: banner.imageUrl,
+      mobileImageUrl: banner.mobileImageUrl || "",
+      title: banner.title,
+      subtitle: banner.subtitle,
+      linkUrl: banner.linkUrl,
+      linkText: banner.linkText || "ดูรายละเอียด",
+      bgColor: banner.bgColor || "#1e1b4b",
+    });
+    setEditingId(banner._id);
+    setShowForm(true);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const closeForm = () => {
+    setForm(EMPTY_FORM);
+    setEditingId(null);
+    setShowForm(false);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.imageUrl) return alert("กรุณาอัปโหลดรูปภาพ Desktop ก่อน");
-    const res = await fetch("/api/admin/banners", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...form, order: banners.length }),
-    });
-    if (res.ok) {
-      setForm(EMPTY_FORM);
-      setShowForm(false);
-      load();
+    if (editingId) {
+      const res = await fetch(`/api/admin/banners/${editingId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      if (res.ok) { closeForm(); load(); }
+    } else {
+      const res = await fetch("/api/admin/banners", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...form, order: banners.length }),
+      });
+      if (res.ok) { closeForm(); load(); }
     }
   };
 
@@ -90,7 +117,7 @@ export default function AdminBannersPage() {
           <p className="text-gray-500 text-sm mt-1">แบนเนอร์สไลด์โชว์บนหน้าแรก</p>
         </div>
         <button
-          onClick={() => setShowForm(!showForm)}
+          onClick={() => { setEditingId(null); setForm(EMPTY_FORM); setShowForm(true); }}
           className="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 text-white text-sm font-semibold rounded-xl hover:bg-indigo-700 transition-colors"
         >
           <Plus className="w-4 h-4" />
@@ -101,18 +128,23 @@ export default function AdminBannersPage() {
       {/* Add form */}
       {showForm && (
         <div className="bg-white rounded-2xl border border-gray-200 p-6 mb-6">
-          <h2 className="font-semibold text-gray-900 mb-5">แบนเนอร์ใหม่</h2>
-          <form onSubmit={handleCreate} className="space-y-5">
+          <h2 className="font-semibold text-gray-900 mb-5">
+            {editingId ? "แก้ไขแบนเนอร์" : "แบนเนอร์ใหม่"}
+          </h2>
+          <form onSubmit={handleSubmit} className="space-y-5">
 
             {/* Image uploads — side by side */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Desktop image */}
               <div className="border border-gray-200 rounded-2xl p-4">
-                <div className="flex items-center gap-2 mb-3">
+                <div className="flex items-center gap-2 mb-1">
                   <Monitor className="w-4 h-4 text-indigo-500" />
                   <span className="text-sm font-semibold text-gray-700">รูป Desktop *</span>
-                  <span className="text-xs text-gray-400">แนะนำ 1920×1080px</span>
                 </div>
+                <p className="text-xs text-gray-500 mb-3">
+                  แนะนำ <span className="font-semibold text-indigo-600">1920 × 1080px</span> (แนวนอน 16:9)<br/>
+                  ⚠️ วางเนื้อหาสำคัญไว้กลางภาพ — ขอบจะถูกตัดตามขนาดจอ
+                </p>
                 <div className="flex flex-col gap-3">
                   {form.imageUrl ? (
                     <div className="relative w-full h-32 rounded-xl overflow-hidden border border-gray-200">
@@ -143,11 +175,14 @@ export default function AdminBannersPage() {
 
               {/* Mobile image */}
               <div className="border border-gray-200 rounded-2xl p-4">
-                <div className="flex items-center gap-2 mb-3">
+                <div className="flex items-center gap-2 mb-1">
                   <Smartphone className="w-4 h-4 text-green-500" />
                   <span className="text-sm font-semibold text-gray-700">รูป Mobile</span>
-                  <span className="text-xs text-gray-400">แนะนำ 750×1000px</span>
                 </div>
+                <p className="text-xs text-gray-500 mb-3">
+                  แนะนำ <span className="font-semibold text-green-600">1080 × 1920px</span> (แนวตั้ง 9:16)<br/>
+                  ⚠️ ไม่บังคับ — วางเนื้อหาไว้กลางภาพ ขอบจะถูกตัดตามจอโทรศัพท์
+                </p>
                 <div className="flex flex-col gap-3">
                   {form.mobileImageUrl ? (
                     <div className="relative w-full h-32 rounded-xl overflow-hidden border border-gray-200">
@@ -239,9 +274,9 @@ export default function AdminBannersPage() {
 
             <div className="flex gap-3 pt-2">
               <button type="submit" className="px-5 py-2.5 bg-indigo-600 text-white text-sm font-semibold rounded-xl hover:bg-indigo-700 transition-colors">
-                บันทึกแบนเนอร์
+                {editingId ? "บันทึกการแก้ไข" : "บันทึกแบนเนอร์"}
               </button>
-              <button type="button" onClick={() => setShowForm(false)} className="px-5 py-2.5 bg-gray-100 text-gray-700 text-sm font-semibold rounded-xl hover:bg-gray-200 transition-colors">
+              <button type="button" onClick={closeForm} className="px-5 py-2.5 bg-gray-100 text-gray-700 text-sm font-semibold rounded-xl hover:bg-gray-200 transition-colors">
                 ยกเลิก
               </button>
             </div>
@@ -305,6 +340,13 @@ export default function AdminBannersPage() {
 
               {/* Actions */}
               <div className="flex items-center gap-1 shrink-0">
+                <button
+                  onClick={() => openEdit(banner)}
+                  className="p-2 text-gray-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors"
+                  title="แก้ไขแบนเนอร์"
+                >
+                  <Pencil className="w-4 h-4" />
+                </button>
                 <button
                   onClick={() => toggleActive(banner)}
                   className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
