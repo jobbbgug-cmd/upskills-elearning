@@ -6,12 +6,13 @@ import CourseContent from "@/models/CourseContent";
 import { ICourse, ICourseContent } from "@/types";
 import { getAuthUser } from "@/lib/auth";
 import Booking from "@/models/Booking";
+import { cleanupExpiredBookings } from "@/lib/cleanupExpiredBookings";
 import Badge from "@/components/ui/Badge";
 import CourseBooking from "./CourseBooking";
 import VideoPlayerSection from "@/components/VideoPlayerSection";
 import {
   BookOpen, Users, Calendar, Clock, Video,
-  FileText, Play, Download,
+  FileText, Play, Download, Lock,
 } from "lucide-react";
 
 async function getCourseWithContent(id: string): Promise<{ course: ICourse; content: ICourseContent | null } | null> {
@@ -57,6 +58,10 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
   const auth = await getAuthUser();
 
   await connectDB();
+
+  // Auto-cancel expired holds before building the seat map
+  await cleanupExpiredBookings(id);
+
   const allBookings = await Booking.find({
     courseId: id,
     status: { $in: ["pending_payment", "confirmed"] },
@@ -75,7 +80,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
     bookedCount: (sessionSeatsMap[s._id] ?? s.bookedSeats ?? []).length,
   }));
 
-  interface MyBookingInfo { bookingId: string; seatNumber: number; status: string; slipImage: string; }
+  interface MyBookingInfo { bookingId: string; seatNumber: number; status: string; slipImage: string; expiresAt: string | null; }
   const myBookings: Record<string, MyBookingInfo> = {};
   if (auth) {
     const myRecs = await Booking.find({
@@ -89,6 +94,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
         seatNumber: b.seatNumber as number,
         status: b.status,
         slipImage: b.slipImage ?? "",
+        expiresAt: b.expiresAt ? (b.expiresAt as Date).toISOString() : null,
       };
     });
   }
@@ -107,6 +113,12 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
   const downloadFree    = content?.downloadFree    ?? course.downloadFree    ?? [];
   const downloadTeacherCard = content?.downloadTeacherCard ?? course.downloadTeacherCard ?? [];
   const downloadAksorn  = content?.downloadAksorn  ?? course.downloadAksorn  ?? [];
+
+  // Access control
+  const isAdminOrTeacher = auth?.role === "admin" || auth?.role === "teacher";
+  const hasPaidAccess    = isAdminOrTeacher ||
+    Object.values(myBookings).some((b) => b.status === "confirmed");
+  const isTeacherOrAdmin = isAdminOrTeacher;
 
   return (
     <div className="py-10">
@@ -174,7 +186,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
 
           {/* Right column — booking */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-2xl border border-gray-100 p-5 flex flex-col justify-center min-h-[200px] lg:h-96">
+            <div className="bg-white rounded-2xl border border-gray-100 p-5">
               <div className="text-center mb-5">
                 <div className="text-3xl font-bold text-indigo-600 mb-1">
                   {course.price === 0 ? "ฟรี" : `฿${course.price.toLocaleString()}`}
@@ -234,7 +246,8 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
           icon={<BookOpen className="w-5 h-5 text-red-500" />}
           title="e-Book"
           accentColor="red"
-          action={ebookPdfUrl ? (
+          locked={!hasPaidAccess}
+          action={hasPaidAccess && ebookPdfUrl ? (
             <a
               href={ebookPdfUrl}
               target="_blank"
@@ -281,6 +294,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
           icon={<FileText className="w-5 h-5 text-purple-500" />}
           title="Smart PPT"
           accentColor="purple"
+          locked={!hasPaidAccess}
         >
           {smartPpts.length > 0 ? (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 gap-5">
@@ -316,6 +330,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
           icon={<Play className="w-5 h-5 text-red-500" />}
           title="คลิปประกอบการสอน"
           accentColor="red"
+          locked={!hasPaidAccess}
         >
           {teachingClips.length > 0 ? (
             <VideoPlayerSection title="คลิปประกอบการสอน" clips={teachingClips} accentColor="red" />
@@ -330,6 +345,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
           icon={<Play className="w-5 h-5 text-pink-500" />}
           title="คลิปอักษรเรียนสรุป"
           accentColor="pink"
+          locked={!hasPaidAccess}
         >
           {summaryClips.length > 0 ? (
             <VideoPlayerSection title="คลิปอักษรเรียนสรุป" clips={summaryClips} accentColor="pink" />
@@ -350,16 +366,20 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
               label="ดาวน์โหลดฟรี"
               items={downloadFree}
               variant="free"
+              locked={false}
             />
             <DownloadSubGroup
               label="เฉพาะลูกค้าอักษร (ยื่นบัตรครู)"
               items={downloadTeacherCard}
               variant="teacher"
+              locked={!isTeacherOrAdmin}
+              lockMessage="สำหรับครูเท่านั้น — กรุณายื่นบัตรครูเพื่อรับสิทธิ์"
             />
             <DownloadSubGroup
               label="เฉพาะลูกค้าอักษร"
               items={downloadAksorn}
               variant="aksorn"
+              locked={!hasPaidAccess}
             />
           </div>
         </ContentSection>
@@ -380,13 +400,28 @@ function EmptyState() {
   );
 }
 
+function LockedOverlay({ message }: { message?: string }) {
+  return (
+    <div className="flex flex-col items-center justify-center py-8 gap-3 text-center">
+      <div className="w-14 h-14 rounded-full bg-gray-100 flex items-center justify-center">
+        <Lock className="w-7 h-7 text-gray-400" />
+      </div>
+      <p className="text-sm font-semibold text-gray-500">
+        {message ?? "ชำระเงินเพื่อปลดล็อกเนื้อหา"}
+      </p>
+      <p className="text-xs text-gray-400">จองและชำระเงินให้ครบเพื่อเข้าถึงส่วนนี้</p>
+    </div>
+  );
+}
+
 function ContentSection({
-  icon, title, accentColor, action, children,
+  icon, title, accentColor, action, locked, children,
 }: {
   icon: React.ReactNode;
   title: string;
   accentColor: "red" | "blue" | "purple" | "pink" | "amber";
   action?: React.ReactNode;
+  locked?: boolean;
   children: React.ReactNode;
 }) {
   const borderMap = {
@@ -409,25 +444,30 @@ function ContentSection({
       <div className={`${headerMap[accentColor]} px-4 py-3 flex items-center gap-2`}>
         {icon}
         <h3 className="font-semibold text-gray-900 text-sm flex-1">{title}</h3>
-        {action}
+        {locked && <Lock className="w-4 h-4 text-gray-400" />}
+        {!locked && action}
       </div>
-      <div className="p-4 bg-white">{children}</div>
+      <div className="p-4 bg-white">
+        {locked ? <LockedOverlay /> : children}
+      </div>
     </div>
   );
 }
 
 
 function DownloadSubGroup({
-  label, items, variant,
+  label, items, variant, locked, lockMessage,
 }: {
   label: string;
   items: { title: string; thumbnailUrl: string; fileUrl: string }[];
   variant: "free" | "teacher" | "aksorn";
+  locked: boolean;
+  lockMessage?: string;
 }) {
   const variantStyle = {
-    free: { badge: "bg-green-100 text-green-700 border-green-200", dot: "bg-green-400" },
-    teacher: { badge: "bg-blue-100 text-blue-700 border-blue-200", dot: "bg-blue-400" },
-    aksorn: { badge: "bg-amber-100 text-amber-700 border-amber-200", dot: "bg-amber-400" },
+    free:    { badge: "bg-green-100 text-green-700 border-green-200", dot: "bg-green-400" },
+    teacher: { badge: "bg-blue-100 text-blue-700 border-blue-200",   dot: "bg-blue-400"  },
+    aksorn:  { badge: "bg-amber-100 text-amber-700 border-amber-200", dot: "bg-amber-400" },
   }[variant];
 
   return (
@@ -437,9 +477,17 @@ function DownloadSubGroup({
         <span className={`text-xs font-semibold px-2 py-0.5 rounded-full border ${variantStyle.badge}`}>
           {label}
         </span>
+        {locked && <Lock className="w-3.5 h-3.5 text-gray-400" />}
       </div>
 
-      {items.length === 0 ? (
+      {locked ? (
+        <div className="pl-4">
+          <div className="flex items-center gap-2 py-3 px-4 bg-gray-50 rounded-xl border border-dashed border-gray-200 text-sm text-gray-500">
+            <Lock className="w-4 h-4 text-gray-400 shrink-0" />
+            <span>{lockMessage ?? "ชำระเงินเพื่อปลดล็อกไฟล์ในส่วนนี้"}</span>
+          </div>
+        </div>
+      ) : items.length === 0 ? (
         <EmptyState />
       ) : (
         <div className="flex flex-wrap gap-4 pl-4">

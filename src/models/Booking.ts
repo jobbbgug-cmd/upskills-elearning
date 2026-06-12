@@ -7,6 +7,7 @@ export interface IBookingDocument extends Document {
   seatNumber: number;
   status: "pending_payment" | "confirmed" | "cancelled" | "rejected";
   slipImage: string;
+  expiresAt: Date | null;
   createdAt: Date;
 }
 
@@ -17,7 +18,8 @@ const BookingSchema = new Schema<IBookingDocument>(
     sessionId: { type: Schema.Types.ObjectId, required: true },
     seatNumber: { type: Number, required: true },
     status: { type: String, enum: ["pending_payment", "confirmed", "cancelled", "rejected"], default: "pending_payment" },
-    slipImage: { type: String, default: "" },
+    slipImage:  { type: String, default: "" },
+    expiresAt:  { type: Date, default: null },
   },
   { timestamps: true }
 );

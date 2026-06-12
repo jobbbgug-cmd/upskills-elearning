@@ -30,6 +30,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     const blob = await put(filename, file, { access: "public" });
 
     booking.slipImage = blob.url;
+    booking.expiresAt = null; // slip uploaded — hold indefinitely until admin reviews
     await booking.save();
 
     return NextResponse.json({ url: blob.url });

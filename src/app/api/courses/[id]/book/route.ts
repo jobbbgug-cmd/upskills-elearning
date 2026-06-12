@@ -4,6 +4,9 @@ import { getAuthUser } from "@/lib/auth";
 import Course from "@/models/Course";
 import Booking from "@/models/Booking";
 import mongoose from "mongoose";
+import { cleanupExpiredBookings } from "@/lib/cleanupExpiredBookings";
+
+const HOLD_MINUTES = 3;
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -17,6 +20,10 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
     await connectDB();
     const { id } = await params;
+
+    // Release any expired holds before checking availability
+    await cleanupExpiredBookings(id);
+
     const course = await Course.findById(id);
     if (!course) return NextResponse.json({ error: "ไม่พบคอร์ส" }, { status: 404 });
 
@@ -31,32 +38,58 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     if (session.bookedSeats?.includes(seatNumber))
       return NextResponse.json({ error: "ที่นั่งนี้ถูกจองแล้ว กรุณาเลือกที่นั่งอื่น" }, { status: 400 });
 
-    // Check user already booked this session
+    // Check user's existing booking for this session (any status)
     const existing = await Booking.findOne({
       userId: auth.userId,
       courseId: id,
       sessionId: new mongoose.Types.ObjectId(sessionId),
-      status: "confirmed",
     });
-    if (existing) return NextResponse.json({ error: "คุณได้จองรอบนี้แล้ว" }, { status: 400 });
 
-    // Create booking — free courses confirm immediately, paid courses wait for payment
+    if (existing) {
+      if (existing.status === "confirmed")
+        return NextResponse.json({ error: "คุณได้จองรอบนี้แล้ว" }, { status: 400 });
+      if (existing.status === "pending_payment")
+        return NextResponse.json({ error: "คุณมีการจองรอชำระเงินอยู่แล้ว" }, { status: 400 });
+      // cancelled / rejected — reuse existing record
+    }
+
     const initialStatus = course.price === 0 ? "confirmed" : "pending_payment";
-    await Booking.create({
-      userId: auth.userId,
-      courseId: id,
-      sessionId: new mongoose.Types.ObjectId(sessionId),
-      seatNumber,
-      status: initialStatus,
-    });
+    const expiresAt = initialStatus === "pending_payment"
+      ? new Date(Date.now() + HOLD_MINUTES * 60 * 1000)
+      : null;
 
-    // Update session
+    let bookingDoc;
+    if (existing) {
+      existing.seatNumber = seatNumber;
+      existing.status     = initialStatus;
+      existing.slipImage  = "";
+      existing.expiresAt  = expiresAt;
+      await existing.save();
+      bookingDoc = existing;
+    } else {
+      bookingDoc = await Booking.create({
+        userId: auth.userId,
+        courseId: id,
+        sessionId: new mongoose.Types.ObjectId(sessionId),
+        seatNumber,
+        status: initialStatus,
+        expiresAt,
+      });
+    }
+
+    // Add seat to session
     if (!session.bookedSeats) session.bookedSeats = [];
     session.bookedSeats.push(seatNumber);
     session.bookedCount = session.bookedSeats.length;
     await course.save();
 
-    return NextResponse.json({ message: `จองที่นั่ง ${seatNumber} สำเร็จ!` });
+    return NextResponse.json({
+      message: `จองที่นั่ง ${seatNumber} สำเร็จ!`,
+      bookingId: (bookingDoc._id as { toString(): string }).toString(),
+      seatNumber,
+      expiresAt: expiresAt?.toISOString() ?? null,
+      status: initialStatus,
+    });
   } catch (err) {
     console.error(err);
     return NextResponse.json({ error: "เกิดข้อผิดพลาด" }, { status: 500 });

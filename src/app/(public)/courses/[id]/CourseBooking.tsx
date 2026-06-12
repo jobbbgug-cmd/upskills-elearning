@@ -4,10 +4,10 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { ICourse, ISession } from "@/types";
 import SeatMap from "@/components/SeatMap";
-import { Calendar, Clock, Upload, CheckCircle, XCircle, Clock3 } from "lucide-react";
+import { Calendar, Clock, Upload, CheckCircle, XCircle, Clock3, Trash2, Copy, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-interface MyBookingInfo { bookingId: string; seatNumber: number; status: string; slipImage: string; }
+interface MyBookingInfo { bookingId: string; seatNumber: number; status: string; slipImage: string; expiresAt: string | null; }
 interface FinanceInfo { bankName?: string; bankAccount?: string; bankBrand?: string; promptpay?: string; qrCodeImage?: string; }
 
 interface CourseBookingProps {
@@ -26,14 +26,58 @@ export default function CourseBooking({ course, sessions, myBookings, isLoggedIn
   const [pendingFile, setPendingFile]         = useState<File | null>(null);
   const [pendingPreview, setPendingPreview]   = useState<string | null>(null);
   const [finance, setFinance]                 = useState<FinanceInfo>({});
+  const [cancelling, setCancelling]           = useState(false);
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+  const [timeLeft, setTimeLeft]               = useState<number>(0);
+  const [localBookings, setLocalBookings]     = useState<Record<string, MyBookingInfo>>(myBookings);
+  const [copiedField, setCopiedField]         = useState<string | null>(null);
   const router  = useRouter();
   const fileRef = useRef<HTMLInputElement>(null);
+
+  const handleCopy = (value: string, field: string) => {
+    navigator.clipboard.writeText(value).then(() => {
+      setCopiedField(field);
+      setTimeout(() => setCopiedField(null), 2000);
+    });
+  };
+
+  // Sync from server props (after router.refresh()), but preserve locally-set
+  // pending_payment entries whose hold hasn't expired yet (guards against stale reads).
+  useEffect(() => {
+    setLocalBookings(prev => {
+      const merged = { ...myBookings };
+      Object.entries(prev).forEach(([sid, info]) => {
+        if (!merged[sid] && info.status === "pending_payment" && info.bookingId) {
+          const expired = info.expiresAt && new Date(info.expiresAt) < new Date();
+          if (!expired) merged[sid] = info;
+        }
+      });
+      return merged;
+    });
+  }, [myBookings]);
 
   useEffect(() => {
     fetch("/api/finance").then((r) => r.json()).then((d) => { if (!d.error) setFinance(d); }).catch(() => {});
   }, []);
 
-  const myInfo       = selectedSession ? myBookings[selectedSession._id] : undefined;
+  // Countdown timer — only when pending_payment + no slip + expiresAt set
+  useEffect(() => {
+    const info = selectedSession ? localBookings[selectedSession._id] : undefined;
+    if (!info || info.slipImage || !info.expiresAt || info.status !== "pending_payment") {
+      setTimeLeft(0);
+      return;
+    }
+    const calc = () => Math.max(0, Math.floor((new Date(info.expiresAt!).getTime() - Date.now()) / 1000));
+    setTimeLeft(calc());
+    const iv = setInterval(() => {
+      const remaining = calc();
+      setTimeLeft(remaining);
+      if (remaining === 0) { clearInterval(iv); router.refresh(); }
+    }, 1000);
+    return () => clearInterval(iv);
+  }, [selectedSession, localBookings, router]);
+
+  const myInfo       = selectedSession ? localBookings[selectedSession._id] : undefined;
   const isBooked     = !!myInfo;
   const bookingStatus = myInfo?.status ?? "";
 
@@ -54,8 +98,22 @@ export default function CourseBooking({ course, sessions, myBookings, isLoggedIn
         body: JSON.stringify({ sessionId: selectedSession._id, seatNumber: selectedSeat }),
       });
       const data = await res.json();
-      if (res.ok) { setMessage({ type: "success", text: data.message }); router.refresh(); }
-      else setMessage({ type: "error", text: data.error ?? "เกิดข้อผิดพลาด" });
+      if (res.ok) {
+        setLocalBookings(prev => ({
+          ...prev,
+          [selectedSession._id]: {
+            bookingId: data.bookingId ?? "",
+            seatNumber: data.seatNumber ?? selectedSeat!,
+            status: data.status ?? (course.price === 0 ? "confirmed" : "pending_payment"),
+            slipImage: "",
+            expiresAt: data.expiresAt ?? null,
+          },
+        }));
+        setSelectedSeat(null);
+        setMessage({ type: "success", text: data.message });
+      } else {
+        setMessage({ type: "error", text: data.error ?? "เกิดข้อผิดพลาด" });
+      }
     } catch { setMessage({ type: "error", text: "เกิดข้อผิดพลาด กรุณาลองใหม่" }); }
     finally { setLoading(false); }
   };
@@ -77,6 +135,13 @@ export default function CourseBooking({ course, sessions, myBookings, isLoggedIn
       const res = await fetch(`/api/bookings/${myInfo.bookingId}/slip`, { method: "POST", body: fd });
       const data = await res.json();
       if (res.ok) {
+        if (selectedSession) {
+          setLocalBookings(prev => {
+            const existing = prev[selectedSession._id];
+            if (!existing) return prev;
+            return { ...prev, [selectedSession._id]: { ...existing, slipImage: data.url ?? "uploaded", expiresAt: null } };
+          });
+        }
         setMessage({ type: "success", text: "ยืนยันการชำระเงินสำเร็จ! รอครูตรวจสอบ" });
         setPendingFile(null);
         setPendingPreview(null);
@@ -92,6 +157,34 @@ export default function CourseBooking({ course, sessions, myBookings, isLoggedIn
     setPendingFile(null);
     setPendingPreview(null);
     if (fileRef.current) fileRef.current.value = "";
+  };
+
+  const handleCancelBooking = async () => {
+    if (!myInfo) return;
+    setCancelling(true);
+    setMessage(null);
+    try {
+      const res  = await fetch(`/api/bookings/${myInfo.bookingId}/cancel`, { method: "POST" });
+      const data = await res.json();
+      if (res.ok) {
+        setShowCancelConfirm(false);
+        if (selectedSession) {
+          setLocalBookings(prev => {
+            const updated = { ...prev };
+            delete updated[selectedSession._id];
+            return updated;
+          });
+        }
+        setMessage({ type: "success", text: "ยกเลิกการจองเรียบร้อย" });
+        router.refresh();
+      } else {
+        setMessage({ type: "error", text: data.error ?? "ยกเลิกไม่สำเร็จ" });
+      }
+    } catch {
+      setMessage({ type: "error", text: "เกิดข้อผิดพลาด" });
+    } finally {
+      setCancelling(false);
+    }
   };
 
   return (
@@ -161,13 +254,6 @@ export default function CourseBooking({ course, sessions, myBookings, isLoggedIn
       {/* Payment section — after booking */}
       {isBooked && (
         <div className="border-t border-gray-100 pt-4 space-y-4">
-          {/* Status banner */}
-          {bookingStatus === "pending_payment" && !myInfo.slipImage && (
-            <div className="flex items-center gap-2 bg-amber-50 border border-amber-200 text-amber-700 px-4 py-3 rounded-xl text-sm font-medium">
-              <Clock3 className="w-4 h-4 shrink-0" />
-              <span>ที่นั่ง {myInfo.seatNumber} — กรุณาชำระเงินและอัปโหลดสลิป</span>
-            </div>
-          )}
           {bookingStatus === "pending_payment" && myInfo.slipImage && (
             <div className="flex items-center gap-2 bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded-xl text-sm font-medium">
               <Clock3 className="w-4 h-4 shrink-0" />
@@ -187,6 +273,42 @@ export default function CourseBooking({ course, sessions, myBookings, isLoggedIn
             </div>
           )}
 
+          {/* Cancel booking button */}
+          {(bookingStatus === "pending_payment" || bookingStatus === "rejected") && (
+            <div>
+              {!showCancelConfirm ? (
+                <button
+                  onClick={() => setShowCancelConfirm(true)}
+                  className="w-full py-2 border border-red-200 text-red-500 text-sm rounded-xl hover:bg-red-50 flex items-center justify-center gap-1.5 transition-colors"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  ยกเลิกการจอง
+                </button>
+              ) : (
+                <div className="bg-red-50 border border-red-200 rounded-xl p-3 space-y-2">
+                  <p className="text-sm font-semibold text-red-700 text-center">ยืนยันการยกเลิกการจอง?</p>
+                  <p className="text-xs text-red-500 text-center">ที่นั่ง {myInfo.seatNumber} จะถูกปล่อยคืน ไม่สามารถกู้คืนได้</p>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={handleCancelBooking}
+                      disabled={cancelling}
+                      className="flex-1 py-2 bg-red-500 hover:bg-red-600 disabled:opacity-50 text-white text-sm font-semibold rounded-lg transition-colors"
+                    >
+                      {cancelling ? "กำลังยกเลิก..." : "ยืนยันยกเลิก"}
+                    </button>
+                    <button
+                      onClick={() => setShowCancelConfirm(false)}
+                      disabled={cancelling}
+                      className="flex-1 py-2 border border-gray-200 text-gray-600 text-sm rounded-lg hover:bg-gray-50 transition-colors"
+                    >
+                      ไม่ยกเลิก
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Seat map (readonly) */}
           {selectedSession && (
             <SeatMap
@@ -201,64 +323,135 @@ export default function CourseBooking({ course, sessions, myBookings, isLoggedIn
 
           {/* Payment info + slip upload (only if pending and price > 0) */}
           {bookingStatus === "pending_payment" && course.price > 0 && (
-            <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 space-y-3">
-              <h4 className="text-sm font-semibold text-amber-800">ข้อมูลการชำระเงิน</h4>
+            <div className="rounded-2xl border border-amber-200 overflow-hidden">
+              {/* Header */}
+              <div className="bg-amber-500 px-4 py-2.5 flex items-center justify-between">
+                <h4 className="text-sm font-bold text-white">ข้อมูลการชำระเงิน</h4>
+                <span className="text-white font-extrabold text-lg">฿{course.price.toLocaleString()}</span>
+              </div>
 
-              {/* QR Code */}
-              {finance.qrCodeImage && (
-                <div className="flex justify-center">
-                  <div className="bg-white rounded-xl p-3 shadow-sm border border-amber-100">
-                    <Image src={finance.qrCodeImage} alt="QR Code" width={180} height={180} className="object-contain" />
+              <div className="bg-amber-50 p-4 space-y-3">
+                {/* Status banner with countdown */}
+                {!myInfo.slipImage && (
+                  <div className="bg-white border border-amber-200 rounded-xl overflow-hidden">
+                    <div className="flex items-center justify-between px-4 py-2.5">
+                      <div className="flex items-center gap-2 text-amber-700 text-sm font-medium">
+                        <Clock3 className="w-4 h-4 shrink-0" />
+                        <span>ที่นั่ง {myInfo.seatNumber} — กรุณาโอนเงินและแนบสลิป</span>
+                      </div>
+                      {timeLeft > 0 && (
+                        <div className={`flex items-center gap-1.5 font-mono font-bold text-sm px-2.5 py-1 rounded-lg ${
+                          timeLeft <= 30 ? "bg-red-100 text-red-600 animate-pulse" : "bg-amber-100 text-amber-700"
+                        }`}>
+                          <Clock3 className="w-3.5 h-3.5" />
+                          {String(Math.floor(timeLeft / 60)).padStart(2, "0")}:{String(timeLeft % 60).padStart(2, "0")}
+                        </div>
+                      )}
+                    </div>
+                    {timeLeft > 0 && (
+                      <div className="h-1 bg-amber-100">
+                        <div
+                          className={`h-full transition-all duration-1000 ${timeLeft <= 30 ? "bg-red-400" : "bg-amber-400"}`}
+                          style={{ width: `${Math.min(100, (timeLeft / 180) * 100)}%` }}
+                        />
+                      </div>
+                    )}
                   </div>
-                </div>
-              )}
-
-              {/* Bank info */}
-              {(finance.bankAccount || finance.bankName || finance.promptpay) && (
-                <div className="bg-white rounded-xl px-4 py-3 text-sm space-y-1 border border-amber-100">
-                  {finance.bankBrand && <p className="text-gray-700"><span className="font-semibold">ธนาคาร:</span> {finance.bankBrand}</p>}
-                  {finance.bankName && <p className="text-gray-700"><span className="font-semibold">ชื่อบัญชี:</span> {finance.bankName}</p>}
-                  {finance.bankAccount && <p className="text-gray-700"><span className="font-semibold">เลขที่บัญชี:</span> {finance.bankAccount}</p>}
-                  {finance.promptpay && <p className="text-gray-700"><span className="font-semibold">พร้อมเพย์:</span> {finance.promptpay}</p>}
-                  <p className="text-amber-700 font-bold text-base mt-1">฿{course.price.toLocaleString()}</p>
-                </div>
-              )}
-
-              {/* Slip upload */}
-              <div className="space-y-2">
-                <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleSlipSelect} />
-
-                {/* Pending preview (not yet submitted) */}
-                {pendingPreview ? (
-                  <div className="space-y-3">
-                    <p className="text-xs text-amber-700 font-semibold">ตรวจสอบสลิปก่อนยืนยัน:</p>
-                    <img src={pendingPreview} alt="slip preview" className="w-full max-h-52 object-contain rounded-xl border-2 border-amber-300 bg-white" />
-                    <button onClick={handleConfirmPayment} disabled={uploading}
-                      className="w-full py-3 bg-green-500 hover:bg-green-600 disabled:opacity-50 text-white font-semibold rounded-xl flex items-center justify-center gap-2 transition-colors">
-                      <CheckCircle className="w-4 h-4" />
-                      {uploading ? "กำลังส่ง..." : "ยืนยันการชำระเงิน"}
-                    </button>
-                    <button onClick={handleCancelPending} disabled={uploading}
-                      className="w-full py-2 border border-gray-200 rounded-xl text-xs text-gray-500 hover:bg-gray-50 transition-colors">
-                      เลือกรูปใหม่
-                    </button>
-                  </div>
-                ) : myInfo.slipImage ? (
-                  <div className="space-y-2">
-                    <p className="text-xs text-gray-500 font-medium">สลิปที่ส่งแล้ว:</p>
-                    <img src={myInfo.slipImage} alt="slip" className="w-full max-h-48 object-contain rounded-xl border border-amber-200 bg-white" />
-                    <button onClick={() => fileRef.current?.click()} disabled={uploading}
-                      className="w-full py-2 border-2 border-dashed border-amber-300 rounded-xl text-xs text-amber-700 hover:bg-amber-100 transition-colors">
-                      เลือกสลิปใหม่
-                    </button>
-                  </div>
-                ) : (
-                  <button onClick={() => fileRef.current?.click()} disabled={uploading}
-                    className="w-full py-3 bg-amber-500 hover:bg-amber-600 text-white font-semibold rounded-xl flex items-center justify-center gap-2 transition-colors">
-                    <Upload className="w-4 h-4" />
-                    เลือกสลิปการโอนเงิน
-                  </button>
                 )}
+
+                {/* QR + bank side by side */}
+                <div className="flex gap-3 items-start">
+                  {/* QR Code */}
+                  {finance.qrCodeImage && (
+                    <div className="bg-white rounded-xl p-2 border border-amber-200 shadow-sm shrink-0">
+                      <Image src={finance.qrCodeImage} alt="QR Code" width={110} height={110} className="object-contain" />
+                    </div>
+                  )}
+
+                  {/* Bank details */}
+                  {(finance.bankBrand || finance.bankName || finance.bankAccount || finance.promptpay) && (
+                    <div className="flex-1 bg-white rounded-xl px-3 py-2.5 text-xs space-y-1.5 border border-amber-100 self-stretch flex flex-col justify-center">
+                      {finance.bankBrand && (
+                        <div>
+                          <span className="text-gray-400 block">ธนาคาร</span>
+                          <span className="font-semibold text-gray-800">{finance.bankBrand}</span>
+                        </div>
+                      )}
+                      {finance.bankName && (
+                        <div>
+                          <span className="text-gray-400 block">ชื่อบัญชี</span>
+                          <span className="font-semibold text-gray-800">{finance.bankName}</span>
+                        </div>
+                      )}
+                      {finance.bankAccount && (
+                        <div>
+                          <span className="text-gray-400 block">เลขบัญชี</span>
+                          <button
+                            onClick={() => handleCopy(finance.bankAccount!, "bankAccount")}
+                            className="flex items-center gap-1.5 group"
+                          >
+                            <span className="font-semibold text-gray-800 tracking-wide">{finance.bankAccount}</span>
+                            {copiedField === "bankAccount"
+                              ? <Check className="w-3.5 h-3.5 text-green-500 shrink-0" />
+                              : <Copy className="w-3.5 h-3.5 text-gray-400 group-hover:text-amber-500 shrink-0 transition-colors" />
+                            }
+                          </button>
+                        </div>
+                      )}
+                      {finance.promptpay && (
+                        <div>
+                          <span className="text-gray-400 block">พร้อมเพย์</span>
+                          <button
+                            onClick={() => handleCopy(finance.promptpay!, "promptpay")}
+                            className="flex items-center gap-1.5 group"
+                          >
+                            <span className="font-semibold text-gray-800">{finance.promptpay}</span>
+                            {copiedField === "promptpay"
+                              ? <Check className="w-3.5 h-3.5 text-green-500 shrink-0" />
+                              : <Copy className="w-3.5 h-3.5 text-gray-400 group-hover:text-amber-500 shrink-0 transition-colors" />
+                            }
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {/* Slip upload */}
+                <div className="space-y-2">
+                  <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleSlipSelect} />
+
+                  {pendingPreview ? (
+                    <div className="space-y-2">
+                      <p className="text-xs text-amber-700 font-semibold">ตรวจสอบสลิปก่อนยืนยัน:</p>
+                      <img src={pendingPreview} alt="slip preview" className="w-full max-h-44 object-contain rounded-xl border-2 border-amber-300 bg-white" />
+                      <button onClick={handleConfirmPayment} disabled={uploading}
+                        className="w-full py-2.5 bg-green-500 hover:bg-green-600 disabled:opacity-50 text-white font-semibold rounded-xl flex items-center justify-center gap-2 text-sm transition-colors">
+                        <CheckCircle className="w-4 h-4" />
+                        {uploading ? "กำลังส่ง..." : "ยืนยันการชำระเงิน"}
+                      </button>
+                      <button onClick={handleCancelPending} disabled={uploading}
+                        className="w-full py-1.5 border border-gray-200 rounded-xl text-xs text-gray-500 hover:bg-gray-50 transition-colors">
+                        เลือกรูปใหม่
+                      </button>
+                    </div>
+                  ) : myInfo.slipImage ? (
+                    <div className="space-y-2">
+                      <p className="text-xs text-gray-500 font-medium">สลิปที่ส่งแล้ว:</p>
+                      <img src={myInfo.slipImage} alt="slip" className="w-full max-h-40 object-contain rounded-xl border border-amber-200 bg-white" />
+                      <button onClick={() => fileRef.current?.click()} disabled={uploading}
+                        className="w-full py-2 border-2 border-dashed border-amber-300 rounded-xl text-xs text-amber-700 hover:bg-amber-100 transition-colors">
+                        เลือกสลิปใหม่
+                      </button>
+                    </div>
+                  ) : (
+                    <button onClick={() => fileRef.current?.click()} disabled={uploading}
+                      className="w-full py-3 bg-amber-500 hover:bg-amber-600 text-white font-semibold rounded-xl flex items-center justify-center gap-2 text-sm transition-colors shadow-sm">
+                      <Upload className="w-4 h-4" />
+                      อัปโหลดสลิปการโอนเงิน
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           )}
