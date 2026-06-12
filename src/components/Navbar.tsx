@@ -53,11 +53,11 @@ export default function Navbar() {
           <div className="flex items-center gap-8">
             <Link href="/">
               <Image
-                src="/icon.png"
+                src="/logo.png"
                 alt="UPSkills"
-                width={40}
+                width={120}
                 height={40}
-                className="object-contain"
+                className={`object-contain transition-all duration-300 ${transparent ? "brightness-0 invert" : ""}`}
                 priority
               />
             </Link>
