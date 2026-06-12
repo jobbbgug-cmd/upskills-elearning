@@ -120,7 +120,7 @@ export default function FinancePage() {
           </div>
 
           <div className="flex gap-6 items-start">
-            <div className="w-40 h-40 rounded-2xl border-2 border-dashed border-gray-300 bg-gray-50 overflow-hidden flex items-center justify-center shrink-0">
+            <div className="relative w-40 h-40 rounded-2xl border-2 border-dashed border-gray-300 bg-gray-50 overflow-hidden flex items-center justify-center shrink-0">
               {form.qrCodeImage ? (
                 <Image src={form.qrCodeImage} alt="QR Code" fill className="object-contain p-2" />
               ) : (
