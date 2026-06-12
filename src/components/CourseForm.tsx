@@ -41,7 +41,6 @@ interface CourseFormProps {
 export default function CourseForm({ course, mode, teacherMode = false, teacherName = "" }: CourseFormProps) {
   const router = useRouter();
   const fileRef    = useRef<HTMLInputElement>(null);
-  const qrFileRef  = useRef<HTMLInputElement>(null);
 
   const [form, setForm] = useState({
     title: course?.title ?? "",
@@ -52,9 +51,6 @@ export default function CourseForm({ course, mode, teacherMode = false, teacherN
     category: course?.category ?? "",
     price: course?.price ?? 0,
     isActive: course?.isActive ?? true,
-    qrCodeImage: course?.qrCodeImage ?? "",
-    bankAccount: course?.bankAccount ?? "",
-    bankName: course?.bankName ?? "",
     linkDigital: course?.linkDigital ?? "",
     linkClip: course?.linkClip ?? "",
     linkSupplementary: course?.linkSupplementary ?? "",
@@ -126,22 +122,6 @@ export default function CourseForm({ course, mode, teacherMode = false, teacherN
       const res = await fetch("/api/upload", { method: "POST", body: fd });
       const data = await res.json();
       if (res.ok) setForm((f) => ({ ...f, coverImage: data.url }));
-      else setError(data.error ?? "อัปโหลดล้มเหลว");
-    } finally {
-      setUploading(false);
-    }
-  };
-
-  const handleQrUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setUploading(true);
-    try {
-      const fd = new FormData();
-      fd.append("file", file);
-      const res = await fetch("/api/upload", { method: "POST", body: fd });
-      const data = await res.json();
-      if (res.ok) setForm((f) => ({ ...f, qrCodeImage: data.url }));
       else setError(data.error ?? "อัปโหลดล้มเหลว");
     } finally {
       setUploading(false);
@@ -368,63 +348,6 @@ export default function CourseForm({ course, mode, teacherMode = false, teacherN
               </div>
             </div>
           ))}
-        </div>
-      </div>
-
-      {/* Payment info */}
-      <div className="border border-amber-200 bg-amber-50 rounded-2xl p-5 space-y-4">
-        <div>
-          <h3 className="text-sm font-semibold text-amber-800 mb-0.5">ข้อมูลการชำระเงิน</h3>
-          <p className="text-xs text-amber-600">นักเรียนจะเห็นข้อมูลนี้หลังจองที่นั่งเพื่อโอนเงิน</p>
-        </div>
-
-        {/* QR Code */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">QR Code พร้อมเพย์ / ธนาคาร</label>
-          <div className="flex gap-4 items-start">
-            <div className="w-32 h-32 rounded-xl border-2 border-dashed border-amber-300 bg-white overflow-hidden flex items-center justify-center shrink-0">
-              {form.qrCodeImage ? (
-                <img src={form.qrCodeImage} alt="QR Code" className="w-full h-full object-contain p-1" />
-              ) : (
-                <span className="text-3xl">📷</span>
-              )}
-            </div>
-            <div className="space-y-2">
-              <input ref={qrFileRef} type="file" accept="image/*" className="hidden" onChange={handleQrUpload} />
-              <button
-                type="button"
-                onClick={() => qrFileRef.current?.click()}
-                disabled={uploading}
-                className="flex items-center gap-2 px-4 py-2 border-2 border-dashed border-amber-300 rounded-xl text-sm text-amber-700 hover:border-amber-500 hover:text-amber-800 transition-colors disabled:opacity-50 bg-white"
-              >
-                <Upload className="w-4 h-4" />
-                {uploading ? "กำลังอัปโหลด..." : "อัปโหลด QR Code"}
-              </button>
-              <p className="text-xs text-gray-400">รองรับ JPG, PNG ขนาดไม่เกิน 10MB</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Bank info */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">เลขที่บัญชี</label>
-            <input
-              value={form.bankAccount}
-              onChange={(e) => setForm({ ...form, bankAccount: e.target.value })}
-              className={inputClass}
-              placeholder="เช่น 000-0-00000-0"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">ชื่อบัญชี</label>
-            <input
-              value={form.bankName}
-              onChange={(e) => setForm({ ...form, bankName: e.target.value })}
-              className={inputClass}
-              placeholder="เช่น นาย สมชาย ใจดี"
-            />
-          </div>
         </div>
       </div>
 

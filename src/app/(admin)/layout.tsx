@@ -2,7 +2,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { LayoutDashboard, ListChecks, Users, LogOut, Images, UserCog, UserCheck, BookOpen, TrendingUp, CalendarDays, GraduationCap, Menu, X } from "lucide-react";
+import { LayoutDashboard, ListChecks, Users, LogOut, Images, UserCog, UserCheck, BookOpen, TrendingUp, CalendarDays, GraduationCap, Menu, X, Wallet } from "lucide-react";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const [pendingCount, setPendingCount]       = useState(0);
@@ -94,6 +94,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               )}
             </span>
           )}
+          {isAdmin && navLink("/admin/finance", <Wallet className="w-4 h-4" />, "ข้อมูลทางการเงิน")}
           {isAdmin && navLink("/admin/banners", <Images className="w-4 h-4" />, "จัดการแบนเนอร์")}
         </nav>
 

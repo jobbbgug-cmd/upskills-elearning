@@ -1,5 +1,5 @@
 "use client";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { ICourse, ISession } from "@/types";
@@ -8,6 +8,7 @@ import { Calendar, Clock, Upload, CheckCircle, XCircle, Clock3 } from "lucide-re
 import { cn } from "@/lib/utils";
 
 interface MyBookingInfo { bookingId: string; seatNumber: number; status: string; slipImage: string; }
+interface FinanceInfo { bankName?: string; bankAccount?: string; bankBrand?: string; promptpay?: string; qrCodeImage?: string; }
 
 interface CourseBookingProps {
   course: ICourse;
@@ -24,8 +25,13 @@ export default function CourseBooking({ course, sessions, myBookings, isLoggedIn
   const [message, setMessage]                 = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [pendingFile, setPendingFile]         = useState<File | null>(null);
   const [pendingPreview, setPendingPreview]   = useState<string | null>(null);
+  const [finance, setFinance]                 = useState<FinanceInfo>({});
   const router  = useRouter();
   const fileRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    fetch("/api/finance").then((r) => r.json()).then((d) => { if (!d.error) setFinance(d); }).catch(() => {});
+  }, []);
 
   const myInfo       = selectedSession ? myBookings[selectedSession._id] : undefined;
   const isBooked     = !!myInfo;
@@ -199,19 +205,21 @@ export default function CourseBooking({ course, sessions, myBookings, isLoggedIn
               <h4 className="text-sm font-semibold text-amber-800">ข้อมูลการชำระเงิน</h4>
 
               {/* QR Code */}
-              {course.qrCodeImage && (
+              {finance.qrCodeImage && (
                 <div className="flex justify-center">
                   <div className="bg-white rounded-xl p-3 shadow-sm border border-amber-100">
-                    <Image src={course.qrCodeImage} alt="QR Code" width={180} height={180} className="object-contain" />
+                    <Image src={finance.qrCodeImage} alt="QR Code" width={180} height={180} className="object-contain" />
                   </div>
                 </div>
               )}
 
               {/* Bank info */}
-              {(course.bankAccount || course.bankName) && (
+              {(finance.bankAccount || finance.bankName || finance.promptpay) && (
                 <div className="bg-white rounded-xl px-4 py-3 text-sm space-y-1 border border-amber-100">
-                  {course.bankName && <p className="text-gray-700"><span className="font-semibold">ชื่อบัญชี:</span> {course.bankName}</p>}
-                  {course.bankAccount && <p className="text-gray-700"><span className="font-semibold">เลขที่บัญชี:</span> {course.bankAccount}</p>}
+                  {finance.bankBrand && <p className="text-gray-700"><span className="font-semibold">ธนาคาร:</span> {finance.bankBrand}</p>}
+                  {finance.bankName && <p className="text-gray-700"><span className="font-semibold">ชื่อบัญชี:</span> {finance.bankName}</p>}
+                  {finance.bankAccount && <p className="text-gray-700"><span className="font-semibold">เลขที่บัญชี:</span> {finance.bankAccount}</p>}
+                  {finance.promptpay && <p className="text-gray-700"><span className="font-semibold">พร้อมเพย์:</span> {finance.promptpay}</p>}
                   <p className="text-amber-700 font-bold text-base mt-1">฿{course.price.toLocaleString()}</p>
                 </div>
               )}
