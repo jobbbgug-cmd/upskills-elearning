@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Clock, Users, BookOpen } from "lucide-react";
+import { Clock, Users, BookOpen, Timer } from "lucide-react";
 import Badge from "./ui/Badge";
 import { ICourse } from "@/types";
 
@@ -12,6 +12,18 @@ export default function CourseCard({ course }: CourseCardProps) {
   const nextSession = course.sessions
     .filter((s) => new Date(s.date) >= new Date())
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())[0];
+
+  const firstSession = course.sessions[0];
+  const sessionDuration = (() => {
+    if (!firstSession?.startTime || !firstSession?.endTime) return null;
+    const [sh, sm] = firstSession.startTime.split(":").map(Number);
+    const [eh, em] = firstSession.endTime.split(":").map(Number);
+    const mins = (eh * 60 + em) - (sh * 60 + sm);
+    if (mins <= 0) return null;
+    const h = Math.floor(mins / 60);
+    const m = mins % 60;
+    return m === 0 ? `${h} ชม.` : `${h} ชม. ${m} นาที`;
+  })();
 
   const totalSeats = course.sessions.reduce((sum, s) => sum + s.maxCapacity, 0);
   const totalBooked = course.sessions.reduce((sum, s) => sum + s.bookedCount, 0);
@@ -65,7 +77,7 @@ export default function CourseCard({ course }: CourseCardProps) {
           <div className="space-y-2 text-xs text-gray-500">
             <div className="flex items-center gap-1.5">
               <Users className="w-3.5 h-3.5" />
-              <span>{course.instructor}</span>
+              <span>{course.instructor} (อาจารย์)</span>
             </div>
             {nextSession && (
               <div className="flex items-center gap-1.5">
@@ -76,7 +88,15 @@ export default function CourseCard({ course }: CourseCardProps) {
               </div>
             )}
             <div className="flex items-center justify-between pt-2 border-t border-gray-100">
-              <span className="text-gray-400">{course.sessions.length} รอบเรียน</span>
+              <div className="flex items-center gap-3 text-gray-400">
+                <span>{course.sessions.length} รอบเรียน</span>
+                {sessionDuration && (
+                  <span className="flex items-center gap-1">
+                    <Timer className="w-3.5 h-3.5" />
+                    {sessionDuration}
+                  </span>
+                )}
+              </div>
               <span className="font-semibold text-indigo-600 text-sm">
                 {course.price === 0 ? "ฟรี" : `฿${course.price.toLocaleString()}`}
               </span>

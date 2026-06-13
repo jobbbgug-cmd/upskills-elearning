@@ -134,80 +134,86 @@ export default function AdminBannersPage() {
           <form onSubmit={handleSubmit} className="space-y-5">
 
             {/* Image uploads — side by side */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-stretch">
               {/* Desktop image */}
-              <div className="border border-gray-200 rounded-2xl p-4">
+              <div className="border border-gray-200 rounded-2xl p-4 flex flex-col">
                 <div className="flex items-center gap-2 mb-1">
                   <Monitor className="w-4 h-4 text-indigo-500" />
                   <span className="text-sm font-semibold text-gray-700">รูป Desktop *</span>
                 </div>
-                <p className="text-xs text-gray-500 mb-3">
-                  แนะนำ <span className="font-semibold text-indigo-600">1920 × 1080px</span> (แนวนอน 16:9)<br/>
-                  ⚠️ วางเนื้อหาสำคัญไว้กลางภาพ — ขอบจะถูกตัดตามขนาดจอ
-                </p>
-                <div className="flex flex-col gap-3">
-                  {form.imageUrl ? (
-                    <div className="relative w-full h-32 rounded-xl overflow-hidden border border-gray-200">
-                      <Image src={form.imageUrl} alt="desktop preview" fill className="object-cover" />
-                      <button
-                        type="button"
-                        onClick={() => setForm((f) => ({ ...f, imageUrl: "" }))}
-                        className="absolute top-2 right-2 w-6 h-6 bg-red-500 text-white rounded-full text-xs flex items-center justify-center hover:bg-red-600"
-                      >×</button>
-                    </div>
-                  ) : (
-                    <div className="w-full h-32 rounded-xl bg-gray-50 border-2 border-dashed border-gray-300 flex items-center justify-center">
-                      <span className="text-xs text-gray-400">ยังไม่มีรูป</span>
-                    </div>
-                  )}
+                <div className="flex items-start gap-3 mb-3">
+                  <p className="flex-1 text-xs text-gray-500">
+                    ต้องใช้รูป <span className="font-semibold text-indigo-600">แนวนอน</span> เท่านั้น — แนะนำ <span className="font-semibold text-indigo-600">1920 × 1080px</span> (16:9)<br/>
+                    ⚠️ รูปแนวตั้งจะถูกซูมและตัดขอบออกอัตโนมัติ
+                  </p>
                   <input ref={desktopFileRef} type="file" accept="image/*" className="hidden" onChange={(e) => handleUpload(e, "desktop")} />
                   <button
                     type="button"
                     onClick={() => desktopFileRef.current?.click()}
                     disabled={uploading === "desktop"}
-                    className="flex items-center justify-center gap-2 py-2 border-2 border-dashed border-gray-300 rounded-xl text-sm text-gray-500 hover:border-indigo-400 hover:text-indigo-600 transition-colors disabled:opacity-50"
+                    className="shrink-0 flex items-center gap-2 px-3 py-2 border-2 border-dashed border-gray-300 rounded-xl text-sm text-gray-500 hover:border-indigo-400 hover:text-indigo-600 transition-colors disabled:opacity-50"
                   >
                     <Upload className="w-4 h-4" />
                     {uploading === "desktop" ? "กำลังอัปโหลด..." : "อัปโหลดรูป Desktop"}
                   </button>
                 </div>
+                {form.imageUrl ? (
+                  <div className="relative rounded-xl overflow-hidden border border-gray-200 bg-gray-50">
+                    <img src={form.imageUrl} alt="desktop preview" className="w-full h-auto block" />
+                    <button
+                      type="button"
+                      onClick={() => setForm((f) => ({ ...f, imageUrl: "" }))}
+                      className="absolute top-2 right-2 w-6 h-6 bg-red-500 text-white rounded-full text-xs flex items-center justify-center hover:bg-red-600"
+                    >×</button>
+                  </div>
+                ) : (
+                  <div className="flex-1 min-h-[10rem] rounded-xl bg-gray-50 border-2 border-dashed border-gray-300 flex items-center justify-center">
+                    <span className="text-xs text-gray-400">ยังไม่มีรูป</span>
+                  </div>
+                )}
               </div>
 
               {/* Mobile image */}
-              <div className="border border-gray-200 rounded-2xl p-4">
-                <div className="flex items-center gap-2 mb-1">
+              <div className="border border-gray-200 rounded-2xl p-4 flex flex-col">
+                <div className="flex items-center gap-2 mb-3">
                   <Smartphone className="w-4 h-4 text-green-500" />
                   <span className="text-sm font-semibold text-gray-700">รูป Mobile</span>
                 </div>
-                <p className="text-xs text-gray-500 mb-3">
-                  แนะนำ <span className="font-semibold text-green-600">1080 × 1920px</span> (แนวตั้ง 9:16)<br/>
-                  ⚠️ ไม่บังคับ — วางเนื้อหาไว้กลางภาพ ขอบจะถูกตัดตามจอโทรศัพท์
-                </p>
-                <div className="flex flex-col gap-3">
-                  {form.mobileImageUrl ? (
-                    <div className="relative w-full h-32 rounded-xl overflow-hidden border border-gray-200">
-                      <Image src={form.mobileImageUrl} alt="mobile preview" fill className="object-cover" />
-                      <button
-                        type="button"
-                        onClick={() => setForm((f) => ({ ...f, mobileImageUrl: "" }))}
-                        className="absolute top-2 right-2 w-6 h-6 bg-red-500 text-white rounded-full text-xs flex items-center justify-center hover:bg-red-600"
-                      >×</button>
-                    </div>
-                  ) : (
-                    <div className="w-full h-32 rounded-xl bg-gray-50 border-2 border-dashed border-gray-300 flex items-center justify-center text-center px-4">
-                      <span className="text-xs text-gray-400">ไม่บังคับ — ถ้าไม่ใส่จะใช้รูป Desktop แทน</span>
-                    </div>
-                  )}
-                  <input ref={mobileFileRef} type="file" accept="image/*" className="hidden" onChange={(e) => handleUpload(e, "mobile")} />
-                  <button
-                    type="button"
-                    onClick={() => mobileFileRef.current?.click()}
-                    disabled={uploading === "mobile"}
-                    className="flex items-center justify-center gap-2 py-2 border-2 border-dashed border-gray-300 rounded-xl text-sm text-gray-500 hover:border-green-400 hover:text-green-600 transition-colors disabled:opacity-50"
-                  >
-                    <Upload className="w-4 h-4" />
-                    {uploading === "mobile" ? "กำลังอัปโหลด..." : "อัปโหลดรูป Mobile"}
-                  </button>
+                <div className="flex gap-4 flex-1 min-h-0">
+                  {/* Image preview — left, stretches to full card height */}
+                  <div className="shrink-0 w-56 flex flex-col">
+                    {form.mobileImageUrl ? (
+                      <div className="relative rounded-xl overflow-hidden border border-gray-200">
+                        <img src={form.mobileImageUrl} alt="mobile preview" className="w-full h-auto block" />
+                        <button
+                          type="button"
+                          onClick={() => setForm((f) => ({ ...f, mobileImageUrl: "" }))}
+                          className="absolute top-1.5 right-1.5 w-6 h-6 bg-red-500 text-white rounded-full text-xs flex items-center justify-center hover:bg-red-600 z-10"
+                        >×</button>
+                      </div>
+                    ) : (
+                      <div className="flex-1 rounded-xl bg-gray-50 border-2 border-dashed border-gray-300 flex items-center justify-center text-center px-2">
+                        <span className="text-[10px] text-gray-400">ยังไม่มีรูป</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Right: details top, upload button bottom */}
+                  <div className="flex-1 flex flex-col justify-between gap-3">
+                    <p className="text-xs text-gray-500">
+                      ต้องใช้รูป <span className="font-semibold text-green-600">แนวตั้ง</span> เท่านั้น — แนะนำ <span className="font-semibold text-green-600">1080 × 1920px</span> (9:16)
+                    </p>
+                    <input ref={mobileFileRef} type="file" accept="image/*" className="hidden" onChange={(e) => handleUpload(e, "mobile")} />
+                    <button
+                      type="button"
+                      onClick={() => mobileFileRef.current?.click()}
+                      disabled={uploading === "mobile"}
+                      className="flex items-center justify-center gap-2 py-2 border-2 border-dashed border-gray-300 rounded-xl text-sm text-gray-500 hover:border-green-400 hover:text-green-600 transition-colors disabled:opacity-50"
+                    >
+                      <Upload className="w-4 h-4" />
+                      {uploading === "mobile" ? "กำลังอัปโหลด..." : "อัปโหลดรูป Mobile"}
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -299,21 +305,21 @@ export default function AdminBannersPage() {
 
               {/* Previews */}
               <div className="flex gap-2 shrink-0">
-                <div className="relative w-28 h-16 rounded-xl overflow-hidden" style={{ background: banner.bgColor }}>
+                <div className="relative w-36 h-20 rounded-xl overflow-hidden" style={{ background: banner.bgColor }}>
                   <Image src={banner.imageUrl} alt="desktop" fill className="object-cover" />
                   <div className="absolute bottom-0 left-0 right-0 flex items-center justify-center pb-0.5">
                     <span className="text-[9px] text-white/70 bg-black/30 px-1 rounded">Desktop</span>
                   </div>
                 </div>
                 {banner.mobileImageUrl ? (
-                  <div className="relative w-10 h-16 rounded-xl overflow-hidden" style={{ background: banner.bgColor }}>
+                  <div className="relative w-14 h-20 rounded-xl overflow-hidden" style={{ background: banner.bgColor }}>
                     <Image src={banner.mobileImageUrl} alt="mobile" fill className="object-cover" />
                     <div className="absolute bottom-0 left-0 right-0 flex items-center justify-center pb-0.5">
                       <span className="text-[9px] text-white/70 bg-black/30 px-0.5 rounded">Mobile</span>
                     </div>
                   </div>
                 ) : (
-                  <div className="w-10 h-16 rounded-xl bg-gray-100 border border-dashed border-gray-300 flex items-center justify-center">
+                  <div className="w-14 h-20 rounded-xl bg-gray-100 border border-dashed border-gray-300 flex items-center justify-center">
                     <Smartphone className="w-3 h-3 text-gray-300" />
                   </div>
                 )}
