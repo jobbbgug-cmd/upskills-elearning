@@ -183,7 +183,7 @@ export default function AdminBannersPage() {
                 </div>
                 <div className="flex gap-4 flex-1 min-h-0">
                   {/* Image preview — left, stretches to full card height */}
-                  <div className="shrink-0 w-56 flex flex-col">
+                  <div className="shrink-0 w-44 flex flex-col">
                     {form.mobileImageUrl ? (
                       <div className="relative rounded-xl overflow-hidden border border-gray-200">
                         <img src={form.mobileImageUrl} alt="mobile preview" className="w-full h-auto block" />
@@ -203,14 +203,15 @@ export default function AdminBannersPage() {
                   {/* Right: details top, upload button bottom */}
                   <div className="flex-1 flex flex-col justify-between gap-3">
                     <p className="text-xs text-gray-500">
-                      ต้องใช้รูป <span className="font-semibold text-green-600">แนวตั้ง</span> เท่านั้น — แนะนำ <span className="font-semibold text-green-600">1080 × 1920px</span> (9:16)
+                      ต้องใช้รูป <span className="font-semibold text-green-600">แนวตั้ง</span> เท่านั้น — แนะนำ <span className="font-semibold text-green-600">1080 × 1920px</span> (9:16)<br/>
+                      ⚠️ รูปแนวนอนจะถูกซูมและตัดขอบออกอัตโนมัติ
                     </p>
                     <input ref={mobileFileRef} type="file" accept="image/*" className="hidden" onChange={(e) => handleUpload(e, "mobile")} />
                     <button
                       type="button"
                       onClick={() => mobileFileRef.current?.click()}
                       disabled={uploading === "mobile"}
-                      className="flex items-center justify-center gap-2 py-2 border-2 border-dashed border-gray-300 rounded-xl text-sm text-gray-500 hover:border-green-400 hover:text-green-600 transition-colors disabled:opacity-50"
+                      className="flex-1 flex items-center justify-center gap-2 border-2 border-dashed border-gray-300 rounded-xl text-sm text-gray-500 hover:border-green-400 hover:text-green-600 transition-colors disabled:opacity-50"
                     >
                       <Upload className="w-4 h-4" />
                       {uploading === "mobile" ? "กำลังอัปโหลด..." : "อัปโหลดรูป Mobile"}
