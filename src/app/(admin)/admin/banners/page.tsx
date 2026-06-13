@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { Plus, Trash2, Upload, GripVertical, Eye, EyeOff, Monitor, Smartphone, Pencil } from "lucide-react";
+import { compressImage } from "@/lib/compressImage";
 import { IBanner } from "@/types";
 
 const DEFAULT_COLORS = ["#1e1b4b", "#0f172a", "#1e3a5f", "#14532d", "#450a0a", "#1c1917"];
@@ -36,9 +37,10 @@ export default function AdminBannersPage() {
   useEffect(() => { load(); }, []);
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>, target: "desktop" | "mobile") => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const raw = e.target.files?.[0];
+    if (!raw) return;
     setUploading(target);
+    const file = await compressImage(raw, 1920, 0.85);
     const fd = new FormData();
     fd.append("file", file);
     const res = await fetch("/api/upload", { method: "POST", body: fd });

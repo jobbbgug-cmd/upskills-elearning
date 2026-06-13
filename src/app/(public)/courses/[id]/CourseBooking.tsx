@@ -6,6 +6,7 @@ import { ICourse, ISession } from "@/types";
 import SeatMap from "@/components/SeatMap";
 import { Calendar, Clock, Upload, CheckCircle, XCircle, Clock3, Trash2, Copy, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { compressImage } from "@/lib/compressImage";
 
 interface MyBookingInfo { bookingId: string; seatNumber: number; status: string; slipImage: string; expiresAt: string | null; }
 interface FinanceInfo { bankName?: string; bankAccount?: string; bankBrand?: string; promptpay?: string; qrCodeImage?: string; }
@@ -118,9 +119,10 @@ export default function CourseBooking({ course, sessions, myBookings, isLoggedIn
     finally { setLoading(false); }
   };
 
-  const handleSlipSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const handleSlipSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const raw = e.target.files?.[0];
+    if (!raw) return;
+    const file = await compressImage(raw, 1920, 0.85);
     setPendingFile(file);
     setPendingPreview(URL.createObjectURL(file));
     setMessage(null);
