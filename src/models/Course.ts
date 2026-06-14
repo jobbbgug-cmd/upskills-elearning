@@ -12,6 +12,7 @@ export interface ISessionDocument {
 }
 
 export interface ICourseDocument extends Document {
+  institutionId?: mongoose.Types.ObjectId;
   title: string;
   description: string;
   coverImage: string;
@@ -68,6 +69,7 @@ const DownloadItemSchema = new Schema(
 
 const CourseSchema = new Schema<ICourseDocument>(
   {
+    institutionId: { type: Schema.Types.ObjectId, ref: "Institution", default: null },
     title: { type: String, required: true, trim: true },
     description: { type: String, required: true },
     coverImage: { type: String, default: "" },

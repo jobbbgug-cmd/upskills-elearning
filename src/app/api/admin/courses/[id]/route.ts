@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { connectDB } from "@/lib/mongodb";
 import { getAuthUser } from "@/lib/auth";
+import { resolveInstitutionId, tenantFilter } from "@/lib/tenant";
 import Course from "@/models/Course";
 import Booking from "@/models/Booking";
 
@@ -15,16 +16,15 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     const { id } = await params;
     const body = await req.json();
     const { sessions: newSessions, ...rest } = body;
-    console.log("[PUT course] rest fields:", JSON.stringify(rest, null, 2));
     await connectDB();
 
-    const existing = await Course.findById(id).select("sessions instructorId");
+    const institutionId = await resolveInstitutionId(req, auth.institutionId);
+    const existing = await Course.findOne({ _id: id, ...tenantFilter(institutionId) }).select("sessions instructorId");
     if (!existing) return NextResponse.json({ error: "ไม่พบคอร์ส" }, { status: 404 });
     if (auth.role === "teacher" && existing.instructorId !== auth.userId) {
       return NextResponse.json({ error: "ไม่มีสิทธิ์แก้ไขคอร์สนี้" }, { status: 403 });
     }
 
-    // Preserve _id and bookedSeats from existing sessions
     const mergedSessions = newSessions.map((s: Record<string, unknown>, i: number) => {
       const ex = existing.sessions[i];
       return ex
@@ -38,8 +38,6 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       { new: true, runValidators: true }
     );
 
-    console.log("[PUT course] saved bankAccount:", course?.bankAccount, "bankName:", course?.bankName, "qrCodeImage:", course?.qrCodeImage);
-
     revalidatePath(`/admin/courses/${id}`);
     revalidatePath("/admin/courses");
 
@@ -50,7 +48,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
   }
 }
 
-export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const auth = await getAuthUser();
     if (!auth || (auth.role !== "admin" && auth.role !== "teacher")) {
@@ -60,8 +58,9 @@ export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ 
     const { id } = await params;
     await connectDB();
 
+    const institutionId = await resolveInstitutionId(req, auth.institutionId);
     if (auth.role === "teacher") {
-      const course = await Course.findById(id).select("instructorId");
+      const course = await Course.findOne({ _id: id, ...tenantFilter(institutionId) }).select("instructorId");
       if (!course || course.instructorId !== auth.userId) {
         return NextResponse.json({ error: "ไม่มีสิทธิ์ลบคอร์สนี้" }, { status: 403 });
       }

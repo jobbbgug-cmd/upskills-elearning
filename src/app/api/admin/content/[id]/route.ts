@@ -2,9 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { connectDB } from "@/lib/mongodb";
 import { getAuthUser } from "@/lib/auth";
+import { resolveInstitutionId, tenantFilter } from "@/lib/tenant";
 import CourseContent from "@/models/CourseContent";
 
-export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const auth = await getAuthUser();
     if (!auth || (auth.role !== "admin" && auth.role !== "teacher")) {
@@ -12,7 +13,8 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
     }
     const { id } = await params;
     await connectDB();
-    const content = await CourseContent.findById(id).lean();
+    const institutionId = await resolveInstitutionId(req, auth.institutionId);
+    const content = await CourseContent.findOne({ _id: id, ...tenantFilter(institutionId) }).lean();
     if (!content) return NextResponse.json({ error: "ไม่พบชุดเนื้อหา" }, { status: 404 });
     return NextResponse.json({ content });
   } catch (err) {
@@ -30,7 +32,12 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     const { id } = await params;
     const body = await req.json();
     await connectDB();
-    const content = await CourseContent.findByIdAndUpdate(id, body, { new: true, runValidators: true });
+    const institutionId = await resolveInstitutionId(req, auth.institutionId);
+    const content = await CourseContent.findOneAndUpdate(
+      { _id: id, ...tenantFilter(institutionId) },
+      body,
+      { new: true, runValidators: true }
+    );
     if (!content) return NextResponse.json({ error: "ไม่พบชุดเนื้อหา" }, { status: 404 });
     revalidatePath("/admin/content");
     return NextResponse.json({ content });
@@ -40,7 +47,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
   }
 }
 
-export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const auth = await getAuthUser();
     if (!auth || auth.role !== "admin") {
@@ -48,7 +55,8 @@ export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ 
     }
     const { id } = await params;
     await connectDB();
-    await CourseContent.findByIdAndDelete(id);
+    const institutionId = await resolveInstitutionId(req, auth.institutionId);
+    await CourseContent.findOneAndDelete({ _id: id, ...tenantFilter(institutionId) });
     revalidatePath("/admin/content");
     return NextResponse.json({ message: "ลบสำเร็จ" });
   } catch (err) {

@@ -1,6 +1,7 @@
 import mongoose, { Schema, Document } from "mongoose";
 
 export interface ICourseContentDocument extends Document {
+  institutionId?: mongoose.Types.ObjectId;
   name: string;
   description: string;
   ebookCoverUrl: string;
@@ -31,6 +32,7 @@ const DownloadItemSchema = new Schema(
 
 const CourseContentSchema = new Schema<ICourseContentDocument>(
   {
+    institutionId: { type: Schema.Types.ObjectId, ref: "Institution", default: null },
     name: { type: String, required: true, trim: true },
     description: { type: String, default: "" },
     ebookCoverUrl: { type: String, default: "" },

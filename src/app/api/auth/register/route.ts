@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
+import { getTenantId } from "@/lib/tenant";
 import User from "@/models/User";
 
 export async function POST(req: NextRequest) {
@@ -23,13 +24,21 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "อีเมลนี้ถูกใช้งานแล้ว" }, { status: 400 });
     }
 
+    const institutionId = await getTenantId(req);
     const resolvedGradeLevel = userRole === "teacher" ? "ทุกระดับชั้น" : (gradeLevel ?? "");
+
     await User.create({
-      name, email, role: userRole,
+      institutionId: institutionId ?? undefined,
+      name,
+      email,
+      role: userRole,
       gradeLevel: resolvedGradeLevel,
       teacherId: userRole === "student" ? (teacherId ?? "") : "",
       teacherName: userRole === "student" ? (teacherName ?? "") : "",
-      status: "pending", password: "", contactChannel, contactId,
+      status: "pending",
+      password: "",
+      contactChannel,
+      contactId,
     });
 
     return NextResponse.json({ message: "ส่งคำขอสมัครสมาชิกสำเร็จ รอการอนุมัติจาก Admin" });

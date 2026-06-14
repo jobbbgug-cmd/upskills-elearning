@@ -1,6 +1,7 @@
 import mongoose, { Schema, Document } from "mongoose";
 
 export interface IFinanceSetting extends Document {
+  institutionId?: mongoose.Types.ObjectId;
   bankName: string;
   bankAccount: string;
   bankBrand: string;
@@ -11,6 +12,7 @@ export interface IFinanceSetting extends Document {
 
 const FinanceSettingSchema = new Schema<IFinanceSetting>(
   {
+    institutionId: { type: Schema.Types.ObjectId, ref: "Institution", default: null },
     bankName:    { type: String, default: "" },
     bankAccount: { type: String, default: "" },
     bankBrand:   { type: String, default: "" },

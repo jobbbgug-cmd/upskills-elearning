@@ -4,10 +4,11 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { Menu, X, User, LogOut, LayoutDashboard, CalendarDays } from "lucide-react";
-import { IUser } from "@/types";
+import { IUser, IBranding } from "@/types";
 
 export default function Navbar() {
-  const [user, setUser]       = useState<IUser | null>(null);
+  const [user, setUser]         = useState<IUser | null>(null);
+  const [branding, setBranding] = useState<IBranding | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const router   = useRouter();
@@ -18,6 +19,10 @@ export default function Navbar() {
     fetch("/api/auth/me")
       .then((r) => r.json())
       .then((d) => d.user && setUser(d.user))
+      .catch(() => {});
+    fetch("/api/branding")
+      .then((r) => r.json())
+      .then((d) => setBranding(d))
       .catch(() => {});
   }, []);
 
@@ -52,14 +57,29 @@ export default function Navbar() {
           {/* Left: logo + nav links */}
           <div className="flex items-center gap-8">
             <Link href="/">
-              <Image
-                src="/logo.png"
-                alt="UPSkills"
-                width={120}
-                height={40}
-                className={`object-contain transition-all duration-300 ${transparent ? "brightness-0 invert" : ""}`}
-                priority
-              />
+              {branding?.logoUrl ? (
+                <Image
+                  src={branding.logoUrl}
+                  alt={branding.name || "Logo"}
+                  width={120}
+                  height={40}
+                  className={`object-contain h-8 w-auto transition-all duration-300 ${transparent ? "brightness-0 invert" : ""}`}
+                  priority
+                />
+              ) : branding && !branding.isDefault && branding.name ? (
+                <span className={`font-bold text-lg transition-colors ${transparent ? "text-white" : "text-indigo-700"}`}>
+                  {branding.name}
+                </span>
+              ) : (
+                <Image
+                  src="/logo.png"
+                  alt="UPSkills"
+                  width={120}
+                  height={40}
+                  className={`object-contain transition-all duration-300 ${transparent ? "brightness-0 invert" : ""}`}
+                  priority
+                />
+              )}
             </Link>
             <div className="hidden md:flex items-center gap-6">
               <Link href="/courses" className={`text-sm font-medium transition-colors ${textCls}`}>

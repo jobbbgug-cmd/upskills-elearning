@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { put } from "@vercel/blob";
 import { connectDB } from "@/lib/mongodb";
 import { getAuthUser } from "@/lib/auth";
+import { tenantFilter, resolveInstitutionId } from "@/lib/tenant";
 import Booking from "@/models/Booking";
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -19,7 +20,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       return NextResponse.json({ error: "รองรับเฉพาะ JPG, PNG, WebP" }, { status: 400 });
 
     await connectDB();
-    const booking = await Booking.findById(id);
+    const institutionId = await resolveInstitutionId(req, auth.institutionId);
+    const booking = await Booking.findOne({ _id: id, ...tenantFilter(institutionId) });
     if (!booking) return NextResponse.json({ error: "ไม่พบการจอง" }, { status: 404 });
     if (booking.userId.toString() !== auth.userId)
       return NextResponse.json({ error: "ไม่มีสิทธิ์" }, { status: 403 });
@@ -30,7 +32,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     const blob = await put(filename, file, { access: "public" });
 
     booking.slipImage = blob.url;
-    booking.expiresAt = null; // slip uploaded — hold indefinitely until admin reviews
+    booking.expiresAt = null;
     await booking.save();
 
     return NextResponse.json({ url: blob.url });

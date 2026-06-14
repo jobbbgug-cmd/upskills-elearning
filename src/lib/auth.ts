@@ -7,7 +7,8 @@ export interface JwtPayload {
   userId: string;
   email: string;
   name: string;
-  role: "student" | "teacher" | "admin";
+  role: "student" | "teacher" | "admin" | "super_admin";
+  institutionId?: string;
 }
 
 export function signToken(payload: JwtPayload): string {

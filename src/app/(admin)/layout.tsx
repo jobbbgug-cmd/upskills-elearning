@@ -2,20 +2,32 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { LayoutDashboard, ListChecks, Users, LogOut, Images, UserCog, UserCheck, BookOpen, TrendingUp, CalendarDays, GraduationCap, Menu, X, Wallet } from "lucide-react";
+import { LayoutDashboard, ListChecks, Users, LogOut, Images, UserCog, UserCheck, BookOpen, TrendingUp, CalendarDays, GraduationCap, Menu, X, Wallet, AlertTriangle, Palette } from "lucide-react";
+import { PLAN_LABELS } from "@/lib/planLimits";
+
+interface Subscription {
+  plan: string | null;
+  planLabel: string;
+  planExpiresAt: string | null;
+  isActive: boolean;
+  isExpired: boolean;
+  daysLeft: number | null;
+}
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const [pendingCount, setPendingCount]       = useState(0);
   const [pendingBookings, setPendingBookings] = useState(0);
   const [role, setRole]                       = useState<string>("");
+  const [subscription, setSubscription]       = useState<Subscription | null>(null);
   const [sidebarOpen, setSidebarOpen]         = useState(false);
 
   useEffect(() => {
     const load = async () => {
-      const [usersRes, bookingsRes, meRes] = await Promise.all([
+      const [usersRes, bookingsRes, meRes, subRes] = await Promise.all([
         fetch("/api/admin/users/pending"),
         fetch("/api/admin/bookings/pending"),
         fetch("/api/auth/me"),
+        fetch("/api/auth/subscription"),
       ]);
       if (usersRes.ok) {
         const data = await usersRes.json();
@@ -28,6 +40,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       if (meRes.ok) {
         const data = await meRes.json();
         setRole(data.user?.role ?? "");
+      }
+      if (subRes.ok) {
+        const data = await subRes.json();
+        setSubscription(data);
       }
     };
     load();
@@ -96,7 +112,37 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           )}
           {isAdmin && navLink("/admin/finance", <Wallet className="w-4 h-4" />, "ข้อมูลทางการเงิน")}
           {isAdmin && navLink("/admin/banners", <Images className="w-4 h-4" />, "จัดการแบนเนอร์")}
+          {isAdmin && navLink("/admin/branding", <Palette className="w-4 h-4" />, "จัดการ Branding")}
         </nav>
+
+        {/* Subscription status */}
+        {subscription?.plan && (
+          <div className="mx-3 mb-2">
+            <div className={`rounded-xl p-3 text-xs ${
+              !subscription.isActive || subscription.isExpired
+                ? "bg-red-50 border border-red-200"
+                : subscription.daysLeft !== null && subscription.daysLeft <= 7
+                ? "bg-orange-50 border border-orange-200"
+                : "bg-indigo-50 border border-indigo-100"
+            }`}>
+              <div className="flex items-center gap-1.5 font-semibold mb-0.5 text-gray-700">
+                {(!subscription.isActive || subscription.isExpired || (subscription.daysLeft !== null && subscription.daysLeft <= 7)) && (
+                  <AlertTriangle className="w-3.5 h-3.5 text-orange-500 shrink-0" />
+                )}
+                {PLAN_LABELS[subscription.plan] ?? subscription.plan}
+              </div>
+              {subscription.isExpired && <p className="text-red-600">แผนหมดอายุแล้ว</p>}
+              {!subscription.isActive && <p className="text-red-600">สถาบันถูกระงับ</p>}
+              {subscription.daysLeft !== null && !subscription.isExpired && subscription.daysLeft <= 7 && (
+                <p className="text-orange-600">หมดอายุใน {subscription.daysLeft} วัน</p>
+              )}
+              {subscription.daysLeft !== null && !subscription.isExpired && subscription.daysLeft > 7 && (
+                <p className="text-gray-500">เหลือ {subscription.daysLeft} วัน</p>
+              )}
+              {subscription.daysLeft === null && <p className="text-gray-500">ไม่มีวันหมดอายุ</p>}
+            </div>
+          </div>
+        )}
 
         <div className="p-3 border-t border-gray-100">
           <Link href="/" onClick={close}
@@ -122,6 +168,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </Link>
         </div>
 
+        {/* Suspended / expired banner */}
+        {subscription && (!subscription.isActive || subscription.isExpired) && (
+          <div className={`px-4 py-3 flex items-center gap-3 text-sm ${
+            !subscription.isActive ? "bg-red-500 text-white" : "bg-orange-500 text-white"
+          }`}>
+            <AlertTriangle className="w-4 h-4 shrink-0" />
+            {!subscription.isActive
+              ? "สถาบันของคุณถูกระงับการใช้งาน กรุณาติดต่อผู้ดูแลระบบ"
+              : "แผนสมาชิกของคุณหมดอายุแล้ว กรุณาต่ออายุเพื่อใช้งานต่อ"}
+          </div>
+        )}
         <div className="max-w-6xl mx-auto p-4 md:p-8">{children}</div>
       </main>
     </div>

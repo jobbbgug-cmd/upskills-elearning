@@ -1,12 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
+import { tenantFilter, getTenantId } from "@/lib/tenant";
 import Course from "@/models/Course";
 
-export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     await connectDB();
     const { id } = await params;
-    const course = await Course.findById(id);
+    const institutionId = await getTenantId(req);
+    const course = await Course.findOne({ _id: id, ...tenantFilter(institutionId) });
     if (!course) return NextResponse.json({ error: "ไม่พบคอร์ส" }, { status: 404 });
     return NextResponse.json({ course });
   } catch (err) {

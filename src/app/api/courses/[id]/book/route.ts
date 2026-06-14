@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
 import { getAuthUser } from "@/lib/auth";
+import { resolveInstitutionId, tenantFilter } from "@/lib/tenant";
 import Course from "@/models/Course";
 import Booking from "@/models/Booking";
 import mongoose from "mongoose";
@@ -20,25 +21,23 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
     await connectDB();
     const { id } = await params;
+    const institutionId = await resolveInstitutionId(req, auth.institutionId);
 
     // Release any expired holds before checking availability
     await cleanupExpiredBookings(id);
 
-    const course = await Course.findById(id);
+    const course = await Course.findOne({ _id: id, ...tenantFilter(institutionId) });
     if (!course) return NextResponse.json({ error: "ไม่พบคอร์ส" }, { status: 404 });
 
     const session = course.sessions.id(sessionId);
     if (!session) return NextResponse.json({ error: "ไม่พบรอบเวลา" }, { status: 404 });
 
-    // Validate seat number
     if (seatNumber < 1 || seatNumber > session.maxCapacity)
       return NextResponse.json({ error: "หมายเลขที่นั่งไม่ถูกต้อง" }, { status: 400 });
 
-    // Check seat already taken
     if (session.bookedSeats?.includes(seatNumber))
       return NextResponse.json({ error: "ที่นั่งนี้ถูกจองแล้ว กรุณาเลือกที่นั่งอื่น" }, { status: 400 });
 
-    // Check user's existing booking for this session (any status)
     const existing = await Booking.findOne({
       userId: auth.userId,
       courseId: id,
@@ -50,7 +49,6 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         return NextResponse.json({ error: "คุณได้จองรอบนี้แล้ว" }, { status: 400 });
       if (existing.status === "pending_payment")
         return NextResponse.json({ error: "คุณมีการจองรอชำระเงินอยู่แล้ว" }, { status: 400 });
-      // cancelled / rejected — reuse existing record
     }
 
     const initialStatus = course.price === 0 ? "confirmed" : "pending_payment";
@@ -61,13 +59,14 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     let bookingDoc;
     if (existing) {
       existing.seatNumber = seatNumber;
-      existing.status     = initialStatus;
-      existing.slipImage  = "";
-      existing.expiresAt  = expiresAt;
+      existing.status = initialStatus;
+      existing.slipImage = "";
+      existing.expiresAt = expiresAt;
       await existing.save();
       bookingDoc = existing;
     } else {
       bookingDoc = await Booking.create({
+        institutionId: institutionId ?? undefined,
         userId: auth.userId,
         courseId: id,
         sessionId: new mongoose.Types.ObjectId(sessionId),
@@ -77,7 +76,6 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       });
     }
 
-    // Add seat to session
     if (!session.bookedSeats) session.bookedSeats = [];
     session.bookedSeats.push(seatNumber);
     session.bookedCount = session.bookedSeats.length;
@@ -112,8 +110,8 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
     );
     if (!booking) return NextResponse.json({ error: "ไม่พบการจอง" }, { status: 404 });
 
-    // Remove seat from session
-    const course = await Course.findById(id);
+    const institutionId = await resolveInstitutionId(req, auth.institutionId);
+    const course = await Course.findOne({ _id: id, ...tenantFilter(institutionId) });
     if (course) {
       const session = course.sessions.id(sessionId);
       if (session) {

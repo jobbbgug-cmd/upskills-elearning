@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
 import { getAuthUser } from "@/lib/auth";
+import { tenantFilter, resolveInstitutionId } from "@/lib/tenant";
 import Booking from "@/models/Booking";
 import Course from "@/models/Course";
 
@@ -12,7 +13,9 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ id
     const { id } = await params;
     await connectDB();
 
-    const booking = await Booking.findById(id);
+    const institutionId = await resolveInstitutionId(_req, auth.institutionId);
+
+    const booking = await Booking.findOne({ _id: id, ...tenantFilter(institutionId) });
     if (!booking) return NextResponse.json({ error: "ไม่พบการจอง" }, { status: 404 });
     if (booking.userId.toString() !== auth.userId)
       return NextResponse.json({ error: "ไม่มีสิทธิ์" }, { status: 403 });
@@ -21,11 +24,9 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ id
     if (booking.status === "cancelled")
       return NextResponse.json({ error: "การจองนี้ถูกยกเลิกแล้ว" }, { status: 400 });
 
-    // Update booking status
     booking.status = "cancelled";
     await booking.save();
 
-    // Release seat from session.bookedSeats in Course
     const course = await Course.findById(booking.courseId);
     if (course) {
       const session = course.sessions.id(booking.sessionId.toString());

@@ -1,18 +1,24 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { getAuthUser } from "@/lib/auth";
+import { resolveInstitutionId, tenantFilter } from "@/lib/tenant";
 import { connectDB } from "@/lib/mongodb";
 import Course from "@/models/Course";
 import Booking from "@/models/Booking";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   const auth = await getAuthUser();
   if (!auth || (auth.role !== "admin" && auth.role !== "teacher")) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   await connectDB();
+  const institutionId = await resolveInstitutionId(req, auth.institutionId);
+  const base = tenantFilter(institutionId);
 
-  const courseFilter = auth.role === "teacher" ? { instructorId: auth.userId } : {};
+  const courseFilter = auth.role === "teacher"
+    ? { ...base, instructorId: auth.userId }
+    : base;
+
   const courses = await Course.find(courseFilter, {
     _id: 1, title: 1, price: 1, instructor: 1, instructorId: 1, sessions: 1,
   }).lean();
@@ -20,7 +26,7 @@ export async function GET() {
   const courseIds = courses.map((c) => c._id);
 
   const bookings = await Booking.find(
-    { courseId: { $in: courseIds } },
+    { ...base, courseId: { $in: courseIds } },
     { courseId: 1, status: 1, createdAt: 1 }
   ).lean();
 
@@ -56,7 +62,6 @@ export async function GET() {
     };
   });
 
-  // Monthly totals
   const monthlyMap: Record<string, number> = {};
   for (const c of courseStats) {
     for (const [month, count] of Object.entries(c.byMonth)) {
@@ -71,7 +76,6 @@ export async function GET() {
   const totalPending = courseStats.reduce((s, c) => s + c.pendingRevenue, 0);
   const totalConfirmed = courseStats.reduce((s, c) => s + c.confirmedBookings, 0);
 
-  // Admin: group by teacher
   let byTeacher = null;
   if (auth.role === "admin") {
     const teacherMap = new Map<string, { instructor: string; instructorId: string; courses: typeof courseStats }>();

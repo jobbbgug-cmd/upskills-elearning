@@ -1,3 +1,39 @@
+export interface IInstitution {
+  _id: string;
+  slug: string;
+  name: string;
+  logoUrl: string;
+  faviconUrl: string;
+  primaryColor: string;
+  tagline: string;
+  whiteLabelMode: boolean;
+  customDomain: string;
+  plan: "trial" | "starter" | "pro" | "enterprise";
+  planExpiresAt: string | null;
+  isActive: boolean;
+  commissionRate: number;
+  createdAt: string;
+}
+
+export interface IBranding {
+  name: string;
+  logoUrl: string;
+  faviconUrl: string;
+  primaryColor: string;
+  tagline: string;
+  whiteLabelMode: boolean;
+  isDefault: boolean;
+}
+
+export interface IBranch {
+  _id: string;
+  institutionId: string;
+  name: string;
+  address: string;
+  isActive: boolean;
+  createdAt: string;
+}
+
 export type GradeLevel =
   | "ป.1" | "ป.2" | "ป.3" | "ป.4" | "ป.5" | "ป.6"
   | "ม.1" | "ม.2" | "ม.3" | "ม.4" | "ม.5" | "ม.6"
@@ -67,7 +103,7 @@ export interface IUser {
   _id: string;
   name: string;
   email: string;
-  role: "student" | "teacher" | "admin";
+  role: "student" | "teacher" | "admin" | "super_admin";
   status: "pending" | "approved" | "rejected";
   gradeLevel?: GradeLevel;
   createdAt: string;

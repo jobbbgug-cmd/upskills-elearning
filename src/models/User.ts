@@ -1,10 +1,11 @@
 import mongoose, { Schema, Document } from "mongoose";
 
 export interface IUserDocument extends Document {
+  institutionId?: mongoose.Types.ObjectId;
   name: string;
   email: string;
   password: string;
-  role: "student" | "teacher" | "admin";
+  role: "student" | "teacher" | "admin" | "super_admin";
   status: "pending" | "approved" | "rejected";
   gradeLevel?: string;
   teacherId?: string;
@@ -16,10 +17,11 @@ export interface IUserDocument extends Document {
 
 const UserSchema = new Schema<IUserDocument>(
   {
+    institutionId: { type: Schema.Types.ObjectId, ref: "Institution", default: null },
     name: { type: String, required: true, trim: true },
     email: { type: String, required: true, unique: true, lowercase: true, trim: true },
     password: { type: String, default: "" },
-    role: { type: String, enum: ["student", "teacher", "admin"], default: "student" },
+    role: { type: String, enum: ["student", "teacher", "admin", "super_admin"], default: "student" },
     status: { type: String, enum: ["pending", "approved", "rejected"], default: "pending" },
     gradeLevel: { type: String },
     teacherId: { type: String, default: "" },

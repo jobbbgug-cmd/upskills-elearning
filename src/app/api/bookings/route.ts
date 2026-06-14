@@ -1,15 +1,21 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
 import { getAuthUser } from "@/lib/auth";
+import { resolveInstitutionId, tenantFilter } from "@/lib/tenant";
 import Booking from "@/models/Booking";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
     const auth = await getAuthUser();
     if (!auth) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     await connectDB();
-    const bookings = await Booking.find({ userId: auth.userId, status: "confirmed" })
+    const institutionId = await resolveInstitutionId(req, auth.institutionId);
+    const bookings = await Booking.find({
+      ...tenantFilter(institutionId),
+      userId: auth.userId,
+      status: "confirmed",
+    })
       .populate("courseId")
       .sort({ createdAt: -1 });
 
