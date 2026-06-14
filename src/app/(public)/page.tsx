@@ -4,6 +4,7 @@ import Course from "@/models/Course";
 import Banner from "@/models/Banner";
 import CourseCard from "@/components/CourseCard";
 import BannerSlider from "@/components/BannerSlider";
+import PricingSection from "@/components/PricingSection";
 import { ICourse, IBanner, GradeLevel } from "@/types";
 import { BookOpen, Users, Video } from "lucide-react";
 import { getAuthUser } from "@/lib/auth";
@@ -120,6 +121,9 @@ export default async function HomePage() {
           </div>
         )}
       </section>
+
+      {/* Pricing */}
+      <PricingSection />
     </div>
   );
 }

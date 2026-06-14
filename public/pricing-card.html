@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>UPSkills Pricing</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Sarabun', sans-serif;
+    background: #f0f4ff;
+    padding: 40px 20px 60px;
+    min-width: 900px;
+  }
+
+  /* ===== HEADER ===== */
+  .header {
+    text-align: center;
+    margin-bottom: 36px;
+  }
+  .logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+  .logo-icon {
+    width: 48px; height: 48px;
+    background: linear-gradient(135deg, #7c3aed, #4f46e5);
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-weight: 800; font-size: 22px;
+  }
+  .logo-text { font-size: 36px; font-weight: 800; color: #1e1b4b; letter-spacing: -1px; }
+  .logo-text span { color: #7c3aed; }
+  .badge {
+    display: inline-block;
+    background: linear-gradient(90deg, #7c3aed, #4f46e5);
+    color: white; font-size: 18px; font-weight: 700;
+    padding: 6px 24px; border-radius: 99px; margin-top: 4px;
+    letter-spacing: 1px;
+  }
+  .subtitle {
+    margin-top: 12px; color: #6b7280; font-size: 15px;
+  }
+
+  /* ===== PLAN CARDS ===== */
+  .plans {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    max-width: 960px;
+    margin: 0 auto 32px;
+  }
+
+  .card {
+    background: white;
+    border-radius: 20px;
+    padding: 24px 20px;
+    border: 2px solid transparent;
+    position: relative;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+  }
+  .card.trial   { border-color: #e5e7eb; }
+  .card.starter { border-color: #7c3aed; }
+  .card.pro     { border-color: #4f46e5; background: linear-gradient(160deg,#fdf4ff,#ede9fe,#e0e7ff); }
+  .card.enterprise { border-color: #0ea5e9; }
+
+  .popular-badge {
+    position: absolute;
+    top: -14px; left: 50%; transform: translateX(-50%);
+    background: linear-gradient(90deg,#7c3aed,#4f46e5);
+    color: white; font-size: 12px; font-weight: 700;
+    padding: 4px 16px; border-radius: 99px;
+    white-space: nowrap;
+  }
+
+  .plan-name {
+    font-size: 15px; font-weight: 700; margin-bottom: 4px;
+  }
+  .card.trial    .plan-name { color: #6b7280; }
+  .card.starter  .plan-name { color: #7c3aed; }
+  .card.pro      .plan-name { color: #4f46e5; }
+  .card.enterprise .plan-name { color: #0ea5e9; }
+
+  .price-wrap { margin-bottom: 4px; }
+  .price-main { font-size: 32px; font-weight: 800; color: #111827; line-height: 1; }
+  .price-unit { font-size: 13px; color: #6b7280; font-weight: 500; }
+  .price-old  { font-size: 12px; color: #9ca3af; text-decoration: line-through; margin-right: 6px; }
+  .discount-badge {
+    display: inline-block;
+    background: #fee2e2; color: #dc2626;
+    font-size: 11px; font-weight: 700; padding: 1px 7px; border-radius: 99px;
+  }
+
+  .divider { border: none; border-top: 1px solid #f3f4f6; margin: 14px 0; }
+
+  .feature-list { list-style: none; space-y: 6px; }
+  .feature-list li {
+    display: flex; align-items: flex-start; gap: 8px;
+    font-size: 13px; color: #374151;
+    padding: 4px 0;
+    line-height: 1.4;
+  }
+  .check { color: #10b981; font-size: 15px; flex-shrink: 0; margin-top: 1px; }
+  .check.purple { color: #7c3aed; }
+  .check.blue   { color: #4f46e5; }
+  .check.sky    { color: #0ea5e9; }
+
+  .highlight {
+    font-weight: 700;
+    color: #7c3aed;
+  }
+  .card.pro .highlight   { color: #4f46e5; }
+  .card.enterprise .highlight { color: #0ea5e9; }
+
+  .btn {
+    display: block; text-align: center;
+    margin-top: 20px; padding: 11px;
+    border-radius: 12px; font-size: 14px; font-weight: 700;
+    border: none; cursor: pointer; text-decoration: none;
+  }
+  .btn-trial      { background: #f3f4f6; color: #374151; }
+  .btn-starter    { background: linear-gradient(90deg,#7c3aed,#6d28d9); color: white; }
+  .btn-pro        { background: linear-gradient(90deg,#4f46e5,#7c3aed); color: white; box-shadow: 0 4px 14px rgba(99,102,241,.35); }
+  .btn-enterprise { background: linear-gradient(90deg,#0ea5e9,#0284c7); color: white; }
+
+  .target-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    max-width: 960px;
+    margin: 0 auto 36px;
+    text-align: center;
+  }
+  .target-item { font-size: 13px; color: #6b7280; font-weight: 600; padding: 6px 0; }
+  .target-dot {
+    width: 12px; height: 12px; border-radius: 50%;
+    margin: 0 auto 6px;
+  }
+
+  /* ===== TAGLINE BANNER ===== */
+  .tagline-banner {
+    max-width: 960px; margin: 0 auto 36px;
+    background: linear-gradient(90deg, #7c3aed, #4f46e5, #0ea5e9);
+    border-radius: 16px; padding: 18px 28px;
+    color: white; text-align: center;
+    font-size: 18px; font-weight: 700;
+  }
+  .tagline-banner span { color: #fbbf24; }
+
+  /* ===== FEATURES GRID ===== */
+  .features-section {
+    max-width: 960px; margin: 0 auto;
+  }
+  .features-title {
+    text-align: center; font-size: 20px; font-weight: 800;
+    color: #1e1b4b; margin-bottom: 20px;
+  }
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+  .feat-box {
+    background: white;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+  }
+  .feat-box-title {
+    font-size: 14px; font-weight: 800; color: #1e1b4b;
+    margin-bottom: 12px;
+    display: flex; align-items: center; gap-6px;
+    border-bottom: 2px solid #e0e7ff; padding-bottom: 8px;
+  }
+  .feat-box-title .icon { margin-right: 8px; font-size: 16px; }
+  .feat-item {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 13px; color: #374151;
+    padding: 5px 0;
+    border-bottom: 1px dashed #f3f4f6;
+  }
+  .feat-item:last-child { border-bottom: none; }
+  .feat-icon { font-size: 15px; }
+
+  .commission-note {
+    max-width: 960px; margin: 24px auto 0;
+    background: #fef3c7; border: 1px solid #fbbf24;
+    border-radius: 12px; padding: 14px 20px;
+    font-size: 13px; color: #92400e;
+    display: flex; align-items: flex-start; gap: 10px;
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="logo">
+    <div class="logo-icon">U</div>
+    <div class="logo-text">UP<span>Skills</span></div>
+  </div>
+  <br/>
+  <div class="badge">Pricing & Core Feature</div>
+  <p class="subtitle">แพลตฟอร์มจัดการคอร์สเรียนออนไลน์สำหรับสถาบันและโรงเรียนกวดวิชา</p>
+</div>
+
+<!-- PLAN CARDS -->
+<div class="plans">
+
+  <!-- Trial -->
+  <div class="card trial">
+    <div class="plan-name">Trial</div>
+    <div class="price-wrap">
+      <span class="price-main">ฟรี</span>
+    </div>
+    <div style="font-size:12px;color:#9ca3af;margin-top:2px;">ทดลองใช้ 30 วัน</div>
+    <hr class="divider"/>
+    <ul class="feature-list">
+      <li><span class="check">✓</span> คอร์สสูงสุด <strong>3 คอร์ส</strong></li>
+      <li><span class="check">✓</span> นักเรียนสูงสุด <strong>50 คน</strong></li>
+      <li><span class="check">✓</span> <strong>1 สาขา</strong></li>
+      <li><span class="check">✓</span> ระบบจองและชำระเงิน</li>
+      <li><span class="check">✓</span> ระบบ QR Code</li>
+      <li><span class="check">✓</span> Dashboard พื้นฐาน</li>
+      <li><span class="check">✓</span> Commission <span class="highlight">10%</span></li>
+    </ul>
+    <a class="btn btn-trial">ทดลองใช้ฟรี</a>
+  </div>
+
+  <!-- Starter -->
+  <div class="card starter">
+    <div class="plan-name">Starter</div>
+    <div class="price-wrap">
+      <span class="price-main">990</span>
+      <span class="price-unit"> บาท / เดือน</span>
+    </div>
+    <div style="margin-top:3px;">
+      <span class="price-old">1,188 บาท</span>
+      <span class="discount-badge">-17%</span>
+    </div>
+    <hr class="divider"/>
+    <ul class="feature-list">
+      <li><span class="check purple">✓</span> คอร์สสูงสุด <strong>10 คอร์ส</strong></li>
+      <li><span class="check purple">✓</span> นักเรียนสูงสุด <strong>200 คน</strong></li>
+      <li><span class="check purple">✓</span> สูงสุด <strong>3 สาขา</strong></li>
+      <li><span class="check purple">✓</span> ทุกฟีเจอร์ Trial</li>
+      <li><span class="check purple">✓</span> ระบบจัดการเนื้อหา</li>
+      <li><span class="check purple">✓</span> รายงานมากกว่า 10 รายการ</li>
+      <li><span class="check purple">✓</span> Commission <span class="highlight">8%</span></li>
+    </ul>
+    <a class="btn btn-starter">สั่งซื้อเลย!</a>
+  </div>
+
+  <!-- Pro -->
+  <div class="card pro">
+    <div class="popular-badge">⭐ แนะนำ</div>
+    <div class="plan-name">Pro</div>
+    <div class="price-wrap">
+      <span class="price-main">2,490</span>
+      <span class="price-unit"> บาท / เดือน</span>
+    </div>
+    <div style="margin-top:3px;">
+      <span class="price-old">2,988 บาท</span>
+      <span class="discount-badge">-17%</span>
+    </div>
+    <hr class="divider"/>
+    <ul class="feature-list">
+      <li><span class="check blue">✓</span> คอร์สสูงสุด <strong>50 คอร์ส</strong></li>
+      <li><span class="check blue">✓</span> นักเรียนสูงสุด <strong>1,000 คน</strong></li>
+      <li><span class="check blue">✓</span> สูงสุด <strong>10 สาขา</strong></li>
+      <li><span class="check blue">✓</span> ทุกฟีเจอร์ Starter</li>
+      <li><span class="check blue">✓</span> Custom Branding / โลโก้</li>
+      <li><span class="check blue">✓</span> White-Label Mode</li>
+      <li><span class="check blue">✓</span> Commission <span class="highlight" style="color:#4f46e5">5%</span></li>
+    </ul>
+    <a class="btn btn-pro">สั่งซื้อเลย!</a>
+  </div>
+
+  <!-- Enterprise -->
+  <div class="card enterprise">
+    <div class="plan-name">Enterprise</div>
+    <div class="price-wrap">
+      <span class="price-main" style="font-size:22px;line-height:1.4;">ติดต่อ</span>
+    </div>
+    <div style="font-size:12px;color:#9ca3af;margin-top:2px;">ราคาพิเศษสำหรับองค์กร</div>
+    <hr class="divider"/>
+    <ul class="feature-list">
+      <li><span class="check sky">✓</span> คอร์ส <strong>ไม่จำกัด</strong></li>
+      <li><span class="check sky">✓</span> นักเรียน <strong>ไม่จำกัด</strong></li>
+      <li><span class="check sky">✓</span> สาขา <strong>ไม่จำกัด</strong></li>
+      <li><span class="check sky">✓</span> ทุกฟีเจอร์ Pro</li>
+      <li><span class="check sky">✓</span> Custom Domain</li>
+      <li><span class="check sky">✓</span> SLA & Priority Support</li>
+      <li><span class="check sky">✓</span> Commission <span style="color:#0ea5e9;font-weight:700">3%</span></li>
+    </ul>
+    <a class="btn btn-enterprise">ติดต่อทีมงาน</a>
+  </div>
+
+</div>
+
+<!-- TARGET ROW -->
+<div class="target-row">
+  <div class="target-item">
+    <div class="target-dot" style="background:#e5e7eb"></div>
+    เหมาะสำหรับสถาบันเปิดใหม่
+  </div>
+  <div class="target-item">
+    <div class="target-dot" style="background:#7c3aed"></div>
+    โรงเรียนกวดวิชาขนาดเล็ก
+  </div>
+  <div class="target-item">
+    <div class="target-dot" style="background:#4f46e5"></div>
+    สถาบันที่กำลังเติบโต
+  </div>
+  <div class="target-item">
+    <div class="target-dot" style="background:#0ea5e9"></div>
+    เชน / แฟรนไชส์
+  </div>
+</div>
+
+<!-- TAGLINE BANNER -->
+<div class="tagline-banner">
+  <span>"ทุกแพ็คเกจ"</span> รองรับฟังก์ชันบริหารคอร์สครบวงจร
+</div>
+
+<!-- FEATURES GRID -->
+<div class="features-section">
+  <div class="features-title">ฟีเจอร์ครบครัน ทุกแพ็คเกจ</div>
+  <div class="features-grid">
+
+    <div class="feat-box">
+      <div class="feat-box-title"><span class="icon">🎓</span> การจัดการคอร์ส</div>
+      <div class="feat-item"><span class="feat-icon">📚</span> สร้างและจัดการคอร์สออนไลน์</div>
+      <div class="feat-item"><span class="feat-icon">🪑</span> ระบบจองที่นั่งแบบ Cinema</div>
+      <div class="feat-item"><span class="feat-icon">📅</span> จัดตารางเรียน / ตารางสอน</div>
+      <div class="feat-item"><span class="feat-icon">📹</span> แนบคลิปวิดีโอ / YouTube</div>
+      <div class="feat-item"><span class="feat-icon">📄</span> ไฟล์ PDF / Ebook</div>
+      <div class="feat-item"><span class="feat-icon">🖼️</span> Smart PPT / สื่อการสอน</div>
+    </div>
+
+    <div class="feat-box">
+      <div class="feat-box-title"><span class="icon">💳</span> การขายและชำระเงิน</div>
+      <div class="feat-item"><span class="feat-icon">📱</span> ระบบสแกน QR Code</div>
+      <div class="feat-item"><span class="feat-icon">🧾</span> แนบสลิปอัตโนมัติ</div>
+      <div class="feat-item"><span class="feat-icon">✅</span> อนุมัติการชำระ (Admin)</div>
+      <div class="feat-item"><span class="feat-icon">💰</span> ติดตามรายได้รายคอร์ส</div>
+      <div class="feat-item"><span class="feat-icon">🏦</span> ตั้งค่าบัญชีธนาคาร</div>
+      <div class="feat-item"><span class="feat-icon">📊</span> รายงานรายได้</div>
+    </div>
+
+    <div class="feat-box">
+      <div class="feat-box-title"><span class="icon">👥</span> การจัดการผู้ใช้</div>
+      <div class="feat-item"><span class="feat-icon">🙋</span> สมัครสมาชิก / อนุมัติ</div>
+      <div class="feat-item"><span class="feat-icon">🎓</span> บทบาท: นักเรียน / ครู / แอดมิน</div>
+      <div class="feat-item"><span class="feat-icon">📋</span> ตารางเรียนส่วนตัว</div>
+      <div class="feat-item"><span class="feat-icon">🔔</span> แจ้งเตือนสถานะการจอง</div>
+      <div class="feat-item"><span class="feat-icon">🏫</span> จัดการหลายสาขา</div>
+      <div class="feat-item"><span class="feat-icon">🔒</span> ระบบล็อกอิน JWT</div>
+    </div>
+
+    <div class="feat-box">
+      <div class="feat-box-title"><span class="icon">🎨</span> Branding & ระบบ</div>
+      <div class="feat-item"><span class="feat-icon">🖼️</span> อัปโหลดโลโก้ / Favicon</div>
+      <div class="feat-item"><span class="feat-icon">🎨</span> เลือกสีหลักของแพลตฟอร์ม</div>
+      <div class="feat-item"><span class="feat-icon">🏷️</span> White-Label (ซ่อน UPSkills)</div>
+      <div class="feat-item"><span class="feat-icon">🌐</span> Subdomain & Custom Domain</div>
+      <div class="feat-item"><span class="feat-icon">📢</span> จัดการแบนเนอร์</div>
+      <div class="feat-item"><span class="feat-icon">⚙️</span> ตั้งค่าข้อมูลทางการเงิน</div>
+    </div>
+
+    <div class="feat-box">
+      <div class="feat-box-title"><span class="icon">📈</span> Dashboard & รายงาน</div>
+      <div class="feat-item"><span class="feat-icon">📊</span> ภาพรวมรายได้ / จำนวนจอง</div>
+      <div class="feat-item"><span class="feat-icon">📉</span> กราฟรายได้รายเดือน</div>
+      <div class="feat-item"><span class="feat-icon">🏆</span> คอร์สยอดนิยม</div>
+      <div class="feat-item"><span class="feat-icon">👤</span> สมาชิกใหม่รายวัน</div>
+      <div class="feat-item"><span class="feat-icon">💵</span> Commission & Payout</div>
+      <div class="feat-item"><span class="feat-icon">🔍</span> ตรวจสอบการชำระเงิน</div>
+    </div>
+
+    <div class="feat-box">
+      <div class="feat-box-title"><span class="icon">🛡️</span> Super Admin (เจ้าของแพลตฟอร์ม)</div>
+      <div class="feat-item"><span class="feat-icon">🏢</span> จัดการสถาบันทั้งหมด</div>
+      <div class="feat-item"><span class="feat-icon">📦</span> ตั้งค่าแพ็คเกจ / วันหมดอายุ</div>
+      <div class="feat-item"><span class="feat-icon">💹</span> ดู Commission รายสถาบัน</div>
+      <div class="feat-item"><span class="feat-icon">💸</span> บันทึก Payout รายเดือน</div>
+      <div class="feat-item"><span class="feat-icon">📡</span> สถิติรวมทั้งแพลตฟอร์ม</div>
+      <div class="feat-item"><span class="feat-icon">⚡</span> ระงับ / เปิดใช้งานสถาบัน</div>
+    </div>
+
+  </div>
+
+  <!-- Commission note -->
+  <div class="commission-note">
+    <span style="font-size:20px">💡</span>
+    <div>
+      <strong>หมายเหตุ Commission:</strong> ระบบจะหัก Commission อัตโนมัติจากยอดการจองที่ได้รับการยืนยัน —
+      Trial 10% · Starter 8% · Pro 5% · Enterprise 3%
+      ยิ่งอัปเกรดแผน ยิ่งเสีย Commission น้อยลง
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>
