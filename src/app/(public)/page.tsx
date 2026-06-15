@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { connectDB } from "@/lib/mongodb";
 import Banner from "@/models/Banner";
 import Institution from "@/models/Institution";
@@ -45,11 +46,11 @@ export default async function HomePage() {
 
       {/* ─── Hero / Banner ─── */}
       {banners.length > 0 ? (
-        <div className="-mt-16">
+        <div>
           <BannerSlider banners={banners} institutionNames={institutionNames} />
         </div>
       ) : (
-        <section className="-mt-16 relative bg-gradient-to-br from-indigo-700 via-indigo-800 to-violet-900 text-white px-4 pt-36 pb-24 overflow-hidden">
+        <section className="relative bg-gradient-to-br from-indigo-700 via-indigo-800 to-violet-900 text-white px-4 py-24 overflow-hidden">
           <div className="absolute inset-0 opacity-10" style={{ backgroundImage: "radial-gradient(circle at 20% 50%, white 1px, transparent 1px), radial-gradient(circle at 80% 20%, white 1px, transparent 1px)", backgroundSize: "60px 60px" }} />
           <div className="max-w-5xl mx-auto text-center relative z-10">
             <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-4 py-1.5 text-sm font-medium mb-6">
@@ -102,20 +103,23 @@ export default async function HomePage() {
       </section>
 
       {/* ─── รู้จัก UPSkill ─── */}
-      <section className="py-20 px-4 bg-gray-50">
+      <section className="py-28 px-4 bg-gray-50">
         <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-14">
-            <span className="text-xs font-bold tracking-widest text-indigo-500 uppercase">รู้จัก UPSkill</span>
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mt-2">
+          <div className="text-center mb-16">
+            <div className="inline-flex items-center gap-3 justify-center">
+              <span className="text-2xl font-bold tracking-widest text-indigo-500 uppercase">รู้จัก</span>
+              <Image src="/logo.png" alt="UPSkill" width={130} height={44} className="object-contain" />
+            </div>
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mt-3 leading-tight">
               แพลตฟอร์มที่ออกแบบมา<br />เพื่อสถาบันสอนพิเศษโดยเฉพาะ
             </h2>
-            <p className="text-gray-500 mt-4 max-w-2xl mx-auto">
+            <p className="text-gray-500 mt-5 max-w-2xl mx-auto text-base leading-relaxed">
               UPSkill ไม่ใช่แค่ระบบ LMS ทั่วไป แต่คือโซลูชั่นที่เข้าใจปัญหาจริงของสถาบันสอนพิเศษไทย
               ออกแบบมาเพื่อให้ผู้บริหาร ครู และนักเรียนทำงานร่วมกันได้อย่างราบรื่น
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-8 items-center">
+          <div className="grid md:grid-cols-2 gap-10 items-center">
             {/* Left — feature list */}
             <div className="space-y-5">
               {[
@@ -124,13 +128,13 @@ export default async function HomePage() {
                 { icon: BarChart3,     title: "Dashboard ติดตามรายได้และสมาชิก", desc: "ดูสถิติการจอง รายได้รายเดือน จำนวนนักเรียนแบบ Real-time ในหน้าเดียว" },
                 { icon: Layers,        title: "รองรับหลายสถาบันในระบบเดียว", desc: "ขยายธุรกิจได้โดยไม่ต้องสร้างระบบใหม่ แต่ละสถาบันมีข้อมูลแยกกันชัดเจน" },
               ].map(({ icon: Icon, title, desc }) => (
-                <div key={title} className="flex gap-4 p-4 bg-white rounded-2xl border border-gray-100 hover:border-indigo-100 hover:shadow-sm transition-all">
-                  <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center shrink-0">
-                    <Icon className="w-5 h-5 text-indigo-600" />
+                <div key={title} className="flex gap-5 p-5 bg-white rounded-2xl border border-gray-100 hover:border-indigo-100 hover:shadow-md transition-all">
+                  <div className="w-12 h-12 rounded-xl bg-indigo-50 flex items-center justify-center shrink-0">
+                    <Icon className="w-6 h-6 text-indigo-600" />
                   </div>
                   <div>
-                    <p className="font-semibold text-gray-900 text-sm">{title}</p>
-                    <p className="text-gray-500 text-xs mt-0.5 leading-relaxed">{desc}</p>
+                    <p className="font-bold text-gray-900 text-base">{title}</p>
+                    <p className="text-gray-500 text-sm mt-1 leading-relaxed">{desc}</p>
                   </div>
                 </div>
               ))}
@@ -173,7 +177,7 @@ export default async function HomePage() {
       <section className="py-20 px-4 bg-white">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-14">
-            <span className="text-xs font-bold tracking-widest text-red-500 uppercase">ปัญหาที่พบบ่อย</span>
+            <span className="text-2xl font-bold tracking-widest text-red-500 uppercase">ปัญหาที่พบบ่อย</span>
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mt-2">
               TOP 3 ปัญหาสถาบันสอนพิเศษออนไลน์<br />ที่ต้องเจอ — และ UPSkill แก้ได้
             </h2>
@@ -232,7 +236,7 @@ export default async function HomePage() {
       <section className="py-20 px-4 bg-gradient-to-br from-slate-900 to-indigo-950 text-white">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-14">
-            <span className="text-xs font-bold tracking-widest text-indigo-400 uppercase">บริการของเรา</span>
+            <span className="text-2xl font-bold tracking-widest text-indigo-400 uppercase">บริการของเรา</span>
             <h2 className="text-3xl md:text-4xl font-bold mt-2">
               ประเภทสถาบัน<br />ที่ UPSkill ให้บริการ
             </h2>
@@ -262,7 +266,7 @@ export default async function HomePage() {
       <section className="py-20 px-4 bg-white">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-14">
-            <span className="text-xs font-bold tracking-widest text-indigo-500 uppercase">ฟีเจอร์ครบครัน</span>
+            <span className="text-2xl font-bold tracking-widest text-indigo-500 uppercase">ฟีเจอร์ครบครัน</span>
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mt-2">
               โปรแกรมที่ตอบโจทย์<br />ผู้ใช้งานมากที่สุด
             </h2>
@@ -299,9 +303,12 @@ export default async function HomePage() {
       <section className="py-20 px-4 bg-gray-50">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-14">
-            <span className="text-xs font-bold tracking-widest text-indigo-500 uppercase">ความไว้วางใจ</span>
+            <span className="text-2xl font-bold tracking-widest text-indigo-500 uppercase">ความไว้วางใจ</span>
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mt-2">
-              ลูกค้าที่ไว้วางใจ UPSkill
+              <span className="inline-flex items-center gap-3 justify-center flex-wrap">
+                ลูกค้าที่ไว้วางใจ
+                <Image src="/logo.png" alt="UPSkill" width={130} height={44} className="object-contain inline-block" />
+              </span>
             </h2>
             <p className="text-gray-500 mt-3 text-sm">เสียงจากสถาบันที่ใช้งานจริง</p>
           </div>
@@ -353,7 +360,7 @@ export default async function HomePage() {
       <section className="py-20 px-4 bg-white">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-14">
-            <span className="text-xs font-bold tracking-widest text-indigo-500 uppercase">คุณภาพ</span>
+            <span className="text-2xl font-bold tracking-widest text-indigo-500 uppercase">คุณภาพ</span>
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mt-2">
               ยึดมั่นในคุณภาพ<br />การให้บริการ
             </h2>
