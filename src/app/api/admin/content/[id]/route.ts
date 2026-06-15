@@ -8,7 +8,7 @@ import CourseContent from "@/models/CourseContent";
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const auth = await getAuthUser();
-    if (!auth || (auth.role !== "admin" && auth.role !== "teacher")) {
+    if (!auth || (auth.role !== "admin" && auth.role !== "super_admin" && auth.role !== "teacher")) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
     const { id } = await params;
@@ -26,7 +26,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const auth = await getAuthUser();
-    if (!auth || (auth.role !== "admin" && auth.role !== "teacher")) {
+    if (!auth || (auth.role !== "admin" && auth.role !== "super_admin" && auth.role !== "teacher")) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
     const { id } = await params;
@@ -50,7 +50,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
 export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const auth = await getAuthUser();
-    if (!auth || auth.role !== "admin") {
+    if (!auth || auth.role !== "admin" && auth.role !== "super_admin") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
     const { id } = await params;

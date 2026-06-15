@@ -15,7 +15,7 @@ import CourseContent from "@/models/CourseContent";
 export async function POST() {
   try {
     const auth = await getAuthUser();
-    if (!auth || auth.role !== "admin") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (!auth || auth.role !== "admin" && auth.role !== "super_admin") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     await connectDB();
 
@@ -63,7 +63,7 @@ export async function POST() {
 export async function GET() {
   try {
     const auth = await getAuthUser();
-    if (!auth || auth.role !== "admin") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (!auth || auth.role !== "admin" && auth.role !== "super_admin") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     await connectDB();
     const institutions = await Institution.find().lean();

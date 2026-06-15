@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
-import { getTenantId } from "@/lib/tenant";
 import User from "@/models/User";
 
 export async function POST(req: NextRequest) {
   try {
-    const { name, email, role, gradeLevel, teacherId, teacherName, contactChannel, contactId } = await req.json();
+    const { name, email, role, gradeLevel, teacherId, teacherName, contactChannel, contactId, institutionId } = await req.json();
 
     if (!name || !email) {
       return NextResponse.json({ error: "กรุณากรอกข้อมูลให้ครบ" }, { status: 400 });
@@ -24,7 +23,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "อีเมลนี้ถูกใช้งานแล้ว" }, { status: 400 });
     }
 
-    const institutionId = await getTenantId(req);
     const resolvedGradeLevel = userRole === "teacher" ? "ทุกระดับชั้น" : (gradeLevel ?? "");
 
     await User.create({

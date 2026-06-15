@@ -7,7 +7,7 @@ import User from "@/models/User";
 export async function GET(req: NextRequest) {
   try {
     const auth = await getAuthUser();
-    if (!auth || (auth.role !== "admin" && auth.role !== "teacher"))
+    if (!auth || (auth.role !== "admin" && auth.role !== "super_admin" && auth.role !== "teacher"))
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     await connectDB();
     const institutionId = await resolveInstitutionId(req, auth.institutionId);

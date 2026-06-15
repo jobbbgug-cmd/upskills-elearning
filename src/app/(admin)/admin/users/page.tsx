@@ -1,22 +1,25 @@
 "use client";
-import { useState, useEffect } from "react";
-import { Search, Shield, User, GraduationCap, Trash2, ChevronDown, Pencil, X, Eye, EyeOff, Copy, Check } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import Image from "next/image";
+import { Search, Shield, ShieldCheck, User, GraduationCap, Trash2, ChevronDown, Pencil, X, Eye, EyeOff, Copy, Check, Camera } from "lucide-react";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 
 interface UserItem {
   _id: string;
   name: string;
   email: string;
-  role: "student" | "teacher" | "admin";
+  role: "student" | "teacher" | "admin" | "super_admin";
   gradeLevel?: string;
+  profileImage?: string;
   status: "pending" | "approved" | "rejected";
   createdAt: string;
 }
 
 const ROLES = [
-  { value: "student", label: "นักเรียน", color: "bg-blue-50 text-blue-700 border-blue-200",      badge: "bg-blue-100 text-blue-700",      icon: User },
-  { value: "teacher", label: "ครู",      color: "bg-green-50 text-green-700 border-green-200",   badge: "bg-green-100 text-green-700",    icon: GraduationCap },
-  { value: "admin",   label: "Admin",    color: "bg-purple-50 text-purple-700 border-purple-200", badge: "bg-purple-100 text-purple-700",  icon: Shield },
+  { value: "student",     label: "นักเรียน",    color: "bg-blue-50 text-blue-700 border-blue-200",      badge: "bg-blue-100 text-blue-700",      icon: User },
+  { value: "teacher",     label: "ครู",          color: "bg-green-50 text-green-700 border-green-200",   badge: "bg-green-100 text-green-700",    icon: GraduationCap },
+  { value: "admin",       label: "Admin",        color: "bg-purple-50 text-purple-700 border-purple-200", badge: "bg-purple-100 text-purple-700", icon: Shield },
+  { value: "super_admin", label: "Super Admin",  color: "bg-rose-50 text-rose-700 border-rose-200",       badge: "bg-rose-100 text-rose-700",     icon: ShieldCheck },
 ] as const;
 
 const GRADE_LEVELS = [
@@ -38,33 +41,58 @@ export default function AdminUsersPage() {
   const [users, setUsers]           = useState<UserItem[]>([]);
   const [loading, setLoading]       = useState(true);
   const [search, setSearch]         = useState("");
-  const [filterRole, setFilterRole] = useState<"all" | "student" | "teacher" | "admin">("all");
+  const [filterRole, setFilterRole] = useState<"all" | "student" | "teacher" | "admin" | "super_admin">("all");
   const [updating, setUpdating]     = useState<string | null>(null);
+  const [myRole, setMyRole]         = useState<string>("");
 
   // Edit modal
   const [editUser, setEditUser]     = useState<UserItem | null>(null);
-  const [editForm, setEditForm]     = useState({ name: "", email: "", role: "student" as UserItem["role"], gradeLevel: "", password: "" });
+  const [editForm, setEditForm]     = useState<{ name: string; email: string; role: UserItem["role"]; gradeLevel: string; password: string; profileImage: string }>({ name: "", email: "", role: "student", gradeLevel: "", password: "", profileImage: "" });
   const [showPass, setShowPass]     = useState(false);
   const [saveError, setSaveError]   = useState("");
   const [copied, setCopied]         = useState(false);
+  const [uploadingImg, setUploadingImg] = useState(false);
+  const fileInputRef                = useRef<HTMLInputElement>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<{ open: boolean; id: string; name: string }>({ open: false, id: "", name: "" });
 
   const load = async () => {
     setLoading(true);
-    const res = await fetch("/api/admin/users");
-    if (res.ok) setUsers(await res.json());
+    const [usersRes, meRes] = await Promise.all([fetch("/api/admin/users"), fetch("/api/auth/me")]);
+    if (usersRes.ok) setUsers(await usersRes.json());
+    if (meRes.ok) { const d = await meRes.json(); setMyRole(d.user?.role ?? ""); }
     setLoading(false);
   };
 
   useEffect(() => { load(); }, []);
 
+  useEffect(() => {
+    if (editUser) document.body.style.overflow = "hidden";
+    else document.body.style.overflow = "";
+    return () => { document.body.style.overflow = ""; };
+  }, [editUser]);
+
+  // super_admin-only role — hide from regular admin
+  const visibleRoles = myRole === "super_admin" ? ROLES : ROLES.filter((r) => r.value !== "super_admin");
+
   const openEdit = (u: UserItem) => {
     setEditUser(u);
-    const gradeLevel = u.role !== "student" ? "ทุกระดับชั้น" : (u.gradeLevel ?? "");
-    setEditForm({ name: u.name, email: u.email, role: u.role, gradeLevel, password: "" });
+    const gradeLevel = u.role === "student" ? (u.gradeLevel ?? "") : "ทุกระดับชั้น";
+    setEditForm({ name: u.name, email: u.email, role: u.role, gradeLevel, password: "", profileImage: u.profileImage ?? "" });
     setShowPass(false);
     setSaveError("");
     setCopied(false);
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingImg(true);
+    const form = new FormData();
+    form.append("file", file);
+    const res = await fetch("/api/upload", { method: "POST", body: form });
+    const data = await res.json();
+    if (res.ok && data.url) setEditForm((f) => ({ ...f, profileImage: data.url }));
+    setUploadingImg(false);
   };
 
   const handleSave = async () => {
@@ -76,6 +104,7 @@ export default function AdminUsersPage() {
       email: editForm.email,
       role: editForm.role,
       gradeLevel: editForm.gradeLevel,
+      profileImage: editForm.profileImage,
     };
     if (editForm.password) body.password = editForm.password;
 
@@ -114,14 +143,17 @@ export default function AdminUsersPage() {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const filtered = users.filter((u) => {
+  // Hide super_admin users from non-super_admin admins
+  const visibleUsers = myRole === "super_admin" ? users : users.filter((u) => u.role !== "super_admin");
+
+  const filtered = visibleUsers.filter((u) => {
     const matchRole   = filterRole === "all" || u.role === filterRole;
     const matchSearch = u.name.toLowerCase().includes(search.toLowerCase()) || u.email.toLowerCase().includes(search.toLowerCase());
     return matchRole && matchSearch;
   });
 
-  const counts = { student: 0, teacher: 0, admin: 0 };
-  users.forEach((u) => { if (u.role in counts) counts[u.role as keyof typeof counts]++; });
+  const counts = { student: 0, teacher: 0, admin: 0, super_admin: 0 };
+  visibleUsers.forEach((u) => { if (u.role in counts) counts[u.role as keyof typeof counts]++; });
 
   const inputCls = "w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white";
 
@@ -142,12 +174,12 @@ export default function AdminUsersPage() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-4 gap-4 mb-8">
+      <div className="grid gap-4 mb-8" style={{ gridTemplateColumns: `repeat(${visibleRoles.length + 1}, 1fr)` }}>
         <div className="bg-gray-50 rounded-2xl p-5">
-          <div className="text-3xl font-bold text-gray-900">{users.length}</div>
+          <div className="text-3xl font-bold text-gray-900">{visibleUsers.length}</div>
           <div className="text-sm text-gray-500 mt-1">ทั้งหมด</div>
         </div>
-        {ROLES.map((r) => {
+        {visibleRoles.map((r) => {
           const Icon = r.icon;
           return (
             <div key={r.value} className={`rounded-2xl p-5 ${r.badge}`}>
@@ -169,7 +201,7 @@ export default function AdminUsersPage() {
             className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white" />
         </div>
         <div className="flex gap-2">
-          {([{ value: "all", label: "ทั้งหมด" }, ...ROLES.map((r) => ({ value: r.value, label: r.label }))] as const).map((f) => (
+          {([{ value: "all", label: "ทั้งหมด" }, ...visibleRoles.map((r) => ({ value: r.value, label: r.label }))] as const).map((f) => (
             <button key={f.value} onClick={() => setFilterRole(f.value as typeof filterRole)}
               className={`px-4 py-2.5 rounded-xl text-sm font-medium transition-colors whitespace-nowrap ${filterRole === f.value ? "bg-indigo-600 text-white" : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"}`}>
               {f.label}
@@ -204,8 +236,12 @@ export default function AdminUsersPage() {
                   <tr key={u._id} className="hover:bg-gray-50 transition-colors">
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-3">
-                        <div className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 ${info.badge}`}>
-                          <Icon className="w-4 h-4" />
+                        <div className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 overflow-hidden ${!u.profileImage ? info.badge : ""}`}>
+                          {u.profileImage ? (
+                            <Image src={u.profileImage} alt={u.name} width={36} height={36} className="w-full h-full object-cover" />
+                          ) : (
+                            <Icon className="w-4 h-4" />
+                          )}
                         </div>
                         <div>
                           <p className="text-sm font-medium text-gray-900">{u.name}</p>
@@ -231,7 +267,7 @@ export default function AdminUsersPage() {
                         <select value={u.role} onChange={(e) => changeRole(u._id, e.target.value as UserItem["role"])}
                           disabled={updating === u._id}
                           className={`appearance-none pl-3 pr-8 py-1.5 rounded-lg text-sm font-medium border transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-50 ${info.color}`}>
-                          {ROLES.map((r) => <option key={r.value} value={r.value}>{r.label}</option>)}
+                          {visibleRoles.map((r) => <option key={r.value} value={r.value}>{r.label}</option>)}
                         </select>
                         <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 pointer-events-none text-gray-500" />
                       </div>
@@ -260,9 +296,9 @@ export default function AdminUsersPage() {
       {/* Edit Modal */}
       {editUser && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.4)" }}>
-          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md">
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md flex flex-col max-h-[90vh]">
             {/* Modal header */}
-            <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
+            <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100 shrink-0">
               <h2 className="text-lg font-bold text-gray-900">แก้ไขข้อมูลผู้ใช้</h2>
               <button onClick={() => setEditUser(null)} className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
                 <X className="w-5 h-5" />
@@ -270,7 +306,41 @@ export default function AdminUsersPage() {
             </div>
 
             {/* Modal body */}
-            <div className="px-6 py-5 space-y-4">
+            <div className="px-6 py-5 space-y-4 overflow-y-auto">
+              {/* Profile image upload */}
+              <div className="flex flex-col items-center gap-3">
+                <div className="relative">
+                  <div className={`w-20 h-20 rounded-full overflow-hidden flex items-center justify-center ${!editForm.profileImage ? `${roleInfo(editForm.role).badge}` : "bg-gray-100"}`}>
+                    {editForm.profileImage ? (
+                      <Image src={editForm.profileImage} alt="profile" width={80} height={80} className="w-full h-full object-cover" />
+                    ) : (
+                      <span className="text-2xl font-bold opacity-60">
+                        {editForm.name ? editForm.name[0].toUpperCase() : "?"}
+                      </span>
+                    )}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploadingImg}
+                    className="absolute bottom-0 right-0 w-7 h-7 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full flex items-center justify-center shadow transition-colors disabled:opacity-50"
+                  >
+                    <Camera className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+                <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
+                {uploadingImg && <p className="text-xs text-indigo-500">กำลังอัปโหลด...</p>}
+                {editForm.profileImage && (
+                  <button
+                    type="button"
+                    onClick={() => setEditForm((f) => ({ ...f, profileImage: "" }))}
+                    className="text-xs text-red-500 hover:underline"
+                  >
+                    ลบรูปภาพ
+                  </button>
+                )}
+              </div>
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">ชื่อ-นามสกุล</label>
                 <input value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
@@ -290,7 +360,7 @@ export default function AdminUsersPage() {
                     setEditForm({ ...editForm, role: newRole, gradeLevel: newGrade });
                   }}
                   className={inputCls}>
-                  {ROLES.map((r) => <option key={r.value} value={r.value}>{r.label}</option>)}
+                  {visibleRoles.map((r) => <option key={r.value} value={r.value}>{r.label}</option>)}
                 </select>
               </div>
 
@@ -356,7 +426,7 @@ export default function AdminUsersPage() {
             </div>
 
             {/* Modal footer */}
-            <div className="flex gap-3 px-6 py-5 border-t border-gray-100">
+            <div className="flex gap-3 px-6 py-5 border-t border-gray-100 shrink-0">
               <button onClick={handleSave} disabled={updating === editUser._id}
                 className="flex-1 py-2.5 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 disabled:opacity-50 transition-colors text-sm">
                 {updating === editUser._id ? "กำลังบันทึก..." : "บันทึก"}

@@ -3,7 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { Menu, X, User, LogOut, LayoutDashboard, CalendarDays } from "lucide-react";
+import { Menu, X, User, LogOut, LayoutDashboard, CalendarDays, ShieldCheck } from "lucide-react";
 import { IUser, IBranding } from "@/types";
 
 export default function Navbar() {
@@ -18,11 +18,14 @@ export default function Navbar() {
   useEffect(() => {
     fetch("/api/auth/me")
       .then((r) => r.json())
-      .then((d) => d.user && setUser(d.user))
-      .catch(() => {});
-    fetch("/api/branding")
-      .then((r) => r.json())
-      .then((d) => setBranding(d))
+      .then((d) => {
+        const u = d.user ?? null;
+        if (u) setUser(u);
+        const qs = u?.institutionId ? `?institutionId=${u.institutionId}` : "";
+        return fetch(`/api/branding${qs}`)
+          .then((r) => r.json())
+          .then((bd) => setBranding(bd));
+      })
       .catch(() => {});
   }, []);
 
@@ -107,20 +110,20 @@ export default function Navbar() {
                     ตารางเรียน
                   </Link>
                 )}
-                {user.role === "admin" && (
+                {(user.role === "admin" || user.role === "teacher") && (
                   <Link href="/admin" className={`flex items-center gap-1.5 text-sm font-medium px-3 py-2 rounded-lg transition-colors ${
                     transparent ? "text-white hover:bg-white/10" : "text-indigo-600 hover:bg-indigo-50"
                   }`}>
                     <User className="w-4 h-4" />
-                    Admin
+                    จัดการหลังบ้าน
                   </Link>
                 )}
-                {user.role === "teacher" && (
-                  <Link href="/dashboard" className={`flex items-center gap-1.5 text-sm font-medium px-3 py-2 rounded-lg transition-colors ${
-                    transparent ? "text-white hover:bg-white/10" : "text-green-600 hover:bg-green-50"
+                {user.role === "super_admin" && (
+                  <Link href="/super-admin" className={`flex items-center gap-1.5 text-sm font-medium px-3 py-2 rounded-lg transition-colors ${
+                    transparent ? "text-white hover:bg-white/10" : "text-rose-600 hover:bg-rose-50"
                   }`}>
-                    <User className="w-4 h-4" />
-                    ครู
+                    <ShieldCheck className="w-4 h-4" />
+                    จัดการหลังบ้าน
                   </Link>
                 )}
                 <button onClick={logout} className={`flex items-center gap-1.5 text-sm px-3 py-2 rounded-lg transition-colors ${
@@ -167,8 +170,11 @@ export default function Navbar() {
                 {user.role === "student" && (
                   <Link href="/dashboard/schedule" onClick={() => setMenuOpen(false)} className="block px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg">ตารางเรียน</Link>
                 )}
-                {user.role === "admin" && (
-                  <Link href="/admin" onClick={() => setMenuOpen(false)} className="block px-3 py-2 text-sm text-indigo-600 font-medium hover:bg-indigo-50 rounded-lg">Admin</Link>
+                {(user.role === "admin" || user.role === "teacher") && (
+                  <Link href="/admin" onClick={() => setMenuOpen(false)} className="block px-3 py-2 text-sm text-indigo-600 font-medium hover:bg-indigo-50 rounded-lg">จัดการหลังบ้าน</Link>
+                )}
+                {user.role === "super_admin" && (
+                  <Link href="/super-admin" onClick={() => setMenuOpen(false)} className="block px-3 py-2 text-sm text-rose-600 font-medium hover:bg-rose-50 rounded-lg">จัดการหลังบ้าน</Link>
                 )}
                 <button onClick={() => { logout(); setMenuOpen(false); }} className="block w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg">ออกจากระบบ</button>
               </>

@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
-import { Plus, Trash2, Upload, GripVertical, Eye, EyeOff, Monitor, Smartphone, Pencil } from "lucide-react";
+import { Plus, Trash2, Upload, GripVertical, Eye, EyeOff, Monitor, Smartphone, Pencil, Building2 } from "lucide-react";
 import { compressImage } from "@/lib/compressImage";
 import { IBanner } from "@/types";
 
@@ -12,6 +12,7 @@ const EMPTY_FORM = {
   mobileImageUrl: "",
   title: "",
   subtitle: "",
+  buttonType: "link" as "link" | "register",
   linkUrl: "",
   linkText: "ดูรายละเอียด",
   bgColor: "#1e1b4b",
@@ -24,13 +25,32 @@ export default function AdminBannersPage() {
   const [form, setForm] = useState(EMPTY_FORM);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [myRole, setMyRole] = useState("");
+  const [institutionNames, setInstitutionNames] = useState<Record<string, string>>({});
   const desktopFileRef = useRef<HTMLInputElement>(null);
   const mobileFileRef  = useRef<HTMLInputElement>(null);
 
   const load = async () => {
     setLoading(true);
-    const res = await fetch("/api/admin/banners");
-    if (res.ok) setBanners(await res.json());
+    const [bannersRes, meRes] = await Promise.all([
+      fetch("/api/admin/banners"),
+      fetch("/api/auth/me"),
+    ]);
+    if (bannersRes.ok) setBanners(await bannersRes.json());
+    if (meRes.ok) {
+      const d = await meRes.json();
+      const role = d.user?.role ?? "";
+      setMyRole(role);
+      if (role === "super_admin") {
+        const instRes = await fetch("/api/admin/institutions");
+        if (instRes.ok) {
+          const institutions = await instRes.json() as { _id: string; name: string }[];
+          const names: Record<string, string> = {};
+          institutions.forEach((i) => { names[i._id] = i.name; });
+          setInstitutionNames(names);
+        }
+      }
+    }
     setLoading(false);
   };
 
@@ -61,6 +81,7 @@ export default function AdminBannersPage() {
       mobileImageUrl: banner.mobileImageUrl || "",
       title: banner.title,
       subtitle: banner.subtitle,
+      buttonType: banner.buttonType ?? "link",
       linkUrl: banner.linkUrl,
       linkText: banner.linkText || "ดูรายละเอียด",
       bgColor: banner.bgColor || "#1e1b4b",
@@ -116,7 +137,11 @@ export default function AdminBannersPage() {
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">จัดการแบนเนอร์</h1>
-          <p className="text-gray-500 text-sm mt-1">แบนเนอร์สไลด์โชว์บนหน้าแรก</p>
+          <p className="text-gray-500 text-sm mt-1">
+            {myRole === "super_admin"
+              ? "แบนเนอร์ทั้งหมดของระบบ — กำหนดการแสดงผลได้"
+              : "แบนเนอร์ของสถาบันคุณ (การแสดงผลควบคุมโดย Super Admin)"}
+          </p>
         </div>
         <button
           onClick={() => { setEditingId(null); setForm(EMPTY_FORM); setShowForm(true); }}
@@ -241,23 +266,58 @@ export default function AdminBannersPage() {
                   className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
                 />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">ลิงก์ปุ่ม</label>
-                <input
-                  value={form.linkUrl}
-                  onChange={(e) => setForm({ ...form, linkUrl: e.target.value })}
-                  placeholder="https://... หรือ /courses"
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                />
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2">ประเภทปุ่ม</label>
+                <div className="flex gap-3">
+                  <label className={`flex-1 flex items-center gap-3 px-4 py-3 rounded-xl border-2 cursor-pointer transition-colors ${form.buttonType === "link" ? "border-indigo-500 bg-indigo-50" : "border-gray-200 hover:border-gray-300"}`}>
+                    <input type="radio" name="buttonType" value="link" checked={form.buttonType === "link"} onChange={() => setForm({ ...form, buttonType: "link" })} className="accent-indigo-600" />
+                    <div>
+                      <p className="text-sm font-semibold text-gray-800">ลิงก์ URL</p>
+                      <p className="text-xs text-gray-500">พาผู้ใช้ไปยัง URL ที่กำหนด</p>
+                    </div>
+                  </label>
+                  <label className={`flex-1 flex items-center gap-3 px-4 py-3 rounded-xl border-2 cursor-pointer transition-colors ${form.buttonType === "register" ? "border-green-500 bg-green-50" : "border-gray-200 hover:border-gray-300"}`}>
+                    <input type="radio" name="buttonType" value="register" checked={form.buttonType === "register"} onChange={() => setForm({ ...form, buttonType: "register" })} className="accent-green-600" />
+                    <div>
+                      <p className="text-sm font-semibold text-gray-800">สมัครสมาชิก</p>
+                      <p className="text-xs text-gray-500">เปิด popup ฟอร์มสมัครสมาชิกสถาบัน</p>
+                    </div>
+                  </label>
+                </div>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">ข้อความปุ่ม</label>
-                <input
-                  value={form.linkText}
-                  onChange={(e) => setForm({ ...form, linkText: e.target.value })}
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                />
-              </div>
+
+              {form.buttonType === "link" ? (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1.5">ลิงก์ปุ่ม</label>
+                    <input
+                      value={form.linkUrl}
+                      onChange={(e) => setForm({ ...form, linkUrl: e.target.value })}
+                      placeholder="https://... หรือ /courses"
+                      className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1.5">ข้อความปุ่ม</label>
+                    <input
+                      value={form.linkText}
+                      onChange={(e) => setForm({ ...form, linkText: e.target.value })}
+                      className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    />
+                  </div>
+                </>
+              ) : (
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">ข้อความปุ่ม</label>
+                  <input
+                    value={form.linkText}
+                    onChange={(e) => setForm({ ...form, linkText: e.target.value })}
+                    placeholder="สมัครสมาชิก"
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                  <p className="text-xs text-green-600 mt-1.5">เมื่อลูกค้ากดปุ่มนี้จะเปิดฟอร์มสมัครสมาชิกสถาบันของคุณอัตโนมัติ</p>
+                </div>
+              )}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">สีพื้นหลัง</label>
                 <div className="flex items-center gap-2 flex-wrap">
@@ -330,9 +390,25 @@ export default function AdminBannersPage() {
 
               {/* Info */}
               <div className="flex-1 min-w-0">
-                <p className="font-medium text-gray-900 truncate">{banner.title || "(ไม่มีหัวข้อ)"}</p>
+                {/* Institution label — super_admin only */}
+                {myRole === "super_admin" && (
+                  <div className="flex items-center gap-1 mb-1">
+                    <Building2 className="w-3 h-3 text-violet-400 shrink-0" />
+                    <span className="text-xs text-violet-600 font-medium truncate">
+                      {banner.institutionId
+                        ? (institutionNames[banner.institutionId] ?? "สถาบัน")
+                        : "ระดับแพลตฟอร์ม"}
+                    </span>
+                  </div>
+                )}
+                <div className="flex items-center gap-2">
+                  <p className="font-medium text-gray-900 truncate">{banner.title || "(ไม่มีหัวข้อ)"}</p>
+                  {banner.buttonType === "register" && (
+                    <span className="shrink-0 text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-semibold">สมัครสมาชิก</span>
+                  )}
+                </div>
                 <p className="text-sm text-gray-400 truncate mt-0.5">{banner.subtitle}</p>
-                {banner.linkUrl && (
+                {banner.buttonType !== "register" && banner.linkUrl && (
                   <p className="text-xs text-indigo-500 mt-1 truncate">{banner.linkUrl}</p>
                 )}
               </div>
@@ -356,13 +432,23 @@ export default function AdminBannersPage() {
                 >
                   <Pencil className="w-4 h-4" />
                 </button>
-                <button
-                  onClick={() => toggleActive(banner)}
-                  className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
-                  title={banner.isActive ? "ซ่อนแบนเนอร์" : "แสดงแบนเนอร์"}
-                >
-                  {banner.isActive ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
+                {/* Toggle visibility — super_admin only */}
+                {myRole === "super_admin" ? (
+                  <button
+                    onClick={() => toggleActive(banner)}
+                    className={`p-2 rounded-lg transition-colors ${banner.isActive ? "text-green-600 hover:text-red-500 hover:bg-red-50" : "text-gray-400 hover:text-green-600 hover:bg-green-50"}`}
+                    title={banner.isActive ? "ซ่อนแบนเนอร์" : "แสดงแบนเนอร์"}
+                  >
+                    {banner.isActive ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                ) : (
+                  <span
+                    className="p-2 text-gray-200 cursor-not-allowed"
+                    title="เฉพาะ Super Admin เท่านั้นที่เปลี่ยนสถานะได้"
+                  >
+                    {banner.isActive ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+                  </span>
+                )}
                 <button
                   onClick={() => handleDelete(banner._id)}
                   className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"

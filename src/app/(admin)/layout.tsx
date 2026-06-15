@@ -1,8 +1,8 @@
 "use client";
 import Link from "next/link";
 import Image from "next/image";
-import { useEffect, useState } from "react";
-import { LayoutDashboard, ListChecks, Users, LogOut, Images, UserCog, UserCheck, BookOpen, TrendingUp, CalendarDays, GraduationCap, Menu, X, Wallet, AlertTriangle, Palette } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { LayoutDashboard, ListChecks, Users, LogOut, Images, UserCog, UserCheck, BookOpen, TrendingUp, CalendarDays, GraduationCap, Menu, X, Wallet, AlertTriangle, Palette, Shield, ShieldCheck, User, ChevronDown, Home } from "lucide-react";
 import { PLAN_LABELS } from "@/lib/planLimits";
 
 interface Subscription {
@@ -18,8 +18,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [pendingCount, setPendingCount]       = useState(0);
   const [pendingBookings, setPendingBookings] = useState(0);
   const [role, setRole]                       = useState<string>("");
+  const [userName, setUserName]               = useState<string>("");
+  const [userImage, setUserImage]             = useState<string>("");
   const [subscription, setSubscription]       = useState<Subscription | null>(null);
   const [sidebarOpen, setSidebarOpen]         = useState(false);
+  const [userDropdown, setUserDropdown]       = useState(false);
+  const dropdownRef                           = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const load = async () => {
@@ -40,6 +44,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       if (meRes.ok) {
         const data = await meRes.json();
         setRole(data.user?.role ?? "");
+        setUserName(data.user?.name ?? "");
+        setUserImage(data.user?.profileImage ?? "");
       }
       if (subRes.ok) {
         const data = await subRes.json();
@@ -51,8 +57,78 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     return () => clearInterval(interval);
   }, []);
 
-  const isAdmin = role === "admin";
+  const isAdmin = role === "admin" || role === "super_admin";
   const close = () => setSidebarOpen(false);
+
+  const handleLogout = async () => {
+    await fetch("/api/auth/me", { method: "DELETE" });
+    window.location.href = "/";
+  };
+
+  const ROLE_LABELS: Record<string, string> = {
+    super_admin: "Super Admin",
+    admin: "Admin",
+    teacher: "Teacher",
+    student: "Student",
+  };
+
+  useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setUserDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
+
+  const ROLE_AVATAR: Record<string, { icon: React.ElementType; bg: string; color: string }> = {
+    student:     { icon: User,         bg: "bg-blue-100",   color: "text-blue-700" },
+    teacher:     { icon: GraduationCap, bg: "bg-green-100", color: "text-green-700" },
+    admin:       { icon: Shield,        bg: "bg-purple-100", color: "text-purple-700" },
+    super_admin: { icon: ShieldCheck,   bg: "bg-rose-100",   color: "text-rose-700" },
+  };
+
+  const UserMenu = () => {
+    const avatar = ROLE_AVATAR[role] ?? ROLE_AVATAR.student;
+    const RoleIcon = avatar.icon;
+    return (
+    <div className="relative" ref={dropdownRef}>
+      <button
+        onClick={() => setUserDropdown((v) => !v)}
+        className="flex items-center gap-2 px-3 py-1.5 rounded-xl hover:bg-gray-100 transition-colors"
+      >
+        <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 overflow-hidden ${!userImage ? `${avatar.bg} ${avatar.color}` : ""}`}>
+          {userImage ? (
+            <Image src={userImage} alt={userName} width={32} height={32} className="w-full h-full object-cover" />
+          ) : (
+            <RoleIcon className="w-4 h-4" />
+          )}
+        </div>
+        <div className="text-left hidden sm:block">
+          <div className="text-sm font-medium text-gray-800 leading-tight">{userName || "User"}</div>
+          <div className="text-xs text-gray-400 leading-tight">{ROLE_LABELS[role] ?? role}</div>
+        </div>
+        <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${userDropdown ? "rotate-180" : ""}`} />
+      </button>
+      {userDropdown && (
+        <div className="absolute right-0 top-full mt-2 w-44 bg-white rounded-xl shadow-lg border border-gray-100 py-1 z-50">
+          <div className="px-3 py-2 border-b border-gray-100 sm:hidden">
+            <div className="text-sm font-medium text-gray-800">{userName}</div>
+            <div className="text-xs text-gray-400">{ROLE_LABELS[role] ?? role}</div>
+          </div>
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+          >
+            <LogOut className="w-4 h-4" />
+            ออกจากระบบ
+          </button>
+        </div>
+      )}
+    </div>
+  );
+  };
 
   const navLink = (href: string, icon: React.ReactNode, label: React.ReactNode) => (
     <Link href={href} onClick={close}
@@ -83,8 +159,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </div>
 
         <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
-          {navLink("/admin", <LayoutDashboard className="w-4 h-4" />, "ภาพรวม")}
-          {navLink("/admin/members", <UserCheck className="w-4 h-4" />,
+          {/* admin + super_admin only */}
+          {isAdmin && navLink("/admin", <LayoutDashboard className="w-4 h-4" />, "ภาพรวม")}
+          {isAdmin && navLink("/admin/members", <UserCheck className="w-4 h-4" />,
             <span className="flex items-center justify-between w-full gap-2">
               อนุมัติสมาชิก
               {pendingCount > 0 && (
@@ -95,12 +172,18 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </span>
           )}
           {isAdmin && navLink("/admin/users", <UserCog className="w-4 h-4" />, "จัดการผู้ใช้")}
-          {navLink("/admin/courses", <ListChecks className="w-4 h-4" />, "จัดการคอร์ส")}
-          {navLink("/admin/content", <BookOpen className="w-4 h-4" />, "เนื้อหาการเรียน")}
-          {navLink("/admin/schedule", <CalendarDays className="w-4 h-4" />, "ตารางสอน")}
-          {navLink("/dashboard/schedule", <GraduationCap className="w-4 h-4" />, "ตารางเรียน")}
-          {navLink("/admin/revenue", <TrendingUp className="w-4 h-4" />, "รายได้")}
-          {navLink("/admin/bookings", <Users className="w-4 h-4" />,
+          {isAdmin && navLink("/admin/courses", <ListChecks className="w-4 h-4" />, "จัดการคอร์ส")}
+          {isAdmin && navLink("/admin/content", <BookOpen className="w-4 h-4" />, "เนื้อหาการเรียน")}
+
+          {/* admin + super_admin + teacher */}
+          {(isAdmin || role === "teacher") && navLink("/admin/schedule", <CalendarDays className="w-4 h-4" />, "ตารางสอน")}
+          {(isAdmin || role === "teacher") && navLink("/admin/revenue", <TrendingUp className="w-4 h-4" />, "รายได้")}
+
+          {/* admin + super_admin: student schedule view */}
+          {isAdmin && navLink("/dashboard/schedule", <GraduationCap className="w-4 h-4" />, "ตารางเรียน")}
+
+          {/* super_admin only */}
+          {role === "super_admin" && navLink("/admin/bookings", <Users className="w-4 h-4" />,
             <span className="flex items-center justify-between w-full gap-2">
               ตรวจสอบการชำระ
               {pendingBookings > 0 && (
@@ -110,9 +193,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               )}
             </span>
           )}
-          {isAdmin && navLink("/admin/finance", <Wallet className="w-4 h-4" />, "ข้อมูลทางการเงิน")}
+          {role === "super_admin" && navLink("/admin/finance", <Wallet className="w-4 h-4" />, "ข้อมูลทางการเงิน")}
+          {role === "super_admin" && navLink("/admin/roles", <Shield className="w-4 h-4" />, "จัดการ Role")}
+
+          {/* admin only (NOT super_admin) */}
+          {role === "admin" && navLink("/admin/branding", <Palette className="w-4 h-4" />, "จัดการ Branding")}
+
+          {/* admin + super_admin */}
           {isAdmin && navLink("/admin/banners", <Images className="w-4 h-4" />, "จัดการแบนเนอร์")}
-          {isAdmin && navLink("/admin/branding", <Palette className="w-4 h-4" />, "จัดการ Branding")}
         </nav>
 
         {/* Subscription status */}
@@ -146,8 +234,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
         <div className="p-3 border-t border-gray-100">
           <Link href="/" onClick={close}
-            className="flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg text-gray-500 hover:bg-red-50 hover:text-red-600 transition-colors">
-            <LogOut className="w-4 h-4" />
+            className="flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg text-gray-500 hover:bg-gray-50 hover:text-indigo-600 transition-colors">
+            <Home className="w-4 h-4" />
             กลับหน้าหลัก
           </Link>
         </div>
@@ -155,17 +243,20 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
       {/* Main content */}
       <main className="flex-1 overflow-auto min-w-0">
-        {/* Mobile topbar */}
-        <div className="lg:hidden sticky top-0 z-30 bg-white border-b border-gray-200 px-4 py-3 flex items-center gap-3">
+        {/* Topbar */}
+        <div className="sticky top-0 z-30 bg-white border-b border-gray-200 px-4 py-2 flex items-center gap-3">
           <button
             onClick={() => setSidebarOpen(true)}
-            className="p-1.5 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+            className="lg:hidden p-1.5 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
           >
             <Menu className="w-5 h-5" />
           </button>
-          <Link href="/">
+          <Link href="/" className="lg:hidden">
             <Image src="/logo.png" alt="UPSkills" width={100} height={34} className="object-contain" />
           </Link>
+          <div className="ml-auto">
+            <UserMenu />
+          </div>
         </div>
 
         {/* Suspended / expired banner */}

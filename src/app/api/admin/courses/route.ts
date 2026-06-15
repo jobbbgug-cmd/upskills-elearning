@@ -9,14 +9,14 @@ import Institution from "@/models/Institution";
 export async function GET(req: NextRequest) {
   try {
     const auth = await getAuthUser();
-    if (!auth || (auth.role !== "admin" && auth.role !== "teacher")) {
+    if (!auth || (auth.role !== "admin" && auth.role !== "super_admin" && auth.role !== "teacher")) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     await connectDB();
     const institutionId = await resolveInstitutionId(req, auth.institutionId);
     const base = tenantFilter(institutionId);
-    const filter = auth.role === "admin" ? base : { ...base, instructorId: auth.userId };
+    const filter = auth.role === "teacher" ? { ...base, instructorId: auth.userId } : base;
     const courses = await Course.find(filter).sort({ createdAt: -1 });
     return NextResponse.json({ courses });
   } catch (err) {
@@ -28,7 +28,7 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const auth = await getAuthUser();
-    if (!auth || (auth.role !== "admin" && auth.role !== "teacher")) {
+    if (!auth || (auth.role !== "admin" && auth.role !== "super_admin" && auth.role !== "teacher")) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 

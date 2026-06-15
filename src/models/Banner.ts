@@ -6,6 +6,7 @@ export interface IBannerDocument extends Document {
   mobileImageUrl: string;
   title: string;
   subtitle: string;
+  buttonType: "link" | "register";
   linkUrl: string;
   linkText: string;
   bgColor: string;
@@ -21,6 +22,7 @@ const BannerSchema = new Schema<IBannerDocument>(
     mobileImageUrl: { type: String, default: "" },
     title: { type: String, default: "" },
     subtitle: { type: String, default: "" },
+    buttonType: { type: String, enum: ["link", "register"], default: "link" },
     linkUrl: { type: String, default: "" },
     linkText: { type: String, default: "ดูรายละเอียด" },
     bgColor: { type: String, default: "#1e1b4b" },

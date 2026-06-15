@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
-import { getTenantId } from "@/lib/tenant";
 import Institution from "@/models/Institution";
 
 const DEFAULT_BRANDING = {
@@ -16,7 +15,8 @@ const DEFAULT_BRANDING = {
 export async function GET(req: NextRequest) {
   try {
     await connectDB();
-    const institutionId = await getTenantId(req);
+    const { searchParams } = new URL(req.url);
+    const institutionId = searchParams.get("institutionId");
     if (!institutionId) return NextResponse.json(DEFAULT_BRANDING);
 
     const inst = await Institution.findById(institutionId)

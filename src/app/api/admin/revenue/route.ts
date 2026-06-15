@@ -7,7 +7,7 @@ import Booking from "@/models/Booking";
 
 export async function GET(req: NextRequest) {
   const auth = await getAuthUser();
-  if (!auth || (auth.role !== "admin" && auth.role !== "teacher")) {
+  if (!auth || (auth.role !== "admin" && auth.role !== "super_admin" && auth.role !== "teacher")) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -77,7 +77,7 @@ export async function GET(req: NextRequest) {
   const totalConfirmed = courseStats.reduce((s, c) => s + c.confirmedBookings, 0);
 
   let byTeacher = null;
-  if (auth.role === "admin") {
+  if (auth.role === "admin" || auth.role === "super_admin") {
     const teacherMap = new Map<string, { instructor: string; instructorId: string; courses: typeof courseStats }>();
     for (const c of courseStats) {
       const key = c.instructorId || c.instructor;

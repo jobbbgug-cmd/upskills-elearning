@@ -11,30 +11,8 @@ async function getUser(token: string) {
   }
 }
 
-function extractTenantSlug(req: NextRequest): string {
-  const host = req.headers.get("host") ?? "";
-  const hostname = host.split(":")[0]; // strip port
-  const parts = hostname.split(".");
-  // abc.upskills.com → ["abc","upskills","com"] → slug "abc"
-  // upskills.com / localhost / *.vercel.app → "default"
-  if (
-    parts.length >= 3 &&
-    parts[0] !== "www" &&
-    !parts[0].startsWith("upskills") &&
-    parts[0] !== "localhost"
-  ) {
-    return parts[0];
-  }
-  return "default";
-}
-
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
-  const tenantSlug = extractTenantSlug(req);
-
-  // Always inject tenant slug into downstream request headers
-  const requestHeaders = new Headers(req.headers);
-  requestHeaders.set("x-tenant-slug", tenantSlug);
 
   // Auth checks only needed for page routes (API routes do their own auth)
   if (!pathname.startsWith("/api/")) {
@@ -51,22 +29,38 @@ export async function middleware(req: NextRequest) {
       return NextResponse.redirect(new URL("/login", req.url));
     }
 
+    // Block super_admin from /admin/* — they have their own /super-admin/* pages
+    if (pathname.startsWith("/admin") && user?.role === "super_admin") {
+      return NextResponse.redirect(new URL("/super-admin", req.url));
+    }
+
     if (
       pathname.startsWith("/admin") &&
-      (!user || (user.role !== "admin" && user.role !== "teacher" && user.role !== "super_admin"))
+      (!user || (user.role !== "admin" && user.role !== "teacher"))
     ) {
       return NextResponse.redirect(new URL("/login", req.url));
     }
 
-    // Protect /super-admin — super_admin only
+    // Teacher: only /admin/schedule and /admin/revenue allowed
+    const teacherAdminAllowed = ["/admin/schedule", "/admin/revenue"];
+    if (pathname.startsWith("/admin") && user?.role === "teacher") {
+      if (!teacherAdminAllowed.some((p) => pathname.startsWith(p))) {
+        return NextResponse.redirect(new URL("/admin/schedule", req.url));
+      }
+    }
+
+    // super_admin only pages
+    const superAdminOnlyPages = ["/admin/bookings", "/admin/finance", "/admin/roles"];
+    if (superAdminOnlyPages.some((p) => pathname.startsWith(p)) && user?.role !== "super_admin") {
+      return NextResponse.redirect(new URL("/admin", req.url));
+    }
+
     if (pathname.startsWith("/super-admin") && (!user || user.role !== "super_admin")) {
       return NextResponse.redirect(new URL("/login", req.url));
     }
   }
 
-  return NextResponse.next({
-    request: { headers: requestHeaders },
-  });
+  return NextResponse.next();
 }
 
 export const config = {

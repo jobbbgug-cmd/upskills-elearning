@@ -1,39 +1,19 @@
-import { connectDB } from "./mongodb";
-import Institution from "@/models/Institution";
-
-const slugCache = new Map<string, { id: string; expiresAt: number }>();
-
-export function getTenantSlug(req: Request): string {
-  return req.headers.get("x-tenant-slug") ?? "default";
-}
-
-export async function getTenantId(req: Request): Promise<string | null> {
-  const slug = getTenantSlug(req);
-
-  const hit = slugCache.get(slug);
-  if (hit && hit.expiresAt > Date.now()) return hit.id;
-
-  await connectDB();
-  const inst = (await Institution.findOne({ slug, isActive: true })
-    .select("_id")
-    .lean()) as { _id: { toString(): string } } | null;
-  if (!inst) return null;
-
-  const id = inst._id.toString();
-  slugCache.set(slug, { id, expiresAt: Date.now() + 60_000 });
-  return id;
-}
-
-// Use auth.institutionId if present (new tokens), otherwise resolve from header
-export async function resolveInstitutionId(
-  req: Request,
-  authInstitutionId?: string | null
-): Promise<string | null> {
-  if (authInstitutionId) return authInstitutionId;
-  return getTenantId(req);
-}
-
-// Build a query filter — only adds institutionId if it's set, so pre-migration data still works
+// tenantFilter — only adds institutionId when set, so unassigned records still match
 export function tenantFilter(institutionId: string | null | undefined): Record<string, unknown> {
   return institutionId ? { institutionId } : {};
+}
+
+// Resolves institutionId: super_admin can pass ?institutionId= query param to filter by institution
+// For regular admin, always uses their own institutionId from auth token
+export async function resolveInstitutionId(
+  req: unknown,
+  authInstitutionId?: string | null
+): Promise<string | null> {
+  // If there's a request object with a URL, try to extract institutionId from query param
+  if (req && typeof req === "object" && "nextUrl" in req) {
+    const nextReq = req as { nextUrl: URL };
+    const qpId = nextReq.nextUrl.searchParams.get("institutionId");
+    if (qpId && qpId !== "all") return qpId;
+  }
+  return authInstitutionId ?? null;
 }

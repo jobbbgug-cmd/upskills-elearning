@@ -7,7 +7,7 @@ import FinanceSetting from "@/models/FinanceSetting";
 export async function GET(req: NextRequest) {
   try {
     const auth = await getAuthUser();
-    if (!auth || auth.role !== "admin") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (!auth || auth.role !== "super_admin") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     await connectDB();
     const institutionId = await resolveInstitutionId(req, auth.institutionId);
     const setting = await FinanceSetting.findOne(tenantFilter(institutionId)).lean();
@@ -20,7 +20,7 @@ export async function GET(req: NextRequest) {
 export async function PUT(req: NextRequest) {
   try {
     const auth = await getAuthUser();
-    if (!auth || auth.role !== "admin") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (!auth || auth.role !== "super_admin") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     await connectDB();
     const body = await req.json();
     const institutionId = await resolveInstitutionId(req, auth.institutionId);

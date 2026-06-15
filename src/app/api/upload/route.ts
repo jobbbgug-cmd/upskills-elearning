@@ -5,7 +5,7 @@ import { getAuthUser } from "@/lib/auth";
 export async function POST(req: NextRequest) {
   try {
     const auth = await getAuthUser();
-    if (!auth || (auth.role !== "admin" && auth.role !== "teacher")) {
+    if (!auth || (auth.role !== "admin" && auth.role !== "teacher" && auth.role !== "super_admin")) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 

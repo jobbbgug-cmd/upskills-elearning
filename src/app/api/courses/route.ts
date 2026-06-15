@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
-import { tenantFilter, getTenantId } from "@/lib/tenant";
+import { tenantFilter } from "@/lib/tenant";
 import Course from "@/models/Course";
 
 export async function GET(req: NextRequest) {
@@ -9,8 +9,7 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const gradeLevel = searchParams.get("gradeLevel");
     const category = searchParams.get("category");
-
-    const institutionId = await getTenantId(req);
+    const institutionId = searchParams.get("institutionId");
     const query: Record<string, unknown> = { ...tenantFilter(institutionId), isActive: true };
     if (gradeLevel) query.gradeLevels = gradeLevel;
     if (category) query.category = category;

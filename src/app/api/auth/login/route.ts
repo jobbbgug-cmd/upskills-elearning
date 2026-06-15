@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { connectDB } from "@/lib/mongodb";
 import { signToken } from "@/lib/auth";
-import { getTenantId } from "@/lib/tenant";
 import User from "@/models/User";
 
 export async function POST(req: NextRequest) {
@@ -32,9 +31,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "อีเมลหรือรหัสผ่านไม่ถูกต้อง" }, { status: 401 });
     }
 
-    // Resolve institutionId from user record or current tenant header
-    const institutionId =
-      user.institutionId?.toString() ?? (await getTenantId(req)) ?? undefined;
+    const institutionId = user.institutionId?.toString() ?? undefined;
 
     const token = signToken({
       userId: user._id.toString(),

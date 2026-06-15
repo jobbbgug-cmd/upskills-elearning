@@ -33,6 +33,8 @@ async function getDashboardData(userId: string) {
 export default async function DashboardPage() {
   const auth = await getAuthUser();
   if (!auth) redirect("/login");
+  if (auth.role === "super_admin") redirect("/super-admin");
+  if (auth.role === "admin" || auth.role === "teacher") redirect("/admin");
 
   const { bookings, user } = await getDashboardData(auth.userId);
 

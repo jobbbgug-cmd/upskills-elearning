@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import { CheckCircle, XCircle, Clock3, Search } from "lucide-react";
+import { CheckCircle, XCircle, Clock3, Search, Building2, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 
@@ -12,8 +12,14 @@ interface BookingRow {
   slipImage: string;
   createdAt: string;
   sessionId: string;
+  institutionId?: string;
   userId: { _id: string; name: string; email: string; gradeLevel?: string };
   courseId: { _id: string; title: string; sessions: { _id: string; date: string; startTime: string; endTime: string }[] };
+}
+
+interface Institution {
+  _id: string;
+  name: string;
 }
 
 const STATUS_LABEL: Record<string, { label: string; cls: string }> = {
@@ -24,25 +30,39 @@ const STATUS_LABEL: Record<string, { label: string; cls: string }> = {
 };
 
 export default function AdminBookingsPage() {
-  const [bookings, setBookings]       = useState<BookingRow[]>([]);
-  const [loading, setLoading]         = useState(true);
-  const [tab, setTab]                 = useState<"pending" | "all">("pending");
-  const [search, setSearch]           = useState("");
-  const [previewSlip, setPreviewSlip] = useState<string | null>(null);
-  const [acting, setActing]           = useState<string | null>(null);
+  const [bookings, setBookings]           = useState<BookingRow[]>([]);
+  const [institutions, setInstitutions]   = useState<Institution[]>([]);
+  const [loading, setLoading]             = useState(true);
+  const [tab, setTab]                     = useState<"pending" | "all">("pending");
+  const [search, setSearch]               = useState("");
+  const [filterInstitution, setFilterInstitution] = useState("all");
+  const [previewSlip, setPreviewSlip]     = useState<string | null>(null);
+  const [acting, setActing]               = useState<string | null>(null);
   const [confirmBooking, setConfirmBooking] = useState<{ open: boolean; id: string; action: "approve" | "reject" }>({ open: false, id: "", action: "approve" });
 
-  const load = async () => {
+  const load = async (institutionId?: string) => {
     setLoading(true);
-    const res = await fetch("/api/admin/bookings");
-    if (res.ok) {
-      const data = await res.json();
+    const qs = institutionId && institutionId !== "all" ? `?institutionId=${institutionId}` : "";
+    const [bookingsRes, instRes] = await Promise.all([
+      fetch(`/api/admin/bookings${qs}`),
+      fetch("/api/admin/institutions"),
+    ]);
+    if (bookingsRes.ok) {
+      const data = await bookingsRes.json();
       setBookings(data.bookings ?? []);
+    }
+    if (instRes.ok) {
+      setInstitutions(await instRes.json());
     }
     setLoading(false);
   };
 
   useEffect(() => { load(); }, []);
+
+  const handleInstitutionChange = (val: string) => {
+    setFilterInstitution(val);
+    load(val);
+  };
 
   const act = async (id: string, action: "approve" | "reject") => {
     setActing(id);
@@ -58,6 +78,9 @@ export default function AdminBookingsPage() {
     }
     setActing(null);
   };
+
+  const institutionNames: Record<string, string> = {};
+  institutions.forEach((i) => { institutionNames[i._id] = i.name; });
 
   const filtered = bookings.filter((b) => {
     const matchTab = tab === "all" || b.status === "pending_payment";
@@ -82,13 +105,15 @@ export default function AdminBookingsPage() {
         onConfirm={() => act(confirmBooking.id, confirmBooking.action)}
         onCancel={() => setConfirmBooking((d) => ({ ...d, open: false }))}
       />
+
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900">ตรวจสอบการชำระเงิน</h1>
-        <p className="text-gray-500 text-sm mt-1">ตรวจสอบสลิปและอนุมัติการจองคอร์ส</p>
+        <p className="text-gray-500 text-sm mt-1">ตรวจสอบสลิปและอนุมัติการจองคอร์ส (ทุกสถาบัน)</p>
       </div>
 
-      {/* Tabs + Search */}
+      {/* Filter bar */}
       <div className="flex flex-wrap gap-2 mb-5 items-center">
+        {/* Status tabs */}
         <button onClick={() => setTab("pending")}
           className={cn("px-4 py-2 rounded-xl text-sm font-semibold transition-colors flex items-center gap-2",
             tab === "pending" ? "bg-amber-500 text-white" : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"
@@ -107,6 +132,24 @@ export default function AdminBookingsPage() {
           )}>
           ทั้งหมด ({bookings.length})
         </button>
+
+        {/* Institution filter */}
+        <div className="relative">
+          <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+          <select
+            value={filterInstitution}
+            onChange={(e) => handleInstitutionChange(e.target.value)}
+            className="pl-9 pr-8 py-2 border border-gray-200 rounded-xl text-sm text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none cursor-pointer"
+          >
+            <option value="all">ทุกสถาบัน</option>
+            {institutions.map((i) => (
+              <option key={i._id} value={i._id}>{i.name}</option>
+            ))}
+          </select>
+          <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none" />
+        </div>
+
+        {/* Search */}
         <div className="relative ml-auto">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
           <input value={search} onChange={(e) => setSearch(e.target.value)}
@@ -127,6 +170,7 @@ export default function AdminBookingsPage() {
             const session    = booking.courseId?.sessions?.find((s) => s._id === booking.sessionId);
             const statusInfo = STATUS_LABEL[booking.status] ?? STATUS_LABEL.pending_payment;
             const isPending  = booking.status === "pending_payment";
+            const instName   = booking.institutionId ? (institutionNames[booking.institutionId] ?? "สถาบัน") : null;
 
             return (
               <div key={booking._id}
@@ -135,6 +179,13 @@ export default function AdminBookingsPage() {
                 )}>
                 {/* Info */}
                 <div className="flex-1 space-y-2 min-w-0">
+                  {/* Institution badge */}
+                  {instName && (
+                    <div className="flex items-center gap-1.5">
+                      <Building2 className="w-3.5 h-3.5 text-violet-400 shrink-0" />
+                      <span className="text-xs font-semibold text-violet-700 bg-violet-50 px-2 py-0.5 rounded-full">{instName}</span>
+                    </div>
+                  )}
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="font-semibold text-gray-900">{booking.userId?.name}</span>
                     <span className="text-xs text-gray-400">{booking.userId?.email}</span>

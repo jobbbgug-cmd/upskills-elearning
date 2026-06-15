@@ -4,13 +4,16 @@ import Image from "next/image";
 import Link from "next/link";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { IBanner } from "@/types";
+import BannerRegisterModal from "@/components/BannerRegisterModal";
 
 interface Props {
   banners: IBanner[];
+  institutionNames?: Record<string, string>;
 }
 
-export default function BannerSlider({ banners }: Props) {
+export default function BannerSlider({ banners, institutionNames = {} }: Props) {
   const [current, setCurrent] = useState(0);
+  const [registerBanner, setRegisterBanner] = useState<IBanner | null>(null);
   const next = useCallback(() => setCurrent((c) => (c + 1) % banners.length), [banners.length]);
   const prev = () => setCurrent((c) => (c - 1 + banners.length) % banners.length);
 
@@ -71,7 +74,15 @@ export default function BannerSlider({ banners }: Props) {
                       {b.subtitle}
                     </p>
                   )}
-                  {b.linkUrl && (
+                  {b.buttonType === "register" ? (
+                    <button
+                      onClick={() => setRegisterBanner(b)}
+                      className="inline-block px-10 py-4 rounded-2xl font-semibold text-white text-base shadow-lg transition-opacity hover:opacity-90"
+                      style={{ background: "linear-gradient(90deg,#059669,#10b981)" }}
+                    >
+                      {b.linkText || "สมัครสมาชิก"}
+                    </button>
+                  ) : b.linkUrl ? (
                     <Link
                       href={b.linkUrl}
                       className="inline-block px-10 py-4 rounded-2xl font-semibold text-white text-base shadow-lg transition-opacity hover:opacity-90"
@@ -79,7 +90,7 @@ export default function BannerSlider({ banners }: Props) {
                     >
                       {b.linkText || "ดูรายละเอียด"}
                     </Link>
-                  )}
+                  ) : null}
                 </div>
               </div>
             </div>
@@ -121,6 +132,15 @@ export default function BannerSlider({ banners }: Props) {
             />
           ))}
         </div>
+      )}
+
+      {/* Registration modal */}
+      {registerBanner && (
+        <BannerRegisterModal
+          institutionId={registerBanner.institutionId}
+          institutionName={registerBanner.institutionId ? institutionNames[registerBanner.institutionId] : undefined}
+          onClose={() => setRegisterBanner(null)}
+        />
       )}
     </div>
   );

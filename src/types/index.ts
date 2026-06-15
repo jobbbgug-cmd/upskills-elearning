@@ -106,6 +106,7 @@ export interface IUser {
   role: "student" | "teacher" | "admin" | "super_admin";
   status: "pending" | "approved" | "rejected";
   gradeLevel?: GradeLevel;
+  profileImage?: string;
   createdAt: string;
 }
 
@@ -127,10 +128,12 @@ export interface AuthResponse {
 
 export interface IBanner {
   _id: string;
+  institutionId?: string;
   imageUrl: string;
   mobileImageUrl?: string;
   title: string;
   subtitle: string;
+  buttonType?: "link" | "register";
   linkUrl: string;
   linkText: string;
   bgColor: string;

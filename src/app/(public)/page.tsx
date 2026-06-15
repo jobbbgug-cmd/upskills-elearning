@@ -2,6 +2,7 @@ import Link from "next/link";
 import { connectDB } from "@/lib/mongodb";
 import Course from "@/models/Course";
 import Banner from "@/models/Banner";
+import Institution from "@/models/Institution";
 import CourseCard from "@/components/CourseCard";
 import BannerSlider from "@/components/BannerSlider";
 import PricingSection from "@/components/PricingSection";
@@ -18,25 +19,31 @@ const GRADE_GROUPS = [
 
 async function getData() {
   await connectDB();
-  const [courses, banners] = await Promise.all([
+  const [courses, banners, institutions] = await Promise.all([
     Course.find({ isActive: true }).sort({ createdAt: -1 }).limit(6).lean(),
     Banner.find({ isActive: true }).sort({ order: 1, createdAt: 1 }).lean(),
+    Institution.find({ isActive: true }).select("_id name").lean(),
   ]);
+  const institutionNames: Record<string, string> = {};
+  (institutions as unknown as { _id: { toString(): string }; name: string }[]).forEach((i) => {
+    institutionNames[i._id.toString()] = i.name;
+  });
   return {
     courses: JSON.parse(JSON.stringify(courses)) as ICourse[],
     banners: JSON.parse(JSON.stringify(banners)) as IBanner[],
+    institutionNames,
   };
 }
 
 export default async function HomePage() {
-  const [{ courses, banners }, user] = await Promise.all([getData(), getAuthUser()]);
+  const [{ courses, banners, institutionNames }, user] = await Promise.all([getData(), getAuthUser()]);
 
   return (
     <div>
       {/* Banner Slider — -mt-16 ดึงขึ้นทับด้านหลัง navbar (64px) */}
       {banners.length > 0 ? (
         <div className="-mt-16">
-          <BannerSlider banners={banners} />
+          <BannerSlider banners={banners} institutionNames={institutionNames} />
         </div>
       ) : (
         /* Fallback hero when no banners */

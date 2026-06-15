@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
-import { tenantFilter, getTenantId } from "@/lib/tenant";
+import { tenantFilter } from "@/lib/tenant";
 import FinanceSetting from "@/models/FinanceSetting";
 
 export async function GET(req: NextRequest) {
   try {
     await connectDB();
-    const institutionId = await getTenantId(req);
+    const { searchParams } = new URL(req.url);
+    const institutionId = searchParams.get("institutionId");
     const setting = await FinanceSetting.findOne(tenantFilter(institutionId)).lean();
     return NextResponse.json(setting ?? {});
   } catch {

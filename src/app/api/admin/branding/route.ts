@@ -6,7 +6,7 @@ import Institution from "@/models/Institution";
 
 export async function GET(req: NextRequest) {
   const auth = await getAuthUser();
-  if (!auth || auth.role !== "admin") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!auth || auth.role !== "admin" && auth.role !== "super_admin") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   await connectDB();
   const institutionId = await resolveInstitutionId(req, auth.institutionId);
@@ -20,7 +20,7 @@ export async function GET(req: NextRequest) {
 
 export async function PUT(req: NextRequest) {
   const auth = await getAuthUser();
-  if (!auth || auth.role !== "admin") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!auth || auth.role !== "admin" && auth.role !== "super_admin") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   await connectDB();
   const institutionId = await resolveInstitutionId(req, auth.institutionId);

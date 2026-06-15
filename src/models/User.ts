@@ -8,6 +8,7 @@ export interface IUserDocument extends Document {
   role: "student" | "teacher" | "admin" | "super_admin";
   status: "pending" | "approved" | "rejected";
   gradeLevel?: string;
+  profileImage?: string;
   teacherId?: string;
   teacherName?: string;
   contactChannel?: string;
@@ -24,6 +25,7 @@ const UserSchema = new Schema<IUserDocument>(
     role: { type: String, enum: ["student", "teacher", "admin", "super_admin"], default: "student" },
     status: { type: String, enum: ["pending", "approved", "rejected"], default: "pending" },
     gradeLevel: { type: String },
+    profileImage: { type: String, default: "" },
     teacherId: { type: String, default: "" },
     teacherName: { type: String, default: "" },
     contactChannel: { type: String, default: "" },

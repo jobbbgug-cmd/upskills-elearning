@@ -1,13 +1,13 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
-import { Clock, CheckCircle, XCircle, Copy, Check, User, GraduationCap, RefreshCw } from "lucide-react";
+import { Clock, CheckCircle, XCircle, Copy, Check, User, GraduationCap, Shield, ShieldCheck, RefreshCw } from "lucide-react";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 
 interface PendingUser {
   _id: string;
   name: string;
   email: string;
-  role: "student" | "teacher" | "admin";
+  role: "student" | "teacher" | "admin" | "super_admin";
   gradeLevel?: string;
   status: "pending" | "approved" | "rejected";
   contactChannel?: string;
@@ -79,13 +79,15 @@ export default function AdminMembersPage() {
     setTimeout(() => setCopied(null), 2000);
   };
 
-  const roleLabel = (role: string) => role === "teacher" ? "ครู" : "นักเรียน";
-  const roleIcon = (role: string) => role === "teacher"
-    ? <GraduationCap className="w-4 h-4 text-green-600" />
-    : <User className="w-4 h-4 text-blue-600" />;
-  const roleBadge = (role: string) => role === "teacher"
-    ? "bg-green-100 text-green-700"
-    : "bg-blue-100 text-blue-700";
+  const ROLE_MAP: Record<string, { label: string; badge: string; icon: React.ReactNode }> = {
+    student:     { label: "นักเรียน",   badge: "bg-blue-100 text-blue-700",    icon: <User className="w-4 h-4 text-blue-600" /> },
+    teacher:     { label: "ครู",         badge: "bg-green-100 text-green-700",  icon: <GraduationCap className="w-4 h-4 text-green-600" /> },
+    admin:       { label: "Admin",       badge: "bg-purple-100 text-purple-700",icon: <Shield className="w-4 h-4 text-purple-600" /> },
+    super_admin: { label: "Super Admin", badge: "bg-rose-100 text-rose-700",    icon: <ShieldCheck className="w-4 h-4 text-rose-600" /> },
+  };
+  const roleLabel = (role: string) => ROLE_MAP[role]?.label ?? role;
+  const roleIcon  = (role: string) => ROLE_MAP[role]?.icon ?? <User className="w-4 h-4 text-gray-400" />;
+  const roleBadge = (role: string) => ROLE_MAP[role]?.badge ?? "bg-gray-100 text-gray-600";
 
   const statusBadge = (status: string) => {
     if (status === "approved") return <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-green-100 text-green-700"><CheckCircle className="w-3 h-3" />อนุมัติแล้ว</span>;

@@ -1,31 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
 import { getAuthUser } from "@/lib/auth";
-import { resolveInstitutionId, tenantFilter } from "@/lib/tenant";
 import Booking from "@/models/Booking";
-import Course from "@/models/Course";
 
 export async function GET(req: NextRequest) {
   try {
     const auth = await getAuthUser();
-    if (!auth || (auth.role !== "admin" && auth.role !== "teacher")) {
+    if (!auth || auth.role !== "super_admin") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     await connectDB();
-    const institutionId = await resolveInstitutionId(req, auth.institutionId);
-    const base = tenantFilter(institutionId);
+    const { searchParams } = new URL(req.url);
+    const institutionId = searchParams.get("institutionId");
 
-    let filter: Record<string, unknown> = base;
-    if (auth.role === "teacher") {
-      const teacherCourses = await Course.find({ ...base, instructorId: auth.userId }).select("_id");
-      const courseIds = teacherCourses.map((c) => c._id);
-      filter = { ...base, courseId: { $in: courseIds } };
-    }
+    const filter: Record<string, unknown> = {};
+    if (institutionId) filter.institutionId = institutionId;
 
     const bookings = await Booking.find(filter)
       .populate("userId", "name email gradeLevel")
-      .populate("courseId", "title sessions")
+      .populate("courseId", "title sessions institutionId")
       .sort({ createdAt: -1 })
       .lean();
 
