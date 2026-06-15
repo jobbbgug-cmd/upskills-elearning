@@ -2,10 +2,11 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowLeft, CheckCircle, User, GraduationCap, ChevronDown } from "lucide-react";
+import { ArrowLeft, CheckCircle, User, GraduationCap, ChevronDown, Building2 } from "lucide-react";
 import { GradeLevel } from "@/types";
 
 interface Teacher { _id: string; name: string; }
+interface Institution { _id: string; name: string; }
 
 const GRADE_LEVELS: GradeLevel[] = [
   "ป.1", "ป.2", "ป.3", "ป.4", "ป.5", "ป.6",
@@ -32,15 +33,20 @@ export default function RegisterPage() {
     teacherName: "",
     contactChannel: "",
     contactId: "",
+    institutionId: "",
   });
   const [error, setError]     = useState("");
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [teachers, setTeachers] = useState<Teacher[]>([]);
+  const [institutions, setInstitutions] = useState<Institution[]>([]);
 
   useEffect(() => {
     fetch("/api/teachers").then((r) => r.json()).then((data) => {
       if (Array.isArray(data)) setTeachers(data);
+    });
+    fetch("/api/institutions").then((r) => r.json()).then((data) => {
+      if (Array.isArray(data)) setInstitutions(data);
     });
   }, []);
 
@@ -49,6 +55,7 @@ export default function RegisterPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    if (institutions.length > 0 && !form.institutionId) { setError("กรุณาเลือกสถาบัน"); return; }
     if (!form.contactChannel) { setError("กรุณาเลือกช่องทางการรับ Username/Password"); return; }
     if (!form.contactId.trim()) { setError("กรุณาระบุรายละเอียดช่องทางการติดต่อ"); return; }
     setLoading(true);
@@ -144,6 +151,25 @@ export default function RegisterPage() {
             placeholder="อีเมล"
             className="w-full bg-gray-100 rounded-2xl px-4 py-3.5 text-sm text-gray-700 placeholder-gray-400 outline-none focus:ring-2 focus:ring-violet-400"
           />
+
+          {/* Institution */}
+          {institutions.length > 0 && (
+            <div className="relative">
+              <Building2 className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+              <select
+                required
+                value={form.institutionId}
+                onChange={(e) => setForm({ ...form, institutionId: e.target.value })}
+                className="w-full bg-gray-100 rounded-2xl pl-10 pr-4 py-3.5 text-sm text-gray-700 outline-none focus:ring-2 focus:ring-violet-400 appearance-none"
+              >
+                <option value="">-- เลือกสถาบัน --</option>
+                {institutions.map((i) => (
+                  <option key={i._id} value={i._id}>{i.name}</option>
+                ))}
+              </select>
+              <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+            </div>
+          )}
 
           {/* Grade level + Teacher — student only */}
           {form.role === "student" && (
