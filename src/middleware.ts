@@ -41,11 +41,11 @@ export async function middleware(req: NextRequest) {
       return NextResponse.redirect(new URL("/login", req.url));
     }
 
-    // Teacher: only /admin/schedule and /admin/revenue allowed
-    const teacherAdminAllowed = ["/admin/schedule", "/admin/revenue"];
+    // Teacher: allowed pages
+    const teacherAdminAllowed = ["/admin/schedule", "/admin/revenue", "/admin/courses", "/admin/content"];
     if (pathname.startsWith("/admin") && user?.role === "teacher") {
       if (!teacherAdminAllowed.some((p) => pathname.startsWith(p))) {
-        return NextResponse.redirect(new URL("/admin/schedule", req.url));
+        return NextResponse.redirect(new URL("/admin/courses", req.url));
       }
     }
 

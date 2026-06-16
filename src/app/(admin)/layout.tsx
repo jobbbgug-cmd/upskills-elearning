@@ -172,8 +172,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </span>
           )}
           {isAdmin && navLink("/admin/users", <UserCog className="w-4 h-4" />, "จัดการผู้ใช้")}
-          {isAdmin && navLink("/admin/courses", <ListChecks className="w-4 h-4" />, "จัดการคอร์ส")}
-          {isAdmin && navLink("/admin/content", <BookOpen className="w-4 h-4" />, "เนื้อหาการเรียน")}
+          {(isAdmin || role === "teacher") && navLink("/admin/courses", <ListChecks className="w-4 h-4" />, "จัดการคอร์ส")}
+          {(isAdmin || role === "teacher") && navLink("/admin/content", <BookOpen className="w-4 h-4" />, "เนื้อหาการเรียน")}
 
           {/* admin + super_admin + teacher */}
           {(isAdmin || role === "teacher") && navLink("/admin/schedule", <CalendarDays className="w-4 h-4" />, "ตารางสอน")}

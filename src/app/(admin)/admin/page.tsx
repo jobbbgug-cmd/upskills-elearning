@@ -6,16 +6,21 @@ import Course from "@/models/Course";
 import Booking from "@/models/Booking";
 import User from "@/models/User";
 import CourseContent from "@/models/CourseContent";
+import Institution from "@/models/Institution";
 import {
-  BookOpen, Users, Clock3, CheckCircle2, TrendingUp,
-  FileText, GraduationCap, ArrowRight, UserCheck,
+  BookOpen, Clock3, CheckCircle2, TrendingUp,
+  FileText, GraduationCap, ArrowRight, UserCheck, Building2,
 } from "lucide-react";
 import mongoose from "mongoose";
 
-async function getStats(role: string, userId: string) {
+async function getStats(role: string, userId: string, institutionId?: string) {
   await connectDB();
 
-  const courseFilter = role === "admin" ? {} : { instructorId: userId };
+  const tenantClause = institutionId ? { institutionId } : {};
+  const courseFilter = role === "teacher"
+    ? { ...tenantClause, instructorId: userId }
+    : tenantClause;
+
   const courses = await Course.find(courseFilter).select("_id price isActive").lean();
   const courseIds = courses.map((c) => c._id as mongoose.Types.ObjectId);
 
@@ -27,11 +32,11 @@ async function getStats(role: string, userId: string) {
     pendingUsers,
     activeCourses,
   ] = await Promise.all([
-    role === "admin" ? CourseContent.countDocuments() : Promise.resolve(0),
+    role === "admin" ? CourseContent.countDocuments(tenantClause) : Promise.resolve(0),
     Booking.countDocuments({ status: "pending_payment", courseId: { $in: courseIds } }),
     Booking.countDocuments({ status: "confirmed",       courseId: { $in: courseIds } }),
-    User.countDocuments({ role: "student", status: "approved" }),
-    User.countDocuments({ role: "student", status: "pending" }),
+    User.countDocuments({ role: "student", status: "approved", ...tenantClause }),
+    User.countDocuments({ role: "student", status: "pending",  ...tenantClause }),
     courses.filter((c) => c.isActive).length,
   ]);
 
@@ -70,14 +75,29 @@ export default async function AdminPage() {
   const auth = await getAuthUser();
   if (!auth || (auth.role !== "admin" && auth.role !== "teacher")) redirect("/login");
 
-  const stats = await getStats(auth.role, auth.userId);
-  const isAdmin   = auth.role === "admin";
+  const stats = await getStats(auth.role, auth.userId, auth.institutionId);
+  const isAdmin = auth.role === "admin";
+
+  let institutionName = "";
+  if (auth.institutionId) {
+    await connectDB();
+    const inst = await Institution.findById(auth.institutionId).select("name").lean() as { name: string } | null;
+    institutionName = inst?.name ?? "";
+  }
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-gray-900">ภาพรวม{isAdmin ? "ระบบ" : "คอร์สของฉัน"}</h1>
-        <p className="text-gray-500 text-sm mt-1">ยินดีต้อนรับ, {auth.name}</p>
+        <div className="flex items-center gap-3 mt-1">
+          <p className="text-gray-500 text-sm">ยินดีต้อนรับ, {auth.name}</p>
+          {institutionName && (
+            <span className="inline-flex items-center gap-1 text-xs font-semibold text-indigo-700 bg-indigo-50 px-2.5 py-1 rounded-full">
+              <Building2 className="w-3 h-3" />
+              {institutionName}
+            </span>
+          )}
+        </div>
       </div>
 
       {/* Main stats grid */}

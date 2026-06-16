@@ -4,14 +4,16 @@ import Image from "next/image";
 import { getAuthUser } from "@/lib/auth";
 import { connectDB } from "@/lib/mongodb";
 import Course from "@/models/Course";
+import Institution from "@/models/Institution";
 import { ICourse } from "@/types";
 import Badge from "@/components/ui/Badge";
-import { BookOpen, Plus, Pencil } from "lucide-react";
+import { BookOpen, Plus, Pencil, Building2 } from "lucide-react";
 import DeleteCourseButton from "./DeleteCourseButton";
 
-async function getCourses(role: string, userId: string) {
+async function getCourses(role: string, userId: string, institutionId?: string) {
   await connectDB();
-  const filter = role === "admin" ? {} : { instructorId: userId };
+  const tenantClause = institutionId ? { institutionId } : {};
+  const filter = role === "teacher" ? { ...tenantClause, instructorId: userId } : tenantClause;
   const courses = await Course.find(filter).sort({ createdAt: -1 }).lean();
   return JSON.parse(JSON.stringify(courses)) as ICourse[];
 }
@@ -20,14 +22,29 @@ export default async function AdminCoursesPage() {
   const auth = await getAuthUser();
   if (!auth || (auth.role !== "admin" && auth.role !== "teacher")) redirect("/login");
 
-  const courses = await getCourses(auth.role, auth.userId);
+  const courses = await getCourses(auth.role, auth.userId, auth.institutionId);
+
+  let institutionName = "";
+  if (auth.institutionId) {
+    await connectDB();
+    const inst = await Institution.findById(auth.institutionId).select("name").lean() as { name: string } | null;
+    institutionName = inst?.name ?? "";
+  }
 
   return (
     <div>
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">จัดการคอร์ส</h1>
-          <p className="text-gray-500 text-sm mt-1">คอร์สทั้งหมด {courses.length} คอร์ส</p>
+          <div className="flex items-center gap-3 mt-1">
+            <p className="text-gray-500 text-sm">คอร์สทั้งหมด {courses.length} คอร์ส</p>
+            {institutionName && (
+              <span className="inline-flex items-center gap-1 text-xs font-semibold text-indigo-700 bg-indigo-50 px-2.5 py-1 rounded-full">
+                <Building2 className="w-3 h-3" />
+                {institutionName}
+              </span>
+            )}
+          </div>
         </div>
         <Link
           href="/admin/courses/new"

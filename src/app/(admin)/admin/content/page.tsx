@@ -3,14 +3,16 @@ import Link from "next/link";
 import { getAuthUser } from "@/lib/auth";
 import { connectDB } from "@/lib/mongodb";
 import CourseContent from "@/models/CourseContent";
+import Institution from "@/models/Institution";
 import { ICourseContent } from "@/types";
 import Image from "next/image";
-import { Plus, Pencil, Trash2, BookOpen } from "lucide-react";
+import { Plus, Pencil, BookOpen, Building2 } from "lucide-react";
 import DeleteContentButton from "./DeleteContentButton";
 
-async function getContents(): Promise<ICourseContent[]> {
+async function getContents(institutionId?: string): Promise<ICourseContent[]> {
   await connectDB();
-  const contents = await CourseContent.find({}).sort({ createdAt: -1 }).lean();
+  const filter = institutionId ? { institutionId } : {};
+  const contents = await CourseContent.find(filter).sort({ createdAt: -1 }).lean();
   return JSON.parse(JSON.stringify(contents));
 }
 
@@ -18,14 +20,29 @@ export default async function ContentListPage() {
   const auth = await getAuthUser();
   if (!auth || (auth.role !== "admin" && auth.role !== "teacher")) redirect("/login");
 
-  const contents = await getContents();
+  const contents = await getContents(auth.institutionId);
+
+  let institutionName = "";
+  if (auth.institutionId) {
+    await connectDB();
+    const inst = await Institution.findById(auth.institutionId).select("name").lean() as { name: string } | null;
+    institutionName = inst?.name ?? "";
+  }
 
   return (
     <div>
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">จัดการเนื้อหาการเรียน</h1>
-          <p className="text-gray-500 text-sm mt-1">สร้างชุดเนื้อหาและนำไปใช้กับคอร์สที่ต้องการ</p>
+          <div className="flex items-center gap-3 mt-1">
+            <p className="text-gray-500 text-sm">สร้างชุดเนื้อหาและนำไปใช้กับคอร์สที่ต้องการ</p>
+            {institutionName && (
+              <span className="inline-flex items-center gap-1 text-xs font-semibold text-green-700 bg-green-50 px-2.5 py-1 rounded-full">
+                <Building2 className="w-3 h-3" />
+                {institutionName}
+              </span>
+            )}
+          </div>
         </div>
         <Link
           href="/admin/content/new"
@@ -40,7 +57,7 @@ export default async function ContentListPage() {
         <div className="text-center py-20 bg-white rounded-2xl border border-gray-100">
           <BookOpen className="w-12 h-12 text-gray-300 mx-auto mb-3" />
           <p className="text-gray-500 font-medium">ยังไม่มีชุดเนื้อหา</p>
-          <p className="text-gray-400 text-sm mt-1">กด "สร้างชุดเนื้อหาใหม่" เพื่อเริ่มต้น</p>
+          <p className="text-gray-400 text-sm mt-1">กด &quot;สร้างชุดเนื้อหาใหม่&quot; เพื่อเริ่มต้น</p>
         </div>
       ) : (
         <div className="grid gap-4">
@@ -63,7 +80,9 @@ export default async function ContentListPage() {
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-gray-900 truncate">{c.name}</h3>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h3 className="font-semibold text-gray-900 truncate">{c.name}</h3>
+                  </div>
                   {c.description && (
                     <p className="text-sm text-gray-500 truncate mt-0.5">{c.description}</p>
                   )}
