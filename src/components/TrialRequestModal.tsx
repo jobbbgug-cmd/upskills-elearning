@@ -1,6 +1,5 @@
 "use client";
 import { useState } from "react";
-import Image from "next/image";
 import { X, CheckCircle2, Loader2, MoveRight } from "lucide-react";
 
 const INSTITUTION_TYPES = [
@@ -26,7 +25,7 @@ interface Form {
   contactValue: string;
 }
 
-export default function TrialRequestModal({ navbar }: { navbar?: boolean } = {}) {
+export default function TrialRequestModal({ navbar, children }: { navbar?: boolean; children?: React.ReactNode } = {}) {
   const [open, setOpen] = useState(false);
   const [done, setDone] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -80,42 +79,47 @@ export default function TrialRequestModal({ navbar }: { navbar?: boolean } = {})
 
   return (
     <>
-      <button
-        onClick={() => setOpen(true)}
-        className={navbar
-          ? "text-sm font-light px-5 py-2 rounded-full bg-teal-500 text-white hover:bg-teal-600 transition-colors whitespace-nowrap shadow"
-          : "bg-teal-500 text-white font-light px-8 py-3.5 rounded-full hover:bg-teal-600 transition-colors shadow-md whitespace-nowrap"
-        }
-      >
-        <span className="flex items-center gap-2">ทดลองใช้งาน ฟรี! <MoveRight className="w-4 h-4" strokeWidth={1.5} /></span>
-      </button>
+      {children ? (
+        <span onClick={() => setOpen(true)} className="cursor-pointer">{children}</span>
+      ) : (
+        <button
+          onClick={() => setOpen(true)}
+          className={navbar
+            ? "text-sm font-light px-5 py-2 rounded-full bg-gradient-to-r from-blue-500 to-violet-500 text-white hover:from-blue-600 hover:to-violet-600 transition-all whitespace-nowrap shadow"
+            : "bg-gradient-to-r from-blue-500 to-violet-500 text-white font-light px-8 py-3.5 rounded-full hover:from-blue-600 hover:to-violet-600 transition-all shadow-md whitespace-nowrap"
+          }
+        >
+          <span className="flex items-center gap-2">ทดลองใช้งาน ฟรี! <MoveRight className="w-4 h-4" strokeWidth={1.5} /></span>
+        </button>
+      )}
 
       {open && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[95vh] flex overflow-hidden">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm px-4 pt-20 pb-4">
+          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-3xl flex overflow-hidden text-left" style={{ height: "calc(100vh - 88px)" }}>
 
             {/* Left: hero image */}
-            <div className="hidden md:block w-[42%] shrink-0 relative">
-              <Image
+            <div className="hidden md:flex w-[52%] shrink-0">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
                 src="/trial-hero.jpg"
                 alt="ทดลองใช้งานฟรี"
-                fill
-                className="object-cover object-top"
-                sizes="400px"
+                className="w-full h-full object-cover object-top"
               />
             </div>
 
-            {/* Right: form */}
-            <div className="flex-1 flex flex-col overflow-y-auto">
-              {/* Close */}
-              <button
-                onClick={handleClose}
-                className="absolute top-4 right-4 z-10 p-1.5 rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
+            {/* Right: scrollable form */}
+            <div className="flex-1 flex flex-col overflow-hidden">
+              {/* Sticky header with close button */}
+              <div className="sticky top-0 z-10 flex items-center justify-end px-5 pt-4 pb-2 bg-white">
+                <button
+                  onClick={handleClose}
+                  className="p-1.5 rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
 
-              <div className="p-7 pt-8">
+              <div className="overflow-y-auto flex-1 px-7 pb-7 pt-1">
                 {done ? (
                   <div className="flex flex-col items-center justify-center min-h-[400px] text-center">
                     <CheckCircle2 className="w-16 h-16 text-teal-500 mb-4" />

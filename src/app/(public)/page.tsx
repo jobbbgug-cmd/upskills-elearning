@@ -87,11 +87,11 @@ export default async function HomePage() {
       )}
 
       {/* ─── Trial CTA ─── */}
-      <section className="bg-gradient-to-r from-teal-500 to-emerald-600 px-4 py-6">
+      <section className="bg-gradient-to-r from-violet-500 to-indigo-600 px-4 py-6">
         <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="text-white text-center sm:text-left">
             <p className="font-bold text-lg">ทดลองใช้งานระบบฟรี 30 วัน</p>
-            <p className="text-teal-100 text-sm">ไม่ต้องใช้บัตรเครดิต · ทีมงานติดต่อกลับภายใน 1-2 วันทำการ</p>
+            <p className="text-violet-100 text-sm">ไม่ต้องใช้บัตรเครดิต · ทีมงานติดต่อกลับภายใน 1-2 วันทำการ</p>
           </div>
           <TrialRequestModal />
         </div>
@@ -177,9 +177,11 @@ export default async function HomePage() {
                     </li>
                   ))}
                 </ul>
-                <Link href="/register" className="inline-flex items-center gap-2 mt-6 bg-white text-indigo-700 font-semibold px-5 py-2.5 rounded-xl text-sm hover:bg-indigo-50 transition-colors">
-                  เริ่มต้นใช้งาน <ArrowRight className="w-4 h-4" />
-                </Link>
+                <TrialRequestModal>
+                  <span className="inline-flex items-center gap-2 mt-6 bg-white text-indigo-700 font-semibold px-5 py-2.5 rounded-xl text-sm hover:bg-indigo-50 transition-colors">
+                    เริ่มต้นใช้งาน <ArrowRight className="w-4 h-4" />
+                  </span>
+                </TrialRequestModal>
               </div>
             </div>
           </div>
@@ -430,9 +432,11 @@ export default async function HomePage() {
             เราพัฒนาระบบอย่างต่อเนื่องโดยฟังเสียงผู้ใช้งานจริงเป็นหลัก
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/register" className="bg-yellow-400 text-gray-900 font-bold px-8 py-4 rounded-xl hover:bg-yellow-300 transition-colors shadow-lg text-base">
-              เริ่มต้นใช้งานฟรี →
-            </Link>
+            <TrialRequestModal>
+              <span className="bg-yellow-400 text-gray-900 font-bold px-8 py-4 rounded-xl hover:bg-yellow-300 transition-colors shadow-lg text-base inline-block">
+                เริ่มต้นใช้งานฟรี →
+              </span>
+            </TrialRequestModal>
             <Link href="/courses" className="bg-white/10 border border-white/20 text-white font-semibold px-8 py-4 rounded-xl hover:bg-white/20 transition-colors text-base">
               ดูคอร์สทั้งหมด
             </Link>

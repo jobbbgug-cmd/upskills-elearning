@@ -6,9 +6,10 @@ import { ICourse } from "@/types";
 
 interface CourseCardProps {
   course: ICourse;
+  onClickOverride?: (e: React.MouseEvent) => void;
 }
 
-export default function CourseCard({ course }: CourseCardProps) {
+export default function CourseCard({ course, onClickOverride }: CourseCardProps) {
   const nextSession = course.sessions
     .filter((s) => new Date(s.date) >= new Date())
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())[0];
@@ -30,7 +31,7 @@ export default function CourseCard({ course }: CourseCardProps) {
   const hasAvailable = course.sessions.some((s) => s.bookedCount < s.maxCapacity);
 
   return (
-    <Link href={`/courses/${course._id}`} className="group block">
+    <Link href={`/courses/${course._id}`} className="group block" onClick={onClickOverride}>
       <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-md hover:border-indigo-100 transition-all duration-200 h-full flex flex-col">
         {/* Cover Image */}
         <div className="relative h-48 bg-gradient-to-br from-indigo-100 to-purple-100 overflow-hidden">

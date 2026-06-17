@@ -1,10 +1,9 @@
 import { connectDB } from "@/lib/mongodb";
 import Course from "@/models/Course";
 import Institution from "@/models/Institution";
-import CourseCard from "@/components/CourseCard";
+import CoursesGrid from "@/components/CoursesGrid";
 import { getAuthUser } from "@/lib/auth";
 import { ICourse, GradeLevel } from "@/types";
-import { BookOpen } from "lucide-react";
 import Link from "next/link";
 
 const GRADE_GROUPS = [
@@ -257,18 +256,11 @@ export default async function CoursesPage({
             </p>
           </div>
 
-          {courses.length === 0 ? (
-            <div className="text-center py-20 text-gray-400">
-              <BookOpen className="w-12 h-12 mx-auto mb-3 opacity-50" />
-              <p>ไม่พบคอร์สที่ตรงกัน</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
-              {courses.map((course) => (
-                <CourseCard key={course._id} course={course} />
-              ))}
-            </div>
-          )}
+          <CoursesGrid
+            courses={courses}
+            isLoggedIn={!!auth}
+            defaultInstitutionId={activeInstitutionId}
+          />
         </div>
       </div>
     </div>
