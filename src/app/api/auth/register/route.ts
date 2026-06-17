@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
+import { sendNewMemberNotification } from "@/lib/email";
 import User from "@/models/User";
+import Institution from "@/models/Institution";
 
 export async function POST(req: NextRequest) {
   try {
@@ -38,6 +40,18 @@ export async function POST(req: NextRequest) {
       contactChannel,
       contactId,
     });
+
+    // ส่ง email แจ้งเตือน super admin — ไม่ block ถ้า email ส่งไม่ได้
+    try {
+      let institutionName: string | undefined;
+      if (institutionId) {
+        const inst = await Institution.findById(institutionId).select("name").lean() as { name: string } | null;
+        institutionName = inst?.name;
+      }
+      await sendNewMemberNotification({ name, email, role: userRole, institutionName });
+    } catch (emailErr) {
+      console.error("Email notification failed:", emailErr);
+    }
 
     return NextResponse.json({ message: "ส่งคำขอสมัครสมาชิกสำเร็จ รอการอนุมัติจาก Admin" });
   } catch (err) {

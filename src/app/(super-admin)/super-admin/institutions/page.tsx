@@ -1,7 +1,37 @@
 "use client";
 import { useEffect, useState } from "react";
-import { Users, BookOpen, TrendingUp, Edit3, Plus, X, Eye, EyeOff, RefreshCw, CheckCircle2, Copy } from "lucide-react";
+import { Users, BookOpen, TrendingUp, Edit3, Plus, X, Eye, EyeOff, RefreshCw, CheckCircle2, Copy, ClipboardCopy } from "lucide-react";
 import { PLAN_LABELS, PLAN_LIMITS } from "@/lib/planLimits";
+
+function buildWelcomeText(admin: CreatedAdmin): string {
+  return `เรียน คุณลูกค้า
+
+ขอขอบคุณที่ไว้วางใจใช้บริการจากทีมงาน UPSkill
+
+ทางทีมงานขอแจ้งข้อมูลสำหรับเข้าสู่ระบบ โดยมีรายละเอียดดังต่อไปนี้
+
+บัญชีผู้ดูแลระบบ (Admin)
+
+ชื่อผู้ใช้: ${admin.name}
+
+อีเมล: ${admin.email}
+
+รหัสผ่าน: ${admin.password}
+
+เพื่อความปลอดภัยของข้อมูล ขอแนะนำให้ท่านเปลี่ยนรหัสผ่านทันทีหลังจากเข้าสู่ระบบครั้งแรก
+
+หากพบปัญหาในการเข้าสู่ระบบ หรือต้องการความช่วยเหลือเพิ่มเติม สามารถติดต่อทีมงานได้ตามช่องทางด้านล่าง ทางเรายินดีให้บริการอย่างเต็มที่
+
+ขอแสดงความนับถือ
+
+ทีมงาน UPSkill
+
+โทรศัพท์: 094-801-8302
+
+อีเมล: jobbbgug@gmail.com
+
+Line ID: job0948018302`;
+}
 
 interface InstitutionStats {
   _id: string;
@@ -23,6 +53,7 @@ interface CreatedAdmin {
 }
 
 const PLANS = ["trial", "starter", "pro", "enterprise"] as const;
+const PLAN_COMMISSION: Record<string, number> = { trial: 10, starter: 8, pro: 5, enterprise: 3 };
 
 function genPassword(len = 12) {
   const chars = "abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789!@#$";
@@ -37,7 +68,7 @@ export default function InstitutionsPage() {
   const [createdAdmin, setCreatedAdmin] = useState<CreatedAdmin | null>(null);
   const [form, setForm] = useState({ plan: "trial", planExpiresAt: "", isActive: true, commissionRate: 0 });
   const [newForm, setNewForm] = useState({
-    slug: "", name: "", plan: "trial", commissionRate: 0,
+    slug: "", name: "", plan: "trial", commissionRate: PLAN_COMMISSION["trial"],
     adminName: "", adminEmail: "", adminPassword: "",
   });
   const [showPw, setShowPw] = useState(false);
@@ -50,7 +81,11 @@ export default function InstitutionsPage() {
     setLoading(false);
   };
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    load();
+    // Backfill commissionAmount for any confirmed bookings that don't have it stored yet
+    fetch("/api/super-admin/migrate-commission", { method: "POST" }).catch(() => {});
+  }, []);
 
   const openEdit = (inst: InstitutionStats) => {
     setEditing(inst);
@@ -105,7 +140,7 @@ export default function InstitutionsPage() {
     if (res.ok) {
       const data = await res.json();
       setCreating(false);
-      setNewForm({ slug: "", name: "", plan: "trial", commissionRate: 0, adminName: "", adminEmail: "", adminPassword: "" });
+      setNewForm({ slug: "", name: "", plan: "trial", commissionRate: PLAN_COMMISSION["trial"], adminName: "", adminEmail: "", adminPassword: "" });
       load();
       if (data.adminUser) {
         setCreatedAdmin({
@@ -138,61 +173,101 @@ export default function InstitutionsPage() {
         </button>
       </div>
 
-      <div className="space-y-3">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {institutions.map((inst) => {
           const expired = inst.planExpiresAt && new Date(inst.planExpiresAt) < new Date();
           const daysLeft = inst.planExpiresAt
             ? Math.max(0, Math.ceil((new Date(inst.planExpiresAt).getTime() - Date.now()) / 86400000))
             : null;
           const limits = PLAN_LIMITS[inst.plan as keyof typeof PLAN_LIMITS] ?? PLAN_LIMITS.trial;
+          const userPct = limits.maxStudents > 0 ? Math.min(100, (inst.stats.users / limits.maxStudents) * 100) : 0;
+          const coursePct = limits.maxCourses > 0 ? Math.min(100, (inst.stats.courses / limits.maxCourses) * 100) : 0;
+          const initials = inst.name.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase();
+          const planColor: Record<string, string> = {
+            trial: "from-gray-400 to-gray-500",
+            starter: "from-blue-400 to-blue-600",
+            pro: "from-violet-500 to-purple-600",
+            enterprise: "from-amber-400 to-orange-500",
+          };
 
           return (
-            <div key={inst._id} className="bg-white rounded-2xl border border-gray-100 p-5">
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <h3 className="font-semibold text-gray-900">{inst.name}</h3>
-                    <span className="text-xs text-gray-400 font-mono">{inst.slug}</span>
-                    <PlanBadge plan={inst.plan} />
-                    {!inst.isActive && (
-                      <span className="text-xs bg-red-50 text-red-600 border border-red-200 px-2 py-0.5 rounded-full">ระงับ</span>
-                    )}
-                    {expired && (
-                      <span className="text-xs bg-orange-50 text-orange-600 border border-orange-200 px-2 py-0.5 rounded-full">หมดอายุ</span>
-                    )}
+            <div key={inst._id} className={`bg-white rounded-2xl border overflow-hidden transition-all hover:shadow-md ${!inst.isActive ? "border-red-100" : "border-gray-100"}`}>
+              {/* Top accent bar */}
+              <div className={`h-1 w-full bg-gradient-to-r ${planColor[inst.plan] ?? planColor.trial}`} />
+
+              <div className="p-5">
+                {/* Header */}
+                <div className="flex items-start gap-3">
+                  {/* Avatar */}
+                  <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${planColor[inst.plan] ?? planColor.trial} flex items-center justify-center shrink-0`}>
+                    <span className="text-white text-sm font-bold">{initials}</span>
                   </div>
 
-                  {/* Stats row */}
-                  <div className="flex flex-wrap gap-4 mt-3 text-sm text-gray-600">
-                    <span className="flex items-center gap-1.5"><Users className="w-3.5 h-3.5 text-gray-400" />
-                      {inst.stats.users} / {limits.maxStudents === 0 ? "∞" : limits.maxStudents} ผู้ใช้
-                    </span>
-                    <span className="flex items-center gap-1.5"><BookOpen className="w-3.5 h-3.5 text-gray-400" />
-                      {inst.stats.courses} / {limits.maxCourses === 0 ? "∞" : limits.maxCourses} คอร์ส
-                    </span>
-                    <span className="flex items-center gap-1.5"><TrendingUp className="w-3.5 h-3.5 text-gray-400" />
-                      ฿{inst.stats.revenue.toLocaleString()} รายได้
-                    </span>
-                    {inst.commissionRate > 0 && (
-                      <span className="text-violet-600 font-medium">Commission {inst.commissionRate}%</span>
-                    )}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h3 className="font-semibold text-gray-900 leading-tight">{inst.name}</h3>
+                      <PlanBadge plan={inst.plan} />
+                      {!inst.isActive && (
+                        <span className="text-xs bg-red-50 text-red-600 border border-red-200 px-2 py-0.5 rounded-full font-medium">ระงับ</span>
+                      )}
+                      {expired && (
+                        <span className="text-xs bg-orange-50 text-orange-600 border border-orange-200 px-2 py-0.5 rounded-full font-medium">หมดอายุ</span>
+                      )}
+                    </div>
+                    <p className="text-xs text-gray-400 font-mono mt-0.5">{inst.slug}</p>
                   </div>
 
-                  {/* Expiry */}
-                  {inst.planExpiresAt && (
-                    <p className={`text-xs mt-2 ${expired ? "text-red-500" : daysLeft! <= 7 ? "text-orange-500" : "text-gray-400"}`}>
-                      {expired ? "หมดอายุแล้ว" : `หมดอายุใน ${daysLeft} วัน`} —{" "}
-                      {new Date(inst.planExpiresAt).toLocaleDateString("th-TH", { day: "numeric", month: "short", year: "numeric" })}
-                    </p>
-                  )}
+                  <button
+                    onClick={() => openEdit(inst)}
+                    className="p-2 text-gray-400 hover:text-violet-600 hover:bg-violet-50 rounded-lg transition-colors shrink-0"
+                  >
+                    <Edit3 className="w-4 h-4" />
+                  </button>
                 </div>
 
-                <button
-                  onClick={() => openEdit(inst)}
-                  className="p-2 text-gray-400 hover:text-violet-600 hover:bg-violet-50 rounded-lg transition-colors shrink-0"
-                >
-                  <Edit3 className="w-4 h-4" />
-                </button>
+                {/* Revenue highlight */}
+                <div className="mt-4 bg-gradient-to-r from-violet-50 to-purple-50 rounded-xl px-4 py-3 flex items-center justify-between">
+                  <div>
+                    <p className="text-xs text-gray-500">รายได้รวม</p>
+                    <p className="text-xl font-extrabold text-violet-700">฿{inst.stats.revenue.toLocaleString()}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xs text-gray-500">{inst.stats.bookings} การจอง</p>
+                    {inst.commissionRate > 0 && (
+                      <p className="text-xs font-semibold text-violet-500 mt-0.5">Commission {inst.commissionRate}%</p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Usage stats */}
+                <div className="mt-4 space-y-2.5">
+                  <div>
+                    <div className="flex justify-between text-xs text-gray-500 mb-1">
+                      <span className="flex items-center gap-1"><Users className="w-3 h-3" /> ผู้ใช้</span>
+                      <span className="font-medium text-gray-700">{inst.stats.users}{limits.maxStudents > 0 ? ` / ${limits.maxStudents}` : ""}</span>
+                    </div>
+                    <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                      <div className="h-full rounded-full bg-blue-400 transition-all" style={{ width: `${limits.maxStudents > 0 ? userPct : 100}%`, opacity: limits.maxStudents > 0 ? 1 : 0.3 }} />
+                    </div>
+                  </div>
+                  <div>
+                    <div className="flex justify-between text-xs text-gray-500 mb-1">
+                      <span className="flex items-center gap-1"><BookOpen className="w-3 h-3" /> คอร์ส</span>
+                      <span className="font-medium text-gray-700">{inst.stats.courses}{limits.maxCourses > 0 ? ` / ${limits.maxCourses}` : ""}</span>
+                    </div>
+                    <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                      <div className="h-full rounded-full bg-violet-400 transition-all" style={{ width: `${limits.maxCourses > 0 ? coursePct : 100}%`, opacity: limits.maxCourses > 0 ? 1 : 0.3 }} />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Expiry */}
+                {inst.planExpiresAt && (
+                  <div className={`mt-3 text-xs px-3 py-1.5 rounded-lg ${expired ? "bg-red-50 text-red-600" : daysLeft! <= 7 ? "bg-orange-50 text-orange-600" : "bg-gray-50 text-gray-500"}`}>
+                    {expired ? "⚠️ หมดอายุแล้ว" : `⏱ หมดอายุใน ${daysLeft} วัน`} —{" "}
+                    {new Date(inst.planExpiresAt).toLocaleDateString("th-TH", { day: "numeric", month: "short", year: "numeric" })}
+                  </div>
+                )}
               </div>
             </div>
           );
@@ -214,9 +289,17 @@ export default function InstitutionsPage() {
                 className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-300" />
             </Field>
             <Field label="Commission (%)">
-              <input type="number" min={0} max={100} step={0.5} value={form.commissionRate}
-                onChange={(e) => setForm({ ...form, commissionRate: Number(e.target.value) })}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-300" />
+              <input
+                type="text"
+                inputMode="decimal"
+                value={String(form.commissionRate)}
+                onChange={(e) => {
+                  const raw = e.target.value.replace(/[^0-9.]/g, "");
+                  const stripped = raw.replace(/^0+(?=\d)/, "") || "0";
+                  setForm({ ...form, commissionRate: Number(stripped) });
+                }}
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-300"
+              />
             </Field>
             <div className="flex items-center gap-2">
               <input type="checkbox" id="isActive" checked={form.isActive}
@@ -252,10 +335,23 @@ export default function InstitutionsPage() {
                 placeholder="abc-school" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-300" />
             </Field>
             <Field label="แผนเริ่มต้น">
-              <select value={newForm.plan} onChange={(e) => setNewForm({ ...newForm, plan: e.target.value })}
+              <select value={newForm.plan} onChange={(e) => setNewForm({ ...newForm, plan: e.target.value, commissionRate: PLAN_COMMISSION[e.target.value] ?? 0 })}
                 className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-300">
-                {PLANS.map((p) => <option key={p} value={p}>{PLAN_LABELS[p]}</option>)}
+                {PLANS.map((p) => <option key={p} value={p}>{PLAN_LABELS[p]} — ค่าคอม {PLAN_COMMISSION[p]}%</option>)}
               </select>
+            </Field>
+            <Field label="Commission (%)">
+              <input
+                type="text"
+                inputMode="decimal"
+                value={String(newForm.commissionRate)}
+                onChange={(e) => {
+                  const raw = e.target.value.replace(/[^0-9.]/g, "");
+                  const stripped = raw.replace(/^0+(?=\d)/, "") || "0";
+                  setNewForm({ ...newForm, commissionRate: Number(stripped) });
+                }}
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-300"
+              />
             </Field>
 
             {/* Divider */}
@@ -317,34 +413,84 @@ export default function InstitutionsPage() {
 
       {/* Success modal — show admin credentials */}
       {createdAdmin && (
-        <Modal title="สร้างสถาบันสำเร็จ! 🎉" onClose={() => setCreatedAdmin(null)}>
-          <div className="space-y-4">
-            <div className="bg-green-50 border border-green-200 rounded-xl p-4 text-sm text-green-800">
-              <div className="flex items-center gap-2 font-semibold mb-1">
-                <CheckCircle2 className="w-4 h-4" />
-                สร้าง <span className="font-bold">{createdAdmin.institutionName}</span> พร้อม Admin เรียบร้อย
-              </div>
-            </div>
-
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">ข้อมูลเข้าสู่ระบบสำหรับลูกค้า</p>
-            <div className="space-y-2">
-              <CredRow label="ชื่อ" value={createdAdmin.name} />
-              <CredRow label="อีเมล" value={createdAdmin.email} />
-              <CredRow label="รหัสผ่าน" value={createdAdmin.password} secret />
-            </div>
-
-            <p className="text-xs text-orange-600 bg-orange-50 border border-orange-200 rounded-lg px-3 py-2">
-              ⚠️ คัดลอกรหัสผ่านไว้ก่อน! จะไม่สามารถดูได้อีกครั้ง
-            </p>
-
-            <button onClick={() => setCreatedAdmin(null)}
-              className="w-full bg-violet-600 hover:bg-violet-700 text-white text-sm font-medium py-2.5 rounded-lg transition-colors">
-              รับทราบแล้ว
-            </button>
-          </div>
-        </Modal>
+        <SuccessModal admin={createdAdmin} onClose={() => setCreatedAdmin(null)} />
       )}
     </div>
+  );
+}
+
+function SuccessModal({ admin, onClose }: { admin: CreatedAdmin; onClose: () => void }) {
+  const [copied, setCopied] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
+  const text = buildWelcomeText(admin);
+
+  const copyAll = () => {
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2500);
+    });
+  };
+
+  return (
+    <Modal title="สร้างสถาบันสำเร็จ!" onClose={onClose}>
+      <div className="space-y-4">
+        <div className="bg-green-50 border border-green-200 rounded-xl p-4 text-sm text-green-800">
+          <div className="flex items-center gap-2 font-semibold">
+            <CheckCircle2 className="w-4 h-4 shrink-0" />
+            สร้าง <span className="font-bold">{admin.institutionName}</span> พร้อม Admin เรียบร้อย
+          </div>
+        </div>
+
+        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">ข้อมูลเข้าสู่ระบบ</p>
+        <div className="space-y-2">
+          <CredRow label="ชื่อ" value={admin.name} />
+          <CredRow label="อีเมล" value={admin.email} />
+          <CredRow label="รหัสผ่าน" value={admin.password} secret />
+        </div>
+
+        <p className="text-xs text-orange-600 bg-orange-50 border border-orange-200 rounded-lg px-3 py-2">
+          ⚠️ คัดลอกรหัสผ่านไว้ก่อน! จะไม่สามารถดูได้อีกครั้ง
+        </p>
+
+        {/* Copy welcome letter */}
+        <div className="border border-gray-200 rounded-xl overflow-hidden">
+          <button
+            onClick={() => setShowPreview(!showPreview)}
+            className="w-full flex items-center justify-between px-4 py-2.5 bg-gray-50 hover:bg-gray-100 text-sm text-gray-700 transition-colors"
+          >
+            <span className="font-medium">ดูข้อความสำหรับส่งลูกค้า</span>
+            <span className="text-gray-400 text-xs">{showPreview ? "ซ่อน ▲" : "แสดง ▼"}</span>
+          </button>
+          {showPreview && (
+            <pre className="px-4 py-3 text-xs text-gray-700 bg-white whitespace-pre-wrap leading-relaxed max-h-52 overflow-y-auto border-t border-gray-200 font-sans">
+              {text}
+            </pre>
+          )}
+        </div>
+
+        <button
+          onClick={copyAll}
+          className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+            copied
+              ? "bg-green-500 text-white"
+              : "bg-violet-600 hover:bg-violet-700 text-white"
+          }`}
+        >
+          {copied ? (
+            <><CheckCircle2 className="w-4 h-4" /> คัดลอกแล้ว!</>
+          ) : (
+            <><ClipboardCopy className="w-4 h-4" /> คัดลอกข้อความทั้งหมด</>
+          )}
+        </button>
+
+        <button
+          onClick={onClose}
+          className="w-full border border-gray-200 text-gray-600 text-sm py-2.5 rounded-lg hover:bg-gray-50 transition-colors"
+        >
+          ปิด
+        </button>
+      </div>
+    </Modal>
   );
 }
 

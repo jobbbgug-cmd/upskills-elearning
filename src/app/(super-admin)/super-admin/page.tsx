@@ -6,7 +6,7 @@ import Institution from "@/models/Institution";
 import User from "@/models/User";
 import Course from "@/models/Course";
 import Booking from "@/models/Booking";
-import { Building2, Users, BookOpen, TrendingUp, CheckCircle2, Clock3, ArrowRight } from "lucide-react";
+import { Building2, Users, BookOpen, TrendingUp, CheckCircle2, Clock3, ArrowRight, Percent } from "lucide-react";
 import { PLAN_LABELS } from "@/lib/planLimits";
 
 async function getStats() {
@@ -31,9 +31,14 @@ async function getStats() {
     { $match: { status: "confirmed" } },
     { $lookup: { from: "courses", localField: "courseId", foreignField: "_id", as: "course" } },
     { $unwind: "$course" },
-    { $group: { _id: null, total: { $sum: "$course.price" } } },
+    { $group: {
+      _id: null,
+      total: { $sum: "$course.price" },
+      commission: { $sum: "$commissionAmount" },
+    }},
   ]);
   const totalRevenue = revPipeline[0]?.total ?? 0;
+  const totalCommission = Math.round(revPipeline[0]?.commission ?? 0);
 
   const byPlan = await Institution.aggregate([{ $group: { _id: "$plan", count: { $sum: 1 } } }]);
   const planCounts: Record<string, number> = {};
@@ -53,7 +58,7 @@ async function getStats() {
       createdAt: Date;
     }>;
 
-  return { totalInstitutions, activeInstitutions, totalUsers, totalCourses, totalConfirmed, totalPending, totalRevenue, planCounts, recent };
+  return { totalInstitutions, activeInstitutions, totalUsers, totalCourses, totalConfirmed, totalPending, totalRevenue, totalCommission, planCounts, recent };
 }
 
 export default async function SuperAdminPage() {
@@ -78,7 +83,7 @@ export default async function SuperAdminPage() {
       </div>
 
       {/* Revenue/booking split */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
         <div className="bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl p-5 text-white">
           <div className="flex items-center gap-2 mb-3">
             <CheckCircle2 className="w-5 h-5 text-green-200" />
@@ -86,6 +91,14 @@ export default async function SuperAdminPage() {
           </div>
           <div className="text-3xl font-extrabold">฿{s.totalRevenue.toLocaleString()}</div>
           <div className="text-green-100 text-xs mt-1">{s.totalConfirmed} การจองยืนยันแล้ว</div>
+        </div>
+        <div className="bg-gradient-to-br from-violet-500 to-purple-600 rounded-2xl p-5 text-white">
+          <div className="flex items-center gap-2 mb-3">
+            <Percent className="w-5 h-5 text-violet-200" />
+            <span className="text-violet-100 text-sm font-medium">ค่าคอมมิชชั่นรวม</span>
+          </div>
+          <div className="text-3xl font-extrabold">฿{s.totalCommission.toLocaleString()}</div>
+          <div className="text-violet-100 text-xs mt-1">จากรายได้ที่ยืนยันแล้ว</div>
         </div>
         <div className="bg-gradient-to-br from-amber-400 to-orange-500 rounded-2xl p-5 text-white">
           <div className="flex items-center gap-2 mb-3">
@@ -95,16 +108,16 @@ export default async function SuperAdminPage() {
           <div className="text-3xl font-extrabold">{s.totalPending}</div>
           <div className="text-amber-100 text-xs mt-1">การจองรอตรวจสอบ</div>
         </div>
-        <div className="bg-gradient-to-br from-violet-500 to-purple-600 rounded-2xl p-5 text-white">
+        <div className="bg-gradient-to-br from-indigo-500 to-blue-600 rounded-2xl p-5 text-white">
           <div className="flex items-center gap-2 mb-3">
-            <Building2 className="w-5 h-5 text-violet-200" />
-            <span className="text-violet-100 text-sm font-medium">สถาบันตามแผน</span>
+            <Building2 className="w-5 h-5 text-indigo-200" />
+            <span className="text-indigo-100 text-sm font-medium">สถาบันตามแผน</span>
           </div>
-          <div className="space-y-1 mt-1">
+          <div className="space-y-1.5 mt-1">
             {Object.entries(s.planCounts).map(([plan, count]) => (
-              <div key={plan} className="flex justify-between text-sm">
-                <span className="text-violet-200">{PLAN_LABELS[plan] ?? plan}</span>
-                <span className="text-white font-bold">{count}</span>
+              <div key={plan} className="flex justify-between items-center">
+                <span className="text-indigo-200 text-sm">{PLAN_LABELS[plan] ?? plan}</span>
+                <span className="text-white font-extrabold text-3xl">{count}</span>
               </div>
             ))}
           </div>

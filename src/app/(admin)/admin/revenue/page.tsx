@@ -11,7 +11,10 @@ interface CourseStat {
   confirmedBookings: number;
   pendingBookings: number;
   revenue: number;
+  commissionAmount: number;
   pendingRevenue: number;
+  pendingCommission: number;
+  commissionRate: number;
   byMonth: Record<string, number>;
 }
 
@@ -31,13 +34,16 @@ interface RevenueData {
   courseStats: CourseStat[];
   monthly: MonthlyData[];
   totalRevenue: number;
+  totalCommissionAmount: number;
   totalPending: number;
+  totalPendingCommission: number;
   totalConfirmed: number;
   byTeacher: TeacherGroup[] | null;
+  commissionRate: number;
 }
 
-const COMMISSION = 0.2;
 const fmt = (n: number) => n.toLocaleString("th-TH");
+
 const MONTHS_TH = ["ม.ค.","ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.","ก.ค.","ส.ค.","ก.ย.","ต.ค.","พ.ย.","ธ.ค."];
 function monthLabel(m: string) {
   const [y, mo] = m.split("-");
@@ -49,15 +55,20 @@ function SortIcon({ active, dir }: { active: boolean; dir: "asc" | "desc" }) {
   return dir === "desc" ? <ChevronDown className="w-3 h-3 text-indigo-500" /> : <ChevronUp className="w-3 h-3 text-indigo-500" />;
 }
 
-function CourseTable({ courses, showInstructor = false }: { courses: CourseStat[]; showInstructor?: boolean }) {
+function CourseTable({ courses, showInstructor = false }: {
+  courses: CourseStat[];
+  showInstructor?: boolean;
+}) {
   const [sortKey, setSortKey] = useState<"revenue" | "confirmedBookings">("revenue");
   const [sortDir, setSortDir] = useState<"desc" | "asc">("desc");
   const sorted = [...courses].sort((a, b) => {
     const d = a[sortKey] - b[sortKey];
     return sortDir === "desc" ? -d : d;
   });
-  const totalRevenue = courses.reduce((s, c) => s + c.revenue, 0);
-  const totalNet = Math.round(totalRevenue * (1 - COMMISSION));
+  const totalGrossRevenue = courses.reduce((s, c) => s + c.revenue, 0);
+  const totalCommission = courses.reduce((s, c) => s + c.commissionAmount, 0);
+  const totalNet = totalGrossRevenue - totalCommission;
+  const colSpanCount = showInstructor ? 8 : 7;
 
   function toggle(col: typeof sortKey) {
     if (sortKey === col) setSortDir((d) => d === "desc" ? "asc" : "desc");
@@ -75,41 +86,52 @@ function CourseTable({ courses, showInstructor = false }: { courses: CourseStat[
             <th className="text-right px-3 py-3 font-medium cursor-pointer hover:text-indigo-600 select-none" onClick={() => toggle("confirmedBookings")}>
               <span className="inline-flex items-center gap-1">นักเรียน <SortIcon active={sortKey === "confirmedBookings"} dir={sortDir} /></span>
             </th>
-            <th className="text-right px-3 py-3 font-medium text-amber-600">รอชำระ</th>
-            <th className="text-right px-4 py-3 font-medium cursor-pointer hover:text-indigo-600 select-none" onClick={() => toggle("revenue")}>
-              <span className="inline-flex items-center gap-1">รายได้รวม <SortIcon active={sortKey === "revenue"} dir={sortDir} /></span>
+            <th className="text-right px-3 py-3 font-medium cursor-pointer hover:text-indigo-600 select-none" onClick={() => toggle("revenue")}>
+              <span className="inline-flex items-center gap-1">ราคา/รวม <SortIcon active={sortKey === "revenue"} dir={sortDir} /></span>
             </th>
-            <th className="text-right px-4 py-3 font-medium text-green-600">ครูได้รับ (80%)</th>
+            <th className="text-right px-3 py-3 font-medium text-amber-600">รอชำระ</th>
+            <th className="text-right px-3 py-3 font-medium text-red-500">ค่าคอมมิชชั่น</th>
+            <th className="text-right px-4 py-3 font-medium text-green-600">รายได้รวม</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-50">
           {sorted.length === 0 ? (
-            <tr><td colSpan={showInstructor ? 7 : 6} className="text-center py-8 text-gray-400">ยังไม่มีข้อมูล</td></tr>
-          ) : sorted.map((c) => (
-            <tr key={c._id} className="hover:bg-gray-50 transition-colors">
-              <td className="px-4 py-3.5">
-                <p className="font-medium text-gray-800 line-clamp-1">{c.title}</p>
-              </td>
-              {showInstructor && <td className="px-4 py-3.5 text-gray-500 text-xs">{c.instructor}</td>}
-              <td className="px-3 py-3.5 text-right text-gray-600">฿{fmt(c.price)}</td>
-              <td className="px-3 py-3.5 text-right">
-                <span className="inline-flex items-center justify-center min-w-[28px] bg-indigo-50 text-indigo-700 text-xs font-semibold rounded-full px-2 py-0.5">{c.confirmedBookings}</span>
-              </td>
-              <td className="px-3 py-3.5 text-right">
-                {c.pendingBookings > 0
-                  ? <span className="inline-flex items-center justify-center min-w-[28px] bg-amber-50 text-amber-700 text-xs font-semibold rounded-full px-2 py-0.5">{c.pendingBookings}</span>
-                  : <span className="text-gray-300">—</span>}
-              </td>
-              <td className="px-4 py-3.5 text-right font-semibold text-gray-800">฿{fmt(c.revenue)}</td>
-              <td className="px-4 py-3.5 text-right font-semibold text-green-600">฿{fmt(Math.round(c.revenue * (1 - COMMISSION)))}</td>
-            </tr>
-          ))}
+            <tr><td colSpan={colSpanCount} className="text-center py-8 text-gray-400">ยังไม่มีข้อมูล</td></tr>
+          ) : sorted.map((c) => {
+            const courseNet = c.revenue - c.commissionAmount;
+            return (
+              <tr key={c._id} className="hover:bg-gray-50 transition-colors">
+                <td className="px-4 py-3.5">
+                  <p className="font-medium text-gray-800 line-clamp-1">{c.title}</p>
+                </td>
+                {showInstructor && <td className="px-4 py-3.5 text-gray-500 text-xs">{c.instructor}</td>}
+                <td className="px-3 py-3.5 text-right text-gray-600">฿{fmt(c.price)}</td>
+                <td className="px-3 py-3.5 text-right">
+                  <span className="inline-flex items-center justify-center min-w-[28px] bg-indigo-50 text-indigo-700 text-xs font-semibold rounded-full px-2 py-0.5">{c.confirmedBookings}</span>
+                </td>
+                <td className="px-3 py-3.5 text-right text-gray-700">฿{fmt(c.revenue)}</td>
+                <td className="px-3 py-3.5 text-right">
+                  {c.pendingBookings > 0
+                    ? <span className="inline-flex items-center justify-center min-w-[28px] bg-amber-50 text-amber-700 text-xs font-semibold rounded-full px-2 py-0.5">{c.pendingBookings}</span>
+                    : <span className="text-gray-300">—</span>}
+                </td>
+                <td className="px-3 py-3.5 text-right text-red-500">
+                  {c.commissionRate > 0 ? `- ฿${fmt(c.commissionAmount)}` : <span className="text-gray-300">—</span>}
+                </td>
+                <td className="px-4 py-3.5 text-right font-semibold text-green-600">฿{fmt(courseNet)}</td>
+              </tr>
+            );
+          })}
         </tbody>
         {sorted.length > 0 && (
           <tfoot className="bg-gray-50 border-t border-gray-200 text-sm font-semibold">
             <tr>
-              <td colSpan={showInstructor ? 5 : 4} className="px-4 py-3 text-gray-600">รวม</td>
-              <td className="px-4 py-3 text-right text-gray-800">฿{fmt(totalRevenue)}</td>
+              <td colSpan={showInstructor ? 4 : 3} className="px-4 py-3 text-gray-600">รวม</td>
+              <td className="px-3 py-3 text-right text-gray-800">฿{fmt(totalGrossRevenue)}</td>
+              <td className="px-3 py-3" />
+              <td className="px-3 py-3 text-right text-red-500">
+                {totalCommission > 0 ? `- ฿${fmt(totalCommission)}` : "—"}
+              </td>
               <td className="px-4 py-3 text-right text-green-600">฿{fmt(totalNet)}</td>
             </tr>
           </tfoot>
@@ -119,18 +141,20 @@ function CourseTable({ courses, showInstructor = false }: { courses: CourseStat[
   );
 }
 
-function MonthlyChart({ monthly, filterMonth, setFilterMonth }: {
+function MonthlyChart({ monthly, filterMonth, setFilterMonth, commissionRate }: {
   monthly: MonthlyData[];
   filterMonth: string;
   setFilterMonth: (m: string) => void;
+  commissionRate: number;
 }) {
-  const max = Math.max(...monthly.map((m) => m.revenue), 1);
-  if (!monthly.length) return null;
+  const netMonthly = monthly.map((m) => ({ ...m, revenue: Math.round(m.revenue * (1 - commissionRate / 100)) }));
+  const max = Math.max(...netMonthly.map((m) => m.revenue), 1);
+  if (!netMonthly.length) return null;
   return (
     <div className="bg-white rounded-2xl border border-gray-100 p-5">
-      <h2 className="text-sm font-semibold text-gray-800 mb-4">รายได้รายเดือน</h2>
+      <h2 className="text-sm font-semibold text-gray-800 mb-4">รายได้รายเดือน{commissionRate > 0 ? " (สุทธิหลังหักค่าคอม)" : ""}</h2>
       <div className="flex items-end gap-2 h-32">
-        {monthly.map((m) => {
+        {netMonthly.map((m) => {
           const pct = (m.revenue / max) * 100;
           const isSel = filterMonth === m.month;
           return (
@@ -150,7 +174,7 @@ function MonthlyChart({ monthly, filterMonth, setFilterMonth }: {
   );
 }
 
-/* ── Teacher view (role=teacher) ── */
+/* ── Teacher view ── */
 function TeacherView({ data }: { data: RevenueData }) {
   const [filterMonth, setFilterMonth] = useState("all");
   const [sortKey, setSortKey] = useState<"revenue" | "confirmedBookings">("revenue");
@@ -171,9 +195,11 @@ function TeacherView({ data }: { data: RevenueData }) {
       });
   }, [data.courseStats, filterMonth, sortKey, sortDir]);
 
-  const displayRevenue = filteredStats.reduce((s, c) => s + c.revenue, 0);
-  const netRevenue = Math.round(displayRevenue * (1 - COMMISSION));
+  const grossRevenue = filteredStats.reduce((s, c) => s + c.revenue, 0);
+  const commissionDeducted = Math.round(grossRevenue * data.commissionRate / 100);
+  const netRevenue = grossRevenue - commissionDeducted;
   const displayConfirmed = filteredStats.reduce((s, c) => s + c.confirmedBookings, 0);
+  const netPending = Math.round(data.totalPending * (1 - data.commissionRate / 100));
 
   return (
     <div className="space-y-6">
@@ -191,26 +217,26 @@ function TeacherView({ data }: { data: RevenueData }) {
         )}
       </div>
 
-      {/* Summary — teacher only sees revenue + net */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white rounded-2xl border border-gray-100 p-5">
-          <div className="flex items-center gap-2 mb-3"><TrendingUp className="w-4 h-4 text-indigo-500" /><span className="text-xs text-gray-500">รายได้รวม</span></div>
-          <p className="text-2xl font-bold text-gray-900">฿{fmt(displayRevenue)}</p>
-          <p className="text-xs text-gray-400 mt-1">จากการจองที่ยืนยันแล้ว</p>
-        </div>
-        <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl border border-green-200 p-5">
-          <div className="flex items-center gap-2 mb-3"><TrendingUp className="w-4 h-4 text-green-500" /><span className="text-xs text-gray-500">ยอดที่ครูได้รับ (80%)</span></div>
+          <div className="flex items-center gap-2 mb-3"><TrendingUp className="w-4 h-4 text-green-500" /><span className="text-xs text-gray-500">รายได้รวม</span></div>
           <p className="text-2xl font-bold text-green-600">฿{fmt(netRevenue)}</p>
-          <p className="text-xs text-gray-400 mt-1">หลังหัก commission แพลตฟอร์ม</p>
         </div>
         <div className="bg-white rounded-2xl border border-gray-100 p-5">
           <div className="flex items-center gap-2 mb-3"><Clock className="w-4 h-4 text-amber-500" /><span className="text-xs text-gray-500">รอชำระ</span></div>
-          <p className="text-2xl font-bold text-gray-900">฿{fmt(data.totalPending)}</p>
-          <p className="text-xs text-gray-400 mt-1">ยังไม่ยืนยัน</p>
+          <p className="text-2xl font-bold text-gray-900">฿{fmt(netPending)}</p>
+        </div>
+        <div className="bg-white rounded-2xl border border-gray-100 p-5">
+          <div className="flex items-center gap-2 mb-3"><Users className="w-4 h-4 text-indigo-500" /><span className="text-xs text-gray-500">นักเรียนทั้งหมด</span></div>
+          <p className="text-2xl font-bold text-gray-900">{fmt(displayConfirmed)}</p>
+        </div>
+        <div className="bg-white rounded-2xl border border-gray-100 p-5">
+          <div className="flex items-center gap-2 mb-3"><BookOpen className="w-4 h-4 text-purple-500" /><span className="text-xs text-gray-500">คอร์สทั้งหมด</span></div>
+          <p className="text-2xl font-bold text-gray-900">{data.courseStats.length}</p>
         </div>
       </div>
 
-      <MonthlyChart monthly={data.monthly} filterMonth={filterMonth} setFilterMonth={setFilterMonth} />
+      <MonthlyChart monthly={data.monthly} filterMonth={filterMonth} setFilterMonth={setFilterMonth} commissionRate={data.commissionRate} />
 
       <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
         <div className="px-5 py-4 border-b border-gray-100">
@@ -222,7 +248,7 @@ function TeacherView({ data }: { data: RevenueData }) {
   );
 }
 
-/* ── Admin view (role=admin) ── */
+/* ── Admin view ── */
 function AdminView({ data }: { data: RevenueData }) {
   const [filterMonth, setFilterMonth] = useState("all");
   const [expandedTeachers, setExpandedTeachers] = useState<Set<string>>(new Set());
@@ -246,10 +272,13 @@ function AdminView({ data }: { data: RevenueData }) {
     });
   }, [teachers, filterMonth]);
 
-  const displayRevenue = filterMonth === "all" ? data.totalRevenue : filteredTeachers.reduce((s, t) => s + t.totalRevenue, 0);
+  const grossRevenue = filterMonth === "all"
+    ? data.totalRevenue
+    : filteredTeachers.reduce((s, t) => s + t.totalRevenue, 0);
+  const commissionDeducted = Math.round(grossRevenue * data.commissionRate / 100);
+  const netRevenue = grossRevenue - commissionDeducted;
+  const netPending = Math.round(data.totalPending * (1 - data.commissionRate / 100));
   const displayConfirmed = filterMonth === "all" ? data.totalConfirmed : filteredTeachers.reduce((s, t) => s + t.totalConfirmed, 0);
-  const commission = displayRevenue * COMMISSION;
-  const netRevenue = displayRevenue - commission;
 
   function toggleTeacher(key: string) {
     setExpandedTeachers((prev) => {
@@ -264,7 +293,9 @@ function AdminView({ data }: { data: RevenueData }) {
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">รายได้</h1>
-          <p className="text-sm text-gray-500 mt-0.5">ภาพรวมรายได้ทั้งหมด</p>
+          <p className="text-sm text-gray-500 mt-0.5">
+            ภาพรวมรายได้ทั้งหมด{data.commissionRate > 0 ? ` (สุทธิหลังหักค่าคอม ${data.commissionRate}%)` : ""}
+          </p>
         </div>
         {allMonths.length > 0 && (
           <select value={filterMonth} onChange={(e) => setFilterMonth(e.target.value)}
@@ -275,18 +306,17 @@ function AdminView({ data }: { data: RevenueData }) {
         )}
       </div>
 
-      {/* Admin summary cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white rounded-2xl border border-gray-100 p-5">
-          <div className="flex items-center gap-2 text-indigo-500 mb-3"><TrendingUp className="w-4 h-4" /><span className="text-xs text-gray-500">รายได้รวม</span></div>
-          <p className="text-2xl font-bold text-gray-900">฿{fmt(displayRevenue)}</p>
+          <div className="flex items-center gap-2 text-green-500 mb-3"><TrendingUp className="w-4 h-4" /><span className="text-xs text-gray-500">รายได้รวม</span></div>
+          <p className="text-2xl font-bold text-green-600">฿{fmt(netRevenue)}</p>
         </div>
         <div className="bg-white rounded-2xl border border-gray-100 p-5">
           <div className="flex items-center gap-2 text-amber-500 mb-3"><Clock className="w-4 h-4" /><span className="text-xs text-gray-500">รอชำระ</span></div>
-          <p className="text-2xl font-bold text-gray-900">฿{fmt(data.totalPending)}</p>
+          <p className="text-2xl font-bold text-gray-900">฿{fmt(netPending)}</p>
         </div>
         <div className="bg-white rounded-2xl border border-gray-100 p-5">
-          <div className="flex items-center gap-2 text-green-500 mb-3"><Users className="w-4 h-4" /><span className="text-xs text-gray-500">นักเรียนทั้งหมด</span></div>
+          <div className="flex items-center gap-2 text-indigo-500 mb-3"><Users className="w-4 h-4" /><span className="text-xs text-gray-500">นักเรียนทั้งหมด</span></div>
           <p className="text-2xl font-bold text-gray-900">{fmt(displayConfirmed)}</p>
         </div>
         <div className="bg-white rounded-2xl border border-gray-100 p-5">
@@ -295,19 +325,9 @@ function AdminView({ data }: { data: RevenueData }) {
         </div>
       </div>
 
-      {/* Commission breakdown */}
-      <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-2xl border border-indigo-100 p-5">
-        <h2 className="text-sm font-semibold text-indigo-800 mb-4">สรุป Commission (20%)</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div><p className="text-xs text-gray-500 mb-1">รายได้รวม</p><p className="text-xl font-bold text-gray-800">฿{fmt(displayRevenue)}</p></div>
-          <div><p className="text-xs text-gray-500 mb-1">Commission แพลตฟอร์ม (20%)</p><p className="text-xl font-bold text-red-500">- ฿{fmt(commission)}</p></div>
-          <div><p className="text-xs text-gray-500 mb-1">จ่ายให้ครูทั้งหมด (80%)</p><p className="text-xl font-bold text-green-600">฿{fmt(Math.round(netRevenue))}</p></div>
-        </div>
-      </div>
+      <MonthlyChart monthly={data.monthly} filterMonth={filterMonth} setFilterMonth={setFilterMonth} commissionRate={data.commissionRate} />
 
-      <MonthlyChart monthly={data.monthly} filterMonth={filterMonth} setFilterMonth={setFilterMonth} />
-
-      {/* Teacher breakdown — expand/collapse */}
+      {/* Teacher breakdown */}
       <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
         <div className="px-5 py-4 border-b border-gray-100">
           <h2 className="text-sm font-semibold text-gray-800">รายได้แยกตามครู</h2>
@@ -316,10 +336,9 @@ function AdminView({ data }: { data: RevenueData }) {
           {filteredTeachers.map((t) => {
             const key = t.instructorId || t.instructor;
             const isOpen = expandedTeachers.has(key);
-            const net = Math.round(t.totalRevenue * (1 - COMMISSION));
+            const teacherNet = Math.round(t.totalRevenue * (1 - data.commissionRate / 100));
             return (
               <div key={key}>
-                {/* Teacher row */}
                 <button
                   onClick={() => toggleTeacher(key)}
                   className="w-full flex items-center gap-4 px-5 py-4 hover:bg-gray-50 transition-colors text-left"
@@ -332,8 +351,7 @@ function AdminView({ data }: { data: RevenueData }) {
                     <p className="text-xs text-gray-400">{t.courses.length} คอร์ส · {t.totalConfirmed} นักเรียน</p>
                   </div>
                   <div className="text-right shrink-0">
-                    <p className="text-sm font-bold text-gray-800">฿{fmt(t.totalRevenue)}</p>
-                    <p className="text-xs text-green-600">ครูได้ ฿{fmt(net)}</p>
+                    <p className="text-sm font-bold text-gray-800">฿{fmt(teacherNet)}</p>
                   </div>
                   {t.totalPending > 0 && (
                     <span className="shrink-0 text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">รอ {t.totalPending}</span>
@@ -341,7 +359,6 @@ function AdminView({ data }: { data: RevenueData }) {
                   <ChevronRight className={`w-4 h-4 text-gray-400 shrink-0 transition-transform ${isOpen ? "rotate-90" : ""}`} />
                 </button>
 
-                {/* Expanded courses */}
                 {isOpen && (
                   <div className="border-t border-gray-100 bg-gray-50">
                     <CourseTable courses={t.courses} />

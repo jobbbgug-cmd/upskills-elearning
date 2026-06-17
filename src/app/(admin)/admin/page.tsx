@@ -24,6 +24,13 @@ async function getStats(role: string, userId: string, institutionId?: string) {
   const courses = await Course.find(courseFilter).select("_id price isActive").lean();
   const courseIds = courses.map((c) => c._id as mongoose.Types.ObjectId);
 
+  // Fetch commission rate for this institution
+  let commissionRate = 0;
+  if (institutionId) {
+    const inst = await Institution.findById(institutionId).select("commissionRate").lean() as { commissionRate?: number } | null;
+    commissionRate = inst?.commissionRate ?? 0;
+  }
+
   const [
     totalContent,
     pendingBookings,
@@ -40,23 +47,24 @@ async function getStats(role: string, userId: string, institutionId?: string) {
     courses.filter((c) => c.isActive).length,
   ]);
 
-  // Revenue: sum price of confirmed bookings
+  // Revenue: sum gross then apply commissionRate (stored commissionAmount may be 0 for old bookings)
   const revenuePipeline = await Booking.aggregate([
     { $match: { status: "confirmed", courseId: { $in: courseIds } } },
     { $lookup: { from: "courses", localField: "courseId", foreignField: "_id", as: "course" } },
     { $unwind: "$course" },
-    { $group: { _id: null, total: { $sum: "$course.price" } } },
+    { $group: { _id: null, gross: { $sum: "$course.price" } } },
   ]);
-  const revenue = revenuePipeline[0]?.total ?? 0;
+  const grossRevenue = revenuePipeline[0]?.gross ?? 0;
+  const revenue = Math.round(grossRevenue * (1 - commissionRate / 100));
 
-  // Pending revenue (pending_payment)
   const pendingRevenuePipeline = await Booking.aggregate([
     { $match: { status: "pending_payment", courseId: { $in: courseIds } } },
     { $lookup: { from: "courses", localField: "courseId", foreignField: "_id", as: "course" } },
     { $unwind: "$course" },
-    { $group: { _id: null, total: { $sum: "$course.price" } } },
+    { $group: { _id: null, gross: { $sum: "$course.price" } } },
   ]);
-  const pendingRevenue = pendingRevenuePipeline[0]?.total ?? 0;
+  const grossPending = pendingRevenuePipeline[0]?.gross ?? 0;
+  const pendingRevenue = Math.round(grossPending * (1 - commissionRate / 100));
 
   return {
     totalCourses: courses.length,
@@ -68,6 +76,7 @@ async function getStats(role: string, userId: string, institutionId?: string) {
     pendingUsers,
     revenue,
     pendingRevenue,
+    commissionRate,
   };
 }
 
@@ -149,7 +158,10 @@ export default async function AdminPage() {
           <div className="text-3xl font-extrabold mb-1">
             ฿{stats.revenue.toLocaleString()}
           </div>
-          <div className="text-green-100 text-xs">{stats.confirmedBookings} การจองที่ชำระแล้ว</div>
+          <div className="text-green-100 text-xs">
+            {stats.confirmedBookings} การจองที่ชำระแล้ว
+            {stats.commissionRate > 0 && ` · หักค่าคอม ${stats.commissionRate}% แล้ว`}
+          </div>
         </div>
 
         {/* Pending revenue */}
@@ -161,7 +173,10 @@ export default async function AdminPage() {
           <div className="text-3xl font-extrabold mb-1">
             ฿{stats.pendingRevenue.toLocaleString()}
           </div>
-          <div className="text-amber-100 text-xs">{stats.pendingBookings} การจองรอชำระ</div>
+          <div className="text-amber-100 text-xs">
+            {stats.pendingBookings} การจองรอชำระ
+            {stats.commissionRate > 0 && ` · หักค่าคอม ${stats.commissionRate}% แล้ว`}
+          </div>
         </div>
 
         {/* Total potential */}
@@ -173,7 +188,10 @@ export default async function AdminPage() {
           <div className="text-3xl font-extrabold mb-1">
             ฿{(stats.revenue + stats.pendingRevenue).toLocaleString()}
           </div>
-          <div className="text-indigo-100 text-xs">{stats.confirmedBookings + stats.pendingBookings} การจองทั้งหมด</div>
+          <div className="text-indigo-100 text-xs">
+            {stats.confirmedBookings + stats.pendingBookings} การจองทั้งหมด
+            {stats.commissionRate > 0 && ` · หักค่าคอม ${stats.commissionRate}% แล้ว`}
+          </div>
         </div>
       </div>
 

@@ -4,6 +4,7 @@ import { resolveInstitutionId, tenantFilter } from "@/lib/tenant";
 import { connectDB } from "@/lib/mongodb";
 import Course from "@/models/Course";
 import Booking from "@/models/Booking";
+import Institution from "@/models/Institution";
 
 export async function GET(req: NextRequest) {
   const auth = await getAuthUser();
@@ -15,31 +16,54 @@ export async function GET(req: NextRequest) {
   const institutionId = await resolveInstitutionId(req, auth.institutionId);
   const base = tenantFilter(institutionId);
 
+  let commissionRate = 0;
+  if (institutionId) {
+    const inst = await Institution.findById(institutionId).select("commissionRate").lean() as { commissionRate?: number } | null;
+    commissionRate = inst?.commissionRate ?? 0;
+  }
+
   const courseFilter = auth.role === "teacher"
     ? { ...base, instructorId: auth.userId }
     : base;
 
   const courses = await Course.find(courseFilter, {
-    _id: 1, title: 1, price: 1, instructor: 1, instructorId: 1, sessions: 1,
+    _id: 1, title: 1, price: 1, instructor: 1, instructorId: 1, institutionId: 1, sessions: 1,
   }).lean();
 
   const courseIds = courses.map((c) => c._id);
 
+  // Build per-institution commission rate map (handles super_admin "all institutions" view)
+  const uniqueInstIds = [...new Set(
+    courses.map((c) => (c.institutionId as { toString(): string } | undefined)?.toString()).filter(Boolean)
+  )] as string[];
+  let instRateMap = new Map<string, number>([[institutionId ?? "", commissionRate]]);
+  if (uniqueInstIds.length > 0) {
+    const insts = await Institution.find({ _id: { $in: uniqueInstIds } }).select("_id commissionRate").lean() as Array<{ _id: unknown; commissionRate?: number }>;
+    instRateMap = new Map(insts.map((i) => [(i._id as { toString(): string }).toString(), i.commissionRate ?? 0]));
+  }
+
   const bookings = await Booking.find(
     { ...base, courseId: { $in: courseIds } },
-    { courseId: 1, status: 1, createdAt: 1 }
+    { courseId: 1, status: 1, createdAt: 1, commissionAmount: 1 }
   ).lean();
 
-  type BookingGroup = { confirmed: number; pending: number; byMonth: Record<string, number> };
+  type BookingGroup = {
+    confirmed: number; pending: number;
+    storedCommission: number;              // sum of commissionAmount saved at confirm-time
+    byMonth: Record<string, number>;
+    byMonthCommission: Record<string, number>; // stored commission per month
+  };
   const bookingMap: Record<string, BookingGroup> = {};
 
   for (const b of bookings) {
     const key = b.courseId.toString();
-    if (!bookingMap[key]) bookingMap[key] = { confirmed: 0, pending: 0, byMonth: {} };
+    if (!bookingMap[key]) bookingMap[key] = { confirmed: 0, pending: 0, storedCommission: 0, byMonth: {}, byMonthCommission: {} };
     if (b.status === "confirmed") {
       bookingMap[key].confirmed++;
+      bookingMap[key].storedCommission += (b.commissionAmount as number) ?? 0;
       const month = new Date(b.createdAt).toISOString().slice(0, 7);
       bookingMap[key].byMonth[month] = (bookingMap[key].byMonth[month] ?? 0) + 1;
+      bookingMap[key].byMonthCommission[month] = (bookingMap[key].byMonthCommission[month] ?? 0) + ((b.commissionAmount as number) ?? 0);
     } else if (b.status === "pending_payment") {
       bookingMap[key].pending++;
     }
@@ -47,7 +71,14 @@ export async function GET(req: NextRequest) {
 
   const courseStats = courses.map((c) => {
     const id = (c._id as { toString(): string }).toString();
-    const stats = bookingMap[id] ?? { confirmed: 0, pending: 0, byMonth: {} };
+    const stats = bookingMap[id] ?? { confirmed: 0, pending: 0, storedCommission: 0, byMonth: {}, byMonthCommission: {} };
+    const courseRate = instRateMap.get((c.institutionId as { toString(): string } | undefined)?.toString() ?? "") ?? commissionRate;
+    const grossRevenue = stats.confirmed * c.price;
+    const pendingGross = stats.pending * c.price;
+    // Always use stored commission — locked at approval time, never recalculated
+    const commissionAmount = stats.storedCommission;
+    // Pending: use current rate (not yet confirmed, no stored value)
+    const pendingCommission = Math.round(pendingGross * courseRate / 100);
     return {
       _id: id,
       title: c.title,
@@ -56,24 +87,34 @@ export async function GET(req: NextRequest) {
       price: c.price,
       confirmedBookings: stats.confirmed,
       pendingBookings: stats.pending,
-      revenue: stats.confirmed * c.price,
-      pendingRevenue: stats.pending * c.price,
+      revenue: grossRevenue,
+      commissionAmount,
+      pendingRevenue: pendingGross,
+      pendingCommission,
+      commissionRate: courseRate,
       byMonth: stats.byMonth,
+      byMonthCommission: stats.byMonthCommission,
     };
   });
 
-  const monthlyMap: Record<string, number> = {};
+  const monthlyMap: Record<string, { revenue: number; commission: number }> = {};
   for (const c of courseStats) {
     for (const [month, count] of Object.entries(c.byMonth)) {
-      monthlyMap[month] = (monthlyMap[month] ?? 0) + count * c.price;
+      const monthRevenue = count * c.price;
+      const monthCommission = c.byMonthCommission[month] ?? 0;
+      if (!monthlyMap[month]) monthlyMap[month] = { revenue: 0, commission: 0 };
+      monthlyMap[month].revenue += monthRevenue;
+      monthlyMap[month].commission += monthCommission;
     }
   }
   const monthly = Object.entries(monthlyMap)
     .sort(([a], [b]) => a.localeCompare(b))
-    .map(([month, revenue]) => ({ month, revenue }));
+    .map(([month, { revenue, commission }]) => ({ month, revenue, commission }));
 
   const totalRevenue = courseStats.reduce((s, c) => s + c.revenue, 0);
+  const totalCommissionAmount = courseStats.reduce((s, c) => s + c.commissionAmount, 0);
   const totalPending = courseStats.reduce((s, c) => s + c.pendingRevenue, 0);
+  const totalPendingCommission = courseStats.reduce((s, c) => s + c.pendingCommission, 0);
   const totalConfirmed = courseStats.reduce((s, c) => s + c.confirmedBookings, 0);
 
   let byTeacher = null;
@@ -99,8 +140,11 @@ export async function GET(req: NextRequest) {
     courseStats,
     monthly,
     totalRevenue,
+    totalCommissionAmount,
     totalPending,
+    totalPendingCommission,
     totalConfirmed,
     byTeacher,
+    commissionRate,
   });
 }

@@ -4,6 +4,10 @@ import { connectDB } from "@/lib/mongodb";
 import { getAuthUser } from "@/lib/auth";
 import { tenantFilter, resolveInstitutionId } from "@/lib/tenant";
 import Booking from "@/models/Booking";
+import Course from "@/models/Course";
+import User from "@/models/User";
+import Institution from "@/models/Institution";
+import { sendPaymentSlipNotification } from "@/lib/email";
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -34,6 +38,24 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     booking.slipImage = blob.url;
     booking.expiresAt = null;
     await booking.save();
+
+    // Send email notification — non-blocking
+    try {
+      const [course, student, institution] = await Promise.all([
+        Course.findById(booking.courseId).select("title institutionId").lean() as Promise<{ title: string; institutionId?: unknown } | null>,
+        User.findById(booking.userId).select("name email").lean() as Promise<{ name: string; email: string } | null>,
+        booking.institutionId ? Institution.findById(booking.institutionId).select("name").lean() as Promise<{ name: string } | null> : Promise.resolve(null),
+      ]);
+      await sendPaymentSlipNotification({
+        studentName: student?.name ?? "ไม่ทราบชื่อ",
+        studentEmail: student?.email ?? "",
+        courseTitle: course?.title ?? "ไม่ทราบคอร์ส",
+        institutionName: institution?.name,
+        bookingId: id,
+      });
+    } catch (emailErr) {
+      console.error("Payment slip email notification failed:", emailErr);
+    }
 
     return NextResponse.json({ url: blob.url });
   } catch (err) {
