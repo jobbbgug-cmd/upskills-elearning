@@ -118,10 +118,11 @@ export async function sendTrialRequestNotification(info: {
   institutionType: string;
   contactChannel: string;
   contactValue: string;
+  to?: string;
 }) {
   await transporter.sendMail({
     from: `"UPSkill System" <${process.env.SMTP_USER}>`,
-    to: process.env.NOTIFY_EMAIL ?? "jobbbgug@gmail.com",
+    to: info.to ?? process.env.NOTIFY_EMAIL ?? "jobbbgug@gmail.com",
     subject: `[UPSkill] คำขอทดลองใช้งานใหม่ — ${info.institutionName}`,
     html: `
       <div style="font-family:Arial,sans-serif;max-width:520px;margin:0 auto;background:#f0fdfa;padding:24px;border-radius:12px;">

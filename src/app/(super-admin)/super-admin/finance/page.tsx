@@ -59,9 +59,7 @@ export default function SuperAdminFinancePage() {
       if (instRes.ok) {
         const insts = await instRes.json() as Institution[];
         setInstitutions(insts);
-        if (insts.length > 0) {
-          setSelectedInstitution(insts[0]._id);
-        }
+        if (insts.length > 0) setSelectedInstitution(insts[0]._id);
       }
       setLoading(false);
     };

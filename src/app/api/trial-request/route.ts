@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
 import TrialRequest from "@/models/TrialRequest";
+import SystemSetting from "@/models/SystemSetting";
 import { sendTrialRequestNotification } from "@/lib/email";
 
 export async function POST(req: NextRequest) {
@@ -15,7 +16,9 @@ export async function POST(req: NextRequest) {
   await TrialRequest.create({ institutionName, fullName, phone, institutionType, contactChannel, contactValue });
 
   try {
-    await sendTrialRequestNotification({ institutionName, fullName, phone, institutionType, contactChannel, contactValue });
+    const setting = await SystemSetting.findOne({ key: "trialNotifyEmail" }).lean() as { value?: string } | null;
+    const to = setting?.value || undefined;
+    await sendTrialRequestNotification({ institutionName, fullName, phone, institutionType, contactChannel, contactValue, to });
   } catch {
     // email failure is non-critical
   }
