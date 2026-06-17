@@ -5,6 +5,7 @@ import Banner from "@/models/Banner";
 import Institution from "@/models/Institution";
 import BannerSlider from "@/components/BannerSlider";
 import PricingSection from "@/components/PricingSection";
+import TrialRequestModal from "@/components/TrialRequestModal";
 import { IBanner, GradeLevel } from "@/types";
 import {
   BookOpen, Users, Video, CheckCircle, Star, Zap, Shield,
@@ -79,10 +80,22 @@ export default async function HomePage() {
                   สมัครสมาชิกฟรี
                 </Link>
               )}
+              <TrialRequestModal />
             </div>
           </div>
         </section>
       )}
+
+      {/* ─── Trial CTA ─── */}
+      <section className="bg-gradient-to-r from-teal-500 to-emerald-600 px-4 py-6">
+        <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="text-white text-center sm:text-left">
+            <p className="font-bold text-lg">ทดลองใช้งานระบบฟรี 30 วัน</p>
+            <p className="text-teal-100 text-sm">ไม่ต้องใช้บัตรเครดิต · ทีมงานติดต่อกลับภายใน 1-2 วันทำการ</p>
+          </div>
+          <TrialRequestModal />
+        </div>
+      </section>
 
       {/* ─── Stats Bar ─── */}
       <section className="bg-white border-b border-gray-100 shadow-sm">

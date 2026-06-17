@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard, Building2, LogOut, Menu, X, ShieldCheck, Receipt,
   UserCog, Users, Wallet, Images, Shield, Home,
-  UserCheck, BookOpen, FileText, TrendingUp, ChevronDown,
+  UserCheck, BookOpen, FileText, TrendingUp, ChevronDown, FlaskConical,
 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 
@@ -86,6 +86,7 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
           <p className="px-3 pt-2 pb-1 text-xs font-semibold text-gray-400 uppercase tracking-wider">แพลตฟอร์ม</p>
           {nav("/super-admin", <LayoutDashboard className="w-4 h-4" />, "ภาพรวม")}
           {nav("/super-admin/institutions", <Building2 className="w-4 h-4" />, "สถาบันทั้งหมด")}
+          {nav("/super-admin/trials", <FlaskConical className="w-4 h-4" />, "คำขอทดลองใช้งาน")}
           {nav("/super-admin/payouts", <Receipt className="w-4 h-4" />, "Commission & Payout")}
 
           {/* Member management */}

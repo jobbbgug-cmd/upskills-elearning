@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Menu, X, User, LogOut, LayoutDashboard, CalendarDays, ShieldCheck } from "lucide-react";
 import { IUser, IBranding } from "@/types";
+import TrialRequestModal from "@/components/TrialRequestModal";
 
 export default function Navbar() {
   const [user, setUser]         = useState<IUser | null>(null);
@@ -112,6 +113,7 @@ export default function Navbar() {
                 <Link href="/register" className="text-sm font-semibold px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition-colors">
                   สมัครสมาชิก
                 </Link>
+                <TrialRequestModal navbar />
               </>
             )}
           </div>
