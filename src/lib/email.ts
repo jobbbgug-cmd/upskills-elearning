@@ -8,20 +8,26 @@ const transporter = nodemailer.createTransport({
   },
 });
 
+const LOGO_URL = `${process.env.NEXT_PUBLIC_BASE_URL ?? "https://upskills-elearning.vercel.app"}/icon.png`;
+
+const logoImg = `<img src="${LOGO_URL}" alt="UPSkill" style="height:44px;display:block;margin:0 auto 10px;" />`;
+
 export async function sendPaymentSlipNotification(info: {
   studentName: string;
   studentEmail: string;
   courseTitle: string;
   institutionName?: string;
   bookingId: string;
+  to?: string;
 }) {
   await transporter.sendMail({
     from: `"UPSkill System" <${process.env.SMTP_USER}>`,
-    to: process.env.NOTIFY_EMAIL ?? "jobbbgug@gmail.com",
+    to: info.to ?? process.env.NOTIFY_EMAIL ?? "jobbbgug@gmail.com",
     subject: `[UPSkill] มีสลิปชำระเงินรอตรวจสอบ — ${info.courseTitle}`,
     html: `
       <div style="font-family:Arial,sans-serif;max-width:520px;margin:0 auto;background:#f9fafb;padding:24px;border-radius:12px;">
         <div style="background:#7c3aed;padding:20px 24px;border-radius:8px 8px 0 0;text-align:center;">
+          ${logoImg}
           <h2 style="color:#fff;margin:0;font-size:20px;">มีสลิปชำระเงินรอตรวจสอบ</h2>
         </div>
         <div style="background:#fff;padding:24px;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 8px 8px;">
@@ -62,6 +68,7 @@ export async function sendNewMemberNotification(member: {
   email: string;
   role: string;
   institutionName?: string;
+  to?: string;
 }) {
   const roleLabel: Record<string, string> = {
     student: "นักเรียน",
@@ -71,11 +78,12 @@ export async function sendNewMemberNotification(member: {
 
   await transporter.sendMail({
     from: `"UPSkill System" <${process.env.SMTP_USER}>`,
-    to: process.env.NOTIFY_EMAIL ?? "jobbbgug@gmail.com",
+    to: member.to ?? process.env.NOTIFY_EMAIL ?? "jobbbgug@gmail.com",
     subject: `[UPSkill] มีสมาชิกใหม่รออนุมัติ — ${member.name}`,
     html: `
       <div style="font-family:Arial,sans-serif;max-width:520px;margin:0 auto;background:#f9fafb;padding:24px;border-radius:12px;">
         <div style="background:#4f46e5;padding:20px 24px;border-radius:8px 8px 0 0;text-align:center;">
+          ${logoImg}
           <h2 style="color:#fff;margin:0;font-size:20px;">มีสมาชิกใหม่รออนุมัติ</h2>
         </div>
         <div style="background:#fff;padding:24px;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 8px 8px;">
@@ -127,6 +135,7 @@ export async function sendTrialRequestNotification(info: {
     html: `
       <div style="font-family:Arial,sans-serif;max-width:520px;margin:0 auto;background:#f0fdfa;padding:24px;border-radius:12px;">
         <div style="background:#0d9488;padding:20px 24px;border-radius:8px 8px 0 0;text-align:center;">
+          ${logoImg}
           <h2 style="color:#fff;margin:0;font-size:20px;">คำขอทดลองใช้งานใหม่</h2>
         </div>
         <div style="background:#fff;padding:24px;border:1px solid #ccfbf1;border-top:none;border-radius:0 0 8px 8px;">

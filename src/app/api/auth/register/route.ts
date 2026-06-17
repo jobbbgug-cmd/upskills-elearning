@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
 import { sendNewMemberNotification } from "@/lib/email";
+import { getNotifyEmail } from "@/lib/notifyEmail";
 import User from "@/models/User";
 import Institution from "@/models/Institution";
 
@@ -48,7 +49,8 @@ export async function POST(req: NextRequest) {
         const inst = await Institution.findById(institutionId).select("name").lean() as { name: string } | null;
         institutionName = inst?.name;
       }
-      await sendNewMemberNotification({ name, email, role: userRole, institutionName });
+      const to = await getNotifyEmail();
+      await sendNewMemberNotification({ name, email, role: userRole, institutionName, to });
     } catch (emailErr) {
       console.error("Email notification failed:", emailErr);
     }

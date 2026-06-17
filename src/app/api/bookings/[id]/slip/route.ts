@@ -8,6 +8,7 @@ import Course from "@/models/Course";
 import User from "@/models/User";
 import Institution from "@/models/Institution";
 import { sendPaymentSlipNotification } from "@/lib/email";
+import { getNotifyEmail } from "@/lib/notifyEmail";
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -46,12 +47,14 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         User.findById(booking.userId).select("name email").lean() as Promise<{ name: string; email: string } | null>,
         booking.institutionId ? Institution.findById(booking.institutionId).select("name").lean() as Promise<{ name: string } | null> : Promise.resolve(null),
       ]);
+      const to = await getNotifyEmail();
       await sendPaymentSlipNotification({
         studentName: student?.name ?? "ไม่ทราบชื่อ",
         studentEmail: student?.email ?? "",
         courseTitle: course?.title ?? "ไม่ทราบคอร์ส",
         institutionName: institution?.name,
         bookingId: id,
+        to,
       });
     } catch (emailErr) {
       console.error("Payment slip email notification failed:", emailErr);
