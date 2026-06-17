@@ -19,8 +19,8 @@ export async function POST(req: NextRequest) {
     const setting = await SystemSetting.findOne({ key: "trialNotifyEmail" }).lean() as { value?: string } | null;
     const to = setting?.value || undefined;
     await sendTrialRequestNotification({ institutionName, fullName, phone, institutionType, contactChannel, contactValue, to });
-  } catch {
-    // email failure is non-critical
+  } catch (err) {
+    console.error("[trial-request] email send failed:", err);
   }
 
   return NextResponse.json({ ok: true });
