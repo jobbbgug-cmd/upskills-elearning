@@ -23,3 +23,14 @@ export async function PATCH(req: Request) {
   await TrialRequest.findByIdAndUpdate(id, { status });
   return NextResponse.json({ ok: true });
 }
+
+export async function DELETE(req: Request) {
+  const auth = await getAuthUser();
+  if (!auth || auth.role !== "super_admin")
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const { id } = await req.json();
+  await connectDB();
+  await TrialRequest.findByIdAndDelete(id);
+  return NextResponse.json({ ok: true });
+}

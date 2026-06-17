@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { Clock, CheckCircle2, PhoneCall, XCircle, RefreshCw } from "lucide-react";
+import { Clock, CheckCircle2, PhoneCall, XCircle, RefreshCw, Trash2 } from "lucide-react";
 
 interface TrialItem {
   _id: string;
@@ -50,6 +50,16 @@ export default function TrialsPage() {
       body: JSON.stringify({ id, status }),
     });
     setItems((prev) => prev.map((it) => it._id === id ? { ...it, status: status as TrialItem["status"] } : it));
+  };
+
+  const deleteItem = async (id: string) => {
+    if (!confirm("ลบรายการนี้?")) return;
+    await fetch("/api/super-admin/trial-requests", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    });
+    setItems((prev) => prev.filter((it) => it._id !== id));
   };
 
   const filtered = filter === "all" ? items : items.filter((i) => i.status === filter);
@@ -135,22 +145,27 @@ export default function TrialsPage() {
                       </div>
                     </div>
                   </div>
-                  {nextStatuses.length > 0 && (
-                    <div className="flex flex-col gap-1.5 shrink-0">
-                      {nextStatuses.map((s) => {
-                        const nc = STATUS_CONFIG[s as keyof typeof STATUS_CONFIG];
-                        return (
-                          <button
-                            key={s}
-                            onClick={() => updateStatus(item._id, s)}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${nc.color} hover:opacity-80`}
-                          >
-                            {nc.label}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  )}
+                  <div className="flex flex-col gap-1.5 shrink-0">
+                    {nextStatuses.map((s) => {
+                      const nc = STATUS_CONFIG[s as keyof typeof STATUS_CONFIG];
+                      return (
+                        <button
+                          key={s}
+                          onClick={() => updateStatus(item._id, s)}
+                          className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${nc.color} hover:opacity-80`}
+                        >
+                          {nc.label}
+                        </button>
+                      );
+                    })}
+                    <button
+                      onClick={() => deleteItem(item._id)}
+                      className="px-3 py-1.5 rounded-lg text-xs font-medium border border-gray-200 text-gray-400 hover:border-red-300 hover:text-red-500 transition-colors flex items-center gap-1"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                      ลบ
+                    </button>
+                  </div>
                 </div>
               </div>
             );

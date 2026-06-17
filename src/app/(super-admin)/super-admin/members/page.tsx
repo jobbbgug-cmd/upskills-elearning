@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
-import { Clock, CheckCircle, XCircle, Copy, Check, User, GraduationCap, Shield, ShieldCheck, RefreshCw, Building2, ChevronDown } from "lucide-react";
+import { Clock, CheckCircle, XCircle, Copy, Check, User, GraduationCap, Shield, ShieldCheck, RefreshCw, Building2, ChevronDown, Trash2 } from "lucide-react";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 
 interface PendingUser {
@@ -84,6 +84,15 @@ export default function SuperAdminMembersPage() {
     await fetch(`/api/admin/users/${id}/reject`, { method: "POST" });
     setUsers((prev) => prev.filter((u) => u._id !== id));
     setAllUsers((prev) => prev.map((u) => u._id === id ? { ...u, status: "rejected" } : u));
+    setProcessing(null);
+  };
+
+  const doDelete = async (id: string, name: string) => {
+    if (!confirm(`ลบ "${name}" ออกจากระบบ?`)) return;
+    setProcessing(id);
+    await fetch(`/api/admin/users/${id}`, { method: "DELETE" });
+    setUsers((prev) => prev.filter((u) => u._id !== id));
+    setAllUsers((prev) => prev.filter((u) => u._id !== id));
     setProcessing(null);
   };
 
@@ -274,6 +283,14 @@ export default function SuperAdminMembersPage() {
                     <XCircle className="w-4 h-4" />
                     ปฏิเสธ
                   </button>
+                  <button
+                    onClick={() => doDelete(u._id, u.name)}
+                    disabled={processing === u._id}
+                    className="p-2 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-colors disabled:opacity-50"
+                    title="ลบ"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
                 </div>
               </div>
             ))}
@@ -293,6 +310,7 @@ export default function SuperAdminMembersPage() {
                 <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wide">ระดับชั้น</th>
                 <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wide">วันที่สมัคร</th>
                 <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wide">สถานะ</th>
+                <th className="px-5 py-3.5" />
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
@@ -319,6 +337,16 @@ export default function SuperAdminMembersPage() {
                     {new Date(u.createdAt).toLocaleDateString("th-TH", { day: "numeric", month: "short", year: "numeric" })}
                   </td>
                   <td className="px-5 py-3.5">{statusBadge(u.status)}</td>
+                  <td className="px-5 py-3.5">
+                    <button
+                      onClick={() => doDelete(u._id, u.name)}
+                      disabled={processing === u._id}
+                      className="p-1.5 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
+                      title="ลบ"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>

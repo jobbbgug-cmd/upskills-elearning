@@ -45,3 +45,19 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     return NextResponse.json({ error: "เกิดข้อผิดพลาด" }, { status: 500 });
   }
 }
+
+export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  try {
+    const auth = await getAuthUser();
+    if (!auth || (auth.role !== "super_admin" && auth.role !== "admin"))
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    await connectDB();
+    const { id } = await params;
+    await Booking.findByIdAndDelete(id);
+    return NextResponse.json({ ok: true });
+  } catch (err) {
+    console.error(err);
+    return NextResponse.json({ error: "เกิดข้อผิดพลาด" }, { status: 500 });
+  }
+}

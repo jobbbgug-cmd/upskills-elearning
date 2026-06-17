@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import { CheckCircle, XCircle, Clock3, Search, Building2, ChevronDown } from "lucide-react";
+import { CheckCircle, XCircle, Clock3, Search, Building2, ChevronDown, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 
@@ -76,6 +76,14 @@ export default function SuperAdminBookingsPage() {
         b._id === id ? { ...b, status: action === "approve" ? "confirmed" : "rejected" } : b
       ));
     }
+    setActing(null);
+  };
+
+  const deleteBooking = async (id: string) => {
+    if (!confirm("ลบรายการจองนี้?")) return;
+    setActing(id);
+    await fetch(`/api/admin/bookings/${id}`, { method: "DELETE" });
+    setBookings((prev) => prev.filter((b) => b._id !== id));
     setActing(null);
   };
 
@@ -219,18 +227,24 @@ export default function SuperAdminBookingsPage() {
                   )}
                 </div>
 
-                {isPending && (
-                  <div className="flex md:flex-col gap-2 justify-end shrink-0">
-                    <button onClick={() => setConfirmBooking({ open: true, id: booking._id, action: "approve" })} disabled={acting === booking._id}
-                      className="flex items-center gap-1.5 px-4 py-2.5 bg-green-500 hover:bg-green-600 text-white text-sm font-semibold rounded-xl transition-colors disabled:opacity-50 whitespace-nowrap">
-                      <CheckCircle className="w-4 h-4" /> อนุมัติ
-                    </button>
-                    <button onClick={() => setConfirmBooking({ open: true, id: booking._id, action: "reject" })} disabled={acting === booking._id}
-                      className="flex items-center gap-1.5 px-4 py-2.5 bg-red-100 hover:bg-red-200 text-red-600 text-sm font-semibold rounded-xl transition-colors disabled:opacity-50 whitespace-nowrap">
-                      <XCircle className="w-4 h-4" /> ปฏิเสธ
-                    </button>
-                  </div>
-                )}
+                <div className="flex md:flex-col gap-2 justify-end shrink-0">
+                  {isPending && (
+                    <>
+                      <button onClick={() => setConfirmBooking({ open: true, id: booking._id, action: "approve" })} disabled={acting === booking._id}
+                        className="flex items-center gap-1.5 px-4 py-2.5 bg-green-500 hover:bg-green-600 text-white text-sm font-semibold rounded-xl transition-colors disabled:opacity-50 whitespace-nowrap">
+                        <CheckCircle className="w-4 h-4" /> อนุมัติ
+                      </button>
+                      <button onClick={() => setConfirmBooking({ open: true, id: booking._id, action: "reject" })} disabled={acting === booking._id}
+                        className="flex items-center gap-1.5 px-4 py-2.5 bg-red-100 hover:bg-red-200 text-red-600 text-sm font-semibold rounded-xl transition-colors disabled:opacity-50 whitespace-nowrap">
+                        <XCircle className="w-4 h-4" /> ปฏิเสธ
+                      </button>
+                    </>
+                  )}
+                  <button onClick={() => deleteBooking(booking._id)} disabled={acting === booking._id}
+                    className="flex items-center gap-1.5 px-4 py-2.5 bg-gray-50 hover:bg-red-50 text-gray-300 hover:text-red-500 text-sm font-medium rounded-xl border border-gray-100 hover:border-red-200 transition-colors disabled:opacity-50 whitespace-nowrap">
+                    <Trash2 className="w-4 h-4" /> ลบ
+                  </button>
+                </div>
               </div>
             );
           })}
