@@ -10,13 +10,19 @@ import Institution from "@/models/Institution";
 import {
   BookOpen, Clock3, CheckCircle2, TrendingUp,
   FileText, GraduationCap, ArrowRight, UserCheck, Building2,
+  BarChart2,
 } from "lucide-react";
 import mongoose from "mongoose";
+import BranchFilter from "./_components/BranchFilter";
+import DashboardCharts from "./_components/DashboardCharts";
 
-async function getStats(role: string, userId: string, institutionId?: string) {
+async function getStats(role: string, userId: string, institutionId?: string, allBranchIds?: string[]) {
   await connectDB();
 
-  const tenantClause = institutionId ? { institutionId } : {};
+  const tenantClause: Record<string, unknown> = allBranchIds
+    ? { institutionId: { $in: allBranchIds } }
+    : institutionId ? { institutionId } : {};
+
   const courseFilter = role === "teacher"
     ? { ...tenantClause, instructorId: userId }
     : tenantClause;
@@ -24,272 +30,252 @@ async function getStats(role: string, userId: string, institutionId?: string) {
   const courses = await Course.find(courseFilter).select("_id price isActive").lean();
   const courseIds = courses.map((c) => c._id as mongoose.Types.ObjectId);
 
-  // Fetch commission rate for this institution
   let commissionRate = 0;
-  if (institutionId) {
-    const inst = await Institution.findById(institutionId).select("commissionRate").lean() as { commissionRate?: number } | null;
+  const rateSourceId = allBranchIds?.[0] ?? institutionId;
+  if (rateSourceId) {
+    const inst = await Institution.findById(rateSourceId).select("commissionRate").lean() as { commissionRate?: number } | null;
     commissionRate = inst?.commissionRate ?? 0;
   }
 
-  const [
-    totalContent,
-    pendingBookings,
-    confirmedBookings,
-    totalStudents,
-    pendingUsers,
-    activeCourses,
-  ] = await Promise.all([
+  const [totalContent, pendingBookings, confirmedBookings, totalStudents, pendingUsers] = await Promise.all([
     role === "admin" ? CourseContent.countDocuments(tenantClause) : Promise.resolve(0),
     Booking.countDocuments({ status: "pending_payment", courseId: { $in: courseIds } }),
-    Booking.countDocuments({ status: "confirmed",       courseId: { $in: courseIds } }),
+    Booking.countDocuments({ status: "confirmed", courseId: { $in: courseIds } }),
     User.countDocuments({ role: "student", status: "approved", ...tenantClause }),
-    User.countDocuments({ role: "student", status: "pending",  ...tenantClause }),
-    courses.filter((c) => c.isActive).length,
+    User.countDocuments({ role: "student", status: "pending", ...tenantClause }),
   ]);
 
-  // Revenue: sum gross then apply commissionRate (stored commissionAmount may be 0 for old bookings)
-  const revenuePipeline = await Booking.aggregate([
-    { $match: { status: "confirmed", courseId: { $in: courseIds } } },
-    { $lookup: { from: "courses", localField: "courseId", foreignField: "_id", as: "course" } },
-    { $unwind: "$course" },
-    { $group: { _id: null, gross: { $sum: "$course.price" } } },
-  ]);
-  const grossRevenue = revenuePipeline[0]?.gross ?? 0;
-  const revenue = Math.round(grossRevenue * (1 - commissionRate / 100));
+  const activeCourses = (courses as unknown as { isActive: boolean }[]).filter((c) => c.isActive).length;
 
-  const pendingRevenuePipeline = await Booking.aggregate([
-    { $match: { status: "pending_payment", courseId: { $in: courseIds } } },
-    { $lookup: { from: "courses", localField: "courseId", foreignField: "_id", as: "course" } },
-    { $unwind: "$course" },
-    { $group: { _id: null, gross: { $sum: "$course.price" } } },
+  const [revPipeline, pendPipeline] = await Promise.all([
+    Booking.aggregate([
+      { $match: { status: "confirmed", courseId: { $in: courseIds } } },
+      { $lookup: { from: "courses", localField: "courseId", foreignField: "_id", as: "course" } },
+      { $unwind: "$course" },
+      { $group: { _id: null, gross: { $sum: "$course.price" } } },
+    ]),
+    Booking.aggregate([
+      { $match: { status: "pending_payment", courseId: { $in: courseIds } } },
+      { $lookup: { from: "courses", localField: "courseId", foreignField: "_id", as: "course" } },
+      { $unwind: "$course" },
+      { $group: { _id: null, gross: { $sum: "$course.price" } } },
+    ]),
   ]);
-  const grossPending = pendingRevenuePipeline[0]?.gross ?? 0;
-  const pendingRevenue = Math.round(grossPending * (1 - commissionRate / 100));
 
-  return {
-    totalCourses: courses.length,
-    activeCourses,
-    totalContent,
-    pendingBookings,
-    confirmedBookings,
-    totalStudents,
-    pendingUsers,
-    revenue,
-    pendingRevenue,
-    commissionRate,
-  };
+  const revenue = Math.round((revPipeline[0]?.gross ?? 0) * (1 - commissionRate / 100));
+  const pendingRevenue = Math.round((pendPipeline[0]?.gross ?? 0) * (1 - commissionRate / 100));
+
+  return { totalCourses: courses.length, activeCourses, totalContent, pendingBookings, confirmedBookings, totalStudents, pendingUsers, revenue, pendingRevenue, commissionRate };
 }
 
-export default async function AdminPage() {
+export default async function AdminPage({ searchParams }: { searchParams: Promise<{ branchId?: string }> }) {
   const auth = await getAuthUser();
   if (!auth || (auth.role !== "admin" && auth.role !== "teacher")) redirect("/login");
 
-  const stats = await getStats(auth.role, auth.userId, auth.institutionId);
+  const { branchId } = await searchParams;
   const isAdmin = auth.role === "admin";
 
-  let institutionName = "";
-  if (auth.institutionId) {
+  interface BranchOption { _id: string; name: string; }
+  let branches: BranchOption[] = [];
+  let statsInstitutionId: string | undefined = auth.institutionId;
+  let allBranchIds: string[] | undefined;
+  let selectedBranchId = branchId ?? auth.institutionId ?? "";
+  let displayName = "";
+
+  if (auth.isOwner && auth.institutionId) {
     await connectDB();
-    const inst = await Institution.findById(auth.institutionId).select("name").lean() as { name: string } | null;
-    institutionName = inst?.name ?? "";
+    const [parent, children] = await Promise.all([
+      Institution.findById(auth.institutionId).select("_id name").lean() as unknown as Promise<{ _id: mongoose.Types.ObjectId; name: string } | null>,
+      Institution.find({ parentId: auth.institutionId }).select("_id name").sort({ createdAt: 1 }).lean() as unknown as Promise<{ _id: mongoose.Types.ObjectId; name: string }[]>,
+    ]);
+    if (parent) {
+      branches = [
+        { _id: parent._id.toString(), name: `${parent.name} (หลัก)` },
+        ...children.map((b) => ({ _id: b._id.toString(), name: b.name })),
+      ];
+    }
+    if (!branchId) {
+      selectedBranchId = auth.institutionId;
+      statsInstitutionId = auth.institutionId;
+      displayName = branches[0]?.name ?? "";
+    } else if (branchId === "all") {
+      allBranchIds = branches.map((b) => b._id);
+      statsInstitutionId = undefined;
+      displayName = "ทุกสาขา";
+    } else {
+      const match = branches.find((b) => b._id === branchId);
+      if (match) {
+        statsInstitutionId = branchId;
+        displayName = match.name;
+      } else {
+        statsInstitutionId = auth.institutionId;
+        selectedBranchId = auth.institutionId;
+        displayName = branches[0]?.name ?? "";
+      }
+    }
+  } else if (auth.institutionId) {
+    const inst = await connectDB().then(() =>
+      Institution.findById(auth.institutionId).select("name").lean() as Promise<{ name: string } | null>
+    );
+    displayName = inst?.name ?? "";
   }
+
+  const stats = await getStats(auth.role, auth.userId, statsInstitutionId, allBranchIds);
+
+  const today = new Date().toLocaleDateString("th-TH", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">ภาพรวม{isAdmin ? "ระบบ" : "คอร์สของฉัน"}</h1>
-        <div className="flex items-center gap-3 mt-1">
-          <p className="text-gray-500 text-sm">ยินดีต้อนรับ, {auth.name}</p>
-          {institutionName && (
-            <span className="inline-flex items-center gap-1 text-xs font-semibold text-indigo-700 bg-indigo-50 px-2.5 py-1 rounded-full">
-              <Building2 className="w-3 h-3" />
-              {institutionName}
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+            <BarChart2 className="w-6 h-6 text-indigo-500" />
+            ภาพรวม{isAdmin ? "ระบบ" : "คอร์สของฉัน"}
+          </h1>
+          <p className="text-sm text-gray-400 mt-0.5">{today}</p>
+        </div>
+        <div className="flex items-center gap-3 flex-wrap">
+          {auth.isOwner && branches.length > 1 && (
+            <BranchFilter branches={branches} selected={selectedBranchId} />
+          )}
+          {displayName && (
+            <span className={`inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full
+              ${auth.isOwner ? "bg-violet-50 text-violet-700 border border-violet-200" : "bg-indigo-50 text-indigo-700 border border-indigo-100"}`}>
+              <Building2 className="w-3.5 h-3.5" />{displayName}
             </span>
           )}
         </div>
       </div>
 
-      {/* Main stats grid */}
+      {/* KPI Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard
-          label="คอร์สทั้งหมด"
-          value={stats.totalCourses}
-          sub={`เปิดสอน ${stats.activeCourses} คอร์ส`}
-          icon={BookOpen}
-          color="indigo"
-          href="/admin/courses"
-        />
-        {isAdmin && (
-          <StatCard
-            label="เนื้อหาการเรียน"
-            value={stats.totalContent}
-            sub="ชุดเนื้อหา"
-            icon={FileText}
-            color="purple"
-            href="/admin/content"
-          />
-        )}
-        <StatCard
-          label="นักเรียนที่อนุมัติแล้ว"
-          value={stats.totalStudents}
+        <KpiCard
+          label="นักเรียนทั้งหมด"
+          value={stats.totalStudents.toLocaleString()}
           sub={stats.pendingUsers > 0 ? `รออนุมัติ ${stats.pendingUsers} คน` : "ไม่มีรอดำเนินการ"}
-          icon={GraduationCap}
-          color="teal"
+          accent="from-indigo-500 to-violet-600"
+          icon={<GraduationCap className="w-5 h-5 text-white" />}
           href="/admin/members"
         />
-        <StatCard
-          label="การจองที่อนุมัติ"
-          value={stats.confirmedBookings}
-          sub="รอบที่ยืนยันแล้ว"
-          icon={CheckCircle2}
-          color="green"
+        <KpiCard
+          label="คอร์สที่เปิดสอน"
+          value={`${stats.activeCourses}/${stats.totalCourses}`}
+          sub="คอร์สที่เปิด / ทั้งหมด"
+          accent="from-teal-500 to-emerald-500"
+          icon={<BookOpen className="w-5 h-5 text-white" />}
+          href="/admin/courses"
+        />
+        <KpiCard
+          label="การจองยืนยันแล้ว"
+          value={stats.confirmedBookings.toLocaleString()}
+          sub={`รอชำระ ${stats.pendingBookings} รายการ`}
+          accent="from-amber-400 to-orange-500"
+          icon={<CheckCircle2 className="w-5 h-5 text-white" />}
           href="/admin/bookings"
+        />
+        <KpiCard
+          label="รายได้รับแล้ว"
+          value={`฿${stats.revenue.toLocaleString()}`}
+          sub={stats.commissionRate > 0 ? `หักค่าคอม ${stats.commissionRate}% แล้ว` : "ยังไม่หักค่าคอม"}
+          accent="from-rose-500 to-pink-500"
+          icon={<TrendingUp className="w-5 h-5 text-white" />}
+          href="/admin/revenue"
         />
       </div>
 
-      {/* Financial stats */}
+      {/* Revenue Summary Row */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        {/* Revenue confirmed */}
-        <div className="bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl p-5 text-white">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-green-100 text-sm font-medium">รายได้รับแล้ว</span>
-            <CheckCircle2 className="w-5 h-5 text-green-200" />
-          </div>
-          <div className="text-3xl font-extrabold mb-1">
-            ฿{stats.revenue.toLocaleString()}
-          </div>
-          <div className="text-green-100 text-xs">
-            {stats.confirmedBookings} การจองที่ชำระแล้ว
-            {stats.commissionRate > 0 && ` · หักค่าคอม ${stats.commissionRate}% แล้ว`}
-          </div>
-        </div>
-
-        {/* Pending revenue */}
-        <div className="bg-gradient-to-br from-amber-400 to-orange-500 rounded-2xl p-5 text-white">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-amber-100 text-sm font-medium">รอดำเนินการ</span>
-            <Clock3 className="w-5 h-5 text-amber-200" />
-          </div>
-          <div className="text-3xl font-extrabold mb-1">
-            ฿{stats.pendingRevenue.toLocaleString()}
-          </div>
-          <div className="text-amber-100 text-xs">
-            {stats.pendingBookings} การจองรอชำระ
-            {stats.commissionRate > 0 && ` · หักค่าคอม ${stats.commissionRate}% แล้ว`}
-          </div>
-        </div>
-
-        {/* Total potential */}
-        <div className="bg-gradient-to-br from-indigo-500 to-violet-600 rounded-2xl p-5 text-white">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-indigo-100 text-sm font-medium">รายรับรวม (ถ้าชำระครบ)</span>
-            <TrendingUp className="w-5 h-5 text-indigo-200" />
-          </div>
-          <div className="text-3xl font-extrabold mb-1">
-            ฿{(stats.revenue + stats.pendingRevenue).toLocaleString()}
-          </div>
-          <div className="text-indigo-100 text-xs">
-            {stats.confirmedBookings + stats.pendingBookings} การจองทั้งหมด
-            {stats.commissionRate > 0 && ` · หักค่าคอม ${stats.commissionRate}% แล้ว`}
-          </div>
-        </div>
+        <RevCard
+          label="รายได้รับแล้ว"
+          amount={stats.revenue}
+          sub={`${stats.confirmedBookings} การจอง${stats.commissionRate > 0 ? ` · หักค่าคอม ${stats.commissionRate}%` : ""}`}
+          from="from-emerald-500" to="to-teal-600"
+          icon={<CheckCircle2 className="w-5 h-5 text-emerald-200" />}
+        />
+        <RevCard
+          label="รอดำเนินการ"
+          amount={stats.pendingRevenue}
+          sub={`${stats.pendingBookings} รอชำระ${stats.commissionRate > 0 ? ` · หักค่าคอม ${stats.commissionRate}%` : ""}`}
+          from="from-amber-400" to="to-orange-500"
+          icon={<Clock3 className="w-5 h-5 text-amber-200" />}
+        />
+        <RevCard
+          label="รายรับรวม (ถ้าชำระครบ)"
+          amount={stats.revenue + stats.pendingRevenue}
+          sub={`${stats.confirmedBookings + stats.pendingBookings} การจองทั้งหมด`}
+          from="from-indigo-500" to="to-violet-600"
+          icon={<TrendingUp className="w-5 h-5 text-indigo-200" />}
+        />
       </div>
 
-      {/* Booking status breakdown */}
-      <div className="bg-white rounded-2xl border border-gray-100 p-5">
-        <h2 className="font-semibold text-gray-900 mb-4">สถานะการจอง</h2>
-        <div className="grid grid-cols-2 sm:grid-cols-2 gap-4">
-          <BookingStatusRow
-            label="รอชำระเงิน"
-            count={stats.pendingBookings}
-            color="amber"
-            href="/admin/bookings"
-          />
-          <BookingStatusRow
-            label="ชำระแล้ว / อนุมัติ"
-            count={stats.confirmedBookings}
-            color="green"
-            href="/admin/bookings"
-          />
-        </div>
-      </div>
+      {/* Charts */}
+      {isAdmin && (
+        <DashboardCharts branchId={selectedBranchId} />
+      )}
 
       {/* Quick links */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {[
-          { href: "/admin/courses",  icon: BookOpen,     label: "จัดการคอร์ส",           desc: "เพิ่ม แก้ไข ลบ กำหนดรอบเรียน" },
-          { href: "/admin/bookings", icon: CheckCircle2, label: "ตรวจสอบการชำระ",        desc: "ตรวจสลิปและอนุมัติการจอง" },
-          { href: "/admin/members",  icon: UserCheck,    label: "อนุมัติสมาชิก",          desc: "ตรวจสอบและอนุมัตินักเรียนใหม่" },
-          { href: "/admin/revenue",  icon: TrendingUp,   label: "รายงานรายได้",           desc: "ดูรายงานรายได้และสถิติ" },
-          { href: "/admin/content",  icon: FileText,     label: "เนื้อหาการเรียน",        desc: "จัดการคลิป PPT ไฟล์ดาวน์โหลด" },
-          { href: "/admin/finance",  icon: CheckCircle2, label: "ข้อมูลทางการเงิน",       desc: "บัญชีธนาคาร QR Code" },
-        ].map(({ href, icon: Icon, label, desc }) => (
-          <Link key={href} href={href}
-            className="bg-white rounded-2xl border border-gray-100 p-5 hover:border-indigo-200 hover:shadow-sm transition-all group flex items-start gap-3">
-            <div className="w-9 h-9 rounded-xl bg-indigo-50 flex items-center justify-center shrink-0 group-hover:bg-indigo-100 transition-colors">
-              <Icon className="w-4.5 h-4.5 text-indigo-500" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center justify-between">
-                <p className="font-semibold text-gray-900 text-sm group-hover:text-indigo-600 transition-colors">{label}</p>
-                <ArrowRight className="w-4 h-4 text-gray-300 group-hover:text-indigo-400 transition-colors shrink-0" />
+      <div>
+        <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">เมนูลัด</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          {[
+            { href: "/admin/courses",  icon: BookOpen,     label: "จัดการคอร์ส",     desc: "เพิ่ม แก้ไข ลบ กำหนดรอบเรียน", color: "bg-indigo-50 text-indigo-500 group-hover:bg-indigo-100" },
+            { href: "/admin/bookings", icon: CheckCircle2, label: "ตรวจสอบการชำระ",  desc: "ตรวจสลิปและอนุมัติการจอง",       color: "bg-green-50 text-green-500 group-hover:bg-green-100" },
+            { href: "/admin/members",  icon: UserCheck,    label: "อนุมัติสมาชิก",    desc: "ตรวจสอบและอนุมัตินักเรียนใหม่", color: "bg-teal-50 text-teal-500 group-hover:bg-teal-100" },
+            { href: "/admin/revenue",  icon: TrendingUp,   label: "รายงานรายได้",     desc: "ดูรายงานรายได้และสถิติ",          color: "bg-rose-50 text-rose-500 group-hover:bg-rose-100" },
+            { href: "/admin/content",  icon: FileText,     label: "เนื้อหาการเรียน", desc: "จัดการคลิป PPT ไฟล์ดาวน์โหลด",  color: "bg-purple-50 text-purple-500 group-hover:bg-purple-100" },
+            { href: "/admin/schedule", icon: BarChart2,    label: "ตารางสอน",         desc: "ดูตารางการสอนรายเดือน",           color: "bg-amber-50 text-amber-500 group-hover:bg-amber-100" },
+          ].map(({ href, icon: Icon, label, desc, color }) => (
+            <Link key={href} href={href}
+              className="bg-white rounded-2xl border border-gray-100 p-4 hover:border-indigo-200 hover:shadow-sm transition-all group flex items-start gap-3">
+              <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-colors ${color}`}>
+                <Icon className="w-4.5 h-4.5" />
               </div>
-              <p className="text-xs text-gray-400 mt-0.5">{desc}</p>
-            </div>
-          </Link>
-        ))}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between">
+                  <p className="font-semibold text-gray-900 text-sm group-hover:text-indigo-600 transition-colors">{label}</p>
+                  <ArrowRight className="w-4 h-4 text-gray-300 group-hover:text-indigo-400 transition-colors shrink-0" />
+                </div>
+                <p className="text-xs text-gray-400 mt-0.5">{desc}</p>
+              </div>
+            </Link>
+          ))}
+        </div>
       </div>
     </div>
   );
 }
 
-/* ── Shared components ── */
+/* ── Sub-components ── */
 
-type ColorKey = "indigo" | "green" | "purple" | "teal" | "amber";
-
-const colorMap: Record<ColorKey, { icon: string; text: string; sub: string }> = {
-  indigo: { icon: "bg-indigo-50 text-indigo-600", text: "text-indigo-600", sub: "text-gray-400" },
-  green:  { icon: "bg-green-50 text-green-600",   text: "text-green-600",  sub: "text-gray-400" },
-  purple: { icon: "bg-purple-50 text-purple-600", text: "text-purple-600", sub: "text-gray-400" },
-  teal:   { icon: "bg-teal-50 text-teal-600",     text: "text-teal-600",   sub: "text-gray-400" },
-  amber:  { icon: "bg-amber-50 text-amber-600",   text: "text-amber-600",  sub: "text-gray-400" },
-};
-
-function StatCard({ label, value, sub, icon: Icon, color, href }: {
-  label: string; value: number; sub: string;
-  icon: React.ComponentType<{ className?: string }>;
-  color: ColorKey; href: string;
+function KpiCard({ label, value, sub, accent, icon, href }: {
+  label: string; value: string; sub: string;
+  accent: string; icon: React.ReactNode; href: string;
 }) {
-  const c = colorMap[color];
   return (
-    <Link href={href} className="bg-white rounded-2xl border border-gray-100 p-5 hover:border-indigo-200 hover:shadow-sm transition-all group">
-      <div className={`inline-flex items-center justify-center w-10 h-10 rounded-xl ${c.icon} mb-3`}>
-        <Icon className="w-5 h-5" />
+    <Link href={href} className="group relative bg-white rounded-2xl border border-gray-100 p-5 hover:shadow-md transition-all overflow-hidden">
+      <div className={`absolute top-0 right-0 w-20 h-20 rounded-full bg-gradient-to-br ${accent} opacity-5 -mr-6 -mt-6`} />
+      <div className={`inline-flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br ${accent} mb-3 shadow-sm`}>
+        {icon}
       </div>
-      <div className={`text-2xl font-bold ${c.text}`}>{value.toLocaleString()}</div>
-      <div className="text-sm font-medium text-gray-700 mt-0.5">{label}</div>
-      <div className={`text-xs mt-0.5 ${c.sub}`}>{sub}</div>
+      <div className="text-2xl font-bold text-gray-900 mb-0.5">{value}</div>
+      <div className="text-xs font-semibold text-gray-600">{label}</div>
+      <div className="text-xs text-gray-400 mt-0.5">{sub}</div>
     </Link>
   );
 }
 
-function BookingStatusRow({ label, count, color, href }: {
-  label: string; count: number; color: "amber" | "green"; href: string;
+function RevCard({ label, amount, sub, from, to, icon }: {
+  label: string; amount: number; sub: string; from: string; to: string; icon: React.ReactNode;
 }) {
-  const styles = {
-    amber: { bar: "bg-amber-400", badge: "bg-amber-50 text-amber-700 border-amber-200" },
-    green: { bar: "bg-green-400", badge: "bg-green-50 text-green-700 border-green-200"  },
-  }[color];
-
   return (
-    <Link href={href} className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition-colors group">
-      <div className={`w-2 h-10 rounded-full shrink-0 ${styles.bar}`} />
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-gray-700 group-hover:text-indigo-600">{label}</p>
+    <div className={`bg-gradient-to-br ${from} ${to} rounded-2xl p-5 text-white`}>
+      <div className="flex items-center justify-between mb-3">
+        <span className="text-white/80 text-sm font-medium">{label}</span>
+        {icon}
       </div>
-      <span className={`text-sm font-bold px-3 py-1 rounded-full border ${styles.badge}`}>
-        {count.toLocaleString()}
-      </span>
-    </Link>
+      <div className="text-3xl font-extrabold mb-1">฿{amount.toLocaleString()}</div>
+      <div className="text-white/70 text-xs">{sub}</div>
+    </div>
   );
 }

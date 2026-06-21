@@ -14,7 +14,7 @@ export async function GET(req: NextRequest) {
 
   const queryUserId = req.nextUrl.searchParams.get("userId");
   const targetUserId =
-    auth.role === "admin" && queryUserId ? queryUserId : auth.userId;
+    (auth.role === "admin" || auth.role === "super_admin") && queryUserId ? queryUserId : auth.userId;
 
   const bookings = await Booking.find({
     ...tenantFilter(institutionId),

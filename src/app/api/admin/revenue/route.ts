@@ -75,10 +75,8 @@ export async function GET(req: NextRequest) {
     const courseRate = instRateMap.get((c.institutionId as { toString(): string } | undefined)?.toString() ?? "") ?? commissionRate;
     const grossRevenue = stats.confirmed * c.price;
     const pendingGross = stats.pending * c.price;
-    // Always use stored commission — locked at approval time, never recalculated
-    const commissionAmount = stats.storedCommission;
-    // Pending: use current rate (not yet confirmed, no stored value)
-    const pendingCommission = Math.round(pendingGross * courseRate / 100);
+    const commissionAmount = grossRevenue * courseRate / 100;
+    const pendingCommission = pendingGross * courseRate / 100;
     return {
       _id: id,
       title: c.title,

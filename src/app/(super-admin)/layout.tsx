@@ -6,6 +6,7 @@ import {
   LayoutDashboard, Building2, LogOut, Menu, X, ShieldCheck, Receipt,
   UserCog, Users, Wallet, Images, Shield, Home,
   UserCheck, BookOpen, FileText, TrendingUp, ChevronDown, FlaskConical, Settings,
+  CalendarDays, GraduationCap,
 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 
@@ -99,6 +100,8 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
           {nav("/super-admin/courses", <BookOpen className="w-4 h-4" />, "จัดการคอร์ส")}
           {nav("/super-admin/content", <FileText className="w-4 h-4" />, "เนื้อหาการเรียน")}
           {nav("/super-admin/revenue", <TrendingUp className="w-4 h-4" />, "รายได้")}
+          {nav("/super-admin/schedule", <CalendarDays className="w-4 h-4" />, "ตารางสอน")}
+          {nav("/super-admin/student-schedule", <GraduationCap className="w-4 h-4" />, "ตารางเรียน")}
 
           {/* System */}
           <p className="px-3 pt-4 pb-1 text-xs font-semibold text-gray-400 uppercase tracking-wider">จัดการระบบ</p>

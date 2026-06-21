@@ -1,6 +1,9 @@
 "use client";
 import { useEffect, useState, useMemo } from "react";
 import { TrendingUp, Users, Clock, BookOpen, ChevronUp, ChevronDown, Minus, ChevronRight } from "lucide-react";
+import {
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell,
+} from "recharts";
 
 interface CourseStat {
   _id: string;
@@ -42,7 +45,7 @@ interface RevenueData {
   commissionRate: number;
 }
 
-const fmt = (n: number) => n.toLocaleString("th-TH");
+const fmt = (n: number) => n.toLocaleString("th-TH", { maximumFractionDigits: 2 });
 
 const MONTHS_TH = ["ม.ค.","ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.","ก.ค.","ส.ค.","ก.ย.","ต.ค.","พ.ย.","ธ.ค."];
 function monthLabel(m: string) {
@@ -147,28 +150,96 @@ function MonthlyChart({ monthly, filterMonth, setFilterMonth, commissionRate }: 
   setFilterMonth: (m: string) => void;
   commissionRate: number;
 }) {
-  const netMonthly = monthly.map((m) => ({ ...m, revenue: Math.round(m.revenue * (1 - commissionRate / 100)) }));
-  const max = Math.max(...netMonthly.map((m) => m.revenue), 1);
+  const netMonthly = monthly.map((m) => ({
+    ...m,
+    label: monthLabel(m.month),
+    net: m.revenue * (1 - commissionRate / 100),
+  }));
+  const totalNet = netMonthly.reduce((s, m) => s + m.net, 0);
   if (!netMonthly.length) return null;
+
+  function formatB(val: number) {
+    if (val >= 1000000) return `฿${(val / 1000000).toFixed(1)}M`;
+    if (val >= 1000) return `฿${(val / 1000).toFixed(0)}K`;
+    return `฿${val.toLocaleString()}`;
+  }
+
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 p-5">
-      <h2 className="text-sm font-semibold text-gray-800 mb-4">รายได้รายเดือน{commissionRate > 0 ? " (สุทธิหลังหักค่าคอม)" : ""}</h2>
-      <div className="flex items-end gap-2 h-32">
-        {netMonthly.map((m) => {
-          const pct = (m.revenue / max) * 100;
-          const isSel = filterMonth === m.month;
-          return (
-            <button key={m.month} onClick={() => setFilterMonth(filterMonth === m.month ? "all" : m.month)}
-              className="flex-1 flex flex-col items-center gap-1 group" title={`${monthLabel(m.month)}: ฿${fmt(m.revenue)}`}>
-              <span className="text-[10px] text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">฿{fmt(m.revenue)}</span>
-              <div className="w-full rounded-t-md transition-colors" style={{ height: `${Math.max(pct, 4)}%`, backgroundColor: isSel ? "#6366f1" : "#c7d2fe" }} />
-              <span className={`text-[10px] ${isSel ? "text-indigo-600 font-semibold" : "text-gray-400"}`}>{monthLabel(m.month)}</span>
+    <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
+      <div className="flex items-start justify-between mb-4">
+        <div>
+          <h2 className="text-sm font-semibold text-gray-900">
+            รายได้รายเดือน{commissionRate > 0 ? " (สุทธิหลังหักค่าคอม)" : ""}
+          </h2>
+          <p className="text-xs text-gray-400 mt-0.5">{netMonthly.length} เดือนล่าสุด</p>
+        </div>
+        <div className="text-right">
+          <p className="text-lg font-bold text-indigo-600">{formatB(totalNet)}</p>
+          {filterMonth !== "all" && (
+            <button onClick={() => setFilterMonth("all")} className="text-xs text-indigo-400 hover:text-indigo-600 transition-colors">
+              ดูทุกเดือน ×
             </button>
-          );
-        })}
+          )}
+        </div>
       </div>
+      <ResponsiveContainer width="100%" height={220}>
+        <BarChart
+          data={netMonthly}
+          barCategoryGap="30%"
+          onClick={(e) => {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const payload = (e as any)?.activePayload?.[0]?.payload as { month: string } | undefined;
+            if (payload?.month) setFilterMonth(filterMonth === payload.month ? "all" : payload.month);
+          }}
+        >
+          <defs>
+            <linearGradient id="revGradActive" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#6366f1" />
+              <stop offset="100%" stopColor="#8b5cf6" />
+            </linearGradient>
+            <linearGradient id="revGradNormal" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#a5b4fc" />
+              <stop offset="100%" stopColor="#c4b5fd" />
+            </linearGradient>
+          </defs>
+          <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
+          <XAxis dataKey="label" tick={{ fontSize: 11, fill: "#9ca3af" }} axisLine={false} tickLine={false} />
+          <YAxis
+            tickFormatter={formatB}
+            tick={{ fontSize: 10, fill: "#9ca3af" }}
+            axisLine={false}
+            tickLine={false}
+            width={52}
+          />
+          <Tooltip
+            cursor={{ fill: "#f5f3ff", radius: 4 }}
+            content={({ active, payload, label }) => {
+              if (!active || !payload?.length) return null;
+              const row = payload[0]?.payload as { month: string; net: number };
+              const isSel = filterMonth === row?.month;
+              return (
+                <div className="bg-white border border-gray-200 rounded-xl px-3 py-2 shadow-lg text-xs">
+                  <p className="font-semibold text-gray-700 mb-1">{label}</p>
+                  <p className="text-indigo-600">รายได้สุทธิ: ฿{row?.net?.toLocaleString()}</p>
+                  <p className="text-gray-400 mt-0.5">{isSel ? "คลิกเพื่อยกเลิกตัวกรอง" : "คลิกเพื่อกรองเดือนนี้"}</p>
+                </div>
+              );
+            }}
+          />
+          <Bar dataKey="net" name="รายได้สุทธิ" radius={[6, 6, 0, 0]} maxBarSize={48} cursor="pointer">
+            {netMonthly.map((m) => (
+              <Cell
+                key={m.month}
+                fill={filterMonth === "all" || filterMonth === m.month ? "url(#revGradActive)" : "url(#revGradNormal)"}
+              />
+            ))}
+          </Bar>
+        </BarChart>
+      </ResponsiveContainer>
       {filterMonth !== "all" && (
-        <p className="text-xs text-indigo-500 mt-2 text-center cursor-pointer" onClick={() => setFilterMonth("all")}>กดอีกครั้งเพื่อดูทุกเดือน</p>
+        <p className="text-xs text-indigo-500 text-center mt-1">
+          กรองตาราง: {monthLabel(filterMonth)} — <button onClick={() => setFilterMonth("all")} className="underline hover:text-indigo-700">ล้างตัวกรอง</button>
+        </p>
       )}
     </div>
   );
@@ -196,10 +267,10 @@ function TeacherView({ data }: { data: RevenueData }) {
   }, [data.courseStats, filterMonth, sortKey, sortDir]);
 
   const grossRevenue = filteredStats.reduce((s, c) => s + c.revenue, 0);
-  const commissionDeducted = Math.round(grossRevenue * data.commissionRate / 100);
+  const commissionDeducted = grossRevenue * data.commissionRate / 100;
   const netRevenue = grossRevenue - commissionDeducted;
   const displayConfirmed = filteredStats.reduce((s, c) => s + c.confirmedBookings, 0);
-  const netPending = Math.round(data.totalPending * (1 - data.commissionRate / 100));
+  const netPending = data.totalPending * (1 - data.commissionRate / 100);
 
   return (
     <div className="space-y-6">
@@ -275,9 +346,9 @@ function AdminView({ data }: { data: RevenueData }) {
   const grossRevenue = filterMonth === "all"
     ? data.totalRevenue
     : filteredTeachers.reduce((s, t) => s + t.totalRevenue, 0);
-  const commissionDeducted = Math.round(grossRevenue * data.commissionRate / 100);
+  const commissionDeducted = grossRevenue * data.commissionRate / 100;
   const netRevenue = grossRevenue - commissionDeducted;
-  const netPending = Math.round(data.totalPending * (1 - data.commissionRate / 100));
+  const netPending = data.totalPending * (1 - data.commissionRate / 100);
   const displayConfirmed = filterMonth === "all" ? data.totalConfirmed : filteredTeachers.reduce((s, t) => s + t.totalConfirmed, 0);
 
   function toggleTeacher(key: string) {
@@ -336,7 +407,7 @@ function AdminView({ data }: { data: RevenueData }) {
           {filteredTeachers.map((t) => {
             const key = t.instructorId || t.instructor;
             const isOpen = expandedTeachers.has(key);
-            const teacherNet = Math.round(t.totalRevenue * (1 - data.commissionRate / 100));
+            const teacherNet = t.totalRevenue * (1 - data.commissionRate / 100);
             return (
               <div key={key}>
                 <button
