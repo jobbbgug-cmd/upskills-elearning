@@ -10,19 +10,20 @@ export async function POST(req: NextRequest) {
 
   const { branchId } = await req.json();
 
-  if (branchId) {
-    // Validate the branch belongs to this owner's institution
-    await connectDB();
-    const branch = await Institution.findOne({ _id: branchId, parentId: auth.institutionId }).lean();
-    if (!branch)
-      return NextResponse.json({ error: "ไม่พบสาขา" }, { status: 404 });
+  const res = NextResponse.json({ ok: true });
+
+  if (!branchId || branchId === auth.institutionId) {
+    // Switching to parent/HQ — clear activeBranchId so resolveInstitutionId uses parent
+    res.cookies.set("activeBranchId", "", { maxAge: 0, path: "/" });
+    return res;
   }
 
-  const res = NextResponse.json({ ok: true });
-  if (branchId) {
-    res.cookies.set("activeBranchId", branchId, { httpOnly: true, maxAge: 60 * 60 * 24 * 7, path: "/" });
-  } else {
-    res.cookies.set("activeBranchId", "", { maxAge: 0, path: "/" });
-  }
+  // Validate the branch is a child of this owner's institution
+  await connectDB();
+  const branch = await Institution.findOne({ _id: branchId, parentId: auth.institutionId }).lean();
+  if (!branch)
+    return NextResponse.json({ error: "ไม่พบสาขา" }, { status: 404 });
+
+  res.cookies.set("activeBranchId", branchId, { httpOnly: true, maxAge: 60 * 60 * 24 * 7, path: "/" });
   return res;
 }

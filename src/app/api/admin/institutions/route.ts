@@ -38,10 +38,11 @@ export async function POST(req: NextRequest) {
     const institution = await Institution.create({ ...institutionFields, parentId: null });
     const institutionId = (institution._id as { toString(): string }).toString();
 
-    // Create branch institutions
+    // Create branch institutions — parent counts as branch 1, so loop from 2
+    // branchCount=3 → parent + สาขา 2 + สาขา 3 = 3 total
     const count = Math.max(1, Math.min(10, Number(branchCount) || 1));
     const branches = [];
-    for (let i = 1; i <= count; i++) {
+    for (let i = 2; i <= count; i++) {
       const branch = await Institution.create({
         ...institutionFields,
         name: `${institutionFields.name} สาขา ${i}`,
@@ -51,14 +52,16 @@ export async function POST(req: NextRequest) {
       branches.push(JSON.parse(JSON.stringify(branch)));
     }
 
-    // Create owner user linked to parent institution
+    // branchCount=1 → single institution, no branch switching needed → create admin
+    // branchCount>1 → multi-branch, needs owner role to switch between branches
+    const userRole = count > 1 ? "owner" : "admin";
     const hashed = await bcrypt.hash(ownerPassword, 10);
     const ownerUser = await User.create({
       institutionId,
       name: ownerName,
       email: ownerEmail,
       password: hashed,
-      role: "owner",
+      role: userRole,
       gradeLevel: "ทุกระดับชั้น",
       status: "approved",
       contactChannel: "",

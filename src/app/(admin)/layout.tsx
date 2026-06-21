@@ -295,8 +295,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   disabled={switchingBranch}
                   className="text-sm border border-violet-200 bg-violet-50 text-violet-800 font-medium rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-violet-400 cursor-pointer disabled:opacity-50 max-w-[200px]"
                 >
-                  {branches.map((b) => (
-                    <option key={b._id} value={b._id}>{b.name}</option>
+                  {branches.map((b, idx) => (
+                    <option key={b._id} value={b._id}>
+                      {idx === 0 ? `${b.name} (หลัก)` : b.name}
+                    </option>
                   ))}
                 </select>
               </div>

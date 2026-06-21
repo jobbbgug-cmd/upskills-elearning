@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
-import { Search, Shield, ShieldCheck, User, GraduationCap, Trash2, ChevronDown, Pencil, X, Eye, EyeOff, Copy, Check, Camera } from "lucide-react";
+import { Search, Shield, ShieldCheck, User, GraduationCap, Trash2, ChevronDown, Pencil, X, Eye, EyeOff, Copy, Check, Camera, UserPlus } from "lucide-react";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 
 interface UserItem {
@@ -55,6 +55,14 @@ export default function AdminUsersPage() {
   const fileInputRef                = useRef<HTMLInputElement>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<{ open: boolean; id: string; name: string }>({ open: false, id: "", name: "" });
 
+  // Create user modal
+  const [createOpen, setCreateOpen]     = useState(false);
+  const [createForm, setCreateForm]     = useState({ name: "", email: "", role: "student" as UserItem["role"], gradeLevel: "", password: "" });
+  const [createError, setCreateError]   = useState("");
+  const [creating, setCreating]         = useState(false);
+  const [createShowPass, setCreateShowPass] = useState(false);
+  const [createCopied, setCreateCopied] = useState(false);
+
   const load = async () => {
     setLoading(true);
     const [usersRes, meRes] = await Promise.all([fetch("/api/admin/users"), fetch("/api/auth/me")]);
@@ -66,10 +74,10 @@ export default function AdminUsersPage() {
   useEffect(() => { load(); }, []);
 
   useEffect(() => {
-    if (editUser) document.body.style.overflow = "hidden";
+    if (editUser || createOpen) document.body.style.overflow = "hidden";
     else document.body.style.overflow = "";
     return () => { document.body.style.overflow = ""; };
-  }, [editUser]);
+  }, [editUser, createOpen]);
 
   // super_admin-only role — hide from regular admin
   const visibleRoles = myRole === "super_admin" ? ROLES : ROLES.filter((r) => r.value !== "super_admin");
@@ -143,6 +151,50 @@ export default function AdminUsersPage() {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const copyCreatePass = () => {
+    navigator.clipboard.writeText(createForm.password);
+    setCreateCopied(true);
+    setTimeout(() => setCreateCopied(false), 2000);
+  };
+
+  const openCreate = () => {
+    setCreateForm({ name: "", email: "", role: "student", gradeLevel: "", password: "" });
+    setCreateError("");
+    setCreateShowPass(false);
+    setCreateCopied(false);
+    setCreateOpen(true);
+  };
+
+  const handleCreate = async () => {
+    setCreateError("");
+    if (!createForm.name || !createForm.email || !createForm.password) {
+      setCreateError("กรุณากรอกข้อมูลให้ครบ"); return;
+    }
+    if (createForm.password.length < 6) {
+      setCreateError("รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร"); return;
+    }
+    setCreating(true);
+    const res = await fetch("/api/admin/users", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: createForm.name,
+        email: createForm.email,
+        password: createForm.password,
+        role: createForm.role,
+        gradeLevel: createForm.role === "student" ? createForm.gradeLevel : "ทุกระดับชั้น",
+        status: "approved",
+      }),
+    });
+    const data = await res.json();
+    if (!res.ok) { setCreateError(data.error ?? "เกิดข้อผิดพลาด"); }
+    else {
+      setUsers((prev) => [data, ...prev]);
+      setCreateOpen(false);
+    }
+    setCreating(false);
+  };
+
   // Hide super_admin users from non-super_admin admins
   const visibleUsers = myRole === "super_admin" ? users : users.filter((u) => u.role !== "super_admin");
 
@@ -168,9 +220,18 @@ export default function AdminUsersPage() {
         onConfirm={() => deleteUser(deleteConfirm.id)}
         onCancel={() => setDeleteConfirm((d) => ({ ...d, open: false }))}
       />
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">จัดการผู้ใช้</h1>
-        <p className="text-gray-500 text-sm mt-1">แก้ไขข้อมูล เปลี่ยน Role และรหัสผ่านของผู้ใช้</p>
+      <div className="mb-8 flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">จัดการผู้ใช้</h1>
+          <p className="text-gray-500 text-sm mt-1">แก้ไขข้อมูล เปลี่ยน Role และรหัสผ่านของผู้ใช้</p>
+        </div>
+        {(myRole === "admin" || myRole === "super_admin" || myRole === "owner") && (
+          <button onClick={openCreate}
+            className="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 text-white text-sm font-semibold rounded-xl hover:bg-indigo-700 transition-colors shrink-0">
+            <UserPlus className="w-4 h-4" />
+            เพิ่มผู้ใช้
+          </button>
+        )}
       </div>
 
       {/* Stats */}
@@ -292,6 +353,105 @@ export default function AdminUsersPage() {
         )}
       </div>
       <p className="text-xs text-gray-400 mt-3 text-right">แสดง {filtered.length} จาก {users.length} คน</p>
+
+      {/* Create User Modal */}
+      {createOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.4)" }}>
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md flex flex-col max-h-[90vh]">
+            <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100 shrink-0">
+              <h2 className="text-lg font-bold text-gray-900">เพิ่มผู้ใช้ใหม่</h2>
+              <button onClick={() => setCreateOpen(false)} className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="px-6 py-5 space-y-4 overflow-y-auto">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">ชื่อ-นามสกุล <span className="text-red-500">*</span></label>
+                <input value={createForm.name} onChange={(e) => setCreateForm({ ...createForm, name: e.target.value })}
+                  className={inputCls} placeholder="ชื่อ-นามสกุล" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">อีเมล <span className="text-red-500">*</span></label>
+                <input type="email" value={createForm.email} onChange={(e) => setCreateForm({ ...createForm, email: e.target.value })}
+                  className={inputCls} placeholder="อีเมล" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Role</label>
+                <select value={createForm.role}
+                  onChange={(e) => {
+                    const r = e.target.value as UserItem["role"];
+                    setCreateForm({ ...createForm, role: r, gradeLevel: r === "student" ? "" : "ทุกระดับชั้น" });
+                  }}
+                  className={inputCls}>
+                  {visibleRoles.map((r) => <option key={r.value} value={r.value}>{r.label}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">ระดับชั้น</label>
+                {createForm.role === "student" ? (
+                  <select value={createForm.gradeLevel} onChange={(e) => setCreateForm({ ...createForm, gradeLevel: e.target.value })} className={inputCls}>
+                    <option value="">— ไม่ระบุ —</option>
+                    {GRADE_LEVELS.map((g) => <option key={g} value={g}>{g}</option>)}
+                  </select>
+                ) : (
+                  <div className="flex items-center gap-2 px-4 py-2.5 bg-indigo-50 border border-indigo-200 rounded-xl">
+                    <span className="text-sm font-semibold text-indigo-700">ทุกระดับชั้น</span>
+                    <span className="text-xs text-indigo-400">(กำหนดอัตโนมัติตาม Role)</span>
+                  </div>
+                )}
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">รหัสผ่าน <span className="text-red-500">*</span></label>
+                <div className="flex gap-2">
+                  <div className="relative flex-1">
+                    <input
+                      type={createShowPass ? "text" : "password"}
+                      value={createForm.password}
+                      onChange={(e) => setCreateForm({ ...createForm, password: e.target.value })}
+                      placeholder="รหัสผ่านอย่างน้อย 6 ตัวอักษร"
+                      className={`${inputCls} pr-10`}
+                    />
+                    <button type="button" onClick={() => setCreateShowPass(!createShowPass)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                      {createShowPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                  {createForm.password && (
+                    <button type="button" onClick={copyCreatePass}
+                      className="px-3 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-xl transition-colors" title="copy รหัสผ่าน">
+                      {createCopied ? <Check className="w-4 h-4 text-green-600" /> : <Copy className="w-4 h-4" />}
+                    </button>
+                  )}
+                  <button type="button"
+                    onClick={() => { const p = generatePassword(); setCreateForm((f) => ({ ...f, password: p })); setCreateShowPass(true); }}
+                    className="px-3 py-2.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 text-xs font-semibold rounded-xl transition-colors whitespace-nowrap">
+                    สร้างอัตโนมัติ
+                  </button>
+                </div>
+                {createForm.password && (
+                  <p className="text-xs text-indigo-600 mt-1.5 font-mono bg-indigo-50 px-3 py-1.5 rounded-lg">
+                    {createForm.password}
+                  </p>
+                )}
+              </div>
+
+              {createError && <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded-xl">{createError}</p>}
+            </div>
+
+            <div className="flex gap-3 px-6 py-5 border-t border-gray-100 shrink-0">
+              <button onClick={handleCreate} disabled={creating}
+                className="flex-1 py-2.5 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 disabled:opacity-50 transition-colors text-sm">
+                {creating ? "กำลังสร้าง..." : "สร้างบัญชี"}
+              </button>
+              <button onClick={() => setCreateOpen(false)}
+                className="flex-1 py-2.5 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 transition-colors text-sm">
+                ยกเลิก
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Edit Modal */}
       {editUser && (

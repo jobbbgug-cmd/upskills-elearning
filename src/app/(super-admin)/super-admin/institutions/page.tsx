@@ -1,16 +1,18 @@
 "use client";
 import { useEffect, useState } from "react";
-import { Users, BookOpen, TrendingUp, Edit3, Plus, X, Eye, EyeOff, RefreshCw, CheckCircle2, Copy, ClipboardCopy } from "lucide-react";
+import { Users, BookOpen, TrendingUp, Edit3, Plus, X, Eye, EyeOff, RefreshCw, CheckCircle2, Copy, ClipboardCopy, Trash2 } from "lucide-react";
+import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import { PLAN_LABELS, PLAN_LIMITS } from "@/lib/planLimits";
 
 function buildWelcomeText(admin: CreatedAdmin): string {
+  const roleLabel = admin.role === "owner" ? "บัญชีเจ้าของสถาบัน (Owner)" : "บัญชีผู้ดูแลระบบ (Admin)";
   return `เรียน คุณลูกค้า
 
 ขอขอบคุณที่ไว้วางใจใช้บริการจากทีมงาน UPSkill
 
 ทางทีมงานขอแจ้งข้อมูลสำหรับเข้าสู่ระบบ โดยมีรายละเอียดดังต่อไปนี้
 
-บัญชีเจ้าของสถาบัน (Owner)
+${roleLabel}
 
 ชื่อผู้ใช้: ${admin.name}
 
@@ -50,6 +52,7 @@ interface CreatedAdmin {
   email: string;
   password: string;
   institutionName: string;
+  role: "admin" | "owner";
 }
 
 const PLANS = ["trial", "starter", "pro", "enterprise"] as const;
@@ -75,6 +78,7 @@ export default function InstitutionsPage() {
   const [showPw, setShowPw] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [deleteConfirm, setDeleteConfirm] = useState<{ open: boolean; id: string; name: string }>({ open: false, id: "", name: "" });
 
   const load = async () => {
     const res = await fetch("/api/super-admin/institutions");
@@ -148,6 +152,7 @@ export default function InstitutionsPage() {
           email: data.ownerUser.email,
           password: newForm.ownerPassword,
           institutionName: newForm.name,
+          role: data.ownerUser.role === "owner" ? "owner" : "admin",
         });
       }
     } else {
@@ -156,10 +161,24 @@ export default function InstitutionsPage() {
     }
   };
 
+  const deleteInstitution = async (id: string) => {
+    await fetch(`/api/super-admin/institutions/${id}`, { method: "DELETE" });
+    setInstitutions((prev) => prev.filter((i) => i._id !== id));
+  };
+
   if (loading) return <div className="text-gray-400 text-sm p-8">กำลังโหลด...</div>;
 
   return (
     <div className="space-y-6">
+      <ConfirmDialog
+        open={deleteConfirm.open}
+        title="ลบสถาบัน?"
+        message={`"${deleteConfirm.name}" และสาขาทั้งหมด รวมถึงผู้ใช้ในสถาบันนี้ จะถูกลบถาวร ไม่สามารถกู้คืนได้`}
+        confirmLabel="ลบถาวร"
+        type="danger"
+        onConfirm={() => deleteInstitution(deleteConfirm.id)}
+        onCancel={() => setDeleteConfirm((d) => ({ ...d, open: false }))}
+      />
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">สถาบันทั้งหมด</h1>
@@ -217,12 +236,22 @@ export default function InstitutionsPage() {
                     <p className="text-xs text-gray-400 font-mono mt-0.5">{inst.slug}</p>
                   </div>
 
-                  <button
-                    onClick={() => openEdit(inst)}
-                    className="p-2 text-gray-400 hover:text-violet-600 hover:bg-violet-50 rounded-lg transition-colors shrink-0"
-                  >
-                    <Edit3 className="w-4 h-4" />
-                  </button>
+                  <div className="flex items-center gap-1 shrink-0">
+                    <button
+                      onClick={() => openEdit(inst)}
+                      className="p-2 text-gray-400 hover:text-violet-600 hover:bg-violet-50 rounded-lg transition-colors"
+                      title="แก้ไข"
+                    >
+                      <Edit3 className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => setDeleteConfirm({ open: true, id: inst._id, name: inst.name })}
+                      className="p-2 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                      title="ลบสถาบัน"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
 
                 {/* Revenue highlight */}
@@ -367,7 +396,9 @@ export default function InstitutionsPage() {
             {/* Divider */}
             <div className="flex items-center gap-3 pt-1">
               <div className="flex-1 border-t border-gray-200" />
-              <span className="text-xs font-semibold text-violet-500 uppercase tracking-wider whitespace-nowrap">บัญชีเจ้าของสถาบัน (Owner) *</span>
+              <span className="text-xs font-semibold text-violet-500 uppercase tracking-wider whitespace-nowrap">
+                {newForm.branchCount > 1 ? "บัญชีเจ้าของสถาบัน (Owner) *" : "บัญชีผู้ดูแลระบบ (Admin) *"}
+              </span>
               <div className="flex-1 border-t border-gray-200" />
             </div>
 
@@ -377,7 +408,7 @@ export default function InstitutionsPage() {
             </Field>
             <Field label="อีเมล *">
               <input type="email" value={newForm.ownerEmail} onChange={(e) => setNewForm({ ...newForm, ownerEmail: e.target.value })}
-                placeholder="owner@school.com" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-300" />
+                placeholder={newForm.branchCount > 1 ? "owner@school.com" : "admin@school.com"} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-300" />
             </Field>
             <Field label="รหัสผ่าน *">
               <div className="flex gap-2">
@@ -446,11 +477,13 @@ function SuccessModal({ admin, onClose }: { admin: CreatedAdmin; onClose: () => 
         <div className="bg-green-50 border border-green-200 rounded-xl p-4 text-sm text-green-800">
           <div className="flex items-center gap-2 font-semibold">
             <CheckCircle2 className="w-4 h-4 shrink-0" />
-            สร้าง <span className="font-bold">{admin.institutionName}</span> พร้อมเจ้าของสถาบัน (Owner) เรียบร้อย
+            สร้าง <span className="font-bold">{admin.institutionName}</span> พร้อม{admin.role === "owner" ? "เจ้าของสถาบัน (Owner)" : "ผู้ดูแลระบบ (Admin)"} เรียบร้อย
           </div>
         </div>
 
-        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">ข้อมูลเข้าสู่ระบบ (Owner)</p>
+        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+          ข้อมูลเข้าสู่ระบบ ({admin.role === "owner" ? "Owner" : "Admin"})
+        </p>
 
         <div className="space-y-2">
           <CredRow label="ชื่อ" value={admin.name} />
