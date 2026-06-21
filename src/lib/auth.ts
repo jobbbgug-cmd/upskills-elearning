@@ -11,6 +11,7 @@ export interface JwtPayload {
   name: string;
   role: "student" | "teacher" | "admin" | "super_admin";
   institutionId?: string;
+  isOwner?: boolean;
 }
 
 export function signToken(payload: JwtPayload): string {
@@ -41,10 +42,12 @@ export async function getAuthUser(): Promise<JwtPayload | null> {
     } | null;
     if (!user) return payload;
 
+    const isOwner = (user.role as string) === "owner";
     return {
       ...payload,
-      role: user.role as JwtPayload["role"],
+      role: isOwner ? "admin" : user.role as JwtPayload["role"],
       institutionId: user.institutionId?.toString() ?? undefined,
+      isOwner,
     };
   } catch {
     return payload;

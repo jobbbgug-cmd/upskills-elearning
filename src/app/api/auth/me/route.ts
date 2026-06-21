@@ -17,5 +17,6 @@ export async function GET() {
 export async function DELETE() {
   const res = NextResponse.json({ message: "Logged out" });
   res.cookies.set("token", "", { maxAge: 0, path: "/" });
+  res.cookies.set("activeBranchId", "", { maxAge: 0, path: "/" });
   return res;
 }

@@ -10,7 +10,7 @@ function buildWelcomeText(admin: CreatedAdmin): string {
 
 ทางทีมงานขอแจ้งข้อมูลสำหรับเข้าสู่ระบบ โดยมีรายละเอียดดังต่อไปนี้
 
-บัญชีผู้ดูแลระบบ (Admin)
+บัญชีเจ้าของสถาบัน (Owner)
 
 ชื่อผู้ใช้: ${admin.name}
 
@@ -69,7 +69,8 @@ export default function InstitutionsPage() {
   const [form, setForm] = useState({ plan: "trial", planExpiresAt: "", isActive: true, commissionRate: 0 });
   const [newForm, setNewForm] = useState({
     slug: "", name: "", plan: "trial", commissionRate: PLAN_COMMISSION["trial"],
-    adminName: "", adminEmail: "", adminPassword: "",
+    branchCount: 1,
+    ownerName: "", ownerEmail: "", ownerPassword: "",
   });
   const [showPw, setShowPw] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -125,11 +126,10 @@ export default function InstitutionsPage() {
       name: newForm.name,
       plan: newForm.plan,
       commissionRate: Number(newForm.commissionRate),
-      ...(newForm.adminEmail ? {
-        adminName: newForm.adminName,
-        adminEmail: newForm.adminEmail,
-        adminPassword: newForm.adminPassword,
-      } : {}),
+      branchCount: newForm.branchCount,
+      ownerName: newForm.ownerName,
+      ownerEmail: newForm.ownerEmail,
+      ownerPassword: newForm.ownerPassword,
     };
     const res = await fetch("/api/admin/institutions", {
       method: "POST",
@@ -140,13 +140,13 @@ export default function InstitutionsPage() {
     if (res.ok) {
       const data = await res.json();
       setCreating(false);
-      setNewForm({ slug: "", name: "", plan: "trial", commissionRate: PLAN_COMMISSION["trial"], adminName: "", adminEmail: "", adminPassword: "" });
+      setNewForm({ slug: "", name: "", plan: "trial", commissionRate: PLAN_COMMISSION["trial"], branchCount: 1, ownerName: "", ownerEmail: "", ownerPassword: "" });
       load();
-      if (data.adminUser) {
+      if (data.ownerUser) {
         setCreatedAdmin({
-          name: data.adminUser.name,
-          email: data.adminUser.email,
-          password: newForm.adminPassword,
+          name: data.ownerUser.name,
+          email: data.ownerUser.email,
+          password: newForm.ownerPassword,
           institutionName: newForm.name,
         });
       }
@@ -353,30 +353,39 @@ export default function InstitutionsPage() {
                 className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-300"
               />
             </Field>
+            <Field label="จำนวนสาขา *">
+              <input
+                type="number"
+                min={1} max={10}
+                value={newForm.branchCount}
+                onChange={(e) => setNewForm({ ...newForm, branchCount: Math.max(1, Math.min(10, Number(e.target.value) || 1)) })}
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-300"
+              />
+              <p className="text-xs text-gray-400 mt-1">ระบบจะสร้างสาขา 1, 2, 3, ... ให้อัตโนมัติ</p>
+            </Field>
 
             {/* Divider */}
             <div className="flex items-center gap-3 pt-1">
               <div className="flex-1 border-t border-gray-200" />
-              <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider whitespace-nowrap">บัญชี Admin สถาบัน</span>
+              <span className="text-xs font-semibold text-violet-500 uppercase tracking-wider whitespace-nowrap">บัญชีเจ้าของสถาบัน (Owner) *</span>
               <div className="flex-1 border-t border-gray-200" />
             </div>
-            <p className="text-xs text-gray-400 -mt-2">ไม่บังคับ — สามารถเพิ่มภายหลังได้</p>
 
-            <Field label="ชื่อ-นามสกุล Admin">
-              <input type="text" value={newForm.adminName} onChange={(e) => setNewForm({ ...newForm, adminName: e.target.value })}
+            <Field label="ชื่อ-นามสกุล *">
+              <input type="text" value={newForm.ownerName} onChange={(e) => setNewForm({ ...newForm, ownerName: e.target.value })}
                 placeholder="นายสมชาย ใจดี" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-300" />
             </Field>
-            <Field label="อีเมล Admin">
-              <input type="email" value={newForm.adminEmail} onChange={(e) => setNewForm({ ...newForm, adminEmail: e.target.value })}
-                placeholder="admin@school.com" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-300" />
+            <Field label="อีเมล *">
+              <input type="email" value={newForm.ownerEmail} onChange={(e) => setNewForm({ ...newForm, ownerEmail: e.target.value })}
+                placeholder="owner@school.com" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-300" />
             </Field>
-            <Field label="รหัสผ่าน">
+            <Field label="รหัสผ่าน *">
               <div className="flex gap-2">
                 <div className="relative flex-1">
                   <input
                     type={showPw ? "text" : "password"}
-                    value={newForm.adminPassword}
-                    onChange={(e) => setNewForm({ ...newForm, adminPassword: e.target.value })}
+                    value={newForm.ownerPassword}
+                    onChange={(e) => setNewForm({ ...newForm, ownerPassword: e.target.value })}
                     placeholder="อย่างน้อย 6 ตัวอักษร"
                     className="w-full border border-gray-200 rounded-lg px-3 py-2 pr-9 text-sm focus:outline-none focus:ring-2 focus:ring-violet-300"
                   />
@@ -386,7 +395,7 @@ export default function InstitutionsPage() {
                   </button>
                 </div>
                 <button type="button"
-                  onClick={() => { const pw = genPassword(); setNewForm({ ...newForm, adminPassword: pw }); setShowPw(true); }}
+                  onClick={() => { const pw = genPassword(); setNewForm({ ...newForm, ownerPassword: pw }); setShowPw(true); }}
                   className="px-3 py-2 border border-gray-200 rounded-lg text-gray-500 hover:text-violet-600 hover:border-violet-300 transition-colors"
                   title="สร้างรหัสผ่านอัตโนมัติ">
                   <RefreshCw className="w-4 h-4" />
@@ -398,7 +407,7 @@ export default function InstitutionsPage() {
             <div className="flex gap-3 pt-2">
               <button
                 onClick={createInstitution}
-                disabled={saving || !newForm.slug || !newForm.name || (!!newForm.adminEmail && (!newForm.adminName || !newForm.adminPassword))}
+                disabled={saving || !newForm.slug || !newForm.name || !newForm.ownerName || !newForm.ownerEmail || !newForm.ownerPassword}
                 className="flex-1 bg-violet-600 hover:bg-violet-700 text-white text-sm font-medium py-2 rounded-lg transition-colors disabled:opacity-50">
                 {saving ? "กำลังสร้าง..." : "สร้างสถาบัน"}
               </button>
@@ -437,11 +446,12 @@ function SuccessModal({ admin, onClose }: { admin: CreatedAdmin; onClose: () => 
         <div className="bg-green-50 border border-green-200 rounded-xl p-4 text-sm text-green-800">
           <div className="flex items-center gap-2 font-semibold">
             <CheckCircle2 className="w-4 h-4 shrink-0" />
-            สร้าง <span className="font-bold">{admin.institutionName}</span> พร้อม Admin เรียบร้อย
+            สร้าง <span className="font-bold">{admin.institutionName}</span> พร้อมเจ้าของสถาบัน (Owner) เรียบร้อย
           </div>
         </div>
 
-        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">ข้อมูลเข้าสู่ระบบ</p>
+        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">ข้อมูลเข้าสู่ระบบ (Owner)</p>
+
         <div className="space-y-2">
           <CredRow label="ชื่อ" value={admin.name} />
           <CredRow label="อีเมล" value={admin.email} />

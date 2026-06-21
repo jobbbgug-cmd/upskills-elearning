@@ -23,39 +23,55 @@ export async function POST(req: NextRequest) {
     if (!auth || auth.role !== "admin" && auth.role !== "super_admin") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     await connectDB();
 
-    const { adminName, adminEmail, adminPassword, ...institutionFields } = await req.json();
+    const { ownerName, ownerEmail, ownerPassword, branchCount, ...institutionFields } = await req.json();
 
-    // Validate admin fields if provided
-    if (adminEmail) {
-      const existing = await User.findOne({ email: adminEmail });
-      if (existing) return NextResponse.json({ error: "อีเมล Admin นี้ถูกใช้งานแล้ว" }, { status: 400 });
-      if (!adminName) return NextResponse.json({ error: "กรุณากรอกชื่อ Admin" }, { status: 400 });
-      if (!adminPassword || adminPassword.length < 6) return NextResponse.json({ error: "รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร" }, { status: 400 });
-    }
+    // Owner is required
+    if (!ownerName || !ownerEmail || !ownerPassword)
+      return NextResponse.json({ error: "กรุณากรอกข้อมูลเจ้าของสถาบันให้ครบถ้วน" }, { status: 400 });
+    if (ownerPassword.length < 6)
+      return NextResponse.json({ error: "รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร" }, { status: 400 });
 
-    const institution = await Institution.create(institutionFields);
+    const existing = await User.findOne({ email: ownerEmail });
+    if (existing) return NextResponse.json({ error: "อีเมลนี้ถูกใช้งานแล้ว" }, { status: 400 });
+
+    // Create parent institution
+    const institution = await Institution.create({ ...institutionFields, parentId: null });
     const institutionId = (institution._id as { toString(): string }).toString();
 
-    let adminUser = null;
-    if (adminEmail && adminName && adminPassword) {
-      const hashed = await bcrypt.hash(adminPassword, 10);
-      const created = await User.create({
-        institutionId,
-        name: adminName,
-        email: adminEmail,
-        password: hashed,
-        role: "admin",
-        gradeLevel: "ทุกระดับชั้น",
-        status: "approved",
-        contactChannel: "",
-        contactId: "",
+    // Create branch institutions
+    const count = Math.max(1, Math.min(10, Number(branchCount) || 1));
+    const branches = [];
+    for (let i = 1; i <= count; i++) {
+      const branch = await Institution.create({
+        ...institutionFields,
+        name: `${institutionFields.name} สาขา ${i}`,
+        slug: `${institutionFields.slug}-branch-${i}`,
+        parentId: institutionId,
       });
-      const { password: _pw, ...rest } = created.toObject();
-      adminUser = JSON.parse(JSON.stringify(rest));
+      branches.push(JSON.parse(JSON.stringify(branch)));
     }
 
+    // Create owner user linked to parent institution
+    const hashed = await bcrypt.hash(ownerPassword, 10);
+    const ownerUser = await User.create({
+      institutionId,
+      name: ownerName,
+      email: ownerEmail,
+      password: hashed,
+      role: "owner",
+      gradeLevel: "ทุกระดับชั้น",
+      status: "approved",
+      contactChannel: "",
+      contactId: "",
+    });
+    const { password: _pw, ...ownerRest } = ownerUser.toObject();
+
     return NextResponse.json(
-      { institution: JSON.parse(JSON.stringify(institution)), adminUser },
+      {
+        institution: JSON.parse(JSON.stringify(institution)),
+        branches,
+        ownerUser: JSON.parse(JSON.stringify(ownerRest)),
+      },
       { status: 201 }
     );
   } catch (err: unknown) {

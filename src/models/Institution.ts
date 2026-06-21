@@ -13,6 +13,7 @@ export interface IInstitutionDocument extends Document {
   planExpiresAt: Date | null;
   isActive: boolean;
   commissionRate: number;
+  parentId: mongoose.Types.ObjectId | null;
   createdAt: Date;
 }
 
@@ -30,6 +31,7 @@ const InstitutionSchema = new Schema<IInstitutionDocument>(
     planExpiresAt: { type: Date, default: null },
     isActive: { type: Boolean, default: true },
     commissionRate: { type: Number, default: 0 },
+    parentId: { type: Schema.Types.ObjectId, ref: "Institution", default: null },
   },
   { timestamps: true }
 );

@@ -2,7 +2,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
-import { LayoutDashboard, ListChecks, Users, LogOut, Images, UserCog, UserCheck, BookOpen, TrendingUp, CalendarDays, GraduationCap, Menu, X, Wallet, AlertTriangle, Palette, Shield, ShieldCheck, User, ChevronDown, Home } from "lucide-react";
+import { LayoutDashboard, ListChecks, Users, LogOut, Images, UserCog, UserCheck, BookOpen, TrendingUp, CalendarDays, GraduationCap, Menu, X, Wallet, AlertTriangle, Palette, Shield, ShieldCheck, User, ChevronDown, Home, Building2 } from "lucide-react";
 import { PLAN_LABELS } from "@/lib/planLimits";
 
 interface Subscription {
@@ -14,6 +14,8 @@ interface Subscription {
   daysLeft: number | null;
 }
 
+interface BranchOption { _id: string; name: string; isActive: boolean; }
+
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const [pendingCount, setPendingCount]       = useState(0);
   const [pendingBookings, setPendingBookings] = useState(0);
@@ -23,6 +25,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [subscription, setSubscription]       = useState<Subscription | null>(null);
   const [sidebarOpen, setSidebarOpen]         = useState(false);
   const [userDropdown, setUserDropdown]       = useState(false);
+  const [branches, setBranches]               = useState<BranchOption[]>([]);
+  const [activeBranchId, setActiveBranchId]   = useState<string>("");
+  const [switchingBranch, setSwitchingBranch] = useState(false);
   const dropdownRef                           = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -43,9 +48,19 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       }
       if (meRes.ok) {
         const data = await meRes.json();
-        setRole(data.user?.role ?? "");
+        const userRole = data.user?.role ?? "";
+        setRole(userRole);
         setUserName(data.user?.name ?? "");
         setUserImage(data.user?.profileImage ?? "");
+
+        if (userRole === "owner") {
+          const branchRes = await fetch("/api/owner/branches");
+          if (branchRes.ok) {
+            const branchData: BranchOption[] = await branchRes.json();
+            setBranches(branchData);
+            if (branchData.length > 0) setActiveBranchId(branchData[0]._id);
+          }
+        }
       }
       if (subRes.ok) {
         const data = await subRes.json();
@@ -57,8 +72,21 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     return () => clearInterval(interval);
   }, []);
 
-  const isAdmin = role === "admin" || role === "super_admin";
+  const isOwner = role === "owner";
+  const isAdmin = role === "admin" || role === "super_admin" || isOwner;
   const close = () => setSidebarOpen(false);
+
+  const switchBranch = async (branchId: string) => {
+    setSwitchingBranch(true);
+    setActiveBranchId(branchId);
+    await fetch("/api/owner/switch-branch", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ branchId }),
+    });
+    setSwitchingBranch(false);
+    window.location.reload();
+  };
 
   const handleLogout = async () => {
     await fetch("/api/auth/me", { method: "DELETE" });
@@ -68,6 +96,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const ROLE_LABELS: Record<string, string> = {
     super_admin: "Super Admin",
     admin: "Admin",
+    owner: "เจ้าของสถาบัน",
     teacher: "Teacher",
     student: "Student",
   };
@@ -86,6 +115,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     student:     { icon: User,         bg: "bg-blue-100",   color: "text-blue-700" },
     teacher:     { icon: GraduationCap, bg: "bg-green-100", color: "text-green-700" },
     admin:       { icon: Shield,        bg: "bg-purple-100", color: "text-purple-700" },
+    owner:       { icon: ShieldCheck,   bg: "bg-violet-100", color: "text-violet-700" },
     super_admin: { icon: ShieldCheck,   bg: "bg-rose-100",   color: "text-rose-700" },
   };
 
@@ -254,7 +284,23 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <Link href="/" className="lg:hidden">
             <Image src="/logo.png" alt="UPSkills" width={100} height={34} className="object-contain" />
           </Link>
-          <div className="ml-auto">
+          <div className="ml-auto flex items-center gap-3">
+            {/* Branch switcher — owner only */}
+            {isOwner && branches.length > 0 && (
+              <div className="flex items-center gap-2">
+                <Building2 className="w-4 h-4 text-violet-500 shrink-0" />
+                <select
+                  value={activeBranchId}
+                  onChange={(e) => switchBranch(e.target.value)}
+                  disabled={switchingBranch}
+                  className="text-sm border border-violet-200 bg-violet-50 text-violet-800 font-medium rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-violet-400 cursor-pointer disabled:opacity-50 max-w-[200px]"
+                >
+                  {branches.map((b) => (
+                    <option key={b._id} value={b._id}>{b.name}</option>
+                  ))}
+                </select>
+              </div>
+            )}
             <UserMenu />
           </div>
         </div>

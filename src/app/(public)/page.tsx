@@ -194,11 +194,11 @@ export default async function HomePage() {
           <div className="text-center mb-14">
             <span className="text-2xl font-bold tracking-widest text-red-500 uppercase">ปัญหาที่พบบ่อย</span>
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mt-2">
-              TOP 3 ปัญหาสถาบันสอนพิเศษออนไลน์<br />ที่ต้องเจอ — และ UPSkill แก้ได้
+              TOP 4 ปัญหาสถาบันสอนพิเศษออนไลน์<br />ที่ต้องเจอ — และ UPSkill แก้ได้
             </h2>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
               {
                 no: "01",
@@ -226,6 +226,15 @@ export default async function HomePage() {
                 color: "from-blue-50 to-indigo-50",
                 border: "border-blue-100",
                 badge: "bg-blue-100 text-blue-700",
+              },
+              {
+                no: "04",
+                problem: "Meeting ได้แค่ 60 นาที ทำให้การสอนสะดุด",
+                pain: "ใช้โปรแกรม Video Call ฟรีถูกตัดกลางคลาส ต้องหยุดสอนเพื่อสร้างห้องใหม่ เสียสมาธินักเรียน",
+                solution: "Jitsi Meet ไม่จำกัดเวลา ไม่มีค่าใช้จ่ายเพิ่ม สอนได้ต่อเนื่องไม่มีสะดุด",
+                color: "from-violet-50 to-purple-50",
+                border: "border-violet-100",
+                badge: "bg-violet-100 text-violet-700",
               },
             ].map(({ no, problem, pain, solution, color, border, badge }) => (
               <div key={no} className={`rounded-3xl p-6 bg-gradient-to-br ${color} border ${border}`}>
