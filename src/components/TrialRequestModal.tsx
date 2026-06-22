@@ -147,7 +147,7 @@ export default function TrialRequestModal({ navbar, children }: { navbar?: boole
                           value={form.institutionName}
                           onChange={(e) => set("institutionName", e.target.value)}
                           placeholder="ระบุชื่อสถาบัน"
-                          className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-400 bg-gray-50"
+                          className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-400 bg-white"
                         />
                       </div>
 
@@ -160,7 +160,7 @@ export default function TrialRequestModal({ navbar, children }: { navbar?: boole
                           value={form.fullName}
                           onChange={(e) => set("fullName", e.target.value)}
                           placeholder="ระบุชื่อ - นามสกุล"
-                          className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-400 bg-gray-50"
+                          className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-400 bg-white"
                         />
                       </div>
 
@@ -173,7 +173,7 @@ export default function TrialRequestModal({ navbar, children }: { navbar?: boole
                           value={form.phone}
                           onChange={(e) => set("phone", e.target.value)}
                           placeholder="ระบุเบอร์ติดต่อ"
-                          className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-400 bg-gray-50"
+                          className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-400 bg-white"
                         />
                       </div>
 
@@ -227,7 +227,7 @@ export default function TrialRequestModal({ navbar, children }: { navbar?: boole
                             form.contactChannel === "email" ? "อีเมลของท่าน" :
                             "เบอร์โทรศัพท์"
                           }
-                          className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-400 bg-gray-50"
+                          className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-400 bg-white"
                         />
                         <p className="text-xs text-gray-400 mt-1">ทีมงานจะส่ง Username/Password ผ่าน{channelLabel}นี้</p>
                       </div>
