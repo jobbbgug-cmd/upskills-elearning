@@ -102,7 +102,7 @@ export default async function HomePage() {
         <div className="max-w-5xl mx-auto px-4 py-8 grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
           {[
             { icon: Building2, label: "สถาบันที่ใช้งาน", value: `${institutionCount}+`, color: "text-violet-600" },
-            { icon: Users,     label: "ที่นั่งต่อรอบ",   value: "≤ 10 คน",   color: "text-indigo-600" },
+            { icon: Users,     label: "ที่นั่งต่อรอบ",   value: "≥ 10 คน",   color: "text-indigo-600" },
             { icon: Video,     label: "สอนสดผ่าน",       value: "Jitsi Meet", color: "text-blue-600" },
             { icon: Clock,     label: "พร้อมใช้งาน",     value: "24/7",       color: "text-green-600" },
           ].map(({ icon: Icon, label, value, color }) => (
