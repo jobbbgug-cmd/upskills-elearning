@@ -8,7 +8,7 @@ interface UserItem {
   _id: string;
   name: string;
   email: string;
-  role: "student" | "teacher" | "admin" | "super_admin";
+  role: "student" | "teacher" | "admin" | "owner" | "super_admin";
   gradeLevel?: string;
   profileImage?: string;
   status: "pending" | "approved" | "rejected";
@@ -16,10 +16,11 @@ interface UserItem {
 }
 
 const ROLES = [
-  { value: "student",     label: "นักเรียน",    color: "bg-blue-50 text-blue-700 border-blue-200",      badge: "bg-blue-100 text-blue-700",      icon: User },
-  { value: "teacher",     label: "ครู",          color: "bg-green-50 text-green-700 border-green-200",   badge: "bg-green-100 text-green-700",    icon: GraduationCap },
-  { value: "admin",       label: "Admin",        color: "bg-purple-50 text-purple-700 border-purple-200", badge: "bg-purple-100 text-purple-700", icon: Shield },
-  { value: "super_admin", label: "Super Admin",  color: "bg-rose-50 text-rose-700 border-rose-200",       badge: "bg-rose-100 text-rose-700",     icon: ShieldCheck },
+  { value: "student",     label: "นักเรียน",    color: "bg-blue-50 text-blue-700 border-blue-200",       badge: "bg-blue-100 text-blue-700",      icon: User },
+  { value: "teacher",     label: "ครู",          color: "bg-green-50 text-green-700 border-green-200",    badge: "bg-green-100 text-green-700",    icon: GraduationCap },
+  { value: "admin",       label: "Admin",        color: "bg-purple-50 text-purple-700 border-purple-200", badge: "bg-purple-100 text-purple-700",  icon: Shield },
+  { value: "owner",       label: "Owner",        color: "bg-violet-50 text-violet-700 border-violet-200", badge: "bg-violet-100 text-violet-700",  icon: ShieldCheck },
+  { value: "super_admin", label: "Super Admin",  color: "bg-rose-50 text-rose-700 border-rose-200",       badge: "bg-rose-100 text-rose-700",      icon: ShieldCheck },
 ] as const;
 
 const GRADE_LEVELS = [
@@ -41,7 +42,7 @@ export default function AdminUsersPage() {
   const [users, setUsers]           = useState<UserItem[]>([]);
   const [loading, setLoading]       = useState(true);
   const [search, setSearch]         = useState("");
-  const [filterRole, setFilterRole] = useState<"all" | "student" | "teacher" | "admin" | "super_admin">("all");
+  const [filterRole, setFilterRole] = useState<"all" | "student" | "teacher" | "admin" | "owner" | "super_admin">("all");
   const [updating, setUpdating]     = useState<string | null>(null);
   const [myRole, setMyRole]         = useState<string>("");
 
@@ -80,7 +81,7 @@ export default function AdminUsersPage() {
   }, [editUser, createOpen]);
 
   // super_admin-only role — hide from regular admin
-  const visibleRoles = myRole === "super_admin" ? ROLES : ROLES.filter((r) => r.value !== "super_admin");
+  const visibleRoles = myRole === "super_admin" ? ROLES : ROLES.filter((r) => r.value !== "super_admin" && r.value !== "owner");
 
   const openEdit = (u: UserItem) => {
     setEditUser(u);
@@ -204,7 +205,7 @@ export default function AdminUsersPage() {
     return matchRole && matchSearch;
   });
 
-  const counts = { student: 0, teacher: 0, admin: 0, super_admin: 0 };
+  const counts = { student: 0, teacher: 0, admin: 0, owner: 0, super_admin: 0 };
   visibleUsers.forEach((u) => { if (u.role in counts) counts[u.role as keyof typeof counts]++; });
 
   const inputCls = "w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white";
@@ -324,25 +325,36 @@ export default function AdminUsersPage() {
                       </span>
                     </td>
                     <td className="px-5 py-4">
-                      <div className="relative inline-block">
-                        <select value={u.role} onChange={(e) => changeRole(u._id, e.target.value as UserItem["role"])}
-                          disabled={updating === u._id}
-                          className={`appearance-none pl-3 pr-8 py-1.5 rounded-lg text-sm font-medium border transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-50 ${info.color}`}>
-                          {visibleRoles.map((r) => <option key={r.value} value={r.value}>{r.label}</option>)}
-                        </select>
-                        <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 pointer-events-none text-gray-500" />
-                      </div>
+                      {u.role === "owner" ? (
+                        <span className="text-xs text-gray-400 italic">—</span>
+                      ) : (
+                        <div className="relative inline-block">
+                          <select value={u.role} onChange={(e) => changeRole(u._id, e.target.value as UserItem["role"])}
+                            disabled={updating === u._id}
+                            className={`appearance-none pl-3 pr-8 py-1.5 rounded-lg text-sm font-medium border transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-50 ${info.color}`}>
+                            {visibleRoles.map((r) => <option key={r.value} value={r.value}>{r.label}</option>)}
+                          </select>
+                          <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 pointer-events-none text-gray-500" />
+                        </div>
+                      )}
                     </td>
                     <td className="px-5 py-4 text-right">
                       <div className="flex items-center justify-end gap-1">
-                        <button onClick={() => openEdit(u)}
-                          className="p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors" title="แก้ไข">
-                          <Pencil className="w-4 h-4" />
-                        </button>
-                        <button onClick={() => setDeleteConfirm({ open: true, id: u._id, name: u.name })}
-                          className="p-1.5 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors" title="ลบ">
-                          <Trash2 className="w-4 h-4" />
-                        </button>
+                        {u.role !== "owner" && (
+                          <button onClick={() => openEdit(u)}
+                            className="p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors" title="แก้ไข">
+                            <Pencil className="w-4 h-4" />
+                          </button>
+                        )}
+                        {u.role !== "owner" && (
+                          <button onClick={() => setDeleteConfirm({ open: true, id: u._id, name: u.name })}
+                            className="p-1.5 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors" title="ลบ">
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        )}
+                        {u.role === "owner" && (
+                          <span className="text-xs text-gray-300 px-2">จัดการโดย Super Admin</span>
+                        )}
                       </div>
                     </td>
                   </tr>
