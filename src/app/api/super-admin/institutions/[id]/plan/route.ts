@@ -13,7 +13,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
 
   await connectDB();
   const { id } = await params;
-  const { plan, planExpiresAt, isActive, commissionRate } = await req.json();
+  const { plan, planExpiresAt, isActive, commissionRate, name } = await req.json();
 
   // If commission rate is being changed, lock all untracked confirmed bookings
   // to the OLD rate before saving the new one — so historical figures never change
@@ -52,6 +52,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
   }
 
   const update: Record<string, unknown> = {};
+  if (name) update.name = name;
   if (plan) update.plan = plan;
   if (planExpiresAt !== undefined) update.planExpiresAt = planExpiresAt ? new Date(planExpiresAt) : null;
   if (isActive !== undefined) update.isActive = isActive;

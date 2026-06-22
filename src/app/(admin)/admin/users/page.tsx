@@ -107,6 +107,9 @@ export default function AdminUsersPage() {
   const handleSave = async () => {
     if (!editUser) return;
     setSaveError("");
+    if (!editForm.email.toLowerCase().endsWith("@gmail.com")) {
+      setSaveError("อีเมลต้องเป็น @gmail.com เท่านั้น"); return;
+    }
     setUpdating(editUser._id);
     const body: Record<string, string> = {
       name: editForm.name,
@@ -170,6 +173,9 @@ export default function AdminUsersPage() {
     setCreateError("");
     if (!createForm.name || !createForm.email || !createForm.password) {
       setCreateError("กรุณากรอกข้อมูลให้ครบ"); return;
+    }
+    if (!createForm.email.toLowerCase().endsWith("@gmail.com")) {
+      setCreateError("อีเมลต้องเป็น @gmail.com เท่านั้น"); return;
     }
     if (createForm.password.length < 6) {
       setCreateError("รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร"); return;

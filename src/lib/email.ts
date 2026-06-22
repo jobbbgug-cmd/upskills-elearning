@@ -10,7 +10,7 @@ const transporter = nodemailer.createTransport({
 
 const LOGO_URL = `${process.env.NEXT_PUBLIC_BASE_URL ?? "https://upskills-elearning.vercel.app"}/icon.png`;
 
-const logoImg = `<img src="${LOGO_URL}" alt="UPSkill" style="height:44px;display:block;margin:0 auto 10px;" />`;
+const logoImg = `<img src="${LOGO_URL}" alt="UPSkills" style="height:44px;display:block;margin:0 auto 10px;" />`;
 
 export async function sendPaymentSlipNotification(info: {
   studentName: string;
@@ -21,9 +21,9 @@ export async function sendPaymentSlipNotification(info: {
   to?: string;
 }) {
   await transporter.sendMail({
-    from: `"UPSkill System" <${process.env.SMTP_USER}>`,
+    from: `"UPSkills System" <${process.env.SMTP_USER}>`,
     to: info.to ?? process.env.NOTIFY_EMAIL ?? "jobbbgug@gmail.com",
-    subject: `[UPSkill] มีสลิปชำระเงินรอตรวจสอบ — ${info.courseTitle}`,
+    subject: `[UPSkills] มีสลิปชำระเงินรอตรวจสอบ — ${info.courseTitle}`,
     html: `
       <div style="font-family:Arial,sans-serif;max-width:520px;margin:0 auto;background:#f9fafb;padding:24px;border-radius:12px;">
         <div style="background:#7c3aed;padding:20px 24px;border-radius:8px 8px 0 0;text-align:center;">
@@ -57,7 +57,7 @@ export async function sendPaymentSlipNotification(info: {
             </a>
           </div>
         </div>
-        <p style="text-align:center;font-size:12px;color:#9ca3af;margin-top:12px;">UPSkill E-Learning Platform</p>
+        <p style="text-align:center;font-size:12px;color:#9ca3af;margin-top:12px;">UPSkills E-Learning Platform</p>
       </div>
     `,
   });
@@ -77,9 +77,9 @@ export async function sendNewMemberNotification(member: {
   };
 
   await transporter.sendMail({
-    from: `"UPSkill System" <${process.env.SMTP_USER}>`,
+    from: `"UPSkills System" <${process.env.SMTP_USER}>`,
     to: member.to ?? process.env.NOTIFY_EMAIL ?? "jobbbgug@gmail.com",
-    subject: `[UPSkill] มีสมาชิกใหม่รออนุมัติ — ${member.name}`,
+    subject: `[UPSkills] มีสมาชิกใหม่รออนุมัติ — ${member.name}`,
     html: `
       <div style="font-family:Arial,sans-serif;max-width:520px;margin:0 auto;background:#f9fafb;padding:24px;border-radius:12px;">
         <div style="background:#4f46e5;padding:20px 24px;border-radius:8px 8px 0 0;text-align:center;">
@@ -113,7 +113,7 @@ export async function sendNewMemberNotification(member: {
             </a>
           </div>
         </div>
-        <p style="text-align:center;font-size:12px;color:#9ca3af;margin-top:12px;">UPSkill E-Learning Platform</p>
+        <p style="text-align:center;font-size:12px;color:#9ca3af;margin-top:12px;">UPSkills E-Learning Platform</p>
       </div>
     `,
   });
@@ -129,9 +129,9 @@ export async function sendTrialRequestNotification(info: {
   to?: string;
 }) {
   await transporter.sendMail({
-    from: `"UPSkill System" <${process.env.SMTP_USER}>`,
+    from: `"UPSkills System" <${process.env.SMTP_USER}>`,
     to: info.to ?? process.env.NOTIFY_EMAIL ?? "jobbbgug@gmail.com",
-    subject: `[UPSkill] คำขอทดลองใช้งานใหม่ — ${info.institutionName}`,
+    subject: `[UPSkills] คำขอทดลองใช้งานใหม่ — ${info.institutionName}`,
     html: `
       <div style="font-family:Arial,sans-serif;max-width:520px;margin:0 auto;background:#f0fdfa;padding:24px;border-radius:12px;">
         <div style="background:#0d9488;padding:20px 24px;border-radius:8px 8px 0 0;text-align:center;">
@@ -172,7 +172,7 @@ export async function sendTrialRequestNotification(info: {
             </a>
           </div>
         </div>
-        <p style="text-align:center;font-size:12px;color:#9ca3af;margin-top:12px;">UPSkill E-Learning Platform</p>
+        <p style="text-align:center;font-size:12px;color:#9ca3af;margin-top:12px;">UPSkills E-Learning Platform</p>
       </div>
     `,
   });

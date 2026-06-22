@@ -120,6 +120,9 @@ export default function SuperAdminUsersPage() {
   const handleSave = async () => {
     if (!editUser) return;
     setSaveError("");
+    if (!editForm.email.toLowerCase().endsWith("@gmail.com")) {
+      setSaveError("อีเมลต้องเป็น @gmail.com เท่านั้น"); return;
+    }
     setUpdating(editUser._id);
     const body: Record<string, string> = {
       name: editForm.name,
@@ -182,6 +185,9 @@ export default function SuperAdminUsersPage() {
   const handleCreate = async () => {
     if (!createForm.name || !createForm.email || !createForm.password) {
       setCreateError("กรุณากรอกข้อมูลให้ครบ"); return;
+    }
+    if (!createForm.email.toLowerCase().endsWith("@gmail.com")) {
+      setCreateError("อีเมลต้องเป็น @gmail.com เท่านั้น"); return;
     }
     setCreating(true); setCreateError("");
     const qs = createForm.institutionId ? `?institutionId=${createForm.institutionId}` : "";

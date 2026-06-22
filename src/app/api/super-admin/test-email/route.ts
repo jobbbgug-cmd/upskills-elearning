@@ -16,7 +16,7 @@ export async function POST() {
       name: "ทดสอบระบบ",
       email: "test@example.com",
       role: "student",
-      institutionName: "UPSkill Test",
+      institutionName: "UPSkills Test",
     });
     return NextResponse.json({ ok: true, smtpUser, smtpPass, notifyEmail });
   } catch (err) {

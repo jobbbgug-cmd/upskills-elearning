@@ -25,6 +25,7 @@ export async function POST(req: NextRequest) {
 
     const { name, email, password, role, gradeLevel, status } = await req.json();
     if (!name || !email || !password) return NextResponse.json({ error: "กรุณากรอกข้อมูลให้ครบ" }, { status: 400 });
+    if (!email.toLowerCase().endsWith("@gmail.com")) return NextResponse.json({ error: "อีเมลต้องเป็น @gmail.com เท่านั้น" }, { status: 400 });
     if (password.length < 6) return NextResponse.json({ error: "รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร" }, { status: 400 });
 
     const allowedRoles = ["student", "teacher", "admin", "owner", "super_admin"];

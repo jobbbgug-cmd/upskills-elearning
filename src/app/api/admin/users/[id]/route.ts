@@ -23,7 +23,11 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       update.role = body.role;
     }
     if (body.name !== undefined) update.name = body.name;
-    if (body.email !== undefined) update.email = body.email;
+    if (body.email !== undefined) {
+      if (!body.email.toLowerCase().endsWith("@gmail.com"))
+        return NextResponse.json({ error: "อีเมลต้องเป็น @gmail.com เท่านั้น" }, { status: 400 });
+      update.email = body.email;
+    }
     if (body.gradeLevel !== undefined) update.gradeLevel = body.gradeLevel;
     if (body.status !== undefined) update.status = body.status;
     if (body.profileImage !== undefined) update.profileImage = body.profileImage;

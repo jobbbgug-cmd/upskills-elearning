@@ -69,7 +69,7 @@ export default function InstitutionsPage() {
   const [editing, setEditing] = useState<InstitutionStats | null>(null);
   const [creating, setCreating] = useState(false);
   const [createdAdmin, setCreatedAdmin] = useState<CreatedAdmin | null>(null);
-  const [form, setForm] = useState({ plan: "trial", planExpiresAt: "", isActive: true, commissionRate: 0 });
+  const [form, setForm] = useState({ name: "", plan: "trial", planExpiresAt: "", isActive: true, commissionRate: 0 });
   const [newForm, setNewForm] = useState({
     slug: "", name: "", plan: "trial", commissionRate: PLAN_COMMISSION["trial"],
     branchCount: 1,
@@ -95,6 +95,7 @@ export default function InstitutionsPage() {
   const openEdit = (inst: InstitutionStats) => {
     setEditing(inst);
     setForm({
+      name: inst.name,
       plan: inst.plan,
       planExpiresAt: inst.planExpiresAt ? inst.planExpiresAt.slice(0, 10) : "",
       isActive: inst.isActive,
@@ -111,6 +112,7 @@ export default function InstitutionsPage() {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
+        name: form.name,
         plan: form.plan,
         planExpiresAt: form.planExpiresAt || null,
         isActive: form.isActive,
@@ -307,6 +309,10 @@ export default function InstitutionsPage() {
       {editing && (
         <Modal title={`แก้ไข: ${editing.name}`} onClose={() => setEditing(null)}>
           <div className="space-y-4">
+            <Field label="ชื่อสถาบัน">
+              <input type="text" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })}
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-300" />
+            </Field>
             <Field label="แผน">
               <select value={form.plan} onChange={(e) => setForm({ ...form, plan: e.target.value })}
                 className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-300">

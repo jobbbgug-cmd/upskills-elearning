@@ -115,19 +115,19 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ─── รู้จัก UPSkill ─── */}
+      {/* ─── รู้จัก UPSkills ─── */}
       <section className="py-28 px-4 bg-gray-50">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
             <div className="inline-flex items-center gap-3 justify-center">
               <span className="text-2xl font-bold tracking-widest text-indigo-500 uppercase">รู้จัก</span>
-              <Image src="/logo.png" alt="UPSkill" width={130} height={44} className="object-contain" />
+              <Image src="/logo.png" alt="UPSkills" width={130} height={44} className="object-contain" />
             </div>
             <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mt-3 leading-tight">
               แพลตฟอร์มที่ออกแบบมา<br />เพื่อสถาบันสอนพิเศษโดยเฉพาะ
             </h2>
             <p className="text-gray-500 mt-5 max-w-2xl mx-auto text-base leading-relaxed">
-              UPSkill ไม่ใช่แค่ระบบ LMS ทั่วไป แต่คือโซลูชั่นที่เข้าใจปัญหาจริงของสถาบันสอนพิเศษไทย
+              UPSkills ไม่ใช่แค่ระบบ LMS ทั่วไป แต่คือโซลูชั่นที่เข้าใจปัญหาจริงของสถาบันสอนพิเศษไทย
               ออกแบบมาเพื่อให้ผู้บริหาร ครู และนักเรียนทำงานร่วมกันได้อย่างราบรื่น
             </p>
           </div>
@@ -161,7 +161,7 @@ export default async function HomePage() {
                 <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center mb-5">
                   <GraduationCap className="w-6 h-6" />
                 </div>
-                <h3 className="text-2xl font-bold mb-3">ทำไมถึงเลือก UPSkill?</h3>
+                <h3 className="text-2xl font-bold mb-3">ทำไมถึงเลือก UPSkills?</h3>
                 <ul className="space-y-3 text-sm text-indigo-100">
                   {[
                     "ติดตั้งใช้งานได้ทันที ไม่ต้องรอ",
@@ -194,7 +194,7 @@ export default async function HomePage() {
           <div className="text-center mb-14">
             <span className="text-2xl font-bold tracking-widest text-red-500 uppercase">ปัญหาที่พบบ่อย</span>
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mt-2">
-              TOP 4 ปัญหาสถาบันสอนพิเศษออนไลน์<br />ที่ต้องเจอ — และ UPSkill แก้ได้
+              TOP 4 ปัญหาสถาบันสอนพิเศษออนไลน์<br />ที่ต้องเจอ — และ UPSkills แก้ได้
             </h2>
           </div>
 
@@ -262,10 +262,10 @@ export default async function HomePage() {
           <div className="text-center mb-14">
             <span className="text-2xl font-bold tracking-widest text-indigo-400 uppercase">บริการของเรา</span>
             <h2 className="text-3xl md:text-4xl font-bold mt-2">
-              ประเภทสถาบัน<br />ที่ UPSkill ให้บริการ
+              ประเภทสถาบัน<br />ที่ UPSkills ให้บริการ
             </h2>
             <p className="text-slate-400 mt-3 max-w-xl mx-auto text-sm">
-              ไม่ว่าจะเป็นสถาบันขนาดเล็กหรือใหญ่ UPSkill พร้อมรองรับทุกรูปแบบการเรียนการสอน
+              ไม่ว่าจะเป็นสถาบันขนาดเล็กหรือใหญ่ UPSkills พร้อมรองรับทุกรูปแบบการเรียนการสอน
             </p>
           </div>
 
@@ -323,7 +323,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ─── ลูกค้าที่ไว้วางใจ UPSkill ─── */}
+      {/* ─── ลูกค้าที่ไว้วางใจ UPSkills ─── */}
       <section className="py-20 px-4 bg-gray-50">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-14">
@@ -331,7 +331,7 @@ export default async function HomePage() {
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mt-2">
               <span className="inline-flex items-center gap-3 justify-center flex-wrap">
                 ลูกค้าที่ไว้วางใจ
-                <Image src="/logo.png" alt="UPSkill" width={130} height={44} className="object-contain inline-block" />
+                <Image src="/logo.png" alt="UPSkills" width={130} height={44} className="object-contain inline-block" />
               </span>
             </h2>
             <p className="text-gray-500 mt-3 text-sm">เสียงจากสถาบันที่ใช้งานจริง</p>
@@ -342,7 +342,7 @@ export default async function HomePage() {
               {
                 name: "อ.สมชาย",
                 role: "ผู้บริหารสถาบัน ABC Academy",
-                review: "ก่อนใช้ UPSkill ต้องรับจอง LINE ทุกวัน วุ่นมาก ตอนนี้นักเรียนจองเองได้เลย ประหยัดเวลาไปได้เยอะมาก",
+                review: "ก่อนใช้ UPSkills ต้องรับจอง LINE ทุกวัน วุ่นมาก ตอนนี้นักเรียนจองเองได้เลย ประหยัดเวลาไปได้เยอะมาก",
                 stars: 5,
               },
               {
@@ -437,7 +437,7 @@ export default async function HomePage() {
             <span className="text-yellow-400">ระบบที่ใช้ต้องเสถียร รวดเร็ว<br />และพัฒนาต่อเนื่อง</span>
           </h2>
           <p className="text-indigo-200 text-lg mb-10 max-w-2xl mx-auto">
-            UPSkill ไม่ใช่แค่ซอฟต์แวร์ แต่คือพาร์ตเนอร์ที่เติบโตไปพร้อมกับสถาบันของคุณ
+            UPSkills ไม่ใช่แค่ซอฟต์แวร์ แต่คือพาร์ตเนอร์ที่เติบโตไปพร้อมกับสถาบันของคุณ
             เราพัฒนาระบบอย่างต่อเนื่องโดยฟังเสียงผู้ใช้งานจริงเป็นหลัก
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
