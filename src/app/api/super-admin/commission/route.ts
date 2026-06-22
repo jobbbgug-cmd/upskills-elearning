@@ -49,7 +49,8 @@ export async function GET() {
     const id = inst._id.toString();
     const agg = commMap.get(id);
     const gross = agg?.grossRevenue ?? 0;
-    const commission = agg?.totalCommission ?? 0;
+    // Always calculate from rate — stored commissionAmount may be 0 for legacy bookings
+    const commission = gross * inst.commissionRate / 100;
     return {
       _id: id,
       name: inst.name,

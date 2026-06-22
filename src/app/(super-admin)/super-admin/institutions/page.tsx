@@ -194,15 +194,15 @@ export default function InstitutionsPage() {
         </button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div className="flex flex-col gap-2">
         {institutions.map((inst) => {
+          const fmtB = (n: number) => { const r = Math.round(n * 100) / 100; const p = r.toString().split("."); p[0] = p[0].replace(/\B(?=(\d{3})+(?!\d))/g, ","); return p.join("."); };
+          const commissionAmount = inst.commissionRate > 0 ? fmtB(inst.stats.revenue * inst.commissionRate / 100) : null;
           const expired = inst.planExpiresAt && new Date(inst.planExpiresAt) < new Date();
           const daysLeft = inst.planExpiresAt
             ? Math.max(0, Math.ceil((new Date(inst.planExpiresAt).getTime() - Date.now()) / 86400000))
             : null;
           const limits = PLAN_LIMITS[inst.plan as keyof typeof PLAN_LIMITS] ?? PLAN_LIMITS.trial;
-          const userPct = limits.maxStudents > 0 ? Math.min(100, (inst.stats.users / limits.maxStudents) * 100) : 0;
-          const coursePct = limits.maxCourses > 0 ? Math.min(100, (inst.stats.courses / limits.maxCourses) * 100) : 0;
           const initials = inst.name.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase();
           const planColor: Record<string, string> = {
             trial: "from-gray-400 to-gray-500",
@@ -212,93 +212,51 @@ export default function InstitutionsPage() {
           };
 
           return (
-            <div key={inst._id} className={`bg-white rounded-2xl border overflow-hidden transition-all hover:shadow-md ${!inst.isActive ? "border-red-100" : "border-gray-100"}`}>
-              {/* Top accent bar */}
-              <div className={`h-1 w-full bg-gradient-to-r ${planColor[inst.plan] ?? planColor.trial}`} />
+            <div key={inst._id} className={`bg-white rounded-xl border overflow-hidden transition-all hover:shadow-sm ${!inst.isActive ? "border-red-100" : "border-gray-100"}`}>
+              <div className={`h-0.5 w-full bg-gradient-to-r ${planColor[inst.plan] ?? planColor.trial}`} />
 
-              <div className="p-5">
-                {/* Header */}
-                <div className="flex items-start gap-3">
-                  {/* Avatar */}
-                  <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${planColor[inst.plan] ?? planColor.trial} flex items-center justify-center shrink-0`}>
-                    <span className="text-white text-sm font-bold">{initials}</span>
-                  </div>
-
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <h3 className="font-semibold text-gray-900 leading-tight">{inst.name}</h3>
-                      <PlanBadge plan={inst.plan} />
-                      {!inst.isActive && (
-                        <span className="text-xs bg-red-50 text-red-600 border border-red-200 px-2 py-0.5 rounded-full font-medium">ระงับ</span>
-                      )}
-                      {expired && (
-                        <span className="text-xs bg-orange-50 text-orange-600 border border-orange-200 px-2 py-0.5 rounded-full font-medium">หมดอายุ</span>
-                      )}
-                    </div>
-                    <p className="text-xs text-gray-400 font-mono mt-0.5">{inst.slug}</p>
-                  </div>
-
-                  <div className="flex items-center gap-1 shrink-0">
-                    <button
-                      onClick={() => openEdit(inst)}
-                      className="p-2 text-gray-400 hover:text-violet-600 hover:bg-violet-50 rounded-lg transition-colors"
-                      title="แก้ไข"
-                    >
-                      <Edit3 className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => setDeleteConfirm({ open: true, id: inst._id, name: inst.name })}
-                      className="p-2 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                      title="ลบสถาบัน"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
+              <div className="px-4 py-3 flex items-center gap-3">
+                {/* Avatar */}
+                <div className={`w-9 h-9 rounded-lg bg-gradient-to-br ${planColor[inst.plan] ?? planColor.trial} flex items-center justify-center shrink-0`}>
+                  <span className="text-white text-xs font-bold">{initials}</span>
                 </div>
 
-                {/* Revenue highlight */}
-                <div className="mt-4 bg-gradient-to-r from-violet-50 to-purple-50 rounded-xl px-4 py-3 flex items-center justify-between">
-                  <div>
-                    <p className="text-xs text-gray-500">รายได้รวม</p>
-                    <p className="text-xl font-extrabold text-violet-700">฿{inst.stats.revenue.toLocaleString()}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-xs text-gray-500">{inst.stats.bookings} การจอง</p>
-                    {inst.commissionRate > 0 && (
-                      <p className="text-xs font-semibold text-violet-500 mt-0.5">Commission {inst.commissionRate}%</p>
+                {/* Name + badges */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="font-semibold text-gray-900 text-sm">{inst.name}</span>
+                    <PlanBadge plan={inst.plan} />
+                    {!inst.isActive && <span className="text-xs bg-red-50 text-red-600 border border-red-200 px-2 py-0.5 rounded-full">ระงับ</span>}
+                    {expired && <span className="text-xs bg-orange-50 text-orange-600 border border-orange-200 px-2 py-0.5 rounded-full">หมดอายุ</span>}
+                    {inst.planExpiresAt && !expired && daysLeft! <= 7 && (
+                      <span className="text-xs bg-orange-50 text-orange-500 border border-orange-200 px-2 py-0.5 rounded-full">⏱ {daysLeft} วัน</span>
                     )}
                   </div>
-                </div>
-
-                {/* Usage stats */}
-                <div className="mt-4 space-y-2.5">
-                  <div>
-                    <div className="flex justify-between text-xs text-gray-500 mb-1">
-                      <span className="flex items-center gap-1"><Users className="w-3 h-3" /> ผู้ใช้</span>
-                      <span className="font-medium text-gray-700">{inst.stats.users}{limits.maxStudents > 0 ? ` / ${limits.maxStudents}` : ""}</span>
-                    </div>
-                    <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                      <div className="h-full rounded-full bg-blue-400 transition-all" style={{ width: `${limits.maxStudents > 0 ? userPct : 100}%`, opacity: limits.maxStudents > 0 ? 1 : 0.3 }} />
-                    </div>
-                  </div>
-                  <div>
-                    <div className="flex justify-between text-xs text-gray-500 mb-1">
-                      <span className="flex items-center gap-1"><BookOpen className="w-3 h-3" /> คอร์ส</span>
-                      <span className="font-medium text-gray-700">{inst.stats.courses}{limits.maxCourses > 0 ? ` / ${limits.maxCourses}` : ""}</span>
-                    </div>
-                    <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                      <div className="h-full rounded-full bg-violet-400 transition-all" style={{ width: `${limits.maxCourses > 0 ? coursePct : 100}%`, opacity: limits.maxCourses > 0 ? 1 : 0.3 }} />
-                    </div>
+                  <div className="flex items-center gap-3 mt-0.5 text-xs text-gray-400">
+                    <span className="font-mono">{inst.slug}</span>
+                    <span><Users className="w-3 h-3 inline mr-0.5" />{inst.stats.users}{limits.maxStudents > 0 ? `/${limits.maxStudents}` : ""}</span>
+                    <span><BookOpen className="w-3 h-3 inline mr-0.5" />{inst.stats.courses}{limits.maxCourses > 0 ? `/${limits.maxCourses}` : ""}</span>
+                    <span>{inst.stats.bookings} การจอง</span>
                   </div>
                 </div>
 
-                {/* Expiry */}
-                {inst.planExpiresAt && (
-                  <div className={`mt-3 text-xs px-3 py-1.5 rounded-lg ${expired ? "bg-red-50 text-red-600" : daysLeft! <= 7 ? "bg-orange-50 text-orange-600" : "bg-gray-50 text-gray-500"}`}>
-                    {expired ? "⚠️ หมดอายุแล้ว" : `⏱ หมดอายุใน ${daysLeft} วัน`} —{" "}
-                    {new Date(inst.planExpiresAt).toLocaleDateString("th-TH", { day: "numeric", month: "short", year: "numeric" })}
-                  </div>
-                )}
+                {/* Revenue + commission */}
+                <div className="text-right shrink-0">
+                  <p className="text-base font-extrabold text-violet-700">฿{fmtB(inst.stats.revenue)}</p>
+                  {commissionAmount && (
+                    <p className="text-xs text-violet-400">คอม {inst.commissionRate}% = ฿{commissionAmount}</p>
+                  )}
+                </div>
+
+                {/* Actions */}
+                <div className="flex items-center gap-1 shrink-0">
+                  <button onClick={() => openEdit(inst)} className="p-1.5 text-gray-400 hover:text-violet-600 hover:bg-violet-50 rounded-lg transition-colors" title="แก้ไข">
+                    <Edit3 className="w-4 h-4" />
+                  </button>
+                  <button onClick={() => setDeleteConfirm({ open: true, id: inst._id, name: inst.name })} className="p-1.5 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors" title="ลบสถาบัน">
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
             </div>
           );

@@ -32,6 +32,13 @@ interface PayoutRecord {
   createdAt: string;
 }
 
+const fmt = (n: number) => {
+  const r = Math.round(n * 100) / 100;
+  const parts = r.toString().split(".");
+  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  return parts.join(".");
+};
+
 export default function PayoutsPage() {
   const [commissions, setCommissions] = useState<{ institutions: CommissionRow[]; platformTotalCommission: number; platformTotalGross: number } | null>(null);
   const [payouts, setPayouts] = useState<PayoutRecord[]>([]);
@@ -116,7 +123,7 @@ export default function PayoutsPage() {
               <TrendingUp className="w-5 h-5 text-violet-200" />
               <span className="text-violet-100 text-sm">รายได้รวมทั้งหมด</span>
             </div>
-            <div className="text-3xl font-extrabold">฿{commissions.platformTotalGross.toLocaleString()}</div>
+            <div className="text-3xl font-extrabold">฿{fmt(commissions.platformTotalGross)}</div>
             <div className="text-violet-100 text-xs mt-1">จากทุกสถาบัน</div>
           </div>
           <div className="bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl p-5 text-white">
@@ -124,7 +131,7 @@ export default function PayoutsPage() {
               <Receipt className="w-5 h-5 text-green-200" />
               <span className="text-green-100 text-sm">Commission ที่ได้รับ</span>
             </div>
-            <div className="text-3xl font-extrabold">฿{commissions.platformTotalCommission.toLocaleString()}</div>
+            <div className="text-3xl font-extrabold">฿{fmt(commissions.platformTotalCommission)}</div>
             <div className="text-green-100 text-xs mt-1">รายได้สุทธิของแพลตฟอร์ม</div>
           </div>
           <div className="bg-gradient-to-br from-amber-400 to-orange-500 rounded-2xl p-5 text-white">
@@ -167,15 +174,15 @@ export default function PayoutsPage() {
                 </div>
                 <div className="text-right hidden sm:block">
                   <p className="text-sm text-gray-500">รายได้รวม</p>
-                  <p className="text-sm font-semibold text-gray-900">฿{row.grossRevenue.toLocaleString()}</p>
+                  <p className="text-sm font-semibold text-gray-900">฿{fmt(row.grossRevenue)}</p>
                 </div>
                 <div className="text-right hidden sm:block">
                   <p className="text-sm text-gray-500">Commission</p>
-                  <p className="text-sm font-semibold text-violet-600">฿{row.totalCommission.toLocaleString()}</p>
+                  <p className="text-sm font-semibold text-violet-600">฿{fmt(row.totalCommission)}</p>
                 </div>
                 <div className="text-right">
                   <p className="text-xs text-gray-500">ต้องจ่ายสถาบัน</p>
-                  <p className="text-sm font-bold text-green-600">฿{row.netPayout.toLocaleString()}</p>
+                  <p className="text-sm font-bold text-green-600">฿{fmt(row.netPayout)}</p>
                 </div>
               </div>
             ))}
@@ -200,9 +207,9 @@ export default function PayoutsPage() {
                       <StatusBadge status={p.status} />
                     </div>
                     <div className="flex flex-wrap gap-4 mt-2 text-sm text-gray-600">
-                      <span>รายได้ ฿{p.grossRevenue.toLocaleString()}</span>
-                      <span className="text-violet-600">Commission ฿{p.commissionAmount.toLocaleString()} ({p.commissionRate}%)</span>
-                      <span className="text-green-600 font-semibold">จ่ายสถาบัน ฿{p.netPayout.toLocaleString()}</span>
+                      <span>รายได้ ฿{fmt(p.grossRevenue)}</span>
+                      <span className="text-violet-600">Commission ฿{fmt(p.commissionAmount)} ({p.commissionRate}%)</span>
+                      <span className="text-green-600 font-semibold">จ่ายสถาบัน ฿{fmt(p.netPayout)}</span>
                     </div>
                     {p.note && <p className="text-xs text-gray-400 mt-1">{p.note}</p>}
                     {p.paidAt && (
