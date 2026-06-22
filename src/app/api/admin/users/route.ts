@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
     if (!name || !email || !password) return NextResponse.json({ error: "กรุณากรอกข้อมูลให้ครบ" }, { status: 400 });
     if (password.length < 6) return NextResponse.json({ error: "รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร" }, { status: 400 });
 
-    const allowedRoles = ["student", "teacher", "admin", "super_admin"];
+    const allowedRoles = ["student", "teacher", "admin", "owner", "super_admin"];
     const userRole = allowedRoles.includes(role) ? role : "student";
 
     await connectDB();
