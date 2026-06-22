@@ -31,14 +31,16 @@ async function getStats() {
     { $match: { status: "confirmed" } },
     { $lookup: { from: "courses", localField: "courseId", foreignField: "_id", as: "course" } },
     { $unwind: "$course" },
+    { $lookup: { from: "institutions", localField: "institutionId", foreignField: "_id", as: "institution" } },
+    { $unwind: { path: "$institution", preserveNullAndEmptyArrays: true } },
     { $group: {
       _id: null,
       total: { $sum: "$course.price" },
-      commission: { $sum: "$commissionAmount" },
+      commission: { $sum: { $multiply: ["$course.price", { $divide: [{ $ifNull: ["$institution.commissionRate", 0] }, 100] }] } },
     }},
   ]);
   const totalRevenue = revPipeline[0]?.total ?? 0;
-  const totalCommission = Math.round(revPipeline[0]?.commission ?? 0);
+  const totalCommission = Math.round((revPipeline[0]?.commission ?? 0) * 100) / 100;
 
   const byPlan = await Institution.aggregate([{ $group: { _id: "$plan", count: { $sum: 1 } } }]);
   const planCounts: Record<string, number> = {};
@@ -97,7 +99,7 @@ export default async function SuperAdminPage() {
             <Percent className="w-5 h-5 text-violet-200" />
             <span className="text-violet-100 text-sm font-medium">ค่าคอมมิชชั่นรวม</span>
           </div>
-          <div className="text-3xl font-extrabold">฿{s.totalCommission.toLocaleString()}</div>
+          <div className="text-3xl font-extrabold">฿{(() => { const r = s.totalCommission; const p = r.toString().split("."); p[0] = p[0].replace(/\B(?=(\d{3})+(?!\d))/g, ","); return p.join("."); })()}</div>
           <div className="text-violet-100 text-xs mt-1">จากรายได้ที่ยืนยันแล้ว</div>
         </div>
         <div className="bg-gradient-to-br from-amber-400 to-orange-500 rounded-2xl p-5 text-white">
