@@ -55,9 +55,9 @@ export default function BannerSlider({ banners, institutionNames = {} }: Props) 
           </div>
 
           {/* Overlay for text readability */}
-          <div className="absolute inset-0" style={{ background: "rgba(0,0,0,0.25)" }} />
+          <div className="absolute inset-0" style={{ background: "rgba(255,255,255,0.08)" }} />
           {/* Top gradient — ช่วยให้ navbar transparent อ่านได้ชัด */}
-          <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-black/50 to-transparent" />
+          <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-white/20 to-transparent" />
 
           {/* Text overlay */}
           {(b.title || b.subtitle || b.linkUrl) && (
