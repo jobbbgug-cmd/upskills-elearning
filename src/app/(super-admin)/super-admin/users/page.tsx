@@ -55,7 +55,7 @@ export default function SuperAdminUsersPage() {
 
   // Edit modal
   const [editUser, setEditUser]     = useState<UserItem | null>(null);
-  const [editForm, setEditForm]     = useState<{ name: string; email: string; role: UserItem["role"]; gradeLevel: string; password: string; profileImage: string }>({ name: "", email: "", role: "student", gradeLevel: "", password: "", profileImage: "" });
+  const [editForm, setEditForm]     = useState<{ name: string; email: string; role: UserItem["role"]; gradeLevel: string; password: string; profileImage: string; institutionId: string }>({ name: "", email: "", role: "student", gradeLevel: "", password: "", profileImage: "", institutionId: "" });
   const [showPass, setShowPass]     = useState(false);
   const [saveError, setSaveError]   = useState("");
   const [copied, setCopied]         = useState(false);
@@ -99,7 +99,7 @@ export default function SuperAdminUsersPage() {
   const openEdit = (u: UserItem) => {
     setEditUser(u);
     const gradeLevel = u.role === "student" ? (u.gradeLevel ?? "") : "ทุกระดับชั้น";
-    setEditForm({ name: u.name, email: u.email, role: u.role, gradeLevel, password: "", profileImage: u.profileImage ?? "" });
+    setEditForm({ name: u.name, email: u.email, role: u.role, gradeLevel, password: "", profileImage: u.profileImage ?? "", institutionId: u.institutionId ?? "" });
     setShowPass(false);
     setSaveError("");
     setCopied(false);
@@ -130,6 +130,7 @@ export default function SuperAdminUsersPage() {
       role: editForm.role,
       gradeLevel: editForm.gradeLevel,
       profileImage: editForm.profileImage,
+      institutionId: editForm.institutionId,
     };
     if (editForm.password) body.password = editForm.password;
 
@@ -549,6 +550,18 @@ export default function SuperAdminUsersPage() {
                 <input type="email" value={editForm.email} onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
                   className={inputCls} placeholder="อีเมล" />
               </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">สถาบัน</label>
+                <div className="relative">
+                  <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                  <select value={editForm.institutionId} onChange={(e) => setEditForm({ ...editForm, institutionId: e.target.value })}
+                    className={`${inputCls} pl-10`}>
+                    <option value="">— ไม่ระบุสถาบัน —</option>
+                    {institutions.map((i) => <option key={i._id} value={i._id}>{i.name}</option>)}
+                  </select>
+                </div>
+              </div>
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">Role</label>
                 <select value={editForm.role}

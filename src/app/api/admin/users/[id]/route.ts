@@ -31,6 +31,9 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     if (body.gradeLevel !== undefined) update.gradeLevel = body.gradeLevel;
     if (body.status !== undefined) update.status = body.status;
     if (body.profileImage !== undefined) update.profileImage = body.profileImage;
+    if (body.institutionId !== undefined && auth.role === "super_admin") {
+      update.institutionId = body.institutionId || null;
+    }
     if (body.password) {
       if (body.password.length < 6)
         return NextResponse.json({ error: "รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร" }, { status: 400 });
