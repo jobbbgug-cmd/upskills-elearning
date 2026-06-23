@@ -26,7 +26,7 @@ export default function BannerSlider({ banners, institutionNames = {} }: Props) 
   if (banners.length === 0) return null;
 
   return (
-    <div className="relative w-full overflow-hidden" style={{ height: "100svh" }}>
+    <div className="relative w-full overflow-hidden" style={{ height: "clamp(520px, 82vh, 860px)" }}>
       {banners.map((b, i) => (
         <div
           key={b._id}
@@ -65,12 +65,12 @@ export default function BannerSlider({ banners, institutionNames = {} }: Props) 
               <div className="max-w-7xl mx-auto px-8 md:px-16 w-full">
                 <div className="max-w-xl">
                   {b.title && (
-                    <h2 className="text-4xl md:text-6xl font-bold text-white leading-tight mb-5 whitespace-pre-line drop-shadow-lg">
+                    <h2 className="text-3xl md:text-5xl font-bold text-white leading-tight mb-4 whitespace-pre-line drop-shadow-lg">
                       {b.title}
                     </h2>
                   )}
                   {b.subtitle && (
-                    <p className="text-white/80 text-lg md:text-xl mb-10 whitespace-pre-line drop-shadow">
+                    <p className="text-white/80 text-base md:text-lg mb-7 whitespace-pre-line drop-shadow">
                       {b.subtitle}
                     </p>
                   )}

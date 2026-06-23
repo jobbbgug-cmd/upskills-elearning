@@ -87,18 +87,16 @@ export default async function HomePage() {
       )}
 
       {/* ─── Trial CTA ─── */}
-      <section className="bg-gradient-to-r from-violet-500 to-indigo-600 px-4 py-6">
-        <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="text-white text-center sm:text-left">
-            <p className="font-bold text-lg">ทดลองใช้งานระบบฟรี 30 วัน</p>
-            <p className="text-violet-100 text-sm">ไม่ต้องใช้บัตรเครดิต · ทีมงานติดต่อกลับภายใน 1-2 วันทำการ</p>
-          </div>
-          <TrialRequestModal />
+      <section className="bg-gradient-to-r from-violet-500 to-indigo-600 px-4 md:px-8 py-5 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="text-white text-center sm:text-left">
+          <p className="font-bold text-lg">ทดลองใช้งานระบบฟรี 30 วัน</p>
+          <p className="text-violet-100 text-sm">ไม่ต้องใช้บัตรเครดิต · ทีมงานติดต่อกลับภายใน 1-2 วันทำการ</p>
         </div>
+        <TrialRequestModal />
       </section>
 
       {/* ─── Stats Bar ─── */}
-      <section className="bg-white border-b border-gray-100 shadow-sm">
+      <section className="bg-gray-50">
         <div className="max-w-5xl mx-auto px-4 py-8 grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
           {[
             { icon: Building2, label: "สถาบันที่ใช้งาน", value: `${institutionCount}+`, color: "text-violet-600" },

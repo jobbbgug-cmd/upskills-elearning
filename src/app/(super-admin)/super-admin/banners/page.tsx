@@ -155,7 +155,7 @@ export default function SuperAdminBannersPage() {
                 </div>
                 <div className="flex items-start gap-3 mb-3">
                   <p className="flex-1 text-xs text-gray-500">
-                    ต้องใช้รูป <span className="font-semibold text-violet-600">แนวนอน</span> เท่านั้น — แนะนำ <span className="font-semibold text-violet-600">1920 × 1080px</span> (16:9)
+                    ต้องใช้รูป <span className="font-semibold text-violet-600">แนวนอน</span> เท่านั้น — แนะนำ <span className="font-semibold text-violet-600">2560 × 860px</span>
                   </p>
                   <input ref={desktopFileRef} type="file" accept="image/*" className="hidden" onChange={(e) => handleUpload(e, "desktop")} />
                   <button
