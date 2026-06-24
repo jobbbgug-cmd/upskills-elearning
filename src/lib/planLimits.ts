@@ -1,6 +1,7 @@
 export const PLAN_LIMITS = {
-  trial:      { maxCourses: 3,   maxStudents: 50,   maxBranches: 1,  defaultCommissionRate: 10 },
-  starter:    { maxCourses: 10,  maxStudents: 200,  maxBranches: 3,  defaultCommissionRate: 8  },
+  trial:      { maxCourses: 1,   maxStudents: 10,   maxBranches: 1,  defaultCommissionRate: 12 },
+  starter:    { maxCourses: 3,   maxStudents: 50,   maxBranches: 1,  defaultCommissionRate: 10 },
+  growth:     { maxCourses: 10,  maxStudents: 200,  maxBranches: 3,  defaultCommissionRate: 8  },
   pro:        { maxCourses: 50,  maxStudents: 1000, maxBranches: 10, defaultCommissionRate: 5  },
   enterprise: { maxCourses: 0,   maxStudents: 0,    maxBranches: 0,  defaultCommissionRate: 3  }, // 0 = unlimited
 } as const;
@@ -8,6 +9,7 @@ export const PLAN_LIMITS = {
 export const PLAN_LABELS: Record<string, string> = {
   trial:      "ทดลองใช้",
   starter:    "Starter",
+  growth:     "Growth",
   pro:        "Pro",
   enterprise: "Enterprise",
 };

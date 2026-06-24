@@ -11,14 +11,19 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
   await connectDB();
   const { id } = await params;
-  const { status, note } = await req.json();
+  const { status, note, slipUrl } = await req.json();
 
   const payout = await Payout.findById(id);
   if (!payout) return NextResponse.json({ error: "ไม่พบรายการ" }, { status: 404 });
 
+  if (status === "paid" && !slipUrl) {
+    return NextResponse.json({ error: "กรุณาแนบหลักฐานการโอนก่อน" }, { status: 400 });
+  }
+
   if (status) payout.status = status;
   if (status === "paid") payout.paidAt = new Date();
   if (note !== undefined) payout.note = note;
+  if (slipUrl !== undefined) payout.slipUrl = slipUrl;
   await payout.save();
 
   return NextResponse.json(JSON.parse(JSON.stringify(payout)));

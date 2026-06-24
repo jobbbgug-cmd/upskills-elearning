@@ -36,21 +36,28 @@ export async function GET() {
     commissionAgg.map((r) => [String(r._id ?? ""), r])
   );
 
-  // Pending payouts per institution
-  const pendingPayouts = await Payout.aggregate([
-    { $match: { status: "pending" } },
-    { $group: { _id: "$institutionId", pendingNetPayout: { $sum: "$netPayout" } } },
+  // Paid & pending payouts per institution
+  const payoutAgg = await Payout.aggregate([
+    { $group: {
+      _id: { institutionId: "$institutionId", status: "$status" },
+      total: { $sum: "$netPayout" },
+    }},
   ]);
-  const pendingMap = new Map(
-    pendingPayouts.map((r) => [String(r._id ?? ""), r.pendingNetPayout as number])
-  );
+  const paidMap = new Map<string, number>();
+  const pendingMap = new Map<string, number>();
+  for (const r of payoutAgg) {
+    const key = String(r._id.institutionId ?? "");
+    if (r._id.status === "paid") paidMap.set(key, (paidMap.get(key) ?? 0) + r.total);
+    if (r._id.status === "pending") pendingMap.set(key, (pendingMap.get(key) ?? 0) + r.total);
+  }
 
   const result = institutions.map((inst) => {
     const id = inst._id.toString();
     const agg = commMap.get(id);
     const gross = agg?.grossRevenue ?? 0;
-    // Always calculate from rate — stored commissionAmount may be 0 for legacy bookings
     const commission = gross * inst.commissionRate / 100;
+    const net = gross - commission;
+    const paid = paidMap.get(id) ?? 0;
     return {
       _id: id,
       name: inst.name,
@@ -59,7 +66,9 @@ export async function GET() {
       commissionRate: inst.commissionRate,
       grossRevenue: gross,
       totalCommission: commission,
-      netPayout: gross - commission,
+      netPayout: net,
+      paidNetPayout: paid,
+      outstanding: Math.max(0, net - paid),
       bookingCount: agg?.bookingCount ?? 0,
       pendingNetPayout: pendingMap.get(id) ?? 0,
     };
@@ -67,11 +76,13 @@ export async function GET() {
 
   const platformTotalCommission = result.reduce((s, r) => s + r.totalCommission, 0);
   const platformTotalGross = result.reduce((s, r) => s + r.grossRevenue, 0);
+  const platformOutstanding = result.reduce((s, r) => s + r.outstanding, 0);
 
   return NextResponse.json({
     institutions: result,
     platformTotalCommission,
     platformTotalGross,
+    platformOutstanding,
     platformNetRevenue: platformTotalCommission,
   });
 }

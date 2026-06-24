@@ -11,6 +11,7 @@ export interface IPayoutDocument extends Document {
   status: "pending" | "paid";
   paidAt: Date | null;
   note: string;
+  slipUrl: string;
   createdAt: Date;
 }
 
@@ -23,9 +24,10 @@ const PayoutSchema = new Schema<IPayoutDocument>(
     commissionAmount: { type: Number, default: 0 },
     netPayout:     { type: Number, default: 0 },
     confirmedBookings: { type: Number, default: 0 },
-    status: { type: String, enum: ["pending", "paid"], default: "pending" },
-    paidAt: { type: Date, default: null },
-    note:   { type: String, default: "" },
+    status:  { type: String, enum: ["pending", "paid"], default: "pending" },
+    paidAt:  { type: Date, default: null },
+    note:    { type: String, default: "" },
+    slipUrl: { type: String, default: "" },
   },
   { timestamps: true }
 );

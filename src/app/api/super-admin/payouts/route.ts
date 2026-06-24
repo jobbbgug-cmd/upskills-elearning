@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { institutionId, periodLabel } = await req.json();
+  const { institutionId, periodLabel, slipUrl } = await req.json();
   if (!institutionId || !periodLabel) {
     return NextResponse.json({ error: "กรุณาระบุ institutionId และ periodLabel" }, { status: 400 });
   }
@@ -40,15 +40,10 @@ export async function POST(req: NextRequest) {
     .lean() as { commissionRate: number; name: string } | null;
   if (!institution) return NextResponse.json({ error: "ไม่พบสถาบัน" }, { status: 404 });
 
-  // Get all confirmed bookings for this institution in the period (YYYY-MM)
-  const [year, month] = periodLabel.split("-").map(Number);
-  const start = new Date(year, month - 1, 1);
-  const end = new Date(year, month, 1);
-
+  // Sum all confirmed bookings for this institution (period label is for reference only)
   const bookings = await Booking.find({
     institutionId,
     status: "confirmed",
-    createdAt: { $gte: start, $lt: end },
   }).lean();
 
   const courseIds = [...new Set(bookings.map((b) => b.courseId.toString()))];
@@ -72,6 +67,7 @@ export async function POST(req: NextRequest) {
       commissionAmount,
       netPayout,
       confirmedBookings: bookings.length,
+      ...(slipUrl ? { slipUrl, status: "paid", paidAt: new Date() } : {}),
     },
     { new: true, upsert: true }
   );

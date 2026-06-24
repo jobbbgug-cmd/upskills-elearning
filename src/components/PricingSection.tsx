@@ -15,16 +15,16 @@ const PLANS = [
     yearlyPrice: 0,
     isFree: true,
     description: "ทดลองใช้ฟรี 30 วัน",
-    maxCourses: 3,
-    maxStudents: 50,
+    maxCourses: 1,
+    maxStudents: 10,
     maxBranches: 1,
-    commission: 10,
+    commission: 12,
     cta: "ทดลองใช้ฟรี",
     ctaHref: "/register",
     ctaStyle: "outline",
     features: [
-      "คอร์สสูงสุด 3 คอร์ส",
-      "นักเรียนสูงสุด 50 คน",
+      "คอร์สสูงสุด 1 คอร์ส",
+      "นักเรียนสูงสุด 10 คน",
       "1 สาขา",
       "ระบบจองที่นั่ง",
       "สแกน QR Code",
@@ -36,26 +36,51 @@ const PLANS = [
     id: "starter",
     name: "Starter",
     color: "violet",
+    monthlyPrice: 690,
+    yearlyPrice: 6900,
+    isFree: false,
+    description: "สถาบันเริ่มต้น",
+    maxCourses: 3,
+    maxStudents: 50,
+    maxBranches: 1,
+    commission: 10,
+    cta: "สั่งซื้อเลย!",
+    ctaHref: "/register",
+    ctaStyle: "violet",
+    features: [
+      "คอร์สสูงสุด 3 คอร์ส",
+      "นักเรียนสูงสุด 50 คน",
+      "1 สาขา",
+      "ทุกฟีเจอร์ Trial",
+      "ระบบจัดการเนื้อหา",
+      "รายงานพื้นฐาน",
+    ],
+    target: "สถาบันขนาดเล็กเริ่มต้น",
+  },
+  {
+    id: "growth",
+    name: "Growth",
+    color: "teal",
     monthlyPrice: 990,
     yearlyPrice: 9900,
     isFree: false,
-    description: "โรงเรียนกวดวิชาขนาดเล็ก",
+    description: "โรงเรียนกวดวิชาขนาดกลาง",
     maxCourses: 10,
     maxStudents: 200,
     maxBranches: 3,
     commission: 8,
     cta: "สั่งซื้อเลย!",
     ctaHref: "/register",
-    ctaStyle: "violet",
+    ctaStyle: "teal",
     features: [
       "คอร์สสูงสุด 10 คอร์ส",
       "นักเรียนสูงสุด 200 คน",
       "สูงสุด 3 สาขา",
-      "ทุกฟีเจอร์ Trial",
+      "ทุกฟีเจอร์ Starter",
       "ระบบจัดการเนื้อหา",
       "รายงานมากกว่า 10 รายการ",
     ],
-    target: "โรงเรียนกวดวิชาขนาดเล็ก",
+    target: "โรงเรียนกวดวิชาขนาดกลาง",
   },
   {
     id: "pro",
@@ -77,7 +102,7 @@ const PLANS = [
       "คอร์สสูงสุด 50 คอร์ส",
       "นักเรียนสูงสุด 1,000 คน",
       "สูงสุด 10 สาขา",
-      "ทุกฟีเจอร์ Starter",
+      "ทุกฟีเจอร์ Growth",
       "Custom Branding / โลโก้",
       "White-Label Mode",
     ],
@@ -197,6 +222,7 @@ const COLOR_MAP: Record<string, {
 }> = {
   gray:   { border: "border-gray-200",   badge: "",                                                  check: "text-gray-400",  btn: "bg-gray-100 text-gray-700 hover:bg-gray-200",                        bg: "bg-white",              accent: "text-gray-600", icon: "bg-gray-100 text-gray-500" },
   violet: { border: "border-violet-300", badge: "bg-violet-600",                                     check: "text-violet-500", btn: "bg-violet-600 text-white hover:bg-violet-700",                      bg: "bg-white",              accent: "text-violet-600", icon: "bg-violet-100 text-violet-600" },
+  teal:   { border: "border-teal-300",   badge: "bg-teal-600",                                       check: "text-teal-500",  btn: "bg-teal-600 text-white hover:bg-teal-700",                           bg: "bg-white",              accent: "text-teal-600", icon: "bg-teal-100 text-teal-600" },
   indigo: { border: "border-indigo-400", badge: "bg-gradient-to-r from-violet-600 to-indigo-600",   check: "text-indigo-500", btn: "bg-gradient-to-r from-violet-600 to-indigo-600 text-white shadow-lg shadow-indigo-200", bg: "bg-gradient-to-b from-indigo-50 to-white", accent: "text-indigo-600", icon: "bg-indigo-100 text-indigo-600" },
   sky:    { border: "border-sky-300",    badge: "bg-sky-500",                                        check: "text-sky-500",   btn: "bg-sky-500 text-white hover:bg-sky-600",                             bg: "bg-white",              accent: "text-sky-600", icon: "bg-sky-100 text-sky-600" },
   emerald:{ border: "", badge: "", check: "text-emerald-500", btn: "", bg: "", accent: "text-emerald-600", icon: "bg-emerald-100 text-emerald-600" },
@@ -259,7 +285,7 @@ export default function PricingSection() {
         </div>
 
         {/* Plan Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
           {PLANS.map((plan) => {
             const c = COLOR_MAP[plan.color];
             const price = yearly ? plan.yearlyPrice : plan.monthlyPrice;
@@ -353,7 +379,7 @@ export default function PricingSection() {
         </div>
 
         {/* Target row */}
-        <div className="grid grid-cols-4 gap-5 text-center mb-16">
+        <div className="grid grid-cols-5 gap-4 text-center mb-16">
           {PLANS.map((plan) => (
             <p key={plan.id} className="text-xs text-gray-400">{plan.target}</p>
           ))}
@@ -404,7 +430,7 @@ export default function PricingSection() {
             <p className="font-bold text-amber-900 text-sm mb-1">หมายเหตุ Commission</p>
             <p className="text-amber-800 text-xs leading-relaxed">
               ระบบจะหัก Commission อัตโนมัติจากยอดการจองที่ได้รับการยืนยัน —{" "}
-              <strong>Trial 10%</strong> · <strong>Starter 8%</strong> · <strong>Pro 5%</strong> · <strong>Enterprise 3%</strong>
+              <strong>Trial 12%</strong> · <strong>Starter 10%</strong> · <strong>Growth 8%</strong> · <strong>Pro 5%</strong> · <strong>Enterprise 3%</strong>
               <br />ยิ่งอัปเกรดแผน ยิ่งเสีย Commission น้อยลง ช่วยให้ธุรกิจคุ้มค่ายิ่งขึ้นในระยะยาว
             </p>
           </div>
