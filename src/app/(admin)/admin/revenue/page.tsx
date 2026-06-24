@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState, useMemo } from "react";
-import { TrendingUp, Users, Clock, BookOpen, ChevronUp, ChevronDown, Minus, ChevronRight } from "lucide-react";
+import { TrendingUp, Users, Clock, BookOpen, ChevronUp, ChevronDown, Minus, ChevronRight, CheckCircle } from "lucide-react";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell,
 } from "recharts";
@@ -43,6 +43,8 @@ interface RevenueData {
   totalConfirmed: number;
   byTeacher: TeacherGroup[] | null;
   commissionRate: number;
+  outstanding: number;
+  paidNetPayout: number;
 }
 
 const fmt = (n: number) => n.toLocaleString("th-TH", { maximumFractionDigits: 2 });
@@ -348,7 +350,6 @@ function AdminView({ data }: { data: RevenueData }) {
     : filteredTeachers.reduce((s, t) => s + t.totalRevenue, 0);
   const commissionDeducted = grossRevenue * data.commissionRate / 100;
   const netRevenue = grossRevenue - commissionDeducted;
-  const netPending = data.totalPending * (1 - data.commissionRate / 100);
   const displayConfirmed = filterMonth === "all" ? data.totalConfirmed : filteredTeachers.reduce((s, t) => s + t.totalConfirmed, 0);
 
   function toggleTeacher(key: string) {
@@ -377,14 +378,18 @@ function AdminView({ data }: { data: RevenueData }) {
         )}
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
         <div className="bg-white rounded-2xl border border-gray-100 p-5">
           <div className="flex items-center gap-2 text-green-500 mb-3"><TrendingUp className="w-4 h-4" /><span className="text-xs text-gray-500">รายได้รวม</span></div>
           <p className="text-2xl font-bold text-green-600">฿{fmt(netRevenue)}</p>
         </div>
         <div className="bg-white rounded-2xl border border-gray-100 p-5">
-          <div className="flex items-center gap-2 text-amber-500 mb-3"><Clock className="w-4 h-4" /><span className="text-xs text-gray-500">รอชำระ</span></div>
-          <p className="text-2xl font-bold text-gray-900">฿{fmt(netPending)}</p>
+          <div className="flex items-center gap-2 mb-3"><Clock className="w-4 h-4 text-amber-500" /><span className="text-xs text-gray-500">รอชำระ</span></div>
+          <p className={`text-2xl font-bold ${data.outstanding > 0 ? "text-amber-500" : "text-gray-900"}`}>฿{fmt(data.outstanding)}</p>
+        </div>
+        <div className="bg-white rounded-2xl border border-gray-100 p-5">
+          <div className="flex items-center gap-2 mb-3"><CheckCircle className="w-4 h-4 text-green-500" /><span className="text-xs text-gray-500">ชำระแล้ว</span></div>
+          <p className="text-2xl font-bold text-green-600">฿{fmt(data.paidNetPayout)}</p>
         </div>
         <div className="bg-white rounded-2xl border border-gray-100 p-5">
           <div className="flex items-center gap-2 text-indigo-500 mb-3"><Users className="w-4 h-4" /><span className="text-xs text-gray-500">นักเรียนทั้งหมด</span></div>

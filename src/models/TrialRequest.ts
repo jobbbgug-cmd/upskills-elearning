@@ -18,7 +18,8 @@ const TrialRequestSchema = new Schema<ITrialRequest>({
   institutionType: { type: String, required: true },
   contactChannel:  { type: String, required: true },
   contactValue:    { type: String, required: true },
-  status:          { type: String, enum: ["pending", "contacted", "approved", "rejected"], default: "pending" },
+  status:             { type: String, enum: ["pending", "contacted", "approved", "rejected"], default: "pending" },
+  institutionCreated: { type: Boolean, default: false },
 }, { timestamps: true });
 
 export default mongoose.models.TrialRequest ?? mongoose.model<ITrialRequest>("TrialRequest", TrialRequestSchema);

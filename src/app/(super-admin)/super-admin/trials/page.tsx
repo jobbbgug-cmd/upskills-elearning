@@ -56,6 +56,7 @@ interface TrialItem {
   contactChannel: string;
   contactValue: string;
   status: "pending" | "contacted" | "approved" | "rejected";
+  institutionCreated: boolean;
   createdAt: string;
 }
 
@@ -89,6 +90,7 @@ export default function TrialsPage() {
   const [filter, setFilter]  = useState<string>("all");
 
   // Create institution modal state
+  const [currentTrialId, setCurrentTrialId] = useState<string | null>(null);
   const [creating, setCreating]       = useState(false);
   const [createdAdmin, setCreatedAdmin] = useState<CreatedAdmin | null>(null);
   const [newForm, setNewForm] = useState({
@@ -130,6 +132,7 @@ export default function TrialsPage() {
 
   const openCreateFromTrial = (item: TrialItem) => {
     const slug = item.institutionName.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
+    setCurrentTrialId(item._id);
     setNewForm({
       slug,
       name: item.institutionName,
@@ -167,6 +170,16 @@ export default function TrialsPage() {
       const data = await res.json();
       setCreating(false);
       setNewForm({ slug: "", name: "", plan: "trial", commissionRate: PLAN_COMMISSION["trial"], branchCount: 1, ownerName: "", ownerEmail: "", ownerPassword: "" });
+      // Mark trial as institution created
+      if (currentTrialId) {
+        await fetch("/api/super-admin/trial-requests", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id: currentTrialId, institutionCreated: true }),
+        });
+        setItems((prev) => prev.map((it) => it._id === currentTrialId ? { ...it, institutionCreated: true } : it));
+        setCurrentTrialId(null);
+      }
       if (data.ownerUser) {
         setCreatedAdmin({
           name: data.ownerUser.name,
@@ -264,9 +277,15 @@ export default function TrialsPage() {
                     {item.status === "approved" && (
                       <button
                         onClick={() => openCreateFromTrial(item)}
-                        className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white text-sm font-semibold rounded-xl shadow-sm transition-colors"
+                        disabled={item.institutionCreated}
+                        className={`mt-4 inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-xl shadow-sm transition-colors ${
+                          item.institutionCreated
+                            ? "bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200"
+                            : "bg-violet-600 hover:bg-violet-700 text-white"
+                        }`}
                       >
-                        <Building2 className="w-4 h-4" />สร้างสถาบัน
+                        <Building2 className="w-4 h-4" />
+                        {item.institutionCreated ? "สร้างสถาบันแล้ว" : "สร้างสถาบัน"}
                       </button>
                     )}
                   </div>

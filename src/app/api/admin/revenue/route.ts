@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
+import mongoose from "mongoose";
 import { getAuthUser } from "@/lib/auth";
 import { resolveInstitutionId, tenantFilter } from "@/lib/tenant";
 import { connectDB } from "@/lib/mongodb";
 import Course from "@/models/Course";
 import Booking from "@/models/Booking";
 import Institution from "@/models/Institution";
+import Payout from "@/models/Payout";
 
 export async function GET(req: NextRequest) {
   const auth = await getAuthUser();
@@ -71,14 +73,16 @@ export async function GET(req: NextRequest) {
 
   const courseStats = courses.map((c) => {
     const id = (c._id as { toString(): string }).toString();
+    const instIdStr = (c.institutionId as { toString(): string } | undefined)?.toString() ?? "";
     const stats = bookingMap[id] ?? { confirmed: 0, pending: 0, storedCommission: 0, byMonth: {}, byMonthCommission: {} };
-    const courseRate = instRateMap.get((c.institutionId as { toString(): string } | undefined)?.toString() ?? "") ?? commissionRate;
+    const courseRate = instRateMap.get(instIdStr) ?? commissionRate;
     const grossRevenue = stats.confirmed * c.price;
     const pendingGross = stats.pending * c.price;
     const commissionAmount = grossRevenue * courseRate / 100;
     const pendingCommission = pendingGross * courseRate / 100;
     return {
       _id: id,
+      instId: instIdStr,
       title: c.title,
       instructor: c.instructor,
       instructorId: (c.instructorId as string) ?? "",
@@ -115,6 +119,38 @@ export async function GET(req: NextRequest) {
   const totalPendingCommission = courseStats.reduce((s, c) => s + c.pendingCommission, 0);
   const totalConfirmed = courseStats.reduce((s, c) => s + c.confirmedBookings, 0);
 
+  // Build net revenue per institution (only institutions that have confirmed bookings)
+  const netByInst = new Map<string, number>();
+  for (const c of courseStats) {
+    if (c.revenue > 0 && c.instId) {
+      netByInst.set(c.instId, (netByInst.get(c.instId) ?? 0) + (c.revenue - c.commissionAmount));
+    }
+  }
+
+  // Outstanding / paid payout: sum only for institutions that have revenue in this view
+  let outstanding = 0;
+  let paidNetPayout = 0;
+  const instIdsWithRevenue = institutionId ? [institutionId] : [...netByInst.keys()];
+  if (instIdsWithRevenue.length > 0) {
+    const objIds = instIdsWithRevenue.map((id) => new mongoose.Types.ObjectId(id));
+    const payoutAgg = await Payout.aggregate([
+      { $match: { institutionId: { $in: objIds } } },
+      { $group: { _id: { institutionId: "$institutionId", status: "$status" }, total: { $sum: "$netPayout" } } },
+    ]);
+    const paidPerInst = new Map<string, number>();
+    for (const r of payoutAgg) {
+      if (r._id.status === "paid") {
+        const key = String(r._id.institutionId ?? "");
+        paidPerInst.set(key, (paidPerInst.get(key) ?? 0) + r.total);
+      }
+    }
+    for (const [id, net] of netByInst) {
+      const paid = paidPerInst.get(id) ?? 0;
+      paidNetPayout += paid;
+      outstanding += Math.max(0, net - paid);
+    }
+  }
+
   let byTeacher = null;
   if (auth.role === "admin" || auth.role === "super_admin") {
     const teacherMap = new Map<string, { instructor: string; instructorId: string; courses: typeof courseStats }>();
@@ -144,5 +180,7 @@ export async function GET(req: NextRequest) {
     totalConfirmed,
     byTeacher,
     commissionRate,
+    outstanding,
+    paidNetPayout,
   });
 }

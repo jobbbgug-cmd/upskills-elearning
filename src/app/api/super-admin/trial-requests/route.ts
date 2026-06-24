@@ -18,9 +18,12 @@ export async function PATCH(req: Request) {
   if (!auth || auth.role !== "super_admin")
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { id, status } = await req.json();
+  const { id, status, institutionCreated } = await req.json();
   await connectDB();
-  await TrialRequest.findByIdAndUpdate(id, { status });
+  const update: Record<string, unknown> = {};
+  if (status !== undefined) update.status = status;
+  if (institutionCreated !== undefined) update.institutionCreated = institutionCreated;
+  await TrialRequest.findByIdAndUpdate(id, update);
   return NextResponse.json({ ok: true });
 }
 
