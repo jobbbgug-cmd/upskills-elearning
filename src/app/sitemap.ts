@@ -2,7 +2,7 @@ import { MetadataRoute } from "next";
 import { connectDB } from "@/lib/mongodb";
 import Course from "@/models/Course";
 
-const BASE_URL = "https://upskills-elearning.vercel.app";
+const BASE_URL = "https://upskillsth.com";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   await connectDB();
