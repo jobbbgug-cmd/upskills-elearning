@@ -2,7 +2,7 @@ import { MetadataRoute } from "next";
 import { connectDB } from "@/lib/mongodb";
 import Course from "@/models/Course";
 
-const BASE_URL = "https://upskillsth.com";
+const BASE_URL = "https://www.upskillsth.com";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   await connectDB();
