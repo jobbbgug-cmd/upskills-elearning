@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { Building2, ChevronDown, Search, BookOpen, RefreshCw } from "lucide-react";
+import { Building2, ChevronDown, Search, BookOpen, RefreshCw, CheckCircle2, XCircle } from "lucide-react";
 
 interface Course {
   _id: string;
@@ -10,6 +10,7 @@ interface Course {
   isActive: boolean;
   createdAt: string;
   institutionId?: string;
+  contentId?: string;
   sessions?: { _id: string; date: string }[];
 }
 
@@ -126,6 +127,7 @@ export default function SuperAdminCoursesPage() {
                 <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wide">ครู</th>
                 <th className="text-right px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wide">ราคา</th>
                 <th className="text-center px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wide">รอบ</th>
+                <th className="text-center px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wide">เนื้อหาการเรียน</th>
                 <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wide">สถานะ</th>
                 <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wide">สร้างเมื่อ</th>
               </tr>
@@ -148,6 +150,17 @@ export default function SuperAdminCoursesPage() {
                     {c.price > 0 ? `฿${c.price.toLocaleString()}` : "ฟรี"}
                   </td>
                   <td className="px-5 py-4 text-center text-sm text-gray-500">{c.sessions?.length ?? 0}</td>
+                  <td className="px-5 py-4 text-center">
+                    {c.contentId ? (
+                      <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full">
+                        <CheckCircle2 className="w-3.5 h-3.5" />มีเนื้อหา
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 text-xs font-medium text-gray-400 bg-gray-50 px-2.5 py-1 rounded-full">
+                        <XCircle className="w-3.5 h-3.5" />ยังไม่มี
+                      </span>
+                    )}
+                  </td>
                   <td className="px-5 py-4">
                     <span className={`inline-flex items-center text-xs px-2.5 py-1 rounded-full font-medium ${c.isActive ? "bg-green-50 text-green-700" : "bg-gray-100 text-gray-500"}`}>
                       {c.isActive ? "เปิดสอน" : "ปิด"}

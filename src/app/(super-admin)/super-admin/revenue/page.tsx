@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState, useMemo } from "react";
 import { TrendingUp, Users, Clock, BookOpen, ChevronUp, ChevronDown, Minus, ChevronRight, Building2, CheckCircle, Eye, X } from "lucide-react";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
 
 interface CourseStat {
   _id: string;
@@ -168,48 +169,81 @@ function MonthlyChart({ monthly, filterMonth, setFilterMonth }: {
   filterMonth: string;
   setFilterMonth: (m: string) => void;
 }) {
-  const W = 600; const H = 120; const PAD = { t: 16, b: 28, l: 8, r: 8 };
-  const max = Math.max(...monthly.map((m) => m.commission), 1);
-  if (!monthly.length) return null;
+  const chartData = monthly.map((m) => ({ ...m, label: monthLabel(m.month) }));
+  const totalCommission = chartData.reduce((s, m) => s + m.commission, 0);
+  if (!chartData.length) return null;
 
-  const n = monthly.length;
-  const xOf = (i: number) => PAD.l + (i / Math.max(n - 1, 1)) * (W - PAD.l - PAD.r);
-  const yOf = (v: number) => PAD.t + (1 - v / max) * (H - PAD.t - PAD.b);
-
-  const points = monthly.map((m, i) => ({ x: xOf(i), y: yOf(m.commission), ...m }));
-  const polyline = points.map((p) => `${p.x},${p.y}`).join(" ");
-  const area = `M${points[0].x},${H - PAD.b} ` + points.map((p) => `L${p.x},${p.y}`).join(" ") + ` L${points[n - 1].x},${H - PAD.b} Z`;
+  function formatB(val: number) {
+    if (val >= 1000000) return `฿${(val / 1000000).toFixed(1)}M`;
+    if (val >= 1000) return `฿${(val / 1000).toFixed(0)}K`;
+    return `฿${val.toLocaleString()}`;
+  }
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 p-5">
-      <h2 className="text-sm font-semibold text-gray-800 mb-3">ค่าคอมมิชชั่นรายเดือน</h2>
-      <svg viewBox={`0 0 ${W} ${H}`} className="w-full" style={{ height: 140 }}>
-        <defs>
-          <linearGradient id="commGrad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#7c3aed" stopOpacity="0.18" />
-            <stop offset="100%" stopColor="#7c3aed" stopOpacity="0" />
-          </linearGradient>
-        </defs>
-        <path d={area} fill="url(#commGrad)" />
-        <polyline points={polyline} fill="none" stroke="#7c3aed" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
-        {points.map((p) => {
-          const isSel = filterMonth === p.month;
-          return (
-            <g key={p.month} onClick={() => setFilterMonth(filterMonth === p.month ? "all" : p.month)} className="cursor-pointer">
-              <circle cx={p.x} cy={p.y} r={isSel ? 5 : 3.5} fill={isSel ? "#7c3aed" : "#fff"} stroke="#7c3aed" strokeWidth="2" />
-              <text x={p.x} y={p.y - 9} textAnchor="middle" fontSize="9" fill={isSel ? "#7c3aed" : "#6b7280"} fontWeight={isSel ? "700" : "500"}>
-                ฿{fmt(p.commission)}
-              </text>
-              <text x={p.x} y={H - PAD.b + 12} textAnchor="middle" fontSize="9" fill={isSel ? "#7c3aed" : "#9ca3af"} fontWeight={isSel ? "600" : "400"}>
-                {monthLabel(p.month)}
-              </text>
-              <rect x={p.x - 16} y={0} width={32} height={H} fill="transparent" />
-            </g>
-          );
-        })}
-      </svg>
+    <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
+      <div className="flex items-start justify-between mb-4">
+        <div>
+          <h2 className="text-sm font-semibold text-gray-900">ค่าคอมมิชชั่นรายเดือน</h2>
+          <p className="text-xs text-gray-400 mt-0.5">{chartData.length} เดือนล่าสุด</p>
+        </div>
+        <div className="text-right">
+          <p className="text-lg font-bold text-violet-600">{formatB(totalCommission)}</p>
+          {filterMonth !== "all" && (
+            <button onClick={() => setFilterMonth("all")} className="text-xs text-violet-400 hover:text-violet-600 transition-colors">
+              ดูทุกเดือน ×
+            </button>
+          )}
+        </div>
+      </div>
+      <ResponsiveContainer width="100%" height={220}>
+        <BarChart
+          data={chartData}
+          barCategoryGap="30%"
+          onClick={(e) => {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const payload = (e as any)?.activePayload?.[0]?.payload as { month: string } | undefined;
+            if (payload?.month) setFilterMonth(filterMonth === payload.month ? "all" : payload.month);
+          }}
+        >
+          <defs>
+            <linearGradient id="commGradActive" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#7c3aed" />
+              <stop offset="100%" stopColor="#a855f7" />
+            </linearGradient>
+            <linearGradient id="commGradNormal" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#c4b5fd" />
+              <stop offset="100%" stopColor="#ddd6fe" />
+            </linearGradient>
+          </defs>
+          <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
+          <XAxis dataKey="label" tick={{ fontSize: 11, fill: "#9ca3af" }} axisLine={false} tickLine={false} />
+          <YAxis tickFormatter={formatB} tick={{ fontSize: 10, fill: "#9ca3af" }} axisLine={false} tickLine={false} width={52} />
+          <Tooltip
+            cursor={{ fill: "#f5f3ff", radius: 4 }}
+            content={({ active, payload, label }) => {
+              if (!active || !payload?.length) return null;
+              const row = payload[0]?.payload as { month: string; commission: number };
+              const isSel = filterMonth === row?.month;
+              return (
+                <div className="bg-white border border-gray-200 rounded-xl px-3 py-2 shadow-lg text-xs">
+                  <p className="font-semibold text-gray-700 mb-1">{label}</p>
+                  <p className="text-violet-600">ค่าคอมมิชชั่น: ฿{row?.commission?.toLocaleString()}</p>
+                  <p className="text-gray-400 mt-0.5">{isSel ? "คลิกเพื่อยกเลิกตัวกรอง" : "คลิกเพื่อกรองเดือนนี้"}</p>
+                </div>
+              );
+            }}
+          />
+          <Bar dataKey="commission" name="ค่าคอมมิชชั่น" radius={[6, 6, 0, 0]} maxBarSize={48} cursor="pointer">
+            {chartData.map((m) => (
+              <Cell key={m.month} fill={filterMonth === "all" || filterMonth === m.month ? "url(#commGradActive)" : "url(#commGradNormal)"} />
+            ))}
+          </Bar>
+        </BarChart>
+      </ResponsiveContainer>
       {filterMonth !== "all" && (
-        <p className="text-xs text-violet-500 -mt-1 text-center cursor-pointer" onClick={() => setFilterMonth("all")}>กดอีกครั้งเพื่อดูทุกเดือน</p>
+        <p className="text-xs text-violet-500 text-center mt-1">
+          กรองตาราง: {monthLabel(filterMonth)} — <button onClick={() => setFilterMonth("all")} className="underline hover:text-violet-700">ล้างตัวกรอง</button>
+        </p>
       )}
     </div>
   );
