@@ -103,7 +103,7 @@ export async function GET(req: NextRequest) {
   for (const c of courseStats) {
     for (const [month, count] of Object.entries(c.byMonth)) {
       const monthRevenue = count * c.price;
-      const monthCommission = c.byMonthCommission[month] ?? 0;
+      const monthCommission = monthRevenue * c.commissionRate / 100;
       if (!monthlyMap[month]) monthlyMap[month] = { revenue: 0, commission: 0 };
       monthlyMap[month].revenue += monthRevenue;
       monthlyMap[month].commission += monthCommission;
