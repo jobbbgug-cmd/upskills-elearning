@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState, useMemo } from "react";
-import { TrendingUp, Users, Clock, BookOpen, ChevronUp, ChevronDown, Minus, ChevronRight, CheckCircle } from "lucide-react";
+import { TrendingUp, Users, Clock, BookOpen, ChevronUp, ChevronDown, Minus, ChevronRight, CheckCircle, Eye, X } from "lucide-react";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell,
 } from "recharts";
@@ -32,6 +32,16 @@ interface TeacherGroup {
 
 interface MonthlyData { month: string; revenue: number; }
 
+interface PayoutRecord {
+  _id: string;
+  netPayout: number;
+  status: string;
+  paidAt: string | null;
+  periodLabel: string;
+  slipUrl: string;
+  note: string;
+}
+
 interface RevenueData {
   role: "admin" | "teacher";
   courseStats: CourseStat[];
@@ -45,6 +55,7 @@ interface RevenueData {
   commissionRate: number;
   outstanding: number;
   paidNetPayout: number;
+  payoutHistory: PayoutRecord[];
 }
 
 const fmt = (n: number) => n.toLocaleString("th-TH", { maximumFractionDigits: 2 });
@@ -73,7 +84,9 @@ function CourseTable({ courses, showInstructor = false }: {
   const totalGrossRevenue = courses.reduce((s, c) => s + c.revenue, 0);
   const totalCommission = courses.reduce((s, c) => s + c.commissionAmount, 0);
   const totalNet = totalGrossRevenue - totalCommission;
-  const colSpanCount = showInstructor ? 8 : 7;
+  const totalPendingCount = courses.reduce((s, c) => s + c.pendingBookings, 0);
+  const totalPendingRevenue = courses.reduce((s, c) => s + c.pendingRevenue, 0);
+  const colSpanCount = showInstructor ? 9 : 8;
 
   function toggle(col: typeof sortKey) {
     if (sortKey === col) setSortDir((d) => d === "desc" ? "asc" : "desc");
@@ -94,9 +107,10 @@ function CourseTable({ courses, showInstructor = false }: {
             <th className="text-right px-3 py-3 font-medium cursor-pointer hover:text-indigo-600 select-none" onClick={() => toggle("revenue")}>
               <span className="inline-flex items-center gap-1">ราคา/รวม <SortIcon active={sortKey === "revenue"} dir={sortDir} /></span>
             </th>
-            <th className="text-right px-3 py-3 font-medium text-amber-600">รอชำระ</th>
             <th className="text-right px-3 py-3 font-medium text-red-500">ค่าคอมมิชชั่น</th>
             <th className="text-right px-4 py-3 font-medium text-green-600">รายได้รวม</th>
+            <th className="text-right px-3 py-3 font-medium text-amber-600">รอชำระ</th>
+            <th className="text-right px-3 py-3 font-medium text-blue-600">ชำระแล้ว</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-50">
@@ -115,15 +129,16 @@ function CourseTable({ courses, showInstructor = false }: {
                   <span className="inline-flex items-center justify-center min-w-[28px] bg-indigo-50 text-indigo-700 text-xs font-semibold rounded-full px-2 py-0.5">{c.confirmedBookings}</span>
                 </td>
                 <td className="px-3 py-3.5 text-right text-gray-700">฿{fmt(c.revenue)}</td>
-                <td className="px-3 py-3.5 text-right">
-                  {c.pendingBookings > 0
-                    ? <span className="inline-flex items-center justify-center min-w-[28px] bg-amber-50 text-amber-700 text-xs font-semibold rounded-full px-2 py-0.5">{c.pendingBookings}</span>
-                    : <span className="text-gray-300">—</span>}
-                </td>
                 <td className="px-3 py-3.5 text-right text-red-500">
                   {c.commissionRate > 0 ? `- ฿${fmt(c.commissionAmount)}` : <span className="text-gray-300">—</span>}
                 </td>
                 <td className="px-4 py-3.5 text-right font-semibold text-green-600">฿{fmt(courseNet)}</td>
+                <td className="px-3 py-3.5 text-right">
+                  <span className={`inline-flex items-center justify-center min-w-[28px] text-xs font-semibold rounded-full px-2 py-0.5 ${c.pendingBookings > 0 ? "bg-amber-50 text-amber-700" : "bg-gray-50 text-gray-400"}`}>
+                    {c.pendingBookings}
+                  </span>
+                </td>
+                <td className="px-3 py-3.5 text-right font-semibold text-blue-600">฿{fmt(c.revenue)}</td>
               </tr>
             );
           })}
@@ -133,11 +148,16 @@ function CourseTable({ courses, showInstructor = false }: {
             <tr>
               <td colSpan={showInstructor ? 4 : 3} className="px-4 py-3 text-gray-600">รวม</td>
               <td className="px-3 py-3 text-right text-gray-800">฿{fmt(totalGrossRevenue)}</td>
-              <td className="px-3 py-3" />
               <td className="px-3 py-3 text-right text-red-500">
                 {totalCommission > 0 ? `- ฿${fmt(totalCommission)}` : "—"}
               </td>
               <td className="px-4 py-3 text-right text-green-600">฿{fmt(totalNet)}</td>
+              <td className="px-3 py-3 text-right">
+                <span className={`inline-flex items-center justify-center min-w-[28px] text-xs font-semibold rounded-full px-2 py-0.5 ${totalPendingCount > 0 ? "bg-amber-50 text-amber-700" : "bg-gray-50 text-gray-400"}`}>
+                  {totalPendingCount}
+                </span>
+              </td>
+              <td className="px-3 py-3 text-right text-blue-600">฿{fmt(totalGrossRevenue)}</td>
             </tr>
           </tfoot>
         )}
@@ -448,7 +468,78 @@ function AdminView({ data }: { data: RevenueData }) {
           )}
         </div>
       </div>
+
+      {/* Payout history */}
+      {data.payoutHistory.length > 0 && (
+        <PayoutHistorySection payouts={data.payoutHistory} />
+      )}
     </div>
+  );
+}
+
+function PayoutHistorySection({ payouts }: { payouts: PayoutRecord[] }) {
+  const [slipUrl, setSlipUrl] = useState<string | null>(null);
+  return (
+    <>
+      <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+        <div className="px-5 py-4 border-b border-gray-100">
+          <h2 className="text-sm font-semibold text-gray-800">ประวัติการชำระเงินจาก Super Admin</h2>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead className="bg-gray-50 text-xs text-gray-500">
+              <tr>
+                <th className="text-left px-4 py-3 font-medium">งวด</th>
+                <th className="text-right px-3 py-3 font-medium">ยอดชำระ</th>
+                <th className="text-center px-3 py-3 font-medium">สถานะ</th>
+                <th className="text-left px-3 py-3 font-medium">วันที่ชำระ</th>
+                <th className="text-center px-4 py-3 font-medium">สลิป</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-50">
+              {payouts.map((p) => (
+                <tr key={p._id} className="hover:bg-gray-50 transition-colors">
+                  <td className="px-4 py-3.5 text-gray-700">{p.periodLabel || "—"}</td>
+                  <td className="px-3 py-3.5 text-right font-semibold text-green-600">฿{fmt(p.netPayout)}</td>
+                  <td className="px-3 py-3.5 text-center">
+                    {p.status === "paid"
+                      ? <span className="inline-flex items-center gap-1 text-xs bg-green-50 text-green-700 px-2 py-0.5 rounded-full font-medium">ชำระแล้ว</span>
+                      : <span className="inline-flex items-center gap-1 text-xs bg-amber-50 text-amber-700 px-2 py-0.5 rounded-full font-medium">รอชำระ</span>}
+                  </td>
+                  <td className="px-3 py-3.5 text-gray-500 text-xs">
+                    {p.paidAt ? new Date(p.paidAt).toLocaleDateString("th-TH", { day: "numeric", month: "short", year: "numeric" }) : "—"}
+                  </td>
+                  <td className="px-4 py-3.5 text-center">
+                    {p.slipUrl
+                      ? <button onClick={() => setSlipUrl(p.slipUrl)} className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition-colors">
+                          <Eye className="w-3.5 h-3.5" />
+                        </button>
+                      : <span className="text-gray-300 text-xs">—</span>}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Slip modal */}
+      {slipUrl && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={() => setSlipUrl(null)}>
+          <div className="relative bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+              <p className="text-sm font-semibold text-gray-800">สลิปการโอนเงิน</p>
+              <button onClick={() => setSlipUrl(null)} className="text-gray-400 hover:text-gray-600 transition-colors">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-4 flex items-center justify-center bg-gray-50 min-h-[300px]">
+              <img src={slipUrl} alt="slip" className="max-w-full max-h-[60vh] object-contain rounded-xl" />
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
 

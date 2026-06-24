@@ -8,6 +8,7 @@ export interface ITrialRequest {
   contactChannel: string; // "line" | "email" | "phone"
   contactValue: string;
   status: "pending" | "contacted" | "approved" | "rejected";
+  institutionCreated: boolean;
   createdAt: Date;
 }
 

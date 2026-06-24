@@ -151,6 +151,22 @@ export async function GET(req: NextRequest) {
     }
   }
 
+  // Fetch payout records (with slip) for this institution's view
+  let payoutHistory: { _id: string; netPayout: number; status: string; paidAt: string | null; periodLabel: string; slipUrl: string; note: string }[] = [];
+  if (instIdsWithRevenue.length > 0) {
+    const objIds = instIdsWithRevenue.map((id) => new mongoose.Types.ObjectId(id));
+    const payouts = await Payout.find({ institutionId: { $in: objIds } }).sort({ createdAt: -1 }).lean();
+    payoutHistory = payouts.map((p) => ({
+      _id: (p._id as { toString(): string }).toString(),
+      netPayout: p.netPayout,
+      status: p.status,
+      paidAt: p.paidAt ? new Date(p.paidAt).toISOString() : null,
+      periodLabel: p.periodLabel,
+      slipUrl: p.slipUrl ?? "",
+      note: p.note ?? "",
+    }));
+  }
+
   let byTeacher = null;
   if (auth.role === "admin" || auth.role === "super_admin") {
     const teacherMap = new Map<string, { instructor: string; instructorId: string; courses: typeof courseStats }>();
@@ -182,5 +198,6 @@ export async function GET(req: NextRequest) {
     commissionRate,
     outstanding,
     paidNetPayout,
+    payoutHistory,
   });
 }
