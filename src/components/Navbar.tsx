@@ -100,6 +100,10 @@ export default function Navbar() {
                     จัดการหลังบ้าน
                   </Link>
                 )}
+                <Link href="/dashboard/profile" className="flex items-center gap-1.5 text-sm px-3 py-2 rounded-lg text-gray-500 hover:text-violet-600 hover:bg-violet-50 transition-colors">
+                  <User className="w-4 h-4" />
+                  โปรไฟล์
+                </Link>
                 <button onClick={logout} className="flex items-center gap-1.5 text-sm px-3 py-2 rounded-lg text-gray-500 hover:text-red-600 hover:bg-red-50 transition-colors">
                   <LogOut className="w-4 h-4" />
                   ออกจากระบบ

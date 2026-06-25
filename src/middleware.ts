@@ -21,7 +21,7 @@ export async function middleware(req: NextRequest) {
 
     if (user && (pathname === "/login" || pathname === "/register")) {
       if (user.role === "super_admin") return NextResponse.redirect(new URL("/super-admin", req.url));
-      const dest = user.role === "admin" || user.role === "teacher" ? "/admin" : "/dashboard";
+      const dest = user.role === "admin" || user.role === "teacher" || user.role === "owner" ? "/admin" : "/dashboard";
       return NextResponse.redirect(new URL(dest, req.url));
     }
 
@@ -36,13 +36,13 @@ export async function middleware(req: NextRequest) {
 
     if (
       pathname.startsWith("/admin") &&
-      (!user || (user.role !== "admin" && user.role !== "teacher"))
+      (!user || (user.role !== "admin" && user.role !== "teacher" && user.role !== "owner"))
     ) {
       return NextResponse.redirect(new URL("/login", req.url));
     }
 
     // Teacher: allowed pages
-    const teacherAdminAllowed = ["/admin/schedule", "/admin/revenue", "/admin/courses", "/admin/content"];
+    const teacherAdminAllowed = ["/admin/schedule", "/admin/revenue", "/admin/courses", "/admin/content", "/admin/profile"];
     if (pathname.startsWith("/admin") && user?.role === "teacher") {
       if (!teacherAdminAllowed.some((p) => pathname.startsWith(p))) {
         return NextResponse.redirect(new URL("/admin/courses", req.url));
