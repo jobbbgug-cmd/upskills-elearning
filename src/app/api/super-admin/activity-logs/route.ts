@@ -60,7 +60,7 @@ export async function GET(req: NextRequest) {
   )];
   const instNameMap = new Map<string, string>();
   if (missingInstIds.length > 0) {
-    const insts = await Institution.find({ _id: { $in: missingInstIds } }).select("_id name").lean() as Array<{ _id: unknown; name: string }>;
+    const insts = await Institution.find({ _id: { $in: missingInstIds } }).select("_id name").lean() as unknown as Array<{ _id: unknown; name: string }>;
     insts.forEach((i) => instNameMap.set((i._id as { toString(): string }).toString(), i.name));
   }
 
