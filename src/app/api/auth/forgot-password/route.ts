@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
+import dns from "dns/promises";
 import { connectDB } from "@/lib/mongodb";
 import User from "@/models/User";
 import PasswordResetToken from "@/models/PasswordResetToken";
 import nodemailer from "nodemailer";
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL ?? "https://www.upskillsth.com";
+const BASE_URL = "https://www.upskillsth.com";
 const LOGO_URL = `${BASE_URL}/icon.png`;
 
 async function sendResetEmail(to: string, name: string, resetUrl: string) {
@@ -43,14 +44,28 @@ async function sendResetEmail(to: string, name: string, resetUrl: string) {
 
 export async function POST(req: NextRequest) {
   try {
-    const { email } = await req.json();
-    if (!email) return NextResponse.json({ error: "กรุณากรอกอีเมล" }, { status: 400 });
+    const { accountEmail, receiveEmail } = await req.json();
+    if (!accountEmail) return NextResponse.json({ error: "กรุณากรอกอีเมลที่ใช้เข้าสู่ระบบ" }, { status: 400 });
+    if (!receiveEmail) return NextResponse.json({ error: "กรุณากรอกอีเมลที่ต้องการรับลิงก์" }, { status: 400 });
+
+    // Validate receive email domain via MX record lookup
+    const receiveDomain = receiveEmail.toLowerCase().trim().split("@")[1];
+    if (!receiveDomain) {
+      return NextResponse.json({ error: "อีเมลนี้ไม่สามารถรับลิงก์รีเซ็ตรหัสผ่านได้", field: "receive" }, { status: 400 });
+    }
+    try {
+      const mx = await dns.resolveMx(receiveDomain);
+      if (!mx || mx.length === 0) throw new Error("no MX");
+    } catch {
+      return NextResponse.json({ error: "อีเมลนี้ไม่สามารถรับลิงก์รีเซ็ตรหัสผ่านได้", field: "receive" }, { status: 400 });
+    }
 
     await connectDB();
-    const user = await User.findOne({ email: email.toLowerCase().trim() });
+    const user = await User.findOne({ email: accountEmail.toLowerCase().trim() });
 
-    // Always return success to prevent email enumeration
-    if (!user) return NextResponse.json({ ok: true });
+    if (!user) {
+      return NextResponse.json({ error: "ไม่พบอีเมลนี้ในระบบ", field: "account" }, { status: 404 });
+    }
 
     // Invalidate old tokens
     await PasswordResetToken.deleteMany({ userId: user._id });
@@ -61,7 +76,7 @@ export async function POST(req: NextRequest) {
     await PasswordResetToken.create({ userId: user._id, token, expiresAt });
 
     const resetUrl = `${BASE_URL}/reset-password?token=${token}`;
-    await sendResetEmail(user.email, user.name, resetUrl);
+    await sendResetEmail(receiveEmail.toLowerCase().trim(), user.name, resetUrl);
 
     return NextResponse.json({ ok: true });
   } catch (err) {
