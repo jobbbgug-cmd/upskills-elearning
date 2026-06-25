@@ -17,7 +17,7 @@ interface UserProfile {
   email: string;
   role: string;
   profileImage?: string;
-  institutionId?: string;
+  institutionId?: { _id: string; name: string } | null;
   createdAt?: string;
 }
 
@@ -185,6 +185,16 @@ export default function ProfilePage() {
               <span className="text-sm text-gray-500">{ROLE_LABELS[user.role] ?? user.role}</span>
             </div>
           </div>
+
+          {/* Institution — shown for non-super_admin roles only */}
+          {user.role !== "super_admin" && user.institutionId?.name && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">สถาบัน</label>
+              <div className="border border-gray-100 rounded-xl px-4 py-2.5 bg-gray-50">
+                <span className="text-sm text-gray-500">{user.institutionId.name}</span>
+              </div>
+            </div>
+          )}
 
           {infoError && <p className="text-sm text-red-500 bg-red-50 px-4 py-2.5 rounded-xl">{infoError}</p>}
 

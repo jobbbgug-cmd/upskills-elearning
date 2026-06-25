@@ -22,6 +22,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [role, setRole]                       = useState<string>("");
   const [userName, setUserName]               = useState<string>("");
   const [userImage, setUserImage]             = useState<string>("");
+  const [institutionName, setInstitutionName] = useState<string>("");
   const [subscription, setSubscription]       = useState<Subscription | null>(null);
   const [sidebarOpen, setSidebarOpen]         = useState(false);
   const [userDropdown, setUserDropdown]       = useState(false);
@@ -52,6 +53,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         setRole(userRole);
         setUserName(data.user?.name ?? "");
         setUserImage(data.user?.profileImage ?? "");
+        setInstitutionName(data.user?.institutionId?.name ?? "");
 
         if (userRole === "owner") {
           const branchRes = await fetch("/api/owner/branches");
@@ -142,10 +144,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${userDropdown ? "rotate-180" : ""}`} />
       </button>
       {userDropdown && (
-        <div className="absolute right-0 top-full mt-2 w-44 bg-white rounded-xl shadow-lg border border-gray-100 py-1 z-50">
-          <div className="px-3 py-2 border-b border-gray-100 sm:hidden">
+        <div className="absolute right-0 top-full mt-2 w-52 bg-white rounded-xl shadow-lg border border-gray-100 py-1 z-50">
+          <div className="px-3 py-2 border-b border-gray-100">
             <div className="text-sm font-medium text-gray-800">{userName}</div>
             <div className="text-xs text-gray-400">{ROLE_LABELS[role] ?? role}</div>
+            {institutionName && (
+              <div className="text-xs text-indigo-500 mt-0.5 truncate">{institutionName}</div>
+            )}
           </div>
           <Link href="/admin/profile" onClick={() => setUserDropdown(false)}
             className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">

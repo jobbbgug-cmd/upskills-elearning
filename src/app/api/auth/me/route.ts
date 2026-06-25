@@ -8,7 +8,7 @@ export async function GET() {
   if (!auth) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   await connectDB();
-  const user = await User.findById(auth.userId).select("-password");
+  const user = await User.findById(auth.userId).select("-password").populate("institutionId", "name");
   if (!user) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   return NextResponse.json({ user });
