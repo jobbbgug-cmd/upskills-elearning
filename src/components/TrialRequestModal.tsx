@@ -41,6 +41,14 @@ export default function TrialRequestModal({ navbar, children }: { navbar?: boole
 
   const set = (key: keyof Form, val: string) => setForm((f) => ({ ...f, [key]: val }));
 
+  const track = (action: string, description: string, metadata?: Record<string, string>) => {
+    void fetch("/api/track", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action, description, metadata }),
+    });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -60,6 +68,12 @@ export default function TrialRequestModal({ navbar, children }: { navbar?: boole
         setError(d.error ?? "เกิดข้อผิดพลาด");
       } else {
         setDone(true);
+        track("trial_form_submit", `ส่งข้อมูลทดลองใช้งาน — ${form.institutionName}`, {
+          institutionName: form.institutionName,
+          fullName:        form.fullName,
+          institutionType: form.institutionType,
+          contactChannel:  form.contactChannel,
+        });
       }
     } catch {
       setError("เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง");
@@ -80,10 +94,10 @@ export default function TrialRequestModal({ navbar, children }: { navbar?: boole
   return (
     <>
       {children ? (
-        <span onClick={() => setOpen(true)} className="cursor-pointer">{children}</span>
+        <span onClick={() => { setOpen(true); track("trial_button_click", "กดปุ่มทดลองใช้งาน"); }} className="cursor-pointer">{children}</span>
       ) : (
         <button
-          onClick={() => setOpen(true)}
+          onClick={() => { setOpen(true); track("trial_button_click", "กดปุ่มทดลองใช้งาน"); }}
           className={navbar
             ? "text-sm font-light px-5 py-2 rounded-full bg-gradient-to-r from-blue-500 to-violet-500 text-white hover:from-blue-600 hover:to-violet-600 transition-all whitespace-nowrap shadow"
             : "bg-gradient-to-r from-blue-500 to-violet-500 text-white font-light px-8 py-3.5 rounded-full hover:from-blue-600 hover:to-violet-600 transition-all shadow-md whitespace-nowrap"

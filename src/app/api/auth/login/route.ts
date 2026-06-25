@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import { connectDB } from "@/lib/mongodb";
 import { signToken } from "@/lib/auth";
 import User from "@/models/User";
+import { logActivity, ACTION } from "@/lib/activityLog";
 
 export async function POST(req: NextRequest) {
   try {
@@ -47,6 +48,20 @@ export async function POST(req: NextRequest) {
       user: { _id: user._id, name: user.name, email: user.email, role: user.role, gradeLevel: user.gradeLevel },
     });
     res.cookies.set("token", token, { httpOnly: true, maxAge: 60 * 60 * 24 * 7, path: "/" });
+
+    if (["admin", "owner", "super_admin"].includes(user.role)) {
+      void logActivity({
+        userId:        user._id.toString(),
+        userName:      user.name,
+        userEmail:     user.email,
+        userRole:      user.role,
+        institutionId: user.institutionId?.toString(),
+        action:        ACTION.LOGIN,
+        description:   `เข้าสู่ระบบ`,
+        ipAddress:     req.headers.get("x-forwarded-for") ?? req.headers.get("x-real-ip") ?? undefined,
+      });
+    }
+
     return res;
   } catch (err) {
     console.error(err);

@@ -6,7 +6,7 @@ import {
   LayoutDashboard, Building2, LogOut, Menu, X, ShieldCheck, Receipt,
   UserCog, Users, Wallet, Images, Shield, Home,
   UserCheck, BookOpen, FileText, TrendingUp, ChevronDown, FlaskConical, Settings,
-  CalendarDays, GraduationCap,
+  CalendarDays, GraduationCap, ClipboardList,
 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 
@@ -109,6 +109,7 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
           {nav("/super-admin/finance", <Wallet className="w-4 h-4" />, "ข้อมูลทางการเงิน")}
           {nav("/super-admin/banners", <Images className="w-4 h-4" />, "จัดการแบนเนอร์")}
           {nav("/super-admin/roles", <Shield className="w-4 h-4" />, "จัดการ Role")}
+          {nav("/super-admin/logs", <ClipboardList className="w-4 h-4" />, "ประวัติการใช้งาน")}
           {nav("/super-admin/settings", <Settings className="w-4 h-4" />, "ตั้งค่าทั่วไป")}
         </nav>
 
