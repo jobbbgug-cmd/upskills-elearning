@@ -15,6 +15,13 @@ export interface IInstitutionDocument extends Document {
   commissionRate: number;
   parentId: mongoose.Types.ObjectId | null;
   createdAt: Date;
+  // Payment settings
+  promptpayNumber:   string;
+  bankName:          string;
+  bankAccountNumber: string;
+  bankAccountName:   string;
+  // Landing page config
+  landingConfig?:    Record<string, unknown>;
 }
 
 const InstitutionSchema = new Schema<IInstitutionDocument>(
@@ -30,8 +37,13 @@ const InstitutionSchema = new Schema<IInstitutionDocument>(
     plan: { type: String, enum: ["trial", "starter", "pro", "enterprise"], default: "trial" },
     planExpiresAt: { type: Date, default: null },
     isActive: { type: Boolean, default: true },
-    commissionRate: { type: Number, default: 0 },
-    parentId: { type: Schema.Types.ObjectId, ref: "Institution", default: null },
+    commissionRate:    { type: Number, default: 0 },
+    parentId:          { type: Schema.Types.ObjectId, ref: "Institution", default: null },
+    promptpayNumber:   { type: String, default: "" },
+    bankName:          { type: String, default: "" },
+    bankAccountNumber: { type: String, default: "" },
+    bankAccountName:   { type: String, default: "" },
+    landingConfig:     { type: Schema.Types.Mixed, default: null },
   },
   { timestamps: true }
 );

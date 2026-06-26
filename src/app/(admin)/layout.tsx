@@ -2,7 +2,8 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
-import { LayoutDashboard, ListChecks, Users, LogOut, Images, UserCog, UserCheck, BookOpen, TrendingUp, CalendarDays, GraduationCap, Menu, X, Wallet, AlertTriangle, Palette, Shield, ShieldCheck, User, ChevronDown, Home, Building2 } from "lucide-react";
+import { LayoutDashboard, ListChecks, Users, LogOut, Images, UserCog, UserCheck, BookOpen, TrendingUp, CalendarDays, GraduationCap, Menu, X, Wallet, AlertTriangle, Palette, Shield, ShieldCheck, User, ChevronDown, Home, Building2, School, ClipboardCheck, FileText, PenLine, Bell, BarChart2, Radio, Receipt, Globe, Monitor, Star, Tag, MessageSquare } from "lucide-react";
+import NotificationBell from "@/components/NotificationBell";
 import { PLAN_LABELS } from "@/lib/planLimits";
 
 interface Subscription {
@@ -201,6 +202,19 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
           {/* admin + super_admin only */}
           {isAdmin && navLink("/admin", <LayoutDashboard className="w-4 h-4" />, "ภาพรวม")}
+          {(isAdmin || role === "teacher") && navLink("/admin/students",    <School className="w-4 h-4" />,        "จัดการนักเรียน")}
+          {(isAdmin || role === "teacher") && navLink("/admin/attendance",  <ClipboardCheck className="w-4 h-4" />, "เช็คชื่อ")}
+          {(isAdmin || role === "teacher") && navLink("/admin/homework",    <FileText className="w-4 h-4" />,       "การบ้าน")}
+          {(isAdmin || role === "teacher") && navLink("/admin/quiz",            <PenLine className="w-4 h-4" />,  "ข้อสอบ")}
+          {(isAdmin || role === "teacher") && navLink("/admin/live",            <Radio className="w-4 h-4" />,    "Live Class")}
+          {(isAdmin || role === "teacher") && navLink("/admin/teacher-portal",  <Monitor className="w-4 h-4" />, "Teacher Portal")}
+          {isAdmin && navLink("/admin/analytics",    <BarChart2 className="w-4 h-4" />,  "Analytics")}
+          {isAdmin && navLink("/admin/notifications", <Bell className="w-4 h-4" />,      "แจ้งเตือน & ใบรับรอง")}
+          {isAdmin && navLink("/admin/billing",       <Receipt className="w-4 h-4" />,      "Billing & ใบเสร็จ")}
+          {isAdmin && navLink("/admin/landing",       <Globe className="w-4 h-4" />,        "Landing Page")}
+          {isAdmin && navLink("/admin/reviews",       <Star className="w-4 h-4" />,         "รีวิวคอร์ส")}
+          {isAdmin && navLink("/admin/coupons",       <Tag className="w-4 h-4" />,          "คูปองส่วนลด")}
+          {(isAdmin || role === "teacher") && navLink("/admin/forum", <MessageSquare className="w-4 h-4" />, "Forum")}
           {isAdmin && navLink("/admin/members", <UserCheck className="w-4 h-4" />,
             <span className="flex items-center justify-between w-full gap-2">
               อนุมัติสมาชิก
@@ -294,7 +308,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <Link href="/" className="lg:hidden">
             <Image src="/logo.png" alt="UPSkills" width={100} height={34} className="object-contain" />
           </Link>
-          <div className="ml-auto flex items-center gap-3">
+          <div className="ml-auto flex items-center gap-2">
             {/* Branch switcher — owner only */}
             {isOwner && branches.length > 0 && (
               <div className="flex items-center gap-2">
@@ -313,6 +327,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 </select>
               </div>
             )}
+            <NotificationBell />
             <UserMenu />
           </div>
         </div>

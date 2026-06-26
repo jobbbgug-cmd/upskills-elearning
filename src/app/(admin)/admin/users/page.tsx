@@ -1,7 +1,8 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
-import { Search, Shield, ShieldCheck, User, GraduationCap, Trash2, ChevronDown, Pencil, X, Eye, EyeOff, Copy, Check, Camera, UserPlus } from "lucide-react";
+import Link from "next/link";
+import { Search, Shield, ShieldCheck, User, GraduationCap, Trash2, ChevronDown, Pencil, X, Eye, EyeOff, Copy, Check, Camera, UserPlus, ExternalLink } from "lucide-react";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 
 interface UserItem {
@@ -346,6 +347,12 @@ export default function AdminUsersPage() {
                     </td>
                     <td className="px-5 py-4 text-right">
                       <div className="flex items-center justify-end gap-1">
+                        {u.role === "student" && (
+                          <Link href={`/admin/students/${u._id}`}
+                            className="p-1.5 text-gray-400 hover:text-violet-600 hover:bg-violet-50 rounded-lg transition-colors" title="ดูโปรไฟล์นักเรียน">
+                            <ExternalLink className="w-4 h-4" />
+                          </Link>
+                        )}
                         {u.role !== "owner" && (
                           <button onClick={() => openEdit(u)}
                             className="p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors" title="แก้ไข">

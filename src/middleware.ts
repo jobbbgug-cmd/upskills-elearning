@@ -42,7 +42,7 @@ export async function middleware(req: NextRequest) {
     }
 
     // Teacher: allowed pages
-    const teacherAdminAllowed = ["/admin/schedule", "/admin/revenue", "/admin/courses", "/admin/content", "/admin/profile"];
+    const teacherAdminAllowed = ["/admin/schedule", "/admin/revenue", "/admin/courses", "/admin/content", "/admin/profile", "/admin/students", "/admin/attendance", "/admin/homework", "/admin/quiz", "/admin/notifications", "/admin/live", "/admin/teacher-portal", "/admin/forum"];
     if (pathname.startsWith("/admin") && user?.role === "teacher") {
       if (!teacherAdminAllowed.some((p) => pathname.startsWith(p))) {
         return NextResponse.redirect(new URL("/admin/courses", req.url));

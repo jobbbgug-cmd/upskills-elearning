@@ -186,10 +186,10 @@ export default async function LearnPage({ params }: { params: Promise<{ courseId
       {/* ── คลิปประกอบการสอน ── */}
       <div id="clips" className="scroll-mt-20">
         {teachingClips.length > 0 && (
-          <VideoSection title="คลิปประกอบการสอน" clips={teachingClips} sectionId="teachingclips" />
+          <VideoSection title="คลิปประกอบการสอน" clips={teachingClips} sectionId="teachingclips" section="teachingClips" courseId={courseId} />
         )}
         {summaryClips.length > 0 && (
-          <VideoSection title="คลิปอักษรเรียนสรุป" clips={summaryClips} sectionId="summaryclips" />
+          <VideoSection title="คลิปอักษรเรียนสรุป" clips={summaryClips} sectionId="summaryclips" section="summaryClips" courseId={courseId} />
         )}
       </div>
 
