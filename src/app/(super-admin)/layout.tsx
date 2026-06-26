@@ -7,6 +7,7 @@ import {
   UserCog, Users, Wallet, Images, Shield, Home,
   UserCheck, BookOpen, FileText, TrendingUp, ChevronDown, FlaskConical, Settings,
   CalendarDays, GraduationCap, ClipboardList, BarChart2,
+  Radio, Star, MessageSquare, Tag,
 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 
@@ -95,6 +96,13 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
           <p className="px-3 pt-4 pb-1 text-xs font-semibold text-gray-400 uppercase tracking-wider">จัดการสมาชิก</p>
           {nav("/super-admin/members", <UserCheck className="w-4 h-4" />, "อนุมัติสมาชิก")}
           {nav("/super-admin/users", <UserCog className="w-4 h-4" />, "จัดการผู้ใช้งาน")}
+
+          {/* Phase 5-6 features */}
+          <p className="px-3 pt-4 pb-1 text-xs font-semibold text-gray-400 uppercase tracking-wider">ฟีเจอร์แพลตฟอร์ม</p>
+          {nav("/super-admin/live",    <Radio className="w-4 h-4" />,        "Live Sessions")}
+          {nav("/super-admin/reviews", <Star className="w-4 h-4" />,         "รีวิวคอร์ส")}
+          {nav("/super-admin/forum",   <MessageSquare className="w-4 h-4" />, "Forum")}
+          {nav("/super-admin/coupons", <Tag className="w-4 h-4" />,          "คูปองส่วนลด")}
 
           {/* Content management */}
           <p className="px-3 pt-4 pb-1 text-xs font-semibold text-gray-400 uppercase tracking-wider">จัดการเนื้อหา</p>
