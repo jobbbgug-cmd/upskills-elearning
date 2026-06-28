@@ -157,7 +157,7 @@ export default function BrandingPage() {
               <Upload className="w-4 h-4" />
               {uploading === "logo" ? "กำลังอัปโหลด..." : "อัปโหลดโลโก้"}
             </button>
-            <p className="text-xs text-gray-400 mt-1.5">PNG, SVG แนะนำพื้นหลังโปร่งใส · แสดงใน Navbar</p>
+            <p className="text-xs text-gray-400 mt-1.5">PNG, SVG · แนะนำขนาด <span className="font-medium text-gray-500">1000 × 242 px</span> · พื้นหลังโปร่งใส · แสดงใน Navbar</p>
           </div>
         </div>
         {form.logoUrl && (
