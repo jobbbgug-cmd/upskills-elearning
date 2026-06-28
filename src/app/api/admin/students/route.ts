@@ -3,6 +3,7 @@ import { connectDB } from "@/lib/mongodb";
 import { getAuthUser } from "@/lib/auth";
 import { resolveInstitutionId, tenantFilter } from "@/lib/tenant";
 import User from "@/models/User";
+import bcrypt from "bcryptjs";
 
 export async function GET(req: NextRequest) {
   try {
@@ -36,6 +37,44 @@ export async function GET(req: NextRequest) {
       .lean();
 
     return NextResponse.json(JSON.parse(JSON.stringify(students)));
+  } catch {
+    return NextResponse.json({ error: "เกิดข้อผิดพลาด" }, { status: 500 });
+  }
+}
+
+export async function POST(req: NextRequest) {
+  try {
+    const auth = await getAuthUser();
+    if (!auth || (auth.role !== "admin" && auth.role !== "super_admin"))
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    await connectDB();
+    const institutionId = await resolveInstitutionId(req, auth.institutionId);
+    const { name, email, password, phone, gradeLevel, groups, nickname } = await req.json();
+
+    if (!name?.trim()) return NextResponse.json({ error: "กรุณาระบุชื่อ" }, { status: 400 });
+    if (!email?.trim()) return NextResponse.json({ error: "กรุณาระบุอีเมล" }, { status: 400 });
+    if (!password)      return NextResponse.json({ error: "กรุณาระบุรหัสผ่าน" }, { status: 400 });
+
+    const exists = await User.findOne({ email: email.trim().toLowerCase() });
+    if (exists) return NextResponse.json({ error: "อีเมลนี้ถูกใช้งานแล้ว" }, { status: 409 });
+
+    const hashed = await bcrypt.hash(password, 10);
+    const student = await User.create({
+      institutionId: institutionId ?? undefined,
+      name: name.trim(),
+      email: email.trim().toLowerCase(),
+      password: hashed,
+      role: "student",
+      status: "approved",
+      phone: phone?.trim() ?? "",
+      gradeLevel: gradeLevel ?? "",
+      nickname: nickname?.trim() ?? "",
+      groups: Array.isArray(groups) ? groups.filter(Boolean) : [],
+    });
+
+    const { password: _p, ...safe } = student.toObject();
+    return NextResponse.json(JSON.parse(JSON.stringify(safe)), { status: 201 });
   } catch {
     return NextResponse.json({ error: "เกิดข้อผิดพลาด" }, { status: 500 });
   }

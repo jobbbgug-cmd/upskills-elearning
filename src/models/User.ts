@@ -26,6 +26,11 @@ export interface IUserDocument extends Document {
   phone?: string;
   birthDate?: Date;
   address?: string;
+  houseNumber?: string;
+  building?: string;
+  subDistrict?: string;
+  amphoe?: string;
+  province?: string;
   parentName?: string;
   parentPhone?: string;
   parentRelation?: string;
@@ -64,6 +69,11 @@ const UserSchema = new Schema<IUserDocument>(
     phone:          { type: String, default: "" },
     birthDate:      { type: Date,   default: null },
     address:        { type: String, default: "" },
+    houseNumber:    { type: String, default: "" },
+    building:       { type: String, default: "" },
+    subDistrict:    { type: String, default: "" },
+    amphoe:         { type: String, default: "" },
+    province:       { type: String, default: "" },
     parentName:     { type: String, default: "" },
     parentPhone:    { type: String, default: "" },
     parentRelation: { type: String, default: "" },

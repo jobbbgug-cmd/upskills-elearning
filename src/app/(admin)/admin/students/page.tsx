@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Search, User, GraduationCap, Tag, ChevronRight, Filter } from "lucide-react";
+import { Search, User, GraduationCap, Tag, ChevronRight, Filter, Plus, X, Eye, EyeOff } from "lucide-react";
 import LoadingSpinner from "@/components/LoadingSpinner";
 
 interface Student {
@@ -30,6 +30,11 @@ export default function AdminStudentsPage() {
   const [search,   setSearch]   = useState("");
   const [grade,    setGrade]    = useState("");
   const [group,    setGroup]    = useState("");
+  const [showAdd,  setShowAdd]  = useState(false);
+  const [showPw,   setShowPw]   = useState(false);
+  const [saving,   setSaving]   = useState(false);
+  const [addError, setAddError] = useState("");
+  const [form, setForm] = useState({ name: "", email: "", password: "", phone: "", nickname: "", gradeLevel: "", groups: "" });
   const [allGroups, setAllGroups] = useState<string[]>([]);
 
   const GRADE_LEVELS = [
@@ -56,8 +61,36 @@ export default function AdminStudentsPage() {
 
   useEffect(() => { load(); }, [search, grade, group]);
 
+  const handleAddStudent = async () => {
+    setAddError("");
+    if (!form.name.trim() || !form.email.trim() || !form.password) {
+      setAddError("กรุณากรอกชื่อ อีเมล และรหัสผ่าน");
+      return;
+    }
+    setSaving(true);
+    try {
+      const res = await fetch("/api/admin/students", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...form,
+          groups: form.groups ? form.groups.split(",").map((g) => g.trim()).filter(Boolean) : [],
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) { setAddError(data.error ?? "เกิดข้อผิดพลาด"); return; }
+      setShowAdd(false);
+      setForm({ name: "", email: "", password: "", phone: "", nickname: "", gradeLevel: "", groups: "" });
+      load();
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const initials = (name: string) =>
     name.split(" ").map((w) => w[0]).join("").toUpperCase().slice(0, 2);
+
+  const inputCls = "w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white";
 
   return (
     <div>
@@ -66,14 +99,101 @@ export default function AdminStudentsPage() {
           <h1 className="text-2xl font-bold text-gray-900">จัดการนักเรียน</h1>
           <p className="text-gray-500 text-sm mt-1">ดูและแก้ไขข้อมูลนักเรียนทั้งหมด</p>
         </div>
-        <div className="flex items-center gap-2 bg-indigo-50 border border-indigo-100 rounded-2xl px-4 py-3">
-          <GraduationCap className="w-5 h-5 text-indigo-600" />
-          <div>
-            <div className="text-xl font-bold text-indigo-700">{students.length}</div>
-            <div className="text-xs text-indigo-400">นักเรียนทั้งหมด</div>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => { setShowAdd(true); setAddError(""); }}
+            className="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 text-white text-sm font-semibold rounded-xl hover:bg-indigo-700 transition-colors"
+          >
+            <Plus className="w-4 h-4" /> เพิ่มนักเรียน
+          </button>
+          <div className="flex items-center gap-2 bg-indigo-50 border border-indigo-100 rounded-2xl px-4 py-3">
+            <GraduationCap className="w-5 h-5 text-indigo-600" />
+            <div>
+              <div className="text-xl font-bold text-indigo-700">{students.length}</div>
+              <div className="text-xs text-indigo-400">นักเรียนทั้งหมด</div>
+            </div>
           </div>
         </div>
       </div>
+
+      {/* Add Student Modal */}
+      {showAdd && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.4)" }}>
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg max-h-[90vh] flex flex-col">
+            <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100 shrink-0">
+              <h2 className="text-lg font-bold text-gray-900">เพิ่มนักเรียนใหม่</h2>
+              <button onClick={() => setShowAdd(false)} className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="px-6 py-5 space-y-4 overflow-y-auto">
+              {addError && (
+                <div className="bg-red-50 border border-red-100 text-red-600 text-sm rounded-xl px-4 py-3">{addError}</div>
+              )}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="col-span-2">
+                  <label className="block text-xs font-medium text-gray-600 mb-1.5">ชื่อ-นามสกุล <span className="text-red-500">*</span></label>
+                  <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })}
+                    className={inputCls} placeholder="สมชาย ใจดี" />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1.5">ชื่อเล่น</label>
+                  <input value={form.nickname} onChange={(e) => setForm({ ...form, nickname: e.target.value })}
+                    className={inputCls} placeholder="เช่น มาย" />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1.5">เบอร์โทร</label>
+                  <input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                    className={inputCls} placeholder="08x-xxx-xxxx" />
+                </div>
+                <div className="col-span-2">
+                  <label className="block text-xs font-medium text-gray-600 mb-1.5">อีเมล <span className="text-red-500">*</span></label>
+                  <input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })}
+                    className={inputCls} placeholder="student@email.com" />
+                </div>
+                <div className="col-span-2">
+                  <label className="block text-xs font-medium text-gray-600 mb-1.5">รหัสผ่าน <span className="text-red-500">*</span></label>
+                  <div className="relative">
+                    <input type={showPw ? "text" : "password"} value={form.password}
+                      onChange={(e) => setForm({ ...form, password: e.target.value })}
+                      className={`${inputCls} pr-10`} placeholder="อย่างน้อย 6 ตัวอักษร" />
+                    <button type="button" onClick={() => setShowPw((v) => !v)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                      {showPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1.5">ระดับชั้น</label>
+                  <select value={form.gradeLevel} onChange={(e) => setForm({ ...form, gradeLevel: e.target.value })} className={inputCls}>
+                    <option value="">— ไม่ระบุ —</option>
+                    {["ป.1","ป.2","ป.3","ป.4","ป.5","ป.6","ม.1","ม.2","ม.3","ม.4","ม.5","ม.6","ปวช.","ปวส.","มหาวิทยาลัย","ทั่วไป"]
+                      .map((g) => <option key={g} value={g}>{g}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1.5">กลุ่ม</label>
+                  <input value={form.groups} onChange={(e) => setForm({ ...form, groups: e.target.value })}
+                    className={inputCls} placeholder="กลุ่ม A, กลุ่ม B" />
+                  <p className="text-xs text-gray-400 mt-1">คั่นด้วยคอมม่า</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-3 px-6 py-5 border-t border-gray-100 shrink-0">
+              <button onClick={handleAddStudent} disabled={saving}
+                className="flex-1 py-2.5 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 disabled:opacity-50 transition-colors text-sm">
+                {saving ? "กำลังเพิ่ม..." : "เพิ่มนักเรียน"}
+              </button>
+              <button onClick={() => setShowAdd(false)}
+                className="flex-1 py-2.5 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 transition-colors text-sm">
+                ยกเลิก
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Filters */}
       <div className="flex flex-wrap gap-3 mb-5">

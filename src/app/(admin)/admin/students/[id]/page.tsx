@@ -9,6 +9,7 @@ import {
   Video, PenLine, ClipboardCheck, BookOpen,
 } from "lucide-react";
 import LoadingSpinner from "@/components/LoadingSpinner";
+import { THAI_PROVINCES, THAI_DISTRICTS, THAI_SUB_DISTRICTS } from "@/lib/thaiAddress";
 
 interface StudentDoc {
   _id: string;
@@ -26,6 +27,11 @@ interface Student {
   phone?: string;
   birthDate?: string;
   address?: string;
+  houseNumber?: string;
+  building?: string;
+  subDistrict?: string;
+  amphoe?: string;
+  province?: string;
   gradeLevel?: string;
   profileImage?: string;
   parentName?: string;
@@ -75,7 +81,8 @@ export default function StudentDetailPage({ params }: { params: Promise<{ id: st
   // form fields
   const [form, setForm] = useState({
     name: "", nickname: "", phone: "", birthDate: "",
-    address: "", gradeLevel: "", profileImage: "",
+    houseNumber: "", building: "", subDistrict: "", amphoe: "", province: "",
+    gradeLevel: "", profileImage: "",
     parentName: "", parentPhone: "", parentRelation: "",
     notes: "", status: "approved" as Student["status"],
   });
@@ -83,6 +90,10 @@ export default function StudentDetailPage({ params }: { params: Promise<{ id: st
   const [newGroup,  setNewGroup]  = useState("");
   const [progress,  setProgress]  = useState<CourseProgress[] | null>(null);
   const [loadingProg, setLoadingProg] = useState(false);
+
+  // province combobox
+  const [provinceInput, setProvinceInput] = useState("");
+  const [showProvDrop,  setShowProvDrop]  = useState(false);
 
   // document upload state
   const [docName,  setDocName]  = useState("");
@@ -103,7 +114,11 @@ export default function StudentDetailPage({ params }: { params: Promise<{ id: st
           nickname:       d.nickname       ?? "",
           phone:          d.phone          ?? "",
           birthDate:      d.birthDate ? d.birthDate.slice(0, 10) : "",
-          address:        d.address        ?? "",
+          houseNumber:    d.houseNumber    ?? "",
+          building:       d.building       ?? "",
+          subDistrict:    d.subDistrict    ?? "",
+          amphoe:         d.amphoe         ?? "",
+          province:       d.province       ?? "",
           gradeLevel:     d.gradeLevel     ?? "",
           profileImage:   d.profileImage   ?? "",
           parentName:     d.parentName     ?? "",
@@ -113,6 +128,7 @@ export default function StudentDetailPage({ params }: { params: Promise<{ id: st
           status:         d.status         ?? "approved",
         });
         setGroups(d.groups ?? []);
+        setProvinceInput(d.province ?? "");
       })
       .finally(() => setLoading(false));
   }, [id]);
@@ -330,10 +346,117 @@ export default function StudentDetailPage({ params }: { params: Promise<{ id: st
               </select>
             </div>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5"><MapPin className="inline w-3.5 h-3.5 mr-1" />ที่อยู่</label>
-            <textarea value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })}
-              rows={3} className={`${inputCls} resize-none`} placeholder="ที่อยู่ของนักเรียน" />
+          <div className="border border-gray-100 rounded-2xl p-4 space-y-3 bg-gray-50/50">
+            <p className="text-sm font-medium text-gray-700 flex items-center gap-1.5">
+              <MapPin className="w-3.5 h-3.5 text-indigo-500" /> ที่อยู่
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs text-gray-500 mb-1">เลขที่</label>
+                <input
+                  value={form.houseNumber}
+                  onChange={(e) => setForm({ ...form, houseNumber: e.target.value })}
+                  className={inputCls}
+                  placeholder="เช่น 123 หมู่ 4"
+                />
+              </div>
+              <div>
+                <label className="block text-xs text-gray-500 mb-1">อาคาร / หมู่บ้าน</label>
+                <input
+                  value={form.building}
+                  onChange={(e) => setForm({ ...form, building: e.target.value })}
+                  className={inputCls}
+                  placeholder="เช่น คอนโดA, หมู่บ้านB"
+                />
+              </div>
+              <div className="relative">
+                <label className="block text-xs text-gray-500 mb-1">จังหวัด</label>
+                <input
+                  value={provinceInput}
+                  onChange={(e) => {
+                    setProvinceInput(e.target.value);
+                    setForm((f) => ({ ...f, province: "", amphoe: "", subDistrict: "" }));
+                    setShowProvDrop(true);
+                  }}
+                  onFocus={() => setShowProvDrop(true)}
+                  onBlur={() => setTimeout(() => setShowProvDrop(false), 150)}
+                  className={inputCls}
+                  placeholder="พิมพ์ค้นหาจังหวัด..."
+                  autoComplete="off"
+                />
+                {showProvDrop && (
+                  <div className="absolute z-50 w-full mt-1 max-h-52 overflow-y-auto bg-white border border-gray-200 rounded-xl shadow-lg">
+                    {THAI_PROVINCES.filter((p) =>
+                      !provinceInput || provinceInput === form.province || p.includes(provinceInput)
+                    ).map((p) => (
+                      <button
+                        key={p}
+                        type="button"
+                        onMouseDown={() => {
+                          setForm((f) => ({ ...f, province: p, amphoe: "", subDistrict: "" }));
+                          setProvinceInput(p);
+                          setShowProvDrop(false);
+                        }}
+                        className={`w-full text-left px-4 py-2 text-sm transition-colors ${
+                          form.province === p
+                            ? "bg-indigo-50 text-indigo-700 font-medium"
+                            : "hover:bg-gray-50 text-gray-700"
+                        }`}
+                      >
+                        {p}
+                      </button>
+                    ))}
+                    {THAI_PROVINCES.filter((p) => p.includes(provinceInput)).length === 0 && provinceInput && provinceInput !== form.province && (
+                      <p className="px-4 py-2 text-sm text-gray-400">ไม่พบจังหวัด</p>
+                    )}
+                  </div>
+                )}
+              </div>
+              <div>
+                <label className="block text-xs text-gray-500 mb-1">อำเภอ / เขต</label>
+                {form.province && (THAI_DISTRICTS[form.province]?.length ?? 0) > 0 ? (
+                  <select
+                    value={form.amphoe}
+                    onChange={(e) => setForm((f) => ({ ...f, amphoe: e.target.value, subDistrict: "" }))}
+                    className={inputCls}
+                  >
+                    <option value="">— เลือกอำเภอ —</option>
+                    {THAI_DISTRICTS[form.province].map((d) => (
+                      <option key={d} value={d}>{d}</option>
+                    ))}
+                  </select>
+                ) : (
+                  <input
+                    value={form.amphoe}
+                    onChange={(e) => setForm({ ...form, amphoe: e.target.value })}
+                    className={inputCls}
+                    placeholder="อำเภอ / เขต"
+                  />
+                )}
+              </div>
+              <div className="sm:col-span-2">
+                <label className="block text-xs text-gray-500 mb-1">ตำบล / แขวง</label>
+                {form.amphoe && (THAI_SUB_DISTRICTS[`${form.province}|${form.amphoe}`]?.length ?? 0) > 0 ? (
+                  <select
+                    value={form.subDistrict}
+                    onChange={(e) => setForm((f) => ({ ...f, subDistrict: e.target.value }))}
+                    className={inputCls}
+                  >
+                    <option value="">— เลือกตำบล —</option>
+                    {THAI_SUB_DISTRICTS[`${form.province}|${form.amphoe}`].map((t) => (
+                      <option key={t} value={t}>{t}</option>
+                    ))}
+                  </select>
+                ) : (
+                  <input
+                    value={form.subDistrict}
+                    onChange={(e) => setForm((f) => ({ ...f, subDistrict: e.target.value }))}
+                    className={inputCls}
+                    placeholder="ตำบล / แขวง"
+                  />
+                )}
+              </div>
+            </div>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">อีเมล</label>

@@ -37,6 +37,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     const body = await req.json();
 
     const allowed = ["name","nickname","phone","birthDate","address","gradeLevel",
+                     "houseNumber","building","subDistrict","amphoe","province",
                      "parentName","parentPhone","parentRelation","groups","notes","profileImage","status"];
     const update: Record<string, unknown> = {};
     for (const key of allowed) {
