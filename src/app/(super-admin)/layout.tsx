@@ -21,6 +21,7 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
   const [open, setOpen]               = useState(false);
   const [userDropdown, setUserDropdown] = useState(false);
   const [user, setUser]               = useState<UserInfo | null>(null);
+  const [isNavigating, setIsNavigating] = useState(false);
   const pathname = usePathname();
   const router   = useRouter();
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -33,6 +34,10 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
     const saved = sessionStorage.getItem("superadmin-nav-scroll");
     if (saved) nav.scrollTop = Number(saved);
   }, []);
+
+  useEffect(() => {
+    setIsNavigating(false);
+  }, [pathname]);
 
   useEffect(() => {
     fetch("/api/auth/me")
@@ -60,7 +65,7 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
     return (
       <Link
         href={href}
-        onClick={close}
+        onClick={() => { close(); if (!active) setIsNavigating(true); }}
         className={`flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg transition-colors ${
           active
             ? "bg-violet-50 text-violet-700 font-medium"
@@ -154,6 +159,12 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
       </aside>
 
       <main className="flex-1 overflow-auto min-w-0">
+        {isNavigating && (
+          <div className="fixed top-0 left-0 right-0 z-[9999] h-[2px] overflow-hidden">
+            <div className="h-full w-[30%] bg-gradient-to-r from-violet-400 to-violet-600"
+              style={{ animation: "nav-progress 0.8s ease infinite" }} />
+          </div>
+        )}
         {/* Topbar */}
         <div className="sticky top-0 z-30 bg-white border-b border-gray-200 px-4 py-2 flex items-center gap-3">
           <button

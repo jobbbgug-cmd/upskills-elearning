@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState, useMemo } from "react";
 import { ChevronLeft, ChevronRight, Clock, Video, User, X, Building2 } from "lucide-react";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 interface Institution { _id: string; name: string; }
 interface Student { _id: string; name: string; email: string; gradeLevel?: string; }
@@ -133,7 +134,7 @@ export default function SuperAdminStudentSchedulePage() {
           <p className="text-xs text-gray-400 mt-1">มีนักเรียนทั้งหมด {students.length} คน</p>
         </div>
       ) : loadingEvents ? (
-        <div className="text-center py-20 text-gray-400 text-sm">กำลังโหลด...</div>
+        <LoadingSpinner />
       ) : (
         <>
           <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">

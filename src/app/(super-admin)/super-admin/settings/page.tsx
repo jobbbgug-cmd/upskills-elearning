@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { Bell, Save, Mail, CheckCircle2, Send, AlertCircle } from "lucide-react";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 const inputClass =
   "w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-violet-500";
@@ -71,7 +72,7 @@ export default function SettingsPage() {
         </ul>
 
         {loading ? (
-          <div className="text-sm text-gray-400">กำลังโหลด...</div>
+          <LoadingSpinner />
         ) : (
           <form onSubmit={handleSave} className="space-y-4">
             <div>

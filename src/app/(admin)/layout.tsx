@@ -28,11 +28,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [subscription, setSubscription]       = useState<Subscription | null>(null);
   const [sidebarOpen, setSidebarOpen]         = useState(false);
   const [userDropdown, setUserDropdown]       = useState(false);
+  const [isNavigating, setIsNavigating]       = useState(false);
   const [branches, setBranches]               = useState<BranchOption[]>([]);
   const [activeBranchId, setActiveBranchId]   = useState<string>("");
   const [switchingBranch, setSwitchingBranch] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const navRef      = useRef<HTMLElement>(null);
+  const pathname    = usePathname();
 
   useEffect(() => {
     const nav = navRef.current;
@@ -40,6 +42,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     const saved = sessionStorage.getItem("admin-nav-scroll");
     if (saved) nav.scrollTop = Number(saved);
   }, []);
+
+  useEffect(() => {
+    setIsNavigating(false);
+  }, [pathname]);
 
   useEffect(() => {
     const load = async () => {
@@ -84,7 +90,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     return () => clearInterval(interval);
   }, []);
 
-  const pathname = usePathname();
   const isOwner = role === "owner";
   const isAdmin = role === "admin" || role === "super_admin" || isOwner;
   const close = () => setSidebarOpen(false);
@@ -184,7 +189,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const navLink = (href: string, icon: React.ReactNode, label: React.ReactNode) => {
     const active = pathname === href || (href !== "/admin" && pathname.startsWith(href));
     return (
-      <Link href={href} onClick={close}
+      <Link href={href} onClick={() => { close(); if (!active) setIsNavigating(true); }}
         className={`flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg transition-colors ${
           active
             ? "bg-indigo-50 text-indigo-700 font-medium"
@@ -318,6 +323,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
       {/* Main content */}
       <main className="flex-1 overflow-auto min-w-0">
+        {isNavigating && (
+          <div className="fixed top-0 left-0 right-0 z-[9999] h-[2px] overflow-hidden">
+            <div className="h-full w-[30%] bg-gradient-to-r from-indigo-400 to-indigo-600"
+              style={{ animation: "nav-progress 0.8s ease infinite" }} />
+          </div>
+        )}
         {/* Topbar */}
         <div className="sticky top-0 z-30 bg-white border-b border-gray-200 px-4 py-2 flex items-center gap-3">
           <button

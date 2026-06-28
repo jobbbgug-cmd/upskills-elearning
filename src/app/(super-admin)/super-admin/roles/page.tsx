@@ -6,6 +6,7 @@ import {
   Copy, Check, Pencil, Trash2, ChevronUp, ChevronsUpDown, Building2,
 } from "lucide-react";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 type Role = "student" | "teacher" | "admin" | "super_admin";
 type SortKey = "name" | "email" | "role" | "status" | "createdAt";
@@ -290,7 +291,7 @@ export default function SuperAdminRolesPage() {
           </thead>
           <tbody className="divide-y divide-gray-50">
             {loading ? (
-              <tr><td colSpan={8} className="text-center py-16 text-gray-400">กำลังโหลด...</td></tr>
+              <tr><td colSpan={8} className="text-center py-16 text-gray-400"><LoadingSpinner /></td></tr>
             ) : filtered.length === 0 ? (
               <tr><td colSpan={8} className="text-center py-16 text-gray-400">ไม่พบผู้ใช้</td></tr>
             ) : filtered.map((u) => {

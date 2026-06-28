@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { Plus, Video, Clock, Trash2, Radio, CheckCircle2, Link2, X, CalendarDays, ChevronRight } from "lucide-react";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 interface LiveSess {
   _id: string; title: string; description: string; meetLink: string;
@@ -102,7 +103,7 @@ export default function AdminLivePage() {
       </div>
 
       {loading ? (
-        <div className="text-center py-20 text-gray-400">กำลังโหลด...</div>
+        <LoadingSpinner />
       ) : sessions.length === 0 ? (
         <div className="text-center py-20 text-gray-300">
           <Video className="w-12 h-12 mx-auto mb-3 opacity-40" />

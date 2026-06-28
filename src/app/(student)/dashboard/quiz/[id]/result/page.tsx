@@ -3,6 +3,7 @@ import { useState, useEffect, use } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { CheckCircle2, XCircle, Clock, Trophy, ChevronDown, ChevronUp, RotateCcw } from "lucide-react";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 interface ResultQuestion {
   _id: string; question: string; type: string;
@@ -44,7 +45,7 @@ export default function QuizResultPage({ params }: { params: Promise<{ id: strin
     return s;
   });
 
-  if (!result) return <div className="flex items-center justify-center min-h-screen text-gray-400">กำลังโหลด...</div>;
+  if (!result) return <LoadingSpinner fullPage />;
 
   const passed = result.percentage >= 60;
   const correct = result.questions.filter((q) => q.earned > 0).length;

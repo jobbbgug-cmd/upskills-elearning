@@ -2,6 +2,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { TrendingUp, Users, Clock, BookOpen, ChevronUp, ChevronDown, Minus, ChevronRight, Building2, CheckCircle, Eye, X } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 interface CourseStat {
   _id: string;
@@ -378,7 +379,7 @@ export default function SuperAdminRevenuePage() {
     });
   }
 
-  if (loading) return <div className="flex items-center justify-center h-64 text-gray-400 text-sm">กำลังโหลด...</div>;
+  if (loading) return <LoadingSpinner />;
   if (!data) return null;
 
   return (

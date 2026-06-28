@@ -3,6 +3,7 @@ import { useState, useEffect, use } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowLeft, User, CheckCircle2, Clock, Star, MessageSquare, ExternalLink } from "lucide-react";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 interface Submission {
   _id: string;
@@ -56,7 +57,7 @@ export default function HomeworkDetailPage({ params }: { params: Promise<{ id: s
     }
   };
 
-  if (!hw) return <div className="text-center py-20 text-gray-400">กำลังโหลด...</div>;
+  if (!hw) return <LoadingSpinner />;
 
   const graded    = subs.filter((s) => s.status === "graded").length;
   const submitted = subs.length;

@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { Search, Shield, ShieldCheck, User, GraduationCap, Trash2, ChevronDown, Pencil, X, Eye, EyeOff, Copy, Check, Camera, Building2, UserPlus } from "lucide-react";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 interface UserItem {
   _id: string;
@@ -306,7 +307,7 @@ export default function SuperAdminUsersPage() {
       {/* Table */}
       <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
         {loading ? (
-          <div className="text-center py-16 text-gray-400">กำลังโหลด...</div>
+          <LoadingSpinner />
         ) : filtered.length === 0 ? (
           <div className="text-center py-16 text-gray-400">ไม่พบผู้ใช้</div>
         ) : (

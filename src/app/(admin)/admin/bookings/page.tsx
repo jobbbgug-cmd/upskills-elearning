@@ -4,6 +4,7 @@ import Image from "next/image";
 import { CheckCircle, XCircle, Clock3, Search, Building2, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 interface BookingRow {
   _id: string;
@@ -159,7 +160,7 @@ export default function AdminBookingsPage() {
       </div>
 
       {loading ? (
-        <div className="text-center py-16 text-gray-400">กำลังโหลด...</div>
+        <LoadingSpinner />
       ) : filtered.length === 0 ? (
         <div className="text-center py-16 text-gray-400 bg-white rounded-2xl border border-gray-100">
           {tab === "pending" ? "✅ ไม่มีรายการรอตรวจสอบ" : "ไม่พบรายการ"}

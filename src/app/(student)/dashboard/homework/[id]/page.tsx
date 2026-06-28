@@ -2,6 +2,7 @@
 import { useState, useEffect, use } from "react";
 import Link from "next/link";
 import { ArrowLeft, Upload, X, Loader2, CheckCircle2, Clock, ExternalLink, Send } from "lucide-react";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 interface Homework {
   _id: string; title: string; description: string; dueDate: string; maxScore: number;
@@ -65,7 +66,7 @@ export default function StudentHomeworkDetailPage({ params }: { params: Promise<
     setSubmitting(false);
   };
 
-  if (!hw) return <div className="text-center py-20 text-gray-400">กำลังโหลด...</div>;
+  if (!hw) return <LoadingSpinner />;
 
   const due    = new Date(hw.dueDate);
   const isPast = due < new Date();

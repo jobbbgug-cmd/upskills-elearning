@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
 import { Star } from "lucide-react";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 interface Course { _id: string; title: string; }
 interface MyReview { courseId: string; rating: number; comment: string; isApproved: boolean; }
@@ -61,7 +62,7 @@ export default function StudentReviewsPage() {
     setSaving(null);
   };
 
-  if (loading) return <div className="text-center py-20 text-gray-400">กำลังโหลด...</div>;
+  if (loading) return <LoadingSpinner />;
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-8">

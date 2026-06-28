@@ -4,6 +4,7 @@ import Image from "next/image";
 import { Plus, Trash2, Upload, GripVertical, Eye, EyeOff, Monitor, Smartphone, Pencil, Building2 } from "lucide-react";
 import { compressImage } from "@/lib/compressImage";
 import { IBanner } from "@/types";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 const DEFAULT_COLORS = ["#1e1b4b", "#0f172a", "#1e3a5f", "#14532d", "#450a0a", "#1c1917"];
 
@@ -355,7 +356,7 @@ export default function AdminBannersPage() {
 
       {/* Banner list */}
       {loading ? (
-        <div className="text-center py-12 text-gray-400">กำลังโหลด...</div>
+        <LoadingSpinner />
       ) : banners.length === 0 ? (
         <div className="text-center py-20 bg-white rounded-2xl border border-gray-100">
           <p className="text-gray-400">ยังไม่มีแบนเนอร์ กด "+ เพิ่มแบนเนอร์" เพื่อเริ่มต้น</p>

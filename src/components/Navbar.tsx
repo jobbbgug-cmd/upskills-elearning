@@ -2,17 +2,24 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { Menu, X, User, LogOut, LayoutDashboard, CalendarDays, ShieldCheck, BookOpen, ClipboardCheck, PenLine, Award, Radio, Receipt, MessageSquare, Star } from "lucide-react";
 import NotificationBell from "@/components/NotificationBell";
 import { IUser, IBranding } from "@/types";
 import TrialRequestModal from "@/components/TrialRequestModal";
 
 export default function Navbar() {
-  const [user, setUser]         = useState<IUser | null>(null);
-  const [branding, setBranding] = useState<IBranding | null>(null);
-  const [menuOpen, setMenuOpen] = useState(false);
-  const router = useRouter();
+  const [user, setUser]               = useState<IUser | null>(null);
+  const [branding, setBranding]       = useState<IBranding | null>(null);
+  const [menuOpen, setMenuOpen]       = useState(false);
+  const [isNavigating, setIsNavigating] = useState(false);
+  const router   = useRouter();
+  const pathname = usePathname();
+
+  useEffect(() => {
+    setIsNavigating(false);
+    setMenuOpen(false);
+  }, [pathname]);
 
   useEffect(() => {
     fetch("/api/auth/me")
@@ -36,7 +43,18 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="sticky top-0 z-50 bg-white border-b border-gray-200">
+    <nav
+      className="sticky top-0 z-50 bg-white border-b border-gray-200"
+      onClick={(e) => {
+        if ((e.target as HTMLElement).closest("a[href]")) setIsNavigating(true);
+      }}
+    >
+      {isNavigating && (
+        <div className="absolute top-0 left-0 right-0 z-[9999] h-[2px] overflow-hidden">
+          <div className="h-full w-[30%] bg-gradient-to-r from-indigo-400 to-indigo-600"
+            style={{ animation: "nav-progress 0.8s ease infinite" }} />
+        </div>
+      )}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
 

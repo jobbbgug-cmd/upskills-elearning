@@ -5,6 +5,7 @@ import {
   TrendingUp, CheckCircle2, Clock3, Building2,
   Plus, Check, X, ChevronDown, Receipt, Upload, ImageIcon,
 } from "lucide-react";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 interface CommissionRow {
   _id: string;
@@ -165,7 +166,7 @@ export default function PayoutsPage() {
     load();
   };
 
-  if (loading) return <div className="text-gray-400 text-sm p-8">กำลังโหลด...</div>;
+  if (loading) return <LoadingSpinner />;
 
   const pendingPayouts = payouts.filter((p) => p.status === "pending");
   const paidPayouts = payouts.filter((p) => p.status === "paid");

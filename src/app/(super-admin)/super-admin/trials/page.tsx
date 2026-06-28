@@ -5,6 +5,7 @@ import {
   Plus, Eye, EyeOff, X, ClipboardCopy, Copy, Building2,
 } from "lucide-react";
 import { PLAN_LABELS } from "@/lib/planLimits";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 /* ── helpers ── */
 function buildWelcomeText(admin: CreatedAdmin): string {
@@ -235,7 +236,7 @@ export default function TrialsPage() {
       </div>
 
       {loading ? (
-        <div className="bg-white rounded-2xl border border-gray-100 p-12 text-center text-gray-400">กำลังโหลด...</div>
+        <LoadingSpinner />
       ) : filtered.length === 0 ? (
         <div className="bg-white rounded-2xl border border-gray-100 p-12 text-center text-gray-400">ไม่มีรายการ</div>
       ) : (

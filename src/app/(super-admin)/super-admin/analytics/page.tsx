@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { TrendingUp, Users, AlertTriangle, Trophy, Calendar } from "lucide-react";
 import { PLAN_LABELS } from "@/lib/planLimits";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 interface MonthPoint { label: string; revenue: number; count: number; }
 interface UserPoint  { label: string; count: number; }
@@ -50,7 +51,7 @@ export default function SuperAdminAnalyticsPage() {
     fetch("/api/super-admin/analytics").then((r) => r.json()).then((d) => setData(d)).finally(() => setLoading(false));
   }, []);
 
-  if (loading) return <div className="text-center py-20 text-gray-400">กำลังโหลด...</div>;
+  if (loading) return <LoadingSpinner />;
   if (!data)   return null;
 
   const maxRevenue = Math.max(...data.revenueChart.map((m) => m.revenue), 1);

@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Upload, Save, QrCode, Building2, CreditCard, Phone, ChevronDown } from "lucide-react";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 const THAI_BANKS = [
   { value: "", label: "-- เลือกธนาคาร --", color: "" },
@@ -101,7 +102,7 @@ export default function FinancePage() {
     }
   };
 
-  if (!authorized || loading) return <div className="text-center py-20 text-gray-400">กำลังโหลด...</div>;
+  if (!authorized || loading) return <LoadingSpinner />;
 
   return (
     <div className="max-w-2xl">

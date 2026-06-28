@@ -9,3 +9,8 @@ body {
   color: #171717;
   font-family: var(--font-kanit), Arial, sans-serif;
 }
+
+@keyframes nav-progress {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(350%); }
+}

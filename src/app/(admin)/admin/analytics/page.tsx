@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { BookOpen, Video, FileText, PenLine, ClipboardCheck, Users, TrendingUp, ChevronDown, ChevronUp } from "lucide-react";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 interface CourseData {
   _id: string; title: string; isActive: boolean;
@@ -50,7 +51,7 @@ export default function AnalyticsPage() {
     return s;
   });
 
-  if (loading) return <div className="text-center py-20 text-gray-400">กำลังโหลด...</div>;
+  if (loading) return <LoadingSpinner />;
   if (!data) return null;
 
   const sorted = [...data.courses].sort((a, b) => (b[sortBy] ?? 0) - (a[sortBy] ?? 0));

@@ -2,6 +2,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { Clock, CheckCircle, XCircle, Copy, Check, User, GraduationCap, Shield, ShieldCheck, RefreshCw } from "lucide-react";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 interface PendingUser {
   _id: string;
@@ -179,7 +180,7 @@ export default function AdminMembersPage() {
       {/* Pending tab */}
       {tab === "pending" && (
         loading ? (
-          <div className="text-center py-16 text-gray-400">กำลังโหลด...</div>
+          <LoadingSpinner />
         ) : users.length === 0 ? (
           <div className="text-center py-20 bg-white rounded-2xl border border-gray-100">
             <CheckCircle className="w-12 h-12 text-green-400 mx-auto mb-3" />

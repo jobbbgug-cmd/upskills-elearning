@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { Save, Plus, Trash2, Eye, ToggleLeft, ToggleRight, GripVertical } from "lucide-react";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 interface Feature  { icon: string; title: string; desc: string; }
 interface Testimonial { name: string; text: string; role?: string; }
@@ -63,7 +64,7 @@ export default function LandingBuilderPage() {
   const removeTestimonial = (i: number) => setConfig({ ...config, testimonials: { ...config.testimonials, items: config.testimonials.items.filter((_, idx) => idx !== i) } });
   const updateTestimonial = (i: number, field: keyof Testimonial, val: string) => setConfig({ ...config, testimonials: { ...config.testimonials, items: config.testimonials.items.map((t, idx) => idx === i ? { ...t, [field]: val } : t) } });
 
-  if (loading) return <div className="text-center py-20 text-gray-400">กำลังโหลด...</div>;
+  if (loading) return <LoadingSpinner />;
 
   const SECTIONS: { key: Section; label: string }[] = [
     { key: "hero",         label: "Hero Banner" },

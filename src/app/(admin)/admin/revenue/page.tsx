@@ -4,6 +4,7 @@ import { TrendingUp, Users, Clock, BookOpen, ChevronUp, ChevronDown, Minus, Chev
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell,
 } from "recharts";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 interface CourseStat {
   _id: string;
@@ -554,7 +555,7 @@ export default function RevenuePage() {
       .then((d) => { setData(d); setLoading(false); });
   }, []);
 
-  if (loading) return <div className="flex items-center justify-center h-64 text-gray-400 text-sm">กำลังโหลด...</div>;
+  if (loading) return <LoadingSpinner />;
   if (!data) return null;
 
   return data.role === "admin" ? <AdminView data={data} /> : <TeacherView data={data} />;

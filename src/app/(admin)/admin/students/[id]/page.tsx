@@ -8,6 +8,7 @@ import {
   FileText, Tag, Save, Trash2, Upload, ExternalLink, Plus, X, TrendingUp,
   Video, PenLine, ClipboardCheck, BookOpen,
 } from "lucide-react";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 interface StudentDoc {
   _id: string;
@@ -190,7 +191,7 @@ export default function StudentDetailPage({ params }: { params: Promise<{ id: st
     }
   };
 
-  if (loading) return <div className="text-center py-20 text-gray-400">กำลังโหลด...</div>;
+  if (loading) return <LoadingSpinner />;
   if (!student) return <div className="text-center py-20 text-gray-400">ไม่พบนักเรียน</div>;
 
   const initials = student.name.split(" ").map((w) => w[0]).join("").toUpperCase().slice(0, 2);
@@ -475,7 +476,7 @@ export default function StudentDetailPage({ params }: { params: Promise<{ id: st
       {tab === "progress" && (
         <div className="space-y-4">
           {loadingProg ? (
-            <div className="text-center py-16 text-gray-400">กำลังโหลด...</div>
+            <LoadingSpinner />
           ) : !progress || progress.length === 0 ? (
             <div className="text-center py-16 text-gray-300 bg-white rounded-2xl border border-gray-100">
               <BookOpen className="w-10 h-10 mx-auto mb-2 opacity-40" />

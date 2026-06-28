@@ -3,6 +3,7 @@ import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import { ChevronLeft, ChevronRight, Clock, Video, User, X, BookOpen } from "lucide-react";
 import MeetButton from "@/components/MeetButton";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 interface SessionEvent {
   bookingId: string; courseId: string; courseTitle: string; coverImage: string;
@@ -94,7 +95,7 @@ export default function StudentSchedulePage() {
   const selectedEvents = selectedDate ? (byDate.get(selectedDate) ?? []) : [];
   const selectedStudent = students.find(s => s._id === selectedStudentId);
 
-  if (loadingInit) return <div className="text-center py-20 text-gray-400 text-sm">กำลังโหลด...</div>;
+  if (loadingInit) return <LoadingSpinner />;
 
   return (
     <div className="space-y-5">
@@ -127,7 +128,7 @@ export default function StudentSchedulePage() {
           <p className="text-xs text-gray-400 mt-1">มีนักเรียนทั้งหมด {students.length} คน</p>
         </div>
       ) : loadingEvents ? (
-        <div className="text-center py-20 text-gray-400 text-sm">กำลังโหลด...</div>
+        <LoadingSpinner />
       ) : (
         <>
           {/* Calendar */}

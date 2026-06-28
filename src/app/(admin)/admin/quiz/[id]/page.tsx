@@ -2,6 +2,7 @@
 import { useState, useEffect, use } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, Trash2, Save, ArrowLeft, CheckCircle2, XCircle, Medal, Clock } from "lucide-react";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 interface QuizOption { text: string; isCorrect: boolean; }
 interface QuizQuestion {
@@ -113,7 +114,7 @@ export default function AdminQuizDetailPage({ params }: { params: Promise<{ id: 
 
   const inputCls = "w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white";
 
-  if (!quiz) return <div className="text-center py-20 text-gray-400">กำลังโหลด...</div>;
+  if (!quiz) return <LoadingSpinner />;
 
   return (
     <div>

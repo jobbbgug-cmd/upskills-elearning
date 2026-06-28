@@ -3,6 +3,7 @@ import { useEffect, useState, useRef } from "react";
 import Image from "next/image";
 import { Palette, Upload, Check, Globe } from "lucide-react";
 import { compressImage } from "@/lib/compressImage";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 interface BrandingForm {
   name: string;
@@ -70,7 +71,7 @@ export default function BrandingPage() {
     if (res.ok) { setSaved(true); setTimeout(() => setSaved(false), 3000); }
   };
 
-  if (loading) return <div className="text-gray-400 text-sm p-8">กำลังโหลด...</div>;
+  if (loading) return <LoadingSpinner />;
 
   return (
     <div className="max-w-2xl space-y-6">

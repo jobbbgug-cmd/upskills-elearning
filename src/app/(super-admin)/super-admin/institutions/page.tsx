@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Users, BookOpen, TrendingUp, Edit3, Plus, X, Eye, EyeOff, RefreshCw, CheckCircle2, Copy, ClipboardCopy, Trash2 } from "lucide-react";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import { PLAN_LABELS, PLAN_LIMITS } from "@/lib/planLimits";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 function buildWelcomeText(admin: CreatedAdmin): string {
   const roleLabel = admin.role === "owner" ? "บัญชีเจ้าของสถาบัน (Owner)" : "บัญชีผู้ดูแลระบบ (Admin)";
@@ -168,7 +169,7 @@ export default function InstitutionsPage() {
     setInstitutions((prev) => prev.filter((i) => i._id !== id));
   };
 
-  if (loading) return <div className="text-gray-400 text-sm p-8">กำลังโหลด...</div>;
+  if (loading) return <LoadingSpinner />;
 
   return (
     <div className="space-y-6">

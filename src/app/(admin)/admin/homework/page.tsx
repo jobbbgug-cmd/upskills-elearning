@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Plus, BookOpen, ChevronRight, Trash2, Clock, CheckCircle2, X, Upload, Loader2 } from "lucide-react";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 interface Course { _id: string; title: string; }
 interface Homework {
@@ -94,7 +95,7 @@ export default function AdminHomeworkPage() {
       </div>
 
       {loading ? (
-        <div className="text-center py-20 text-gray-400">กำลังโหลด...</div>
+        <LoadingSpinner />
       ) : homeworks.length === 0 ? (
         <div className="text-center py-20 text-gray-300">
           <BookOpen className="w-12 h-12 mx-auto mb-3 opacity-40" />

@@ -2,6 +2,7 @@
 import { useState, useEffect, useCallback, use } from "react";
 import Link from "next/link";
 import { MessageSquare, ThumbsUp, CheckCircle2, Pin, ArrowLeft, Send } from "lucide-react";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 interface Author { name: string; profileImage?: string; role?: string; }
 interface Post {
@@ -86,7 +87,7 @@ export default function ForumPostPage({ params }: { params: Promise<{ id: string
     if (r.ok) { const d = await r.json(); setPost((prev) => prev ? { ...prev, isResolved: d.isResolved } : prev); }
   };
 
-  if (loading) return <div className="text-center py-20 text-gray-400">กำลังโหลด...</div>;
+  if (loading) return <LoadingSpinner />;
   if (!post)   return <div className="text-center py-20 text-gray-400">ไม่พบกระทู้</div>;
 
   const hasUpvoted = post.upvotes.includes(me);

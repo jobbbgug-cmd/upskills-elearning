@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { Upload, Save, QrCode, Building2, CreditCard, Phone, ChevronDown } from "lucide-react";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 const THAI_BANKS = [
   { value: "", label: "-- เลือกธนาคาร --", color: "" },
@@ -160,7 +161,7 @@ export default function SuperAdminFinancePage() {
           <p>กรุณาเลือกสถาบันเพื่อดูข้อมูลทางการเงิน</p>
         </div>
       ) : loading ? (
-        <div className="text-center py-20 text-gray-400">กำลังโหลด...</div>
+        <LoadingSpinner />
       ) : (
         <form onSubmit={handleSave} className="space-y-6">
           {/* QR Code */}

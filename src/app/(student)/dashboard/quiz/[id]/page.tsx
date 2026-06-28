@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef, use } from "react";
 import { useRouter } from "next/navigation";
 import { Clock, ChevronLeft, ChevronRight, Send, AlertTriangle } from "lucide-react";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 interface QuizOption { text: string; }
 interface QuizQuestion {
@@ -102,7 +103,7 @@ export default function TakeQuizPage({ params }: { params: Promise<{ id: string 
     return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
   };
 
-  if (phase === "loading") return <div className="flex items-center justify-center min-h-screen text-gray-400">กำลังโหลดข้อสอบ...</div>;
+  if (phase === "loading") return <LoadingSpinner fullPage />;
   if (phase === "error")   return (
     <div className="flex flex-col items-center justify-center min-h-screen gap-4 text-center px-4">
       <AlertTriangle className="w-12 h-12 text-red-400" />

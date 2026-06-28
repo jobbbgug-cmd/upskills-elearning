@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { BookOpen, Users, TrendingUp, FileText, ChevronRight, CheckCircle2 } from "lucide-react";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 interface CourseStats { _id: string; title: string; price: number; isActive: boolean; enrolled: number; }
 interface HwSub {
@@ -25,7 +26,7 @@ export default function TeacherPortalPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  if (loading) return <div className="text-center py-20 text-gray-400">กำลังโหลด...</div>;
+  if (loading) return <LoadingSpinner />;
   if (!data)   return null;
 
   return (

@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Plus, FileText, ChevronRight, Trash2, Clock, Users, ToggleLeft, ToggleRight, X } from "lucide-react";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 interface Course { _id: string; title: string; }
 interface Quiz {
@@ -91,7 +92,7 @@ export default function AdminQuizPage() {
       </div>
 
       {loading ? (
-        <div className="text-center py-20 text-gray-400">กำลังโหลด...</div>
+        <LoadingSpinner />
       ) : quizzes.length === 0 ? (
         <div className="text-center py-20 text-gray-300">
           <FileText className="w-12 h-12 mx-auto mb-3 opacity-40" />

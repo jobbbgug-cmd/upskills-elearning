@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { Tag, Building2, Copy, Check } from "lucide-react";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 interface Coupon {
   _id: string;
@@ -98,7 +99,7 @@ export default function SuperAdminCouponsPage() {
       </div>
 
       {loading ? (
-        <div className="text-center py-20 text-gray-400">กำลังโหลด...</div>
+        <LoadingSpinner />
       ) : filtered.length === 0 ? (
         <div className="bg-white rounded-2xl border border-gray-100 p-16 text-center">
           <Tag className="w-10 h-10 text-gray-200 mx-auto mb-3" />

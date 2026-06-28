@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
 import { MessageSquare, Pin, CheckCircle2, Trash2, ThumbsUp, Building2 } from "lucide-react";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 interface Post {
   _id: string;
@@ -75,7 +76,7 @@ export default function SuperAdminForumPage() {
       </div>
 
       {loading ? (
-        <div className="text-center py-20 text-gray-400">กำลังโหลด...</div>
+        <LoadingSpinner />
       ) : filtered.length === 0 ? (
         <div className="bg-white rounded-2xl border border-gray-100 p-16 text-center">
           <MessageSquare className="w-10 h-10 text-gray-200 mx-auto mb-3" />

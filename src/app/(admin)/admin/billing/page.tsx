@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { Save, CreditCard, Receipt, Printer, CheckCircle2, Search } from "lucide-react";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 interface ReceiptRow {
   _id: string; receiptNumber: string; amount: number; issuedAt: string; note: string;
@@ -124,7 +125,7 @@ export default function BillingPage() {
 
       {/* Receipts list */}
       {tab === "receipts" && (
-        loading ? <div className="text-center py-20 text-gray-400">กำลังโหลด...</div>
+        loading ? <LoadingSpinner />
         : receipts.length === 0 ? (
           <div className="text-center py-20 text-gray-300"><Receipt className="w-12 h-12 mx-auto mb-3 opacity-40" /><p className="text-sm">ยังไม่มีใบเสร็จ</p></div>
         ) : (

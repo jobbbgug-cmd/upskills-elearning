@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
 import { Search, RefreshCw, LogIn, BookOpen, Users, Settings, Receipt, Building2, Shield, ChevronLeft, ChevronRight, MousePointerClick, Send } from "lucide-react";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 interface LogEntry {
   _id: string;
@@ -203,7 +204,7 @@ export default function ActivityLogsPage() {
       {/* Table */}
       <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
         {loading ? (
-          <div className="text-center py-16 text-gray-400">กำลังโหลด...</div>
+          <LoadingSpinner />
         ) : filtered.length === 0 ? (
           <div className="text-center py-16 text-gray-400">
             <Shield className="w-12 h-12 mx-auto mb-3 opacity-30" />

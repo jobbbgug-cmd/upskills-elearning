@@ -2,6 +2,7 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { MessageSquare, Pin, CheckCircle2, Trash2, ChevronRight, ThumbsUp } from "lucide-react";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 interface ForumPost {
   _id: string;
@@ -61,7 +62,7 @@ export default function AdminForumPage() {
       </div>
 
       {loading ? (
-        <div className="text-center py-20 text-gray-400">กำลังโหลด...</div>
+        <LoadingSpinner />
       ) : posts.length === 0 ? (
         <div className="bg-white rounded-2xl border border-gray-100 p-16 text-center">
           <MessageSquare className="w-10 h-10 text-gray-200 mx-auto mb-3" />

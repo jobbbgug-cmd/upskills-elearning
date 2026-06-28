@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Search, User, GraduationCap, Tag, ChevronRight, Filter } from "lucide-react";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 interface Student {
   _id: string;
@@ -114,7 +115,7 @@ export default function AdminStudentsPage() {
       {/* List */}
       <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
         {loading ? (
-          <div className="text-center py-16 text-gray-400">กำลังโหลด...</div>
+          <LoadingSpinner />
         ) : students.length === 0 ? (
           <div className="text-center py-16 text-gray-400">ไม่พบนักเรียน</div>
         ) : (

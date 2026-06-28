@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { Building2, ChevronDown, Search, FileText, RefreshCw } from "lucide-react";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 interface Content {
   _id: string;
@@ -92,7 +93,7 @@ export default function SuperAdminContentPage() {
       {/* Table */}
       <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
         {loading ? (
-          <div className="text-center py-16 text-gray-400">กำลังโหลด...</div>
+          <LoadingSpinner />
         ) : filtered.length === 0 ? (
           <div className="text-center py-16 text-gray-400">
             <FileText className="w-12 h-12 mx-auto mb-3 opacity-30" />

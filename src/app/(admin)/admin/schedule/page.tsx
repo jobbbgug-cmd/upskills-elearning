@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState, useMemo } from "react";
 import { ChevronLeft, ChevronRight, GraduationCap, Clock, Users, Video, X } from "lucide-react";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 interface TeachingSession {
   courseId: string; courseTitle: string; instructor: string; coverImage: string;
@@ -84,7 +85,7 @@ export default function TeacherSchedulePage() {
 
   const selectedEvents = selectedDate ? (byDate.get(selectedDate) ?? []) : [];
 
-  if (loading) return <div className="text-center py-20 text-gray-400 text-sm">กำลังโหลด...</div>;
+  if (loading) return <LoadingSpinner />;
 
   return (
     <div className="space-y-5">
