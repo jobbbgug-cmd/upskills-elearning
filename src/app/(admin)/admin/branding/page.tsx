@@ -142,11 +142,11 @@ export default function BrandingPage() {
           <Upload className="w-4 h-4 text-indigo-500" /> โลโก้
         </h2>
         <div className="flex items-center gap-4">
-          <div className="w-32 h-14 rounded-xl border border-gray-200 bg-gray-50 flex items-center justify-center overflow-hidden">
+          <div className="w-32 h-14 rounded-xl border border-gray-200 bg-gray-50 flex items-center justify-center overflow-hidden px-2">
             {form.logoUrl ? (
               <Image src={form.logoUrl} alt="logo" width={120} height={48} className="object-contain w-full h-full" />
             ) : (
-              <span className="text-xs text-gray-400">ยังไม่มีโลโก้</span>
+              <span className="text-xs text-gray-500 font-medium text-center leading-tight">{form.name || "ยังไม่มีโลโก้"}</span>
             )}
           </div>
           <div className="flex-1">
@@ -224,17 +224,55 @@ export default function BrandingPage() {
       </div>
 
       {/* Preview */}
-      <div className="bg-gray-900 rounded-2xl p-5">
-        <p className="text-xs text-gray-400 mb-3">Preview — Navbar</p>
-        <div className="flex items-center gap-3">
-          {form.logoUrl ? (
-            <Image src={form.logoUrl} alt="preview" width={100} height={34} className="object-contain brightness-0 invert h-8 w-auto" />
+      <div className="rounded-2xl overflow-hidden border border-gray-200">
+        <div className="bg-gray-800 px-4 py-2 flex items-center gap-2">
+          <div className="flex gap-1.5">
+            <div className="w-3 h-3 rounded-full bg-red-500/70" />
+            <div className="w-3 h-3 rounded-full bg-yellow-500/70" />
+            <div className="w-3 h-3 rounded-full bg-green-500/70" />
+          </div>
+          <div className="flex-1 mx-3 bg-gray-700 rounded-md px-3 py-1 text-xs text-gray-400">
+            www.upskillsth.com
+          </div>
+          <p className="text-xs text-gray-500">Preview</p>
+        </div>
+
+        {/* Navbar mock */}
+        <div className="bg-white border-b border-gray-200 px-6 py-3 flex items-center gap-4">
+          <div className="flex items-center gap-3 min-w-0">
+            {form.logoUrl ? (
+              <Image src={form.logoUrl} alt="preview" width={120} height={40} className="object-contain h-9 w-auto max-w-[140px] shrink-0" />
+            ) : (
+              <div className="min-w-0">
+                <p className="font-bold text-sm leading-tight truncate" style={{ color: form.primaryColor }}>
+                  {form.name || "ชื่อสถาบัน"}
+                </p>
+                {form.tagline && (
+                  <p className="text-xs text-gray-400 truncate">{form.tagline}</p>
+                )}
+              </div>
+            )}
+          </div>
+          <div className="ml-auto flex items-center gap-3">
+            <div className="hidden sm:flex gap-4">
+              <span className="text-xs text-gray-400">คอร์สทั้งหมด</span>
+            </div>
+            <div className="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0"
+              style={{ backgroundColor: form.primaryColor }}>A</div>
+          </div>
+        </div>
+
+        {/* Footer note */}
+        <div className="bg-gray-50 px-6 py-2 flex items-center justify-between">
+          {!form.whiteLabelMode ? (
+            <span className="text-xs text-gray-400">Powered by UPSkills</span>
           ) : (
-            <span className="text-white font-bold text-lg">{form.name || "ชื่อสถาบัน"}</span>
+            <span className="text-xs text-emerald-500">White-label เปิดอยู่ — ซ่อน UPSkills แล้ว</span>
           )}
-          {!form.whiteLabelMode && (
-            <span className="text-gray-500 text-xs">· Powered by UPSkills</span>
-          )}
+          <div className="flex items-center gap-1.5">
+            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: form.primaryColor }} />
+            <span className="text-xs text-gray-400 font-mono">{form.primaryColor}</span>
+          </div>
         </div>
       </div>
 
