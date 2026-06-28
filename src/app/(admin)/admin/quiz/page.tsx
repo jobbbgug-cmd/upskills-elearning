@@ -26,14 +26,16 @@ export default function AdminQuizPage() {
   });
 
   useEffect(() => {
+    const controller = new AbortController();
     Promise.all([
-      fetch("/api/quiz").then((r) => r.json()),
-      fetch("/api/admin/courses").then((r) => r.json()),
+      fetch("/api/quiz",           { signal: controller.signal }).then((r) => r.json()),
+      fetch("/api/admin/courses",  { signal: controller.signal }).then((r) => r.json()),
     ]).then(([q, c]) => {
       setQuizzes(Array.isArray(q) ? q : []);
       const cs = Array.isArray(c) ? c : c.courses ?? [];
       setCourses(cs);
-    }).finally(() => setLoading(false));
+    }).catch(() => {}).finally(() => setLoading(false));
+    return () => controller.abort();
   }, []);
 
   const handleCreate = async () => {

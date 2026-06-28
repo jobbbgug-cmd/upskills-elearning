@@ -74,5 +74,9 @@ const UserSchema = new Schema<IUserDocument>(
   { timestamps: true }
 );
 
-delete mongoose.models["User"];
-export default mongoose.model<IUserDocument>("User", UserSchema);
+UserSchema.index({ institutionId: 1, status: 1 });
+UserSchema.index({ institutionId: 1, role: 1 });
+UserSchema.index({ institutionId: 1 });
+
+export default mongoose.models.User as mongoose.Model<IUserDocument> ||
+  mongoose.model<IUserDocument>("User", UserSchema);

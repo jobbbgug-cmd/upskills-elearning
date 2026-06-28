@@ -68,46 +68,43 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }, [pathname]);
 
   useEffect(() => {
-    const load = async () => {
-      const [usersRes, bookingsRes, meRes, subRes] = await Promise.all([
-        fetch("/api/admin/users/pending"),
-        fetch("/api/admin/bookings/pending"),
-        fetch("/api/auth/me"),
-        fetch("/api/auth/subscription"),
-      ]);
-      if (usersRes.ok) {
-        const data = await usersRes.json();
-        setPendingCount(Array.isArray(data) ? data.length : 0);
-      }
-      if (bookingsRes.ok) {
-        const data = await bookingsRes.json();
-        setPendingBookings(data.count ?? 0);
-      }
-      if (meRes.ok) {
-        const data = await meRes.json();
-        const userRole = data.user?.role ?? "";
-        setRole(userRole);
-        setUserName(data.user?.name ?? "");
-        setUserImage(data.user?.profileImage ?? "");
-        setInstitutionName(data.user?.institutionId?.name ?? "");
+    const controller = new AbortController();
 
-        if (userRole === "owner") {
-          const branchRes = await fetch("/api/owner/branches");
-          if (branchRes.ok) {
-            const branchData: BranchOption[] = await branchRes.json();
-            setBranches(branchData);
-            if (branchData.length > 0) setActiveBranchId(branchData[0]._id);
+    const load = async () => {
+      try {
+        const res = await fetch("/api/admin/layout-init", { signal: controller.signal });
+        if (!res.ok) return;
+        const data = await res.json();
+
+        setPendingCount(data.pendingCount ?? 0);
+        setPendingBookings(data.pendingBookings ?? 0);
+        setSubscription(data.subscription ?? null);
+
+        const u = data.user;
+        if (u) {
+          const userRole = u.role ?? "";
+          setRole(userRole);
+          setUserName(u.name ?? "");
+          setUserImage(u.profileImage ?? "");
+          setInstitutionName(u.institutionId?.name ?? "");
+
+          if (userRole === "owner") {
+            const branchRes = await fetch("/api/owner/branches", { signal: controller.signal });
+            if (branchRes.ok) {
+              const branchData: BranchOption[] = await branchRes.json();
+              setBranches(branchData);
+              if (branchData.length > 0) setActiveBranchId(branchData[0]._id);
+            }
           }
         }
-      }
-      if (subRes.ok) {
-        const data = await subRes.json();
-        setSubscription(data);
+      } catch (e) {
+        if ((e as Error).name !== "AbortError") console.error(e);
       }
     };
+
     load();
     const interval = setInterval(load, 30000);
-    return () => clearInterval(interval);
+    return () => { controller.abort(); clearInterval(interval); };
   }, []);
 
   const isOwner = role === "owner";

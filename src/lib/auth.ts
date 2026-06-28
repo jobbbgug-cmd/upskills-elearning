@@ -1,7 +1,5 @@
 import jwt from "jsonwebtoken";
 import { cookies } from "next/headers";
-import { connectDB } from "@/lib/mongodb";
-import User from "@/models/User";
 
 const JWT_SECRET = process.env.JWT_SECRET!;
 
@@ -26,30 +24,12 @@ export function verifyToken(token: string): JwtPayload | null {
   }
 }
 
-// Always reads institutionId fresh from DB to avoid stale JWT data
+// Reads auth from JWT only — no DB round-trip on every request.
+// Role/institutionId in the signed token are authoritative for the 7-day TTL.
+// If either changes, the user must re-login to get a fresh token.
 export async function getAuthUser(): Promise<JwtPayload | null> {
   const cookieStore = await cookies();
   const token = cookieStore.get("token")?.value;
   if (!token) return null;
-  const payload = verifyToken(token);
-  if (!payload) return null;
-
-  try {
-    await connectDB();
-    const user = await User.findById(payload.userId).select("institutionId role").lean() as {
-      institutionId?: { toString(): string } | null;
-      role: string;
-    } | null;
-    if (!user) return payload;
-
-    const isOwner = (user.role as string) === "owner";
-    return {
-      ...payload,
-      role: isOwner ? "admin" : user.role as JwtPayload["role"],
-      institutionId: user.institutionId?.toString() ?? undefined,
-      isOwner,
-    };
-  } catch {
-    return payload;
-  }
+  return verifyToken(token);
 }

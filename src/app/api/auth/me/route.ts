@@ -1,21 +1,28 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getAuthUser } from "@/lib/auth";
+import { verifyToken } from "@/lib/auth";
 import { connectDB } from "@/lib/mongodb";
 import User from "@/models/User";
+import { cookies } from "next/headers";
 
 export async function GET() {
-  const auth = await getAuthUser();
-  if (!auth) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const cookieStore = await cookies();
+  const token = cookieStore.get("token")?.value;
+  if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const payload = verifyToken(token);
+  if (!payload) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   await connectDB();
-  const user = await User.findById(auth.userId).select("-password").populate("institutionId", "name");
+  const user = await User.findById(payload.userId).select("-password").populate("institutionId", "name").lean();
   if (!user) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   return NextResponse.json({ user });
 }
 
 export async function PATCH(req: NextRequest) {
-  const auth = await getAuthUser();
+  const cookieStore = await cookies();
+  const token = cookieStore.get("token")?.value;
+  if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const auth = verifyToken(token);
   if (!auth) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   await connectDB();
