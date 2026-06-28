@@ -3,7 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, ListChecks, Users, LogOut, Images, UserCog, UserCheck, BookOpen, TrendingUp, CalendarDays, GraduationCap, Menu, X, Wallet, AlertTriangle, Palette, Shield, ShieldCheck, User, ChevronDown, Home, Building2, School, ClipboardCheck, FileText, PenLine, Bell, BarChart2, Radio, Receipt, Globe, Monitor, Star, Tag, MessageSquare } from "lucide-react";
+import { LayoutDashboard, ListChecks, Users, LogOut, Images, UserCog, UserCheck, BookOpen, TrendingUp, CalendarDays, GraduationCap, Menu, X, Wallet, AlertTriangle, Palette, Shield, ShieldCheck, User, ChevronDown, ChevronRight, Home, Building2, School, ClipboardCheck, FileText, PenLine, Bell, BarChart2, Radio, Receipt, Globe, Monitor, Star, Tag, MessageSquare, LayoutGrid } from "lucide-react";
 import NotificationBell from "@/components/NotificationBell";
 import { PLAN_LABELS } from "@/lib/planLimits";
 
@@ -32,9 +32,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [branches, setBranches]               = useState<BranchOption[]>([]);
   const [activeBranchId, setActiveBranchId]   = useState<string>("");
   const [switchingBranch, setSwitchingBranch] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
-  const navRef      = useRef<HTMLElement>(null);
-  const pathname    = usePathname();
+  const dropdownRef  = useRef<HTMLDivElement>(null);
+  const moreMenuRef  = useRef<HTMLDivElement>(null);
+  const navRef       = useRef<HTMLElement>(null);
+  const pathname     = usePathname();
+  const [openGroups,      setOpenGroups]      = useState<Set<string>>(new Set());
+  const [moreMenuOpen,    setMoreMenuOpen]    = useState(false);
+  const [activeMoreGroup, setActiveMoreGroup] = useState<string | null>(null);
+  const toggleGroup = (id: string) => setOpenGroups((prev) => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n; });
 
   useEffect(() => {
     const nav = navRef.current;
@@ -45,6 +50,21 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   useEffect(() => {
     setIsNavigating(false);
+    setMoreMenuOpen(false);
+    const GP: Record<string, string[]> = {
+      teaching:  ["/admin/students","/admin/attendance","/admin/homework","/admin/quiz","/admin/live","/admin/teacher-portal","/admin/forum"],
+      courses:   ["/admin/courses","/admin/content","/admin/schedule","/dashboard/schedule"],
+      members:   ["/admin/members","/admin/users"],
+      finance:   ["/admin/analytics","/admin/revenue","/admin/billing","/admin/coupons","/admin/bookings","/admin/finance"],
+      marketing: ["/admin/landing","/admin/reviews","/admin/notifications","/admin/banners"],
+      settings:  ["/admin/roles","/admin/branding"],
+    };
+    for (const [id, paths] of Object.entries(GP)) {
+      if (paths.some((p) => pathname === p || pathname.startsWith(p + "/"))) {
+        setOpenGroups((prev) => new Set([...prev, id]));
+        break;
+      }
+    }
   }, [pathname]);
 
   useEffect(() => {
@@ -121,9 +141,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
-        setUserDropdown(false);
-      }
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) setUserDropdown(false);
+      if (moreMenuRef.current && !moreMenuRef.current.contains(e.target as Node)) setMoreMenuOpen(false);
     };
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
@@ -193,9 +212,44 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         className={`flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg transition-colors ${
           active
             ? "bg-indigo-50 text-indigo-700 font-medium"
-            : "text-gray-700 hover:bg-gray-50 hover:text-indigo-600"
+            : "text-gray-600 hover:bg-gray-50 hover:text-indigo-600"
         }`}>
         {icon}
+        {label}
+      </Link>
+    );
+  };
+
+  const renderGroup = (id: string, label: string, icon: React.ReactNode, paths: string[], children: React.ReactNode) => {
+    const isOpen   = openGroups.has(id);
+    const hasActive = paths.some((p) => pathname === p || pathname.startsWith(p + "/"));
+    return (
+      <div key={id}>
+        <button onClick={() => toggleGroup(id)}
+          className={`w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg transition-colors ${
+            hasActive ? "bg-indigo-50/60 text-indigo-700 font-semibold" : "text-gray-700 hover:bg-gray-50 hover:text-indigo-600"
+          }`}>
+          <span className={hasActive ? "text-indigo-500" : "text-gray-400"}>{icon}</span>
+          <span className="flex-1 text-left">{label}</span>
+          <ChevronDown className={`w-3.5 h-3.5 text-gray-400 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
+        </button>
+        {isOpen && (
+          <div className="ml-3 pl-3 border-l border-gray-100 space-y-0.5 mt-0.5 mb-1">
+            {children}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const moreLink = (href: string, icon: React.ReactNode, label: React.ReactNode) => {
+    const active = pathname === href || (href !== "/admin" && pathname.startsWith(href));
+    return (
+      <Link href={href} onClick={() => { setMoreMenuOpen(false); if (!active) setIsNavigating(true); }}
+        className={`flex items-center gap-2 px-2 py-1.5 text-sm rounded-lg transition-colors ${
+          active ? "bg-indigo-50 text-indigo-700 font-medium" : "text-gray-600 hover:bg-gray-50 hover:text-indigo-600"
+        }`}>
+        <span className={active ? "text-indigo-500" : "text-gray-400"}>{icon}</span>
         {label}
       </Link>
     );
@@ -226,61 +280,86 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           onScroll={(e) => sessionStorage.setItem("admin-nav-scroll", String((e.currentTarget as HTMLElement).scrollTop))}
           className="flex-1 p-3 space-y-1 overflow-y-auto"
         >
-          {/* admin + super_admin only */}
           {isAdmin && navLink("/admin", <LayoutDashboard className="w-4 h-4" />, "ภาพรวม")}
-          {(isAdmin || role === "teacher") && navLink("/admin/students",    <School className="w-4 h-4" />,        "จัดการนักเรียน")}
-          {(isAdmin || role === "teacher") && navLink("/admin/attendance",  <ClipboardCheck className="w-4 h-4" />, "เช็คชื่อ")}
-          {(isAdmin || role === "teacher") && navLink("/admin/homework",    <FileText className="w-4 h-4" />,       "การบ้าน")}
-          {(isAdmin || role === "teacher") && navLink("/admin/quiz",            <PenLine className="w-4 h-4" />,  "ข้อสอบ")}
-          {(isAdmin || role === "teacher") && navLink("/admin/live",            <Radio className="w-4 h-4" />,    "Live Class")}
-          {(isAdmin || role === "teacher") && navLink("/admin/teacher-portal",  <Monitor className="w-4 h-4" />, "Teacher Portal")}
-          {isAdmin && navLink("/admin/analytics",    <BarChart2 className="w-4 h-4" />,  "Analytics")}
-          {isAdmin && navLink("/admin/notifications", <Bell className="w-4 h-4" />,      "แจ้งเตือน & ใบรับรอง")}
-          {isAdmin && navLink("/admin/billing",       <Receipt className="w-4 h-4" />,      "Billing & ใบเสร็จ")}
-          {isAdmin && navLink("/admin/landing",       <Globe className="w-4 h-4" />,        "Landing Page")}
-          {isAdmin && navLink("/admin/reviews",       <Star className="w-4 h-4" />,         "รีวิวคอร์ส")}
-          {isAdmin && navLink("/admin/coupons",       <Tag className="w-4 h-4" />,          "คูปองส่วนลด")}
-          {(isAdmin || role === "teacher") && navLink("/admin/forum", <MessageSquare className="w-4 h-4" />, "Forum")}
-          {isAdmin && navLink("/admin/members", <UserCheck className="w-4 h-4" />,
-            <span className="flex items-center justify-between w-full gap-2">
-              อนุมัติสมาชิก
-              {pendingCount > 0 && (
-                <span className="bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full min-w-[20px] text-center">
-                  {pendingCount}
+
+          {renderGroup("teaching", "การเรียนการสอน", <GraduationCap className="w-4 h-4" />,
+            ["/admin/students","/admin/attendance","/admin/homework","/admin/quiz","/admin/live","/admin/teacher-portal","/admin/forum"],
+            <>
+              {(isAdmin || role === "teacher") && navLink("/admin/students",      <School className="w-4 h-4" />,        "จัดการนักเรียน")}
+              {(isAdmin || role === "teacher") && navLink("/admin/attendance",    <ClipboardCheck className="w-4 h-4" />, "เช็คชื่อ")}
+              {(isAdmin || role === "teacher") && navLink("/admin/homework",      <FileText className="w-4 h-4" />,       "การบ้าน")}
+              {(isAdmin || role === "teacher") && navLink("/admin/quiz",          <PenLine className="w-4 h-4" />,        "ข้อสอบ")}
+              {(isAdmin || role === "teacher") && navLink("/admin/live",          <Radio className="w-4 h-4" />,          "Live Class")}
+              {(isAdmin || role === "teacher") && navLink("/admin/teacher-portal",<Monitor className="w-4 h-4" />,        "Teacher Portal")}
+              {(isAdmin || role === "teacher") && navLink("/admin/forum",         <MessageSquare className="w-4 h-4" />,  "Forum")}
+            </>
+          )}
+
+          {renderGroup("courses", "คอร์สและเนื้อหา", <BookOpen className="w-4 h-4" />,
+            ["/admin/courses","/admin/content","/admin/schedule","/dashboard/schedule"],
+            <>
+              {(isAdmin || role === "teacher") && navLink("/admin/courses",    <ListChecks className="w-4 h-4" />,   "จัดการคอร์ส")}
+              {(isAdmin || role === "teacher") && navLink("/admin/content",    <BookOpen className="w-4 h-4" />,     "เนื้อหาการเรียน")}
+              {(isAdmin || role === "teacher") && navLink("/admin/schedule",   <CalendarDays className="w-4 h-4" />, "ตารางสอน")}
+              {isAdmin                         && navLink("/dashboard/schedule",<GraduationCap className="w-4 h-4" />,"ตารางเรียน")}
+            </>
+          )}
+
+          {renderGroup("members", "สมาชิก", <Users className="w-4 h-4" />,
+            ["/admin/members","/admin/users"],
+            <>
+              {isAdmin && navLink("/admin/members", <UserCheck className="w-4 h-4" />,
+                <span className="flex items-center justify-between w-full gap-2">
+                  อนุมัติสมาชิก
+                  {pendingCount > 0 && (
+                    <span className="bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full min-w-[20px] text-center">
+                      {pendingCount}
+                    </span>
+                  )}
                 </span>
               )}
-            </span>
+              {isAdmin && navLink("/admin/users", <UserCog className="w-4 h-4" />, "จัดการผู้ใช้")}
+            </>
           )}
-          {isAdmin && navLink("/admin/users", <UserCog className="w-4 h-4" />, "จัดการผู้ใช้")}
-          {(isAdmin || role === "teacher") && navLink("/admin/courses", <ListChecks className="w-4 h-4" />, "จัดการคอร์ส")}
-          {(isAdmin || role === "teacher") && navLink("/admin/content", <BookOpen className="w-4 h-4" />, "เนื้อหาการเรียน")}
 
-          {/* admin + super_admin + teacher */}
-          {(isAdmin || role === "teacher") && navLink("/admin/schedule", <CalendarDays className="w-4 h-4" />, "ตารางสอน")}
-          {(isAdmin || role === "teacher") && navLink("/admin/revenue", <TrendingUp className="w-4 h-4" />, "รายได้")}
-
-          {/* admin + super_admin: student schedule view */}
-          {isAdmin && navLink("/dashboard/schedule", <GraduationCap className="w-4 h-4" />, "ตารางเรียน")}
-
-          {/* super_admin only */}
-          {role === "super_admin" && navLink("/admin/bookings", <Users className="w-4 h-4" />,
-            <span className="flex items-center justify-between w-full gap-2">
-              ตรวจสอบการชำระ
-              {pendingBookings > 0 && (
-                <span className="bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full min-w-[20px] text-center">
-                  {pendingBookings}
+          {renderGroup("finance", "รายได้และการเงิน", <TrendingUp className="w-4 h-4" />,
+            ["/admin/analytics","/admin/revenue","/admin/billing","/admin/coupons","/admin/bookings","/admin/finance"],
+            <>
+              {isAdmin                         && navLink("/admin/analytics", <BarChart2 className="w-4 h-4" />, "Analytics")}
+              {(isAdmin || role === "teacher") && navLink("/admin/revenue",   <TrendingUp className="w-4 h-4" />, "รายได้")}
+              {isAdmin                         && navLink("/admin/billing",   <Receipt className="w-4 h-4" />,    "Billing & ใบเสร็จ")}
+              {isAdmin                         && navLink("/admin/coupons",   <Tag className="w-4 h-4" />,        "คูปองส่วนลด")}
+              {role === "super_admin"          && navLink("/admin/bookings",  <Users className="w-4 h-4" />,
+                <span className="flex items-center justify-between w-full gap-2">
+                  ตรวจสอบการชำระ
+                  {pendingBookings > 0 && (
+                    <span className="bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full min-w-[20px] text-center">
+                      {pendingBookings}
+                    </span>
+                  )}
                 </span>
               )}
-            </span>
+              {role === "super_admin" && navLink("/admin/finance", <Wallet className="w-4 h-4" />, "ข้อมูลทางการเงิน")}
+            </>
           )}
-          {role === "super_admin" && navLink("/admin/finance", <Wallet className="w-4 h-4" />, "ข้อมูลทางการเงิน")}
-          {role === "super_admin" && navLink("/admin/roles", <Shield className="w-4 h-4" />, "จัดการ Role")}
 
-          {/* admin only (NOT super_admin) */}
-          {role === "admin" && navLink("/admin/branding", <Palette className="w-4 h-4" />, "จัดการ Branding")}
+          {renderGroup("marketing", "การตลาด", <Globe className="w-4 h-4" />,
+            ["/admin/landing","/admin/reviews","/admin/notifications","/admin/banners"],
+            <>
+              {isAdmin && navLink("/admin/landing",       <Globe className="w-4 h-4" />,   "Landing Page")}
+              {isAdmin && navLink("/admin/reviews",       <Star className="w-4 h-4" />,    "รีวิวคอร์ส")}
+              {isAdmin && navLink("/admin/notifications", <Bell className="w-4 h-4" />,    "แจ้งเตือน & ใบรับรอง")}
+              {isAdmin && navLink("/admin/banners",       <Images className="w-4 h-4" />,  "จัดการแบนเนอร์")}
+            </>
+          )}
 
-          {/* admin + super_admin */}
-          {isAdmin && navLink("/admin/banners", <Images className="w-4 h-4" />, "จัดการแบนเนอร์")}
+          {renderGroup("settings", "ตั้งค่าระบบ", <Shield className="w-4 h-4" />,
+            ["/admin/roles","/admin/branding"],
+            <>
+              {role === "super_admin" && navLink("/admin/roles",    <Shield className="w-4 h-4" />,  "จัดการ Role")}
+              {role === "admin"       && navLink("/admin/branding", <Palette className="w-4 h-4" />, "จัดการ Branding")}
+            </>
+          )}
         </nav>
 
         {/* Subscription status */}
@@ -359,6 +438,104 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 </select>
               </div>
             )}
+            {/* More menus dropdown */}
+            <div className="relative" ref={moreMenuRef}>
+              <button onClick={() => setMoreMenuOpen((v) => !v)}
+                className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-xl transition-colors ${
+                  moreMenuOpen ? "bg-indigo-50 text-indigo-700" : "text-gray-600 hover:bg-gray-50 hover:text-indigo-600"
+                }`}>
+                <LayoutGrid className="w-4 h-4" />
+                เมนูอื่นๆ
+                {(pendingCount + pendingBookings) > 0 && (
+                  <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full leading-none">
+                    {pendingCount + pendingBookings}
+                  </span>
+                )}
+                <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${moreMenuOpen ? "rotate-180" : ""}`} />
+              </button>
+
+              {moreMenuOpen && (
+                <div className="absolute right-0 top-full mt-2 bg-white rounded-2xl shadow-xl border border-gray-100 z-[100] w-52 p-2 space-y-0.5"
+                  onMouseLeave={() => setActiveMoreGroup(null)}>
+                  {([
+                    { id: "teaching",  label: "การเรียนการสอน",  icon: <GraduationCap className="w-4 h-4" /> },
+                    { id: "courses",   label: "คอร์สและเนื้อหา", icon: <BookOpen className="w-4 h-4" /> },
+                    { id: "members",   label: "สมาชิก",           icon: <Users className="w-4 h-4" /> },
+                    { id: "finance",   label: "รายได้และการเงิน", icon: <TrendingUp className="w-4 h-4" /> },
+                    { id: "marketing", label: "การตลาด",          icon: <Globe className="w-4 h-4" /> },
+                    { id: "settings",  label: "ตั้งค่าระบบ",      icon: <Shield className="w-4 h-4" /> },
+                  ] as { id: string; label: string; icon: React.ReactNode }[]).map(({ id, label, icon }) => (
+                    <div key={id} className="relative" onMouseEnter={() => setActiveMoreGroup(id)}>
+                      <button className={`w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg transition-colors ${
+                        activeMoreGroup === id ? "bg-indigo-50 text-indigo-700" : "text-gray-700 hover:bg-gray-50 hover:text-indigo-600"
+                      }`}>
+                        <span className={activeMoreGroup === id ? "text-indigo-500" : "text-gray-400"}>{icon}</span>
+                        <span className="flex-1 text-left">{label}</span>
+                        <ChevronRight className="w-3.5 h-3.5 text-gray-300" />
+                      </button>
+
+                      {activeMoreGroup === id && (
+                        <div className="absolute left-full top-0 ml-1 bg-white rounded-xl shadow-lg border border-gray-100 p-2 space-y-0.5 z-10 w-52">
+                          {id === "teaching" && <>
+                            {(isAdmin || role === "teacher") && moreLink("/admin/students",       <School className="w-3.5 h-3.5" />,        "จัดการนักเรียน")}
+                            {(isAdmin || role === "teacher") && moreLink("/admin/attendance",     <ClipboardCheck className="w-3.5 h-3.5" />, "เช็คชื่อ")}
+                            {(isAdmin || role === "teacher") && moreLink("/admin/homework",       <FileText className="w-3.5 h-3.5" />,       "การบ้าน")}
+                            {(isAdmin || role === "teacher") && moreLink("/admin/quiz",           <PenLine className="w-3.5 h-3.5" />,        "ข้อสอบ")}
+                            {(isAdmin || role === "teacher") && moreLink("/admin/live",           <Radio className="w-3.5 h-3.5" />,          "Live Class")}
+                            {(isAdmin || role === "teacher") && moreLink("/admin/teacher-portal", <Monitor className="w-3.5 h-3.5" />,        "Teacher Portal")}
+                            {(isAdmin || role === "teacher") && moreLink("/admin/forum",          <MessageSquare className="w-3.5 h-3.5" />,  "Forum")}
+                          </>}
+                          {id === "courses" && <>
+                            {(isAdmin || role === "teacher") && moreLink("/admin/courses",      <ListChecks className="w-3.5 h-3.5" />,    "จัดการคอร์ส")}
+                            {(isAdmin || role === "teacher") && moreLink("/admin/content",      <BookOpen className="w-3.5 h-3.5" />,      "เนื้อหาการเรียน")}
+                            {(isAdmin || role === "teacher") && moreLink("/admin/schedule",     <CalendarDays className="w-3.5 h-3.5" />,  "ตารางสอน")}
+                            {isAdmin                         && moreLink("/dashboard/schedule", <GraduationCap className="w-3.5 h-3.5" />, "ตารางเรียน")}
+                          </>}
+                          {id === "members" && <>
+                            {isAdmin && moreLink("/admin/members", <UserCheck className="w-3.5 h-3.5" />,
+                              <span className="flex items-center gap-2">อนุมัติสมาชิก
+                                {pendingCount > 0 && <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 rounded-full">{pendingCount}</span>}
+                              </span>
+                            )}
+                            {isAdmin && moreLink("/admin/users", <UserCog className="w-3.5 h-3.5" />, "จัดการผู้ใช้")}
+                          </>}
+                          {id === "finance" && <>
+                            {isAdmin                         && moreLink("/admin/analytics", <BarChart2 className="w-3.5 h-3.5" />,  "Analytics")}
+                            {(isAdmin || role === "teacher") && moreLink("/admin/revenue",   <TrendingUp className="w-3.5 h-3.5" />, "รายได้")}
+                            {isAdmin                         && moreLink("/admin/billing",   <Receipt className="w-3.5 h-3.5" />,    "Billing & ใบเสร็จ")}
+                            {isAdmin                         && moreLink("/admin/coupons",   <Tag className="w-3.5 h-3.5" />,        "คูปองส่วนลด")}
+                            {role === "super_admin"          && moreLink("/admin/bookings",  <Users className="w-3.5 h-3.5" />,
+                              <span className="flex items-center gap-2">ตรวจสอบการชำระ
+                                {pendingBookings > 0 && <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 rounded-full">{pendingBookings}</span>}
+                              </span>
+                            )}
+                            {role === "super_admin" && moreLink("/admin/finance", <Wallet className="w-3.5 h-3.5" />, "ข้อมูลทางการเงิน")}
+                          </>}
+                          {id === "marketing" && <>
+                            {isAdmin && moreLink("/admin/landing",       <Globe className="w-3.5 h-3.5" />,  "Landing Page")}
+                            {isAdmin && moreLink("/admin/reviews",       <Star className="w-3.5 h-3.5" />,   "รีวิวคอร์ส")}
+                            {isAdmin && moreLink("/admin/notifications", <Bell className="w-3.5 h-3.5" />,   "แจ้งเตือน & ใบรับรอง")}
+                            {isAdmin && moreLink("/admin/banners",       <Images className="w-3.5 h-3.5" />, "จัดการแบนเนอร์")}
+                          </>}
+                          {id === "settings" && <>
+                            {role === "super_admin" && moreLink("/admin/roles",    <Shield className="w-3.5 h-3.5" />,  "จัดการ Role")}
+                            {role === "admin"       && moreLink("/admin/branding", <Palette className="w-3.5 h-3.5" />, "จัดการ Branding")}
+                          </>}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {institutionName && (
+              <div className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 bg-gray-50 rounded-lg max-w-[160px]">
+                <Building2 className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+                <span className="text-sm text-gray-600 font-medium truncate">{institutionName}</span>
+              </div>
+            )}
+
             <NotificationBell />
             <UserMenu />
           </div>
