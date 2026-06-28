@@ -24,7 +24,15 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
   const pathname = usePathname();
   const router   = useRouter();
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const navRef      = useRef<HTMLElement>(null);
   const close = () => setOpen(false);
+
+  useEffect(() => {
+    const nav = navRef.current;
+    if (!nav) return;
+    const saved = sessionStorage.getItem("superadmin-nav-scroll");
+    if (saved) nav.scrollTop = Number(saved);
+  }, []);
 
   useEffect(() => {
     fetch("/api/auth/me")
@@ -66,7 +74,7 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
   };
 
   return (
-    <div className="min-h-screen flex bg-gray-50">
+    <div className="h-screen flex bg-gray-50 overflow-hidden">
       {open && <div className="fixed inset-0 z-40 bg-black/40 lg:hidden" onClick={close} />}
 
       <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 flex flex-col shrink-0 transition-transform duration-200
@@ -83,7 +91,11 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
           </button>
         </div>
 
-        <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto">
+        <nav
+          ref={navRef}
+          onScroll={(e) => sessionStorage.setItem("superadmin-nav-scroll", String((e.currentTarget as HTMLElement).scrollTop))}
+          className="flex-1 p-3 space-y-0.5 overflow-y-auto"
+        >
           {/* Platform */}
           <p className="px-3 pt-2 pb-1 text-xs font-semibold text-gray-400 uppercase tracking-wider">แพลตฟอร์ม</p>
           {nav("/super-admin", <LayoutDashboard className="w-4 h-4" />, "ภาพรวม")}

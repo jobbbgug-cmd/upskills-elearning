@@ -2,6 +2,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
 import { LayoutDashboard, ListChecks, Users, LogOut, Images, UserCog, UserCheck, BookOpen, TrendingUp, CalendarDays, GraduationCap, Menu, X, Wallet, AlertTriangle, Palette, Shield, ShieldCheck, User, ChevronDown, Home, Building2, School, ClipboardCheck, FileText, PenLine, Bell, BarChart2, Radio, Receipt, Globe, Monitor, Star, Tag, MessageSquare } from "lucide-react";
 import NotificationBell from "@/components/NotificationBell";
 import { PLAN_LABELS } from "@/lib/planLimits";
@@ -30,7 +31,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [branches, setBranches]               = useState<BranchOption[]>([]);
   const [activeBranchId, setActiveBranchId]   = useState<string>("");
   const [switchingBranch, setSwitchingBranch] = useState(false);
-  const dropdownRef                           = useRef<HTMLDivElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const navRef      = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const nav = navRef.current;
+    if (!nav) return;
+    const saved = sessionStorage.getItem("admin-nav-scroll");
+    if (saved) nav.scrollTop = Number(saved);
+  }, []);
 
   useEffect(() => {
     const load = async () => {
@@ -75,6 +84,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     return () => clearInterval(interval);
   }, []);
 
+  const pathname = usePathname();
   const isOwner = role === "owner";
   const isAdmin = role === "admin" || role === "super_admin" || isOwner;
   const close = () => setSidebarOpen(false);
@@ -171,16 +181,23 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   );
   };
 
-  const navLink = (href: string, icon: React.ReactNode, label: React.ReactNode) => (
-    <Link href={href} onClick={close}
-      className="flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg text-gray-700 hover:bg-gray-50 hover:text-indigo-600 transition-colors">
-      {icon}
-      {label}
-    </Link>
-  );
+  const navLink = (href: string, icon: React.ReactNode, label: React.ReactNode) => {
+    const active = pathname === href || (href !== "/admin" && pathname.startsWith(href));
+    return (
+      <Link href={href} onClick={close}
+        className={`flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg transition-colors ${
+          active
+            ? "bg-indigo-50 text-indigo-700 font-medium"
+            : "text-gray-700 hover:bg-gray-50 hover:text-indigo-600"
+        }`}>
+        {icon}
+        {label}
+      </Link>
+    );
+  };
 
   return (
-    <div className="min-h-screen flex bg-gray-50">
+    <div className="h-screen flex bg-gray-50 overflow-hidden">
       {/* Mobile overlay */}
       {sidebarOpen && (
         <div className="fixed inset-0 z-40 bg-black/40 lg:hidden" onClick={close} />
@@ -199,7 +216,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </button>
         </div>
 
-        <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
+        <nav
+          ref={navRef}
+          onScroll={(e) => sessionStorage.setItem("admin-nav-scroll", String((e.currentTarget as HTMLElement).scrollTop))}
+          className="flex-1 p-3 space-y-1 overflow-y-auto"
+        >
           {/* admin + super_admin only */}
           {isAdmin && navLink("/admin", <LayoutDashboard className="w-4 h-4" />, "ภาพรวม")}
           {(isAdmin || role === "teacher") && navLink("/admin/students",    <School className="w-4 h-4" />,        "จัดการนักเรียน")}
