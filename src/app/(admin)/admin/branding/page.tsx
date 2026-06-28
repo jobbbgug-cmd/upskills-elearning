@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState, useRef } from "react";
 import Image from "next/image";
-import { Palette, Upload, Check, Globe } from "lucide-react";
+import { Palette, Upload, Check, Globe, CheckCircle, XCircle } from "lucide-react";
 import { compressImage } from "@/lib/compressImage";
 import LoadingSpinner from "@/components/LoadingSpinner";
 
@@ -26,9 +26,9 @@ export default function BrandingPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [toast, setToast] = useState<{ type: "success" | "error"; message: string } | null>(null);
   const [uploading, setUploading] = useState<"logo" | "favicon" | null>(null);
   const logoRef = useRef<HTMLInputElement>(null);
-  const faviconRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     fetch("/api/admin/branding")
@@ -59,22 +59,51 @@ export default function BrandingPage() {
     }
   };
 
+  const showToast = (type: "success" | "error", message: string) => {
+    setToast({ type, message });
+    setTimeout(() => setToast(null), 3500);
+  };
+
   const save = async () => {
     setSaving(true);
     setSaved(false);
-    const res = await fetch("/api/admin/branding", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
-    });
-    setSaving(false);
-    if (res.ok) { setSaved(true); setTimeout(() => setSaved(false), 3000); }
+    try {
+      const res = await fetch("/api/admin/branding", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      if (res.ok) {
+        setSaved(true);
+        setTimeout(() => setSaved(false), 3000);
+        showToast("success", "บันทึกการตั้งค่า Branding สำเร็จ");
+        window.dispatchEvent(new CustomEvent("branding-updated", { detail: { logoUrl: form.logoUrl } }));
+      } else {
+        showToast("error", "บันทึกไม่สำเร็จ กรุณาลองใหม่");
+      }
+    } catch {
+      showToast("error", "เกิดข้อผิดพลาด กรุณาตรวจสอบการเชื่อมต่อ");
+    } finally {
+      setSaving(false);
+    }
   };
 
   if (loading) return <LoadingSpinner />;
 
   return (
     <div className="max-w-2xl space-y-6">
+
+      {/* Toast notification */}
+      {toast && (
+        <div className={`fixed top-6 right-6 z-[9999] flex items-center gap-3 px-5 py-4 rounded-2xl shadow-xl text-white text-sm font-medium ${
+          toast.type === "success" ? "bg-emerald-500" : "bg-red-500"
+        }`}>
+          {toast.type === "success"
+            ? <CheckCircle className="w-5 h-5 shrink-0" />
+            : <XCircle className="w-5 h-5 shrink-0" />}
+          {toast.message}
+        </div>
+      )}
       <div>
         <h1 className="text-2xl font-bold text-gray-900">ตั้งค่า Branding</h1>
         <p className="text-gray-500 text-sm mt-1">โลโก้ สี และชื่อสถาบันที่แสดงในระบบ</p>
@@ -140,31 +169,6 @@ export default function BrandingPage() {
         )}
       </div>
 
-      {/* Favicon */}
-      <div className="bg-white rounded-2xl border border-gray-100 p-5 space-y-4">
-        <h2 className="font-semibold text-gray-900 flex items-center gap-2">
-          <Upload className="w-4 h-4 text-indigo-500" /> Favicon / App Icon
-        </h2>
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl border border-gray-200 bg-gray-50 flex items-center justify-center overflow-hidden">
-            {form.faviconUrl ? (
-              <Image src={form.faviconUrl} alt="favicon" width={40} height={40} className="object-contain" />
-            ) : (
-              <span className="text-xs text-gray-400">ว่าง</span>
-            )}
-          </div>
-          <div className="flex-1">
-            <input ref={faviconRef} type="file" accept="image/*" className="hidden"
-              onChange={(e) => e.target.files?.[0] && uploadImage(e.target.files[0], "favicon")} />
-            <button onClick={() => faviconRef.current?.click()} disabled={uploading === "favicon"}
-              className="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition-colors disabled:opacity-50">
-              <Upload className="w-4 h-4" />
-              {uploading === "favicon" ? "กำลังอัปโหลด..." : "อัปโหลด Icon"}
-            </button>
-            <p className="text-xs text-gray-400 mt-1.5">PNG 512×512 · แสดงในแท็บ browser และ App icon</p>
-          </div>
-        </div>
-      </div>
 
       {/* Primary color */}
       <div className="bg-white rounded-2xl border border-gray-100 p-5 space-y-4">

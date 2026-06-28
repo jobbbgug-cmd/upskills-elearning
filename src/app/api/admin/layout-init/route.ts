@@ -21,8 +21,8 @@ export async function GET() {
       .lean(),
     auth.institutionId
       ? Institution.findById(auth.institutionId)
-          .select("plan planExpiresAt isActive name")
-          .lean() as Promise<{ plan: string; planExpiresAt: Date | null; isActive: boolean; name: string } | null>
+          .select("plan planExpiresAt isActive name logoUrl")
+          .lean() as Promise<{ plan: string; planExpiresAt: Date | null; isActive: boolean; name: string; logoUrl?: string } | null>
       : Promise.resolve(null),
     auth.role === "super_admin"
       ? Booking.countDocuments({ status: "pending_payment" })
@@ -35,6 +35,7 @@ export async function GET() {
     pendingCount,
     pendingBookings,
     user: me,
+    logoUrl: institution?.logoUrl ?? null,
     subscription: institution
       ? {
           plan: institution.plan,

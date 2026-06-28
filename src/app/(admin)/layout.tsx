@@ -25,6 +25,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [userName, setUserName]               = useState<string>("");
   const [userImage, setUserImage]             = useState<string>("");
   const [institutionName, setInstitutionName] = useState<string>("");
+  const [institutionLogo, setInstitutionLogo] = useState<string>("");
   const [subscription, setSubscription]       = useState<Subscription | null>(null);
   const [sidebarOpen, setSidebarOpen]         = useState(false);
   const [userDropdown, setUserDropdown]       = useState(false);
@@ -79,6 +80,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         setPendingCount(data.pendingCount ?? 0);
         setPendingBookings(data.pendingBookings ?? 0);
         setSubscription(data.subscription ?? null);
+        if (data.logoUrl) setInstitutionLogo(data.logoUrl);
 
         const u = data.user;
         if (u) {
@@ -143,6 +145,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     };
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
+
+  useEffect(() => {
+    const onBrandingUpdated = (e: Event) => {
+      const { logoUrl } = (e as CustomEvent).detail ?? {};
+      if (logoUrl !== undefined) setInstitutionLogo(logoUrl);
+    };
+    window.addEventListener("branding-updated", onBrandingUpdated);
+    return () => window.removeEventListener("branding-updated", onBrandingUpdated);
   }, []);
 
   const ROLE_AVATAR: Record<string, { icon: React.ElementType; bg: string; color: string }> = {
@@ -265,7 +276,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
         <div className="p-5 border-b border-gray-100 flex items-center justify-between">
           <Link href="/" onClick={close}>
-            <Image src="/logo.png" alt="UPSkills" width={150} height={50} className="object-contain" />
+            {institutionLogo ? (
+              <Image src={institutionLogo} alt={institutionName || "Logo"} width={150} height={50} className="object-contain h-10 w-auto max-w-[150px]" />
+            ) : (
+              <Image src="/logo.png" alt="UPSkills" width={150} height={50} className="object-contain" />
+            )}
           </Link>
           <button onClick={close} className="lg:hidden p-1 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100">
             <X className="w-5 h-5" />
