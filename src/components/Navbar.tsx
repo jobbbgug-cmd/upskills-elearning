@@ -107,34 +107,10 @@ export default function Navbar() {
                     ตารางเรียน
                   </Link>
                 )}
-                {(user.role === "student" || user.role === "parent") && (
-                  <Link href="/student/homework" className="flex items-center gap-1.5 text-sm px-3 py-2 rounded-lg text-gray-600 hover:text-indigo-600 hover:bg-gray-50 transition-colors">
-                    <BookOpen className="w-4 h-4" />
-                    การบ้าน
-                  </Link>
-                )}
-                {(user.role === "student" || user.role === "parent") && (
-                  <Link href="/student/attendance" className="flex items-center gap-1.5 text-sm px-3 py-2 rounded-lg text-gray-600 hover:text-indigo-600 hover:bg-gray-50 transition-colors">
-                    <ClipboardCheck className="w-4 h-4" />
-                    เช็คชื่อ
-                  </Link>
-                )}
-                {(user.role === "student" || user.role === "parent") && (
-                  <Link href="/student/quiz" className="flex items-center gap-1.5 text-sm px-3 py-2 rounded-lg text-gray-600 hover:text-indigo-600 hover:bg-gray-50 transition-colors">
-                    <PenLine className="w-4 h-4" />
-                    ข้อสอบ
-                  </Link>
-                )}
                 {user.role === "student" && (
                   <Link href="/dashboard/certificates" className="flex items-center gap-1.5 text-sm px-3 py-2 rounded-lg text-gray-600 hover:text-indigo-600 hover:bg-gray-50 transition-colors">
                     <Award className="w-4 h-4" />
                     ใบรับรอง
-                  </Link>
-                )}
-                {(user.role === "student" || user.role === "parent") && (
-                  <Link href="/student/live-class" className="flex items-center gap-1.5 text-sm px-3 py-2 rounded-lg text-gray-600 hover:text-indigo-600 hover:bg-gray-50 transition-colors">
-                    <Radio className="w-4 h-4" />
-                    Live Class
                   </Link>
                 )}
                 {user.role === "student" && (
@@ -156,6 +132,12 @@ export default function Navbar() {
                   </Link>
                 )}
                 {user && <NotificationBell />}
+                {(user.role === "student" || user.role === "parent") && (
+                  <Link href="/student" className="flex items-center gap-1.5 text-sm font-medium px-3 py-2 rounded-lg text-emerald-600 hover:bg-emerald-50 transition-colors">
+                    <BookOpen className="w-4 h-4" />
+                    ศูนย์การเรียน
+                  </Link>
+                )}
                 {(user.role === "admin" || user.role === "teacher") && (
                   <Link href="/admin" className="flex items-center gap-1.5 text-sm font-medium px-3 py-2 rounded-lg text-indigo-600 hover:bg-indigo-50 transition-colors">
                     <User className="w-4 h-4" />
@@ -210,19 +192,10 @@ export default function Navbar() {
                   <Link href="/dashboard/schedule" onClick={() => setMenuOpen(false)} className="block px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg">ตารางเรียน</Link>
                 )}
                 {(user.role === "student" || user.role === "parent") && (
-                  <Link href="/student/homework" onClick={() => setMenuOpen(false)} className="block px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg">การบ้าน</Link>
-                )}
-                {(user.role === "student" || user.role === "parent") && (
-                  <Link href="/student/attendance" onClick={() => setMenuOpen(false)} className="block px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg">เช็คชื่อ</Link>
-                )}
-                {(user.role === "student" || user.role === "parent") && (
-                  <Link href="/student/quiz" onClick={() => setMenuOpen(false)} className="block px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg">ข้อสอบ</Link>
+                  <Link href="/student" onClick={() => setMenuOpen(false)} className="block px-3 py-2 text-sm text-emerald-600 font-medium hover:bg-emerald-50 rounded-lg">ศูนย์การเรียน</Link>
                 )}
                 {user.role === "student" && (
                   <Link href="/dashboard/certificates" onClick={() => setMenuOpen(false)} className="block px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg">ใบรับรอง</Link>
-                )}
-                {(user.role === "student" || user.role === "parent") && (
-                  <Link href="/student/live-class" onClick={() => setMenuOpen(false)} className="block px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg">Live Class</Link>
                 )}
                 {user.role === "student" && (
                   <Link href="/dashboard/receipts" onClick={() => setMenuOpen(false)} className="block px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg">ใบเสร็จ</Link>
