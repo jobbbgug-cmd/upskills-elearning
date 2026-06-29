@@ -56,16 +56,17 @@ export default function StudentAttendancePage() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto p-6">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-          <CheckCircle2 className="w-8 h-8 text-violet-600" />
-          เช็คชื่อ
-        </h1>
-        <p className="text-gray-500 mt-2">
-          {isParent ? "ดูสถานะการเช็คชื่อของลูก" : "ดูการเช็คชื่อของคุณในแต่ละวิชา"}
-        </p>
-      </div>
+    <div className="min-h-screen bg-gray-50 py-6 md:py-10">
+      <div className="max-w-6xl mx-auto px-4 md:px-6">
+        <div className="mb-8">
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 flex items-center gap-2 md:gap-3">
+            <CheckCircle2 className="w-6 h-6 md:w-8 md:h-8 text-violet-600" />
+            เช็คชื่อ
+          </h1>
+          <p className="text-sm md:text-base text-gray-500 mt-2">
+            {isParent ? "ดูสถานะการเช็คชื่อของลูก" : "ดูการเช็คชื่อของคุณในแต่ละวิชา"}
+          </p>
+        </div>
 
       {attendance.length === 0 ? (
         <div className="text-center py-12 bg-gray-50 rounded-2xl">
@@ -77,42 +78,42 @@ export default function StudentAttendancePage() {
           {attendance.map((att) => (
             <div
               key={att.courseId}
-              className="bg-white rounded-2xl border border-gray-200 p-6 hover:shadow-lg transition-shadow"
+              className="bg-white rounded-xl md:rounded-2xl border border-gray-200 p-4 md:p-6 hover:shadow-lg transition-shadow"
             >
-              <div className="flex items-center justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center gap-3">
-                    <h3 className="text-lg font-semibold text-gray-900">{att.courseName}</h3>
-                    <div className="flex items-center gap-1 px-3 py-1 rounded-full bg-gray-100">
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <div className="flex-1 min-w-0">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-2">
+                    <h3 className="text-base md:text-lg font-semibold text-gray-900 break-words">{att.courseName}</h3>
+                    <div className="flex items-center gap-1 px-2 py-1 md:px-3 md:py-1 rounded-full bg-gray-100 shrink-0 w-fit">
                       {getStatusIcon(att.percentage)}
-                      <span className="text-sm font-medium text-gray-700">
+                      <span className="text-xs md:text-sm font-medium text-gray-700">
                         {getStatusText(att.percentage)}
                       </span>
                     </div>
                   </div>
 
-                  <div className="mt-4 flex items-center gap-6">
+                  <div className="mt-3 grid grid-cols-2 md:flex md:items-center md:gap-6 gap-3">
                     <div>
-                      <p className="text-sm text-gray-500">ครั้งที่เช็คชื่อแล้ว</p>
-                      <p className="text-2xl font-bold text-gray-900">{att.present}</p>
+                      <p className="text-xs md:text-sm text-gray-500">ครั้งที่เช็คชื่อแล้ว</p>
+                      <p className="text-xl md:text-2xl font-bold text-gray-900">{att.present}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-500">ครั้งทั้งหมด</p>
-                      <p className="text-2xl font-bold text-gray-900">{att.total}</p>
+                      <p className="text-xs md:text-sm text-gray-500">ครั้งทั้งหมด</p>
+                      <p className="text-xl md:text-2xl font-bold text-gray-900">{att.total}</p>
                     </div>
                   </div>
                 </div>
 
-                <div className="ml-8 text-right">
-                  <p className="text-sm text-gray-500 mb-2">ร้อยละ</p>
-                  <div className="w-24 h-24 rounded-full bg-gradient-to-r from-violet-400 to-violet-600 flex items-center justify-center text-white">
-                    <span className="text-3xl font-bold">{att.percentage}%</span>
+                <div className="md:ml-8 text-center md:text-right">
+                  <p className="text-xs md:text-sm text-gray-500 mb-2">ร้อยละ</p>
+                  <div className="w-20 h-20 md:w-24 md:h-24 mx-auto md:mx-0 rounded-full bg-gradient-to-r from-violet-400 to-violet-600 flex items-center justify-center text-white">
+                    <span className="text-2xl md:text-3xl font-bold">{att.percentage}%</span>
                   </div>
                 </div>
               </div>
 
               {/* Progress bar */}
-              <div className="mt-6 h-2 bg-gray-200 rounded-full overflow-hidden">
+              <div className="mt-4 md:mt-6 h-2 bg-gray-200 rounded-full overflow-hidden">
                 <div
                   className={`h-full transition-all ${
                     att.percentage >= 80
@@ -128,6 +129,7 @@ export default function StudentAttendancePage() {
           ))}
         </div>
       )}
+      </div>
     </div>
   );
 }

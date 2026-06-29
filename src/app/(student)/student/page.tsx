@@ -59,28 +59,28 @@ export default function StudentDashboard() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-blue-50 py-12">
-      <div className="max-w-6xl mx-auto px-4">
-        <div className="mb-12">
-          <h1 className="text-4xl font-bold text-gray-900">ศูนย์การเรียน</h1>
-          <p className="text-gray-600 mt-2">
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-blue-50 py-6 md:py-12">
+      <div className="max-w-6xl mx-auto px-4 md:px-6">
+        <div className="mb-8 md:mb-12">
+          <h1 className="text-2xl md:text-4xl font-bold text-gray-900">ศูนย์การเรียน</h1>
+          <p className="text-sm md:text-base text-gray-600 mt-2">
             {user.role === "parent"
               ? `สวัสดี ${user.name} - ศูนย์การเรียนของบุตรหลาน`
               : `สวัสดี ${user.name} - ศูนย์การเรียนของคุณ`}
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
           {features.map((feature) => {
             const Icon = feature.icon;
             return (
               <Link key={feature.title} href={feature.href}>
-                <div className={`${feature.bg} rounded-2xl p-6 hover:shadow-lg transition-all cursor-pointer border-2 border-transparent hover:border-gray-200 h-full`}>
-                  <Icon className={`w-10 h-10 ${feature.color} mb-4`} />
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                <div className={`${feature.bg} rounded-xl md:rounded-2xl p-4 md:p-6 hover:shadow-lg transition-all cursor-pointer border-2 border-transparent hover:border-gray-200 h-full`}>
+                  <Icon className={`w-8 md:w-10 h-8 md:h-10 ${feature.color} mb-3 md:mb-4`} />
+                  <h3 className="text-base md:text-lg font-semibold text-gray-900 mb-2">
                     {feature.title}
                   </h3>
-                  <p className="text-sm text-gray-600">{feature.description}</p>
+                  <p className="text-xs md:text-sm text-gray-600">{feature.description}</p>
                 </div>
               </Link>
             );

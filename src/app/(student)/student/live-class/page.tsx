@@ -73,16 +73,17 @@ export default function StudentLiveClassPage() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto p-6">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-          <Video className="w-8 h-8 text-violet-600" />
-          Live Class
-        </h1>
-        <p className="text-gray-500 mt-2">
-          {isParent ? "ดูห้องเรียนของลูก" : "เข้าร่วมและดูห้องเรียนออนไลน์"}
-        </p>
-      </div>
+    <div className="min-h-screen bg-gray-50 py-6 md:py-10">
+      <div className="max-w-6xl mx-auto px-4 md:px-6">
+        <div className="mb-8">
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 flex items-center gap-2 md:gap-3">
+            <Video className="w-6 h-6 md:w-8 md:h-8 text-violet-600" />
+            Live Class
+          </h1>
+          <p className="text-sm md:text-base text-gray-500 mt-2">
+            {isParent ? "ดูห้องเรียนของลูก" : "เข้าร่วมและดูห้องเรียนออนไลน์"}
+          </p>
+        </div>
 
       <div className="space-y-4">
         {classes.length === 0 ? (
@@ -94,24 +95,24 @@ export default function StudentLiveClassPage() {
           classes.map((lc) => (
             <div
               key={lc._id}
-              className={`rounded-2xl border p-6 hover:shadow-lg transition-shadow ${
+              className={`rounded-xl md:rounded-2xl border p-4 md:p-6 hover:shadow-lg transition-shadow ${
                 lc.status === "live"
                   ? "border-red-300 bg-red-50"
                   : "border-gray-200 bg-white"
               }`}
             >
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center gap-3">
-                    <h3 className="text-lg font-semibold text-gray-900">{lc.title}</h3>
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusBadge(lc.status)}`}>
+              <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+                <div className="flex-1 min-w-0">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-2">
+                    <h3 className="text-base md:text-lg font-semibold text-gray-900 break-words">{lc.title}</h3>
+                    <span className={`px-2 md:px-3 py-1 rounded-full text-xs font-medium ${getStatusBadge(lc.status)} shrink-0 w-fit`}>
                       {getStatusText(lc.status)}
                     </span>
                   </div>
 
-                  <p className="text-gray-600 text-sm mt-2">{lc.description}</p>
+                  <p className="text-gray-600 text-xs md:text-sm mt-2 break-words">{lc.description}</p>
 
-                  <div className="flex items-center gap-4 mt-4 text-sm text-gray-500">
+                  <div className="flex flex-col gap-1 mt-3 text-xs md:text-sm text-gray-500">
                     <span className="flex items-center gap-1">
                       <Calendar className="w-4 h-4" />
                       {new Date(lc.scheduledAt).toLocaleDateString("th-TH")}
@@ -128,13 +129,13 @@ export default function StudentLiveClassPage() {
                   </div>
                 </div>
 
-                <div className="ml-4 flex gap-2">
+                <div className="flex gap-2 w-full md:w-auto md:ml-4 md:flex-col">
                   {lc.status === "live" && lc.meetLink && (
                     <a
                       href={lc.meetLink}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="px-4 py-2 bg-red-600 text-white rounded-lg flex items-center gap-2 hover:bg-red-700 transition-colors"
+                      className="flex-1 md:flex-none px-3 md:px-4 py-2 bg-red-600 text-white text-center md:text-left rounded-lg flex md:flex items-center justify-center md:justify-start gap-2 hover:bg-red-700 transition-colors whitespace-nowrap text-sm md:text-base"
                     >
                       <Video className="w-4 h-4" />
                       เข้าห้องเรียน
@@ -146,7 +147,7 @@ export default function StudentLiveClassPage() {
                       href={lc.replayLink}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="px-4 py-2 bg-violet-600 text-white rounded-lg flex items-center gap-2 hover:bg-violet-700 transition-colors"
+                      className="flex-1 md:flex-none px-3 md:px-4 py-2 bg-violet-600 text-white text-center md:text-left rounded-lg flex md:flex items-center justify-center md:justify-start gap-2 hover:bg-violet-700 transition-colors whitespace-nowrap text-sm md:text-base"
                     >
                       <ExternalLink className="w-4 h-4" />
                       ดูบันทึก
@@ -154,7 +155,7 @@ export default function StudentLiveClassPage() {
                   )}
 
                   {lc.status === "upcoming" && (
-                    <div className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg">
+                    <div className="px-3 md:px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-center text-sm md:text-base">
                       รอเริ่มสด
                     </div>
                   )}
@@ -163,6 +164,7 @@ export default function StudentLiveClassPage() {
             </div>
           ))
         )}
+      </div>
       </div>
     </div>
   );

@@ -71,16 +71,17 @@ export default function StudentQuizPage() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto p-6">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-          <Trophy className="w-8 h-8 text-violet-600" />
-          ข้อสอบ
-        </h1>
-        <p className="text-gray-500 mt-2">
-          {isParent ? "ดูคะแนนสอบของลูก" : "ทำและดูคะแนนสอบของคุณ"}
-        </p>
-      </div>
+    <div className="min-h-screen bg-gray-50 py-6 md:py-10">
+      <div className="max-w-6xl mx-auto px-4 md:px-6">
+        <div className="mb-8">
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 flex items-center gap-2 md:gap-3">
+            <Trophy className="w-6 h-6 md:w-8 md:h-8 text-violet-600" />
+            ข้อสอบ
+          </h1>
+          <p className="text-sm md:text-base text-gray-500 mt-2">
+            {isParent ? "ดูคะแนนสอบของลูก" : "ทำและดูคะแนนสอบของคุณ"}
+          </p>
+        </div>
 
       <div className="space-y-4">
         {quizzes.length === 0 ? (
@@ -96,14 +97,14 @@ export default function StudentQuizPage() {
             return (
               <div
                 key={quiz._id}
-                className="bg-white rounded-2xl border border-gray-200 p-6 hover:shadow-lg transition-shadow"
+                className="bg-white rounded-xl md:rounded-2xl border border-gray-200 p-4 md:p-6 hover:shadow-lg transition-shadow"
               >
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-gray-900">{quiz.title}</h3>
-                    <p className="text-gray-600 text-sm mt-2">{quiz.description}</p>
+                <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-base md:text-lg font-semibold text-gray-900 break-words">{quiz.title}</h3>
+                    <p className="text-gray-600 text-xs md:text-sm mt-2 break-words">{quiz.description}</p>
 
-                    <div className="flex items-center gap-4 mt-4 text-sm text-gray-500">
+                    <div className="flex flex-col gap-1 mt-3 text-xs md:text-sm text-gray-500">
                       <span>วิชา: {quiz.courseName || "—"}</span>
                       <span className="flex items-center gap-1">
                         <Clock className="w-4 h-4" />
@@ -114,7 +115,7 @@ export default function StudentQuizPage() {
 
                     {bestScore && (
                       <div className="mt-4 p-3 bg-violet-50 border border-violet-200 rounded-lg">
-                        <p className="text-sm font-medium text-violet-700">
+                        <p className="text-xs md:text-sm font-medium text-violet-700">
                           คะแนนดีที่สุด: {bestScore.score}/{bestScore.totalPoints} ({bestScore.percentage}%)
                         </p>
                         <p className="text-xs text-violet-600 mt-1">
@@ -124,7 +125,7 @@ export default function StudentQuizPage() {
                     )}
 
                     {quizAttempts.length > 1 && (
-                      <div className="mt-3 text-sm text-gray-500">
+                      <div className="mt-3 text-xs md:text-sm text-gray-500">
                         ทำแล้ว {quizAttempts.length} ครั้ง
                       </div>
                     )}
@@ -133,7 +134,7 @@ export default function StudentQuizPage() {
                   {isStudent && (
                     <Link
                       href={`/student/quiz/${quiz._id}`}
-                      className="ml-4 px-4 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition-colors whitespace-nowrap"
+                      className="w-full md:w-auto md:ml-4 px-3 md:px-4 py-2 bg-violet-600 text-white text-center rounded-lg hover:bg-violet-700 transition-colors whitespace-nowrap text-sm md:text-base"
                     >
                       {bestScore ? "ทำอีกครั้ง" : "เริ่มทำ"}
                     </Link>
@@ -143,6 +144,7 @@ export default function StudentQuizPage() {
             );
           })
         )}
+      </div>
       </div>
     </div>
   );
