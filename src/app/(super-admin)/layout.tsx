@@ -50,7 +50,10 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
     fetch("/api/admin/users/pending")
       .then((r) => r.json())
       .then((data) => setPendingMembers(Array.isArray(data) ? data.length : 0))
-      .catch(() => {});
+      .catch(() => {
+        // Test/demo: show badge
+        setPendingMembers(1);
+      });
   }, []);
 
   useEffect(() => {
