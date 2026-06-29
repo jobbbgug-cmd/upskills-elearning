@@ -367,8 +367,8 @@ export default function AdminUsersPage() {
                     </td>
                     <td className="px-5 py-4 text-right">
                       <div className="flex items-center justify-end gap-1">
-                        <Link href={`/admin/students/${u._id}`}
-                          className="p-1.5 text-gray-400 hover:text-violet-600 hover:bg-violet-50 rounded-lg transition-colors" title={u.role === "student" ? "ดูโปรไฟล์นักเรียน" : "ดูโปรไฟล์"}>
+                        <Link href={`/admin/profile/${u._id}`}
+                          className="p-1.5 text-gray-400 hover:text-violet-600 hover:bg-violet-50 rounded-lg transition-colors" title="ดูโปรไฟล์">
                           <ExternalLink className="w-4 h-4" />
                         </Link>
                         {u.role !== "owner" && (

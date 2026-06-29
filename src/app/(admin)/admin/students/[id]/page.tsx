@@ -81,6 +81,8 @@ export default function StudentDetailPage({ params }: { params: Promise<{ id: st
   const [saved,     setSaved]     = useState(false);
   const [uploading, setUploading] = useState(false);
   const [myRole,    setMyRole]    = useState<string>("");
+  const [parents,   setParents]   = useState<{_id: string; name: string; phone?: string}[]>([]);
+  const [loadingParents, setLoadingParents] = useState(false);
 
   // form fields
   const [form, setForm] = useState({
@@ -150,6 +152,28 @@ export default function StudentDetailPage({ params }: { params: Promise<{ id: st
 
     loadData();
   }, [id]);
+
+  useEffect(() => {
+    const loadParents = async () => {
+      setLoadingParents(true);
+      try {
+        const res = await fetch("/api/admin/users?role=parent");
+        if (res.ok) {
+          const data = await res.json();
+          const parentList = Array.isArray(data) ? data : (data.users || []);
+          setParents(parentList.map((p: any) => ({
+            _id: p._id,
+            name: p.name,
+            phone: p.phone,
+          })));
+        }
+      } catch (err) {
+        console.error("Failed to load parents:", err);
+      }
+      setLoadingParents(false);
+    };
+    loadParents();
+  }, []);
 
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -526,7 +550,31 @@ export default function StudentDetailPage({ params }: { params: Promise<{ id: st
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">ชื่อผู้ปกครอง</label>
-                <input value={form.parentName} onChange={(e) => setForm({ ...form, parentName: e.target.value })} className={inputCls} placeholder="ชื่อ-นามสกุลผู้ปกครอง" />
+                <select
+                  value={form.parentName}
+                  onChange={(e) => {
+                    const selectedParent = parents.find(p => p.name === e.target.value);
+                    if (selectedParent) {
+                      setForm({ ...form, parentName: selectedParent.name, parentPhone: selectedParent.phone || "" });
+                    } else {
+                      setForm({ ...form, parentName: e.target.value });
+                    }
+                  }}
+                  className={inputCls}
+                >
+                  <option value="">— เลือกผู้ปกครอง —</option>
+                  {loadingParents ? (
+                    <option disabled>กำลังโหลด...</option>
+                  ) : parents.length === 0 ? (
+                    <option disabled>ไม่มีผู้ปกครอง</option>
+                  ) : (
+                    parents.map(p => (
+                      <option key={p._id} value={p.name}>
+                        {p.name} {p.phone ? `(${p.phone})` : ""}
+                      </option>
+                    ))
+                  )}
+                </select>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">เบอร์โทรผู้ปกครอง</label>

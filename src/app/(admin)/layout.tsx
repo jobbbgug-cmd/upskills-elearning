@@ -228,7 +228,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     );
   };
 
-  const renderGroup = (id: string, label: string, icon: React.ReactNode, paths: string[], children: React.ReactNode) => {
+  const renderGroup = (id: string, label: string, icon: React.ReactNode, paths: string[], children: React.ReactNode, badge?: number) => {
     const isOpen   = openGroups.has(id);
     const hasActive = paths.some((p) => pathname === p || pathname.startsWith(p + "/"));
     return (
@@ -239,6 +239,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           }`}>
           <span className={hasActive ? "text-indigo-500" : "text-gray-400"}>{icon}</span>
           <span className="flex-1 text-left">{label}</span>
+          {badge !== undefined && badge > 0 && (
+            <span className="bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full min-w-[20px] text-center">
+              {badge}
+            </span>
+          )}
           <ChevronDown className={`w-3.5 h-3.5 text-gray-400 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
         </button>
         {isOpen && (
@@ -317,7 +322,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </>
           )}
 
-          {renderGroup("members", "สมาชิก", <Users className="w-4 h-4" />,
+          {renderGroup("members", "สมาชิก", <Users className="w-4 h-4" />, 
             ["/admin/members","/admin/users"],
             <>
               {isAdmin && navLink("/admin/members", <UserCheck className="w-4 h-4" />,
@@ -331,7 +336,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 </span>
               )}
               {isAdmin && navLink("/admin/users", <UserCog className="w-4 h-4" />, "จัดการผู้ใช้")}
-            </>
+            </>,
+            pendingCount
           )}
 
           {renderGroup("finance", "รายได้และการเงิน", <TrendingUp className="w-4 h-4" />,

@@ -189,29 +189,29 @@ export default function PayoutsPage() {
       {/* Platform totals */}
       {commissions && (
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="bg-gradient-to-br from-violet-500 to-purple-600 rounded-2xl p-5 text-white">
+          <div className="bg-white rounded-2xl border border-l-4 border-gray-100 border-l-violet-500 p-5">
             <div className="flex items-center gap-2 mb-3">
-              <TrendingUp className="w-5 h-5 text-violet-200" />
-              <span className="text-violet-100 text-sm">รายได้รวมทั้งหมด</span>
+              <TrendingUp className="w-5 h-5 text-violet-600" />
+              <span className="text-gray-700 text-sm font-medium">รายได้รวมทั้งหมด</span>
             </div>
-            <div className="text-3xl font-extrabold">฿{fmt(commissions.platformTotalGross)}</div>
-            <div className="text-violet-100 text-xs mt-1">จากทุกสถาบัน</div>
+            <div className="text-3xl font-extrabold text-gray-900">฿{fmt(commissions.platformTotalGross)}</div>
+            <div className="text-gray-500 text-xs mt-1">จากทุกสถาบัน</div>
           </div>
-          <div className="bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl p-5 text-white">
+          <div className="bg-white rounded-2xl border border-l-4 border-gray-100 border-l-green-500 p-5">
             <div className="flex items-center gap-2 mb-3">
-              <Receipt className="w-5 h-5 text-green-200" />
-              <span className="text-green-100 text-sm">Commission ที่ได้รับ</span>
+              <Receipt className="w-5 h-5 text-green-600" />
+              <span className="text-gray-700 text-sm font-medium">Commission ที่ได้รับ</span>
             </div>
-            <div className="text-3xl font-extrabold">฿{fmt(commissions.platformTotalCommission)}</div>
-            <div className="text-green-100 text-xs mt-1">รายได้สุทธิของแพลตฟอร์ม</div>
+            <div className="text-3xl font-extrabold text-gray-900">฿{fmt(commissions.platformTotalCommission)}</div>
+            <div className="text-gray-500 text-xs mt-1">รายได้สุทธิของแพลตฟอร์ม</div>
           </div>
-          <div className="bg-gradient-to-br from-red-500 to-rose-600 rounded-2xl p-5 text-white">
+          <div className="bg-white rounded-2xl border border-l-4 border-gray-100 border-l-red-500 p-5">
             <div className="flex items-center gap-2 mb-3">
-              <Clock3 className="w-5 h-5 text-red-200" />
-              <span className="text-red-100 text-sm">ค้างจ่ายสถาบัน</span>
+              <Clock3 className="w-5 h-5 text-red-600" />
+              <span className="text-gray-700 text-sm font-medium">ค้างจ่ายสถาบัน</span>
             </div>
-            <div className="text-3xl font-extrabold">฿{fmt(commissions.platformOutstanding)}</div>
-            <div className="text-rose-100 text-xs mt-1">ยอดรวมที่ยังไม่ได้โอน</div>
+            <div className="text-3xl font-extrabold text-gray-900">฿{fmt(commissions.platformOutstanding)}</div>
+            <div className="text-gray-500 text-xs mt-1">ยอดรวมที่ยังไม่ได้โอน</div>
           </div>
         </div>
       )}

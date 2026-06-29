@@ -88,7 +88,7 @@ const NEXT_STATUS: Record<string, string[]> = {
 export default function TrialsPage() {
   const [items, setItems]   = useState<TrialItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter]  = useState<string>("all");
+  const [filter, setFilter]  = useState<string>("pending");
 
   // Create institution modal state
   const [currentTrialId, setCurrentTrialId] = useState<string | null>(null);

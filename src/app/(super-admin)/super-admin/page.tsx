@@ -86,40 +86,40 @@ export default async function SuperAdminPage() {
 
       {/* Revenue/booking split */}
       <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-        <div className="bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl p-5 text-white">
+        <div className="bg-white rounded-2xl border border-l-4 border-gray-100 border-l-green-500 p-5">
           <div className="flex items-center gap-2 mb-3">
-            <CheckCircle2 className="w-5 h-5 text-green-200" />
-            <span className="text-green-100 text-sm font-medium">รายได้รับแล้ว</span>
+            <CheckCircle2 className="w-5 h-5 text-green-600" />
+            <span className="text-gray-700 text-sm font-medium">รายได้รับแล้ว</span>
           </div>
-          <div className="text-3xl font-extrabold">฿{s.totalRevenue.toLocaleString()}</div>
-          <div className="text-green-100 text-xs mt-1">{s.totalConfirmed} การจองยืนยันแล้ว</div>
+          <div className="text-3xl font-extrabold text-gray-900">฿{s.totalRevenue.toLocaleString()}</div>
+          <div className="text-gray-500 text-xs mt-1">{s.totalConfirmed} การจองยืนยันแล้ว</div>
         </div>
-        <div className="bg-gradient-to-br from-violet-500 to-purple-600 rounded-2xl p-5 text-white">
+        <div className="bg-white rounded-2xl border border-l-4 border-gray-100 border-l-violet-500 p-5">
           <div className="flex items-center gap-2 mb-3">
-            <Percent className="w-5 h-5 text-violet-200" />
-            <span className="text-violet-100 text-sm font-medium">ค่าคอมมิชชั่นรวม</span>
+            <Percent className="w-5 h-5 text-violet-600" />
+            <span className="text-gray-700 text-sm font-medium">ค่าคอมมิชชั่นรวม</span>
           </div>
-          <div className="text-3xl font-extrabold">฿{(() => { const r = s.totalCommission; const p = r.toString().split("."); p[0] = p[0].replace(/\B(?=(\d{3})+(?!\d))/g, ","); return p.join("."); })()}</div>
-          <div className="text-violet-100 text-xs mt-1">จากรายได้ที่ยืนยันแล้ว</div>
+          <div className="text-3xl font-extrabold text-gray-900">฿{(() => { const r = s.totalCommission; const p = r.toString().split("."); p[0] = p[0].replace(/\B(?=(\d{3})+(?!\d))/g, ","); return p.join("."); })()}</div>
+          <div className="text-gray-500 text-xs mt-1">จากรายได้ที่ยืนยันแล้ว</div>
         </div>
-        <div className="bg-gradient-to-br from-amber-400 to-orange-500 rounded-2xl p-5 text-white">
+        <div className="bg-white rounded-2xl border border-l-4 border-gray-100 border-l-amber-500 p-5">
           <div className="flex items-center gap-2 mb-3">
-            <Clock3 className="w-5 h-5 text-amber-200" />
-            <span className="text-amber-100 text-sm font-medium">รอดำเนินการ</span>
+            <Clock3 className="w-5 h-5 text-amber-600" />
+            <span className="text-gray-700 text-sm font-medium">รอดำเนินการ</span>
           </div>
-          <div className="text-3xl font-extrabold">{s.totalPending}</div>
-          <div className="text-amber-100 text-xs mt-1">การจองรอตรวจสอบ</div>
+          <div className="text-3xl font-extrabold text-gray-900">{s.totalPending}</div>
+          <div className="text-gray-500 text-xs mt-1">การจองรอตรวจสอบ</div>
         </div>
-        <div className="bg-gradient-to-br from-indigo-500 to-blue-600 rounded-2xl p-5 text-white">
+        <div className="bg-white rounded-2xl border border-l-4 border-gray-100 border-l-indigo-500 p-5">
           <div className="flex items-center gap-2 mb-3">
-            <Building2 className="w-5 h-5 text-indigo-200" />
-            <span className="text-indigo-100 text-sm font-medium">สถาบันตามแผน</span>
+            <Building2 className="w-5 h-5 text-indigo-600" />
+            <span className="text-gray-700 text-sm font-medium">สถาบันตามแผน</span>
           </div>
           <div className="space-y-1.5 mt-1">
             {Object.entries(s.planCounts).map(([plan, count]) => (
               <div key={plan} className="flex justify-between items-center">
-                <span className="text-indigo-200 text-sm">{PLAN_LABELS[plan] ?? plan}</span>
-                <span className="text-white font-extrabold text-3xl">{count}</span>
+                <span className="text-gray-600 text-sm">{PLAN_LABELS[plan] ?? plan}</span>
+                <span className="text-gray-900 font-extrabold text-3xl">{count}</span>
               </div>
             ))}
           </div>
@@ -165,16 +165,22 @@ function StatBox({ icon: Icon, label, value, sub, color, href, isMoney = false }
   icon: React.ComponentType<{ className?: string }>;
   label: string; value: number; sub: string; color: string; href: string; isMoney?: boolean;
 }) {
-  const colors: Record<string, string> = {
-    violet: "bg-violet-50 text-violet-600",
-    blue:   "bg-blue-50 text-blue-600",
-    indigo: "bg-indigo-50 text-indigo-600",
-    green:  "bg-green-50 text-green-600",
+  const borderColors: Record<string, string> = {
+    violet: "border-l-violet-500",
+    blue:   "border-l-blue-500",
+    indigo: "border-l-indigo-500",
+    green:  "border-l-green-500",
+  };
+  const iconColors: Record<string, string> = {
+    violet: "text-violet-600",
+    blue:   "text-blue-600",
+    indigo: "text-indigo-600",
+    green:  "text-green-600",
   };
   return (
-    <Link href={href} className="bg-white rounded-2xl border border-gray-100 p-5 hover:border-violet-200 hover:shadow-sm transition-all group">
-      <div className={`inline-flex items-center justify-center w-10 h-10 rounded-xl mb-3 ${colors[color] ?? colors.violet}`}>
-        <Icon className="w-5 h-5" />
+    <Link href={href} className={`bg-white rounded-2xl border border-l-4 border-gray-100 ${borderColors[color] ?? borderColors.violet} p-5 hover:shadow-md transition-all group`}>
+      <div className="mb-3">
+        <Icon className={`w-6 h-6 ${iconColors[color] ?? iconColors.violet}`} />
       </div>
       <div className="text-2xl font-bold text-gray-900">
         {isMoney ? `฿${value.toLocaleString()}` : value.toLocaleString()}

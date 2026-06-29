@@ -297,6 +297,7 @@ export default function SuperAdminRolesPage() {
             ) : filtered.map((u) => {
               const rd = ROLE_DEF[u.role];
               const sd = STATUS_DEF[u.status];
+              if (!rd) return null;
               const Icon = rd.icon;
               return (
                 <tr key={u._id} className="hover:bg-violet-50/30 transition-colors group">

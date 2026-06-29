@@ -190,22 +190,22 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
           label="รายได้รับแล้ว"
           amount={stats.revenue}
           sub={`${stats.confirmedBookings} การจอง${stats.commissionRate > 0 ? ` · หักค่าคอม ${stats.commissionRate}%` : ""}`}
-          from="from-emerald-500" to="to-teal-600"
-          icon={<CheckCircle2 className="w-5 h-5 text-emerald-200" />}
+          borderColor="border-l-emerald-500"
+          icon={<CheckCircle2 className="w-5 h-5 text-emerald-600" />}
         />
         <RevCard
           label="รอดำเนินการ"
           amount={stats.pendingRevenue}
           sub={`${stats.pendingBookings} รอชำระ${stats.commissionRate > 0 ? ` · หักค่าคอม ${stats.commissionRate}%` : ""}`}
-          from="from-amber-400" to="to-orange-500"
-          icon={<Clock3 className="w-5 h-5 text-amber-200" />}
+          borderColor="border-l-amber-500"
+          icon={<Clock3 className="w-5 h-5 text-amber-600" />}
         />
         <RevCard
           label="รายรับรวม (ถ้าชำระครบ)"
           amount={stats.revenue + stats.pendingRevenue}
           sub={`${stats.confirmedBookings + stats.pendingBookings} การจองทั้งหมด`}
-          from="from-indigo-500" to="to-violet-600"
-          icon={<TrendingUp className="w-5 h-5 text-indigo-200" />}
+          borderColor="border-l-indigo-500"
+          icon={<TrendingUp className="w-5 h-5 text-indigo-600" />}
         />
       </div>
 
@@ -265,17 +265,17 @@ function KpiCard({ label, value, sub, accent, icon, href }: {
   );
 }
 
-function RevCard({ label, amount, sub, from, to, icon }: {
-  label: string; amount: number; sub: string; from: string; to: string; icon: React.ReactNode;
+function RevCard({ label, amount, sub, borderColor, icon }: {
+  label: string; amount: number; sub: string; borderColor: string; icon: React.ReactNode;
 }) {
   return (
-    <div className={`bg-gradient-to-br ${from} ${to} rounded-2xl p-5 text-white`}>
+    <div className={`bg-white rounded-2xl border border-gray-100 border-l-4 ${borderColor} p-5`}>
       <div className="flex items-center justify-between mb-3">
-        <span className="text-white/80 text-sm font-medium">{label}</span>
+        <span className="text-gray-700 text-sm font-medium">{label}</span>
         {icon}
       </div>
-      <div className="text-3xl font-extrabold mb-1">฿{amount.toLocaleString()}</div>
-      <div className="text-white/70 text-xs">{sub}</div>
+      <div className="text-3xl font-extrabold mb-1 text-gray-900">฿{amount.toLocaleString()}</div>
+      <div className="text-gray-500 text-xs">{sub}</div>
     </div>
   );
 }
