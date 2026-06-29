@@ -142,12 +142,12 @@ export default function SuperAdminMembersPage() {
       />
 
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 md:gap-6 mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">อนุมัติสมาชิก</h1>
-          <p className="text-gray-500 text-sm mt-1">อนุมัติหรือปฏิเสธคำขอสมัครสมาชิก — ทุกสถาบัน</p>
+          <h1 className="text-xl md:text-2xl font-bold text-gray-900">อนุมัติสมาชิก</h1>
+          <p className="text-gray-500 text-xs md:text-sm mt-1">อนุมัติหรือปฏิเสธคำขอสมัครสมาชิก — ทุกสถาบัน</p>
         </div>
-        <button onClick={() => loadPending(filterInstitution)} className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors">
+        <button onClick={() => loadPending(filterInstitution)} className="flex items-center justify-center gap-2 px-3 py-2 text-xs md:text-sm text-gray-600 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors whitespace-nowrap">
           <RefreshCw className="w-4 h-4" />
           รีเฟรช
         </button>
@@ -179,34 +179,34 @@ export default function SuperAdminMembersPage() {
             รหัสผ่านที่สร้างขึ้น — กรุณา copy และส่งให้ผู้ใช้ทันที
           </p>
           {approved.map((a) => (
-            <div key={a.userId} className="bg-green-50 border border-green-200 rounded-2xl p-5">
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <p className="font-semibold text-gray-900">{a.name}</p>
-                  <p className="text-sm text-gray-500">{a.email} · {roleLabel(a.role)}</p>
-                  <div className="mt-3 flex items-center gap-3">
-                    <div className="bg-white border border-green-300 rounded-xl px-4 py-2 font-mono text-lg font-bold text-gray-900 tracking-widest">
+            <div key={a.userId} className="bg-green-50 border border-green-200 rounded-xl md:rounded-2xl p-4 md:p-5">
+              <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-3 md:gap-4">
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold text-sm md:text-base text-gray-900 break-words">{a.name}</p>
+                  <p className="text-xs md:text-sm text-gray-500 break-all">{a.email} · {roleLabel(a.role)}</p>
+                  <div className="mt-3 flex flex-col gap-2">
+                    <div className="bg-white border border-green-300 rounded-lg md:rounded-xl px-3 md:px-4 py-2 font-mono text-sm md:text-lg font-bold text-gray-900 tracking-widest break-all">
                       {a.password}
                     </div>
                     <button
                       onClick={() => copyText(a.password, a.userId)}
-                      className="flex items-center gap-1.5 px-3 py-2 bg-green-600 text-white text-sm font-medium rounded-xl hover:bg-green-700 transition-colors"
+                      className="flex items-center justify-center gap-1.5 px-3 py-2 bg-green-600 text-white text-xs md:text-sm font-medium rounded-lg md:rounded-xl hover:bg-green-700 transition-colors w-full md:w-auto"
                     >
                       {copied === a.userId ? <><Check className="w-4 h-4" /> copied!</> : <><Copy className="w-4 h-4" /> Copy</>}
                     </button>
                   </div>
-                  <p className="text-xs text-green-700 mt-2">ข้อความสำหรับส่งให้ผู้ใช้:</p>
+                  <p className="text-xs text-green-700 mt-3">ข้อความสำหรับส่งให้ผู้ใช้:</p>
                   <button
                     onClick={() => copyText(
                       `ยินดีต้อนรับสู่ UPSkills!\nชื่อผู้ใช้: ${a.email}\nรหัสผ่าน: ${a.password}\nเข้าสู่ระบบ: ${window.location.origin}/login`,
                       `msg-${a.userId}`
                     )}
-                    className="mt-1 text-xs text-green-600 underline hover:text-green-800"
+                    className="mt-1 text-xs text-green-600 underline hover:text-green-800 block"
                   >
                     {copied === `msg-${a.userId}` ? "copied!" : "copy ข้อความทั้งหมด"}
                   </button>
                 </div>
-                <button onClick={() => setApproved((prev) => prev.filter((x) => x.userId !== a.userId))} className="text-gray-300 hover:text-gray-500 text-lg leading-none">x</button>
+                <button onClick={() => setApproved((prev) => prev.filter((x) => x.userId !== a.userId))} className="text-gray-300 hover:text-gray-500 text-lg leading-none self-start md:self-auto shrink-0 p-1">×</button>
               </div>
             </div>
           ))}
@@ -241,53 +241,53 @@ export default function SuperAdminMembersPage() {
         ) : (
           <div className="space-y-3">
             {users.map((u) => (
-              <div key={u._id} className="bg-white rounded-2xl border border-gray-200 p-5 flex items-center gap-4">
-                <div className={`w-11 h-11 rounded-full flex items-center justify-center shrink-0 ${roleBadge(u.role)}`}>
+              <div key={u._id} className="bg-white rounded-xl md:rounded-2xl border border-gray-200 p-4 md:p-5 flex flex-col md:flex-row md:items-center md:gap-4 gap-3">
+                <div className={`w-10 h-10 md:w-11 md:h-11 rounded-full flex items-center justify-center shrink-0 ${roleBadge(u.role)}`}>
                   {roleIcon(u.role)}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <p className="font-semibold text-gray-900">{u.name}</p>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <p className="font-semibold text-sm md:text-base text-gray-900 break-words">{u.name}</p>
                     <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${roleBadge(u.role)}`}>{roleLabel(u.role)}</span>
                     {u.gradeLevel && <span className="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">{u.gradeLevel}</span>}
                     {u.institutionId && (
-                      <span className="inline-flex items-center gap-1 text-xs font-semibold text-violet-700 bg-violet-50 px-2 py-0.5 rounded-full">
-                        <Building2 className="w-3 h-3" />{institutionNames[u.institutionId] ?? "สถาบัน"}
+                      <span className="inline-flex items-center gap-0.5 text-xs font-semibold text-violet-700 bg-violet-50 px-2 py-0.5 rounded-full">
+                        <Building2 className="w-3 h-3" /><span className="truncate">{institutionNames[u.institutionId] ?? "สถาบัน"}</span>
                       </span>
                     )}
                   </div>
-                  <p className="text-sm text-gray-400 mt-0.5">{u.email}</p>
+                  <p className="text-xs md:text-sm text-gray-400 mt-1 break-all">{u.email}</p>
                   {u.contactChannel && (
-                    <div className="inline-flex items-center gap-1.5 mt-1.5 bg-violet-50 border border-violet-200 rounded-lg px-2.5 py-1 text-xs text-violet-700 font-medium">
-                      <span>ส่งทาง {u.contactChannel}:</span>
-                      <span className="font-bold">{u.contactId}</span>
+                    <div className="flex items-center gap-1.5 mt-2 bg-violet-50 border border-violet-200 rounded-lg px-2 md:px-2.5 py-1 text-xs text-violet-700 font-medium flex-wrap">
+                      <span className="shrink-0">ส่งทาง {u.contactChannel}:</span>
+                      <span className="font-bold break-all">{u.contactId}</span>
                     </div>
                   )}
-                  <p className="text-xs text-gray-400 mt-1">
+                  <p className="text-xs text-gray-400 mt-2">
                     สมัครเมื่อ {new Date(u.createdAt).toLocaleDateString("th-TH", { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" })}
                   </p>
                 </div>
-                <div className="flex items-center gap-2 shrink-0">
+                <div className="flex flex-col sm:flex-row md:flex-row gap-2 md:gap-2 md:shrink-0 w-full md:w-auto">
                   <button
                     onClick={() => setConfirmDialog({ open: true, type: "approve", user: u })}
                     disabled={processing === u._id}
-                    className="flex items-center gap-1.5 px-4 py-2 bg-green-600 text-white text-sm font-semibold rounded-xl hover:bg-green-700 disabled:opacity-50 transition-colors"
+                    className="flex items-center justify-center gap-1.5 px-3 md:px-4 py-2 bg-green-600 text-white text-xs md:text-sm font-semibold rounded-lg md:rounded-xl hover:bg-green-700 disabled:opacity-50 transition-colors flex-1 md:flex-none"
                   >
                     <CheckCircle className="w-4 h-4" />
-                    {processing === u._id ? "กำลังดำเนินการ..." : "อนุมัติ"}
+                    <span className="truncate">{processing === u._id ? "กำลังดำเนินการ..." : "อนุมัติ"}</span>
                   </button>
                   <button
                     onClick={() => setConfirmDialog({ open: true, type: "reject", user: u })}
                     disabled={processing === u._id}
-                    className="flex items-center gap-1.5 px-4 py-2 bg-red-50 text-red-600 text-sm font-semibold rounded-xl hover:bg-red-100 disabled:opacity-50 transition-colors border border-red-200"
+                    className="flex items-center justify-center gap-1.5 px-3 md:px-4 py-2 bg-red-50 text-red-600 text-xs md:text-sm font-semibold rounded-lg md:rounded-xl hover:bg-red-100 disabled:opacity-50 transition-colors border border-red-200 flex-1 md:flex-none"
                   >
                     <XCircle className="w-4 h-4" />
-                    ปฏิเสธ
+                    <span className="truncate">ปฏิเสธ</span>
                   </button>
                   <button
                     onClick={() => doDelete(u._id, u.name)}
                     disabled={processing === u._id}
-                    className="p-2 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-colors disabled:opacity-50"
+                    className="p-2 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-lg md:rounded-xl transition-colors disabled:opacity-50 md:shrink-0"
                     title="ลบ"
                   >
                     <Trash2 className="w-4 h-4" />
@@ -301,8 +301,8 @@ export default function SuperAdminMembersPage() {
 
       {/* All users tab */}
       {tab === "all" && (
-        <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
-          <table className="w-full">
+        <div className="bg-white rounded-xl md:rounded-2xl border border-gray-200 overflow-x-auto">
+          <table className="w-full min-w-max">
             <thead>
               <tr className="border-b border-gray-100 bg-gray-50">
                 <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wide">ผู้ใช้</th>
