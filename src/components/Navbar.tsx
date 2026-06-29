@@ -1,9 +1,9 @@
 "use client";
 import Link from "next/link";
 import Image from "next/image";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { Menu, X, User, LogOut, LayoutDashboard, CalendarDays, ShieldCheck, BookOpen, ClipboardCheck, PenLine, Award, Radio, Receipt, MessageSquare, Star, BarChart2, Building2, Users as UsersIcon, Wallet, Tag, Settings, ChevronDown } from "lucide-react";
+import { Menu, X, User, LogOut, LayoutDashboard, CalendarDays, ShieldCheck, BookOpen, ClipboardCheck, PenLine, Award, Radio, Receipt, MessageSquare, Star } from "lucide-react";
 import NotificationBell from "@/components/NotificationBell";
 import { IUser, IBranding } from "@/types";
 import TrialRequestModal from "@/components/TrialRequestModal";
@@ -13,28 +13,13 @@ export default function Navbar() {
   const [branding, setBranding]       = useState<IBranding | null>(null);
   const [menuOpen, setMenuOpen]       = useState(false);
   const [isNavigating, setIsNavigating] = useState(false);
-  const [superAdminDropdown, setSuperAdminDropdown] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
   const router   = useRouter();
   const pathname = usePathname();
 
   useEffect(() => {
     setIsNavigating(false);
     setMenuOpen(false);
-    setSuperAdminDropdown(false);
   }, [pathname]);
-
-  useEffect(() => {
-    const handleClick = (e: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
-        setSuperAdminDropdown(false);
-      }
-    };
-    if (superAdminDropdown) {
-      document.addEventListener("mousedown", handleClick);
-      return () => document.removeEventListener("mousedown", handleClick);
-    }
-  }, [superAdminDropdown]);
 
   useEffect(() => {
     fetch("/api/auth/me")
@@ -141,75 +126,10 @@ export default function Navbar() {
                   </Link>
                 )}
                 {user.role === "super_admin" && (
-                  <div ref={dropdownRef}>
-                    <button
-                      onClick={() => setSuperAdminDropdown(!superAdminDropdown)}
-                      className="flex items-center gap-1.5 text-sm font-medium px-3 py-2 rounded-lg text-rose-600 hover:bg-rose-50 transition-colors"
-                    >
-                      <ShieldCheck className="w-4 h-4" />
-                      จัดการหลังบ้าน
-                      <ChevronDown className={`w-3.5 h-3.5 transition-transform ${superAdminDropdown ? "rotate-180" : ""}`} />
-                    </button>
-                    {superAdminDropdown && (
-                      <div className="absolute -right-2 top-12 w-64 bg-white rounded-xl shadow-2xl border border-gray-200 py-2 z-[99999]">
-                        {/* Dashboard */}
-                        <div>
-                          <p className="px-4 pt-3 pb-1 text-xs font-semibold text-gray-500 uppercase tracking-wide">ภาพรวม</p>
-                          <Link href="/super-admin" onClick={() => setSuperAdminDropdown(false)} className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
-                            <LayoutDashboard className="w-4 h-4" />
-                            ภาพรวม
-                          </Link>
-                          <Link href="/super-admin/analytics" onClick={() => setSuperAdminDropdown(false)} className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
-                            <BarChart2 className="w-4 h-4" />
-                            Analytics
-                          </Link>
-                        </div>
-
-                        {/* Management */}
-                        <div className="border-t border-gray-100 mt-2">
-                          <p className="px-4 pt-3 pb-1 text-xs font-semibold text-gray-500 uppercase tracking-wide">จัดการ</p>
-                          <Link href="/super-admin/institutions" onClick={() => setSuperAdminDropdown(false)} className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
-                            <Building2 className="w-4 h-4" />
-                            สถาบัน
-                          </Link>
-                          <Link href="/super-admin/members" onClick={() => setSuperAdminDropdown(false)} className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
-                            <ShieldCheck className="w-4 h-4" />
-                            อนุมัติสมาชิก
-                          </Link>
-                          <Link href="/super-admin/users" onClick={() => setSuperAdminDropdown(false)} className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
-                            <UsersIcon className="w-4 h-4" />
-                            จัดการผู้ใช้
-                          </Link>
-                        </div>
-
-                        {/* Finance */}
-                        <div className="border-t border-gray-100 mt-2">
-                          <p className="px-4 pt-3 pb-1 text-xs font-semibold text-gray-500 uppercase tracking-wide">การเงิน</p>
-                          <Link href="/super-admin/finance" onClick={() => setSuperAdminDropdown(false)} className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
-                            <Wallet className="w-4 h-4" />
-                            ข้อมูลทางการเงิน
-                          </Link>
-                          <Link href="/super-admin/payouts" onClick={() => setSuperAdminDropdown(false)} className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
-                            <Receipt className="w-4 h-4" />
-                            Commission & Payout
-                          </Link>
-                        </div>
-
-                        {/* System */}
-                        <div className="border-t border-gray-100 mt-2">
-                          <p className="px-4 pt-3 pb-1 text-xs font-semibold text-gray-500 uppercase tracking-wide">ระบบ</p>
-                          <Link href="/super-admin/settings" onClick={() => setSuperAdminDropdown(false)} className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
-                            <Settings className="w-4 h-4" />
-                            ตั้งค่าทั่วไป
-                          </Link>
-                          <Link href="/super-admin/roles" onClick={() => setSuperAdminDropdown(false)} className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
-                            <ShieldCheck className="w-4 h-4" />
-                            จัดการ Role
-                          </Link>
-                        </div>
-                      </div>
-                    )}
-                  </div>
+                  <Link href="/super-admin" className="flex items-center gap-1.5 text-sm font-medium px-3 py-2 rounded-lg text-rose-600 hover:bg-rose-50 transition-colors">
+                    <ShieldCheck className="w-4 h-4" />
+                    จัดการหลังบ้าน
+                  </Link>
                 )}
                 {user.role === "student" && (
                   <Link href="/dashboard/reviews" className="flex items-center gap-1.5 text-sm px-3 py-2 rounded-lg text-gray-600 hover:text-indigo-600 hover:bg-gray-50 transition-colors">
