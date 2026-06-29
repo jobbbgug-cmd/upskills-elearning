@@ -186,7 +186,7 @@ export default function SuperAdminUsersPage() {
   };
 
   const openCreate = () => {
-    setCreateForm({ name: "", email: "", role: "student", gradeLevel: "", password: generatePassword(), institutionId: institutions[0]?._id ?? "" });
+    setCreateForm({ name: "", email: "", role: "student", gradeLevel: "", password: generatePassword(), institutionId: institutions[0]?._id ?? "", studentId: "", studentName: "" });
     setCreateError("");
     setCreateShowPass(true);
     setCreateCopied(false);
