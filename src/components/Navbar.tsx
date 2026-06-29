@@ -3,7 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { Menu, X, User, LogOut, LayoutDashboard, CalendarDays, ShieldCheck, BookOpen, ClipboardCheck, PenLine, Award, Radio, Receipt, MessageSquare, Star } from "lucide-react";
+import { Menu, X, User, LogOut, LayoutDashboard, CalendarDays, ShieldCheck, BookOpen, ClipboardCheck, PenLine, Award, Radio, Receipt, MessageSquare, Star, ChevronDown } from "lucide-react";
 import NotificationBell from "@/components/NotificationBell";
 import { IUser, IBranding } from "@/types";
 import TrialRequestModal from "@/components/TrialRequestModal";
@@ -13,13 +13,26 @@ export default function Navbar() {
   const [branding, setBranding]       = useState<IBranding | null>(null);
   const [menuOpen, setMenuOpen]       = useState(false);
   const [isNavigating, setIsNavigating] = useState(false);
+  const [superAdminMenu, setSuperAdminMenu] = useState(false);
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
   const router   = useRouter();
   const pathname = usePathname();
 
   useEffect(() => {
     setIsNavigating(false);
     setMenuOpen(false);
+    setSuperAdminMenu(false);
   }, [pathname]);
+
+  const toggleGroup = (group: string) => {
+    const newSet = new Set(expandedGroups);
+    if (newSet.has(group)) {
+      newSet.delete(group);
+    } else {
+      newSet.add(group);
+    }
+    setExpandedGroups(newSet);
+  };
 
   useEffect(() => {
     fetch("/api/auth/me")
@@ -126,10 +139,139 @@ export default function Navbar() {
                   </Link>
                 )}
                 {user.role === "super_admin" && (
-                  <Link href="/super-admin" className="flex items-center gap-1.5 text-sm font-medium px-3 py-2 rounded-lg text-rose-600 hover:bg-rose-50 transition-colors">
-                    <ShieldCheck className="w-4 h-4" />
-                    จัดการหลังบ้าน
-                  </Link>
+                  <div className="relative">
+                    <button
+                      onClick={() => setSuperAdminMenu(!superAdminMenu)}
+                      className="flex items-center gap-1.5 text-sm font-medium px-3 py-2 rounded-lg text-rose-600 hover:bg-rose-50 transition-colors"
+                    >
+                      <ShieldCheck className="w-4 h-4" />
+                      จัดการหลังบ้าน
+                      <ChevronDown className={`w-3.5 h-3.5 transition-transform ${superAdminMenu ? "rotate-180" : ""}`} />
+                    </button>
+                    {superAdminMenu && (
+                      <div className="absolute right-0 top-full mt-2 w-72 bg-white rounded-xl shadow-xl border border-gray-200 py-2 z-50">
+                        {/* ภาพรวม */}
+                        <Link href="/super-admin" onClick={() => setSuperAdminMenu(false)} className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                          <LayoutDashboard className="w-4 h-4" />
+                          ภาพรวม
+                        </Link>
+
+                        {/* แพลตฟอร์ม */}
+                        <div className="border-t border-gray-100 mt-1">
+                          <button onClick={() => toggleGroup("platform")} className="w-full flex items-center justify-between px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                            <span>แพลตฟอร์ม</span>
+                            <ChevronDown className={`w-4 h-4 transition-transform ${expandedGroups.has("platform") ? "rotate-180" : ""}`} />
+                          </button>
+                          {expandedGroups.has("platform") && (
+                            <>
+                              <Link href="/super-admin/analytics" onClick={() => setSuperAdminMenu(false)} className="flex items-center gap-2 px-8 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
+                                Analytics
+                              </Link>
+                              <Link href="/super-admin/institutions" onClick={() => setSuperAdminMenu(false)} className="flex items-center gap-2 px-8 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
+                                สถาบัน
+                              </Link>
+                              <Link href="/super-admin/trials" onClick={() => setSuperAdminMenu(false)} className="flex items-center gap-2 px-8 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
+                                ทดลองใช้งาน
+                              </Link>
+                            </>
+                          )}
+                        </div>
+
+                        {/* จัดการสมาชิก */}
+                        <div className="border-t border-gray-100 mt-1">
+                          <button onClick={() => toggleGroup("members")} className="w-full flex items-center justify-between px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                            <span>จัดการสมาชิก</span>
+                            <ChevronDown className={`w-4 h-4 transition-transform ${expandedGroups.has("members") ? "rotate-180" : ""}`} />
+                          </button>
+                          {expandedGroups.has("members") && (
+                            <>
+                              <Link href="/super-admin/members" onClick={() => setSuperAdminMenu(false)} className="flex items-center gap-2 px-8 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
+                                อนุมัติสมาชิก
+                              </Link>
+                              <Link href="/super-admin/users" onClick={() => setSuperAdminMenu(false)} className="flex items-center gap-2 px-8 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
+                                จัดการผู้ใช้
+                              </Link>
+                            </>
+                          )}
+                        </div>
+
+                        {/* ฟีเจอร์แพลตฟอร์ม */}
+                        <div className="border-t border-gray-100 mt-1">
+                          <button onClick={() => toggleGroup("features")} className="w-full flex items-center justify-between px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                            <span>ฟีเจอร์แพลตฟอร์ม</span>
+                            <ChevronDown className={`w-4 h-4 transition-transform ${expandedGroups.has("features") ? "rotate-180" : ""}`} />
+                          </button>
+                          {expandedGroups.has("features") && (
+                            <>
+                              <Link href="/super-admin/live" onClick={() => setSuperAdminMenu(false)} className="flex items-center gap-2 px-8 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
+                                Live Sessions
+                              </Link>
+                              <Link href="/super-admin/reviews" onClick={() => setSuperAdminMenu(false)} className="flex items-center gap-2 px-8 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
+                                รีวิวคอร์ส
+                              </Link>
+                              <Link href="/super-admin/forum" onClick={() => setSuperAdminMenu(false)} className="flex items-center gap-2 px-8 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
+                                Forum
+                              </Link>
+                              <Link href="/super-admin/coupons" onClick={() => setSuperAdminMenu(false)} className="flex items-center gap-2 px-8 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
+                                คูปองส่วนลด
+                              </Link>
+                            </>
+                          )}
+                        </div>
+
+                        {/* จัดการเนื้อหา */}
+                        <div className="border-t border-gray-100 mt-1">
+                          <button onClick={() => toggleGroup("content")} className="w-full flex items-center justify-between px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                            <span>จัดการเนื้อหา</span>
+                            <ChevronDown className={`w-4 h-4 transition-transform ${expandedGroups.has("content") ? "rotate-180" : ""}`} />
+                          </button>
+                          {expandedGroups.has("content") && (
+                            <>
+                              <Link href="/super-admin/courses" onClick={() => setSuperAdminMenu(false)} className="flex items-center gap-2 px-8 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
+                                จัดการคอร์ส
+                              </Link>
+                              <Link href="/super-admin/content" onClick={() => setSuperAdminMenu(false)} className="flex items-center gap-2 px-8 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
+                                เนื้อหาการเรียน
+                              </Link>
+                              <Link href="/super-admin/revenue" onClick={() => setSuperAdminMenu(false)} className="flex items-center gap-2 px-8 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
+                                รายได้
+                              </Link>
+                              <Link href="/super-admin/schedule" onClick={() => setSuperAdminMenu(false)} className="flex items-center gap-2 px-8 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
+                                ตารางสอน
+                              </Link>
+                            </>
+                          )}
+                        </div>
+
+                        {/* จัดการระบบ */}
+                        <div className="border-t border-gray-100 mt-1">
+                          <button onClick={() => toggleGroup("system")} className="w-full flex items-center justify-between px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                            <span>จัดการระบบ</span>
+                            <ChevronDown className={`w-4 h-4 transition-transform ${expandedGroups.has("system") ? "rotate-180" : ""}`} />
+                          </button>
+                          {expandedGroups.has("system") && (
+                            <>
+                              <Link href="/super-admin/finance" onClick={() => setSuperAdminMenu(false)} className="flex items-center gap-2 px-8 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
+                                ข้อมูลทางการเงิน
+                              </Link>
+                              <Link href="/super-admin/banners" onClick={() => setSuperAdminMenu(false)} className="flex items-center gap-2 px-8 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
+                                จัดการแบนเนอร์
+                              </Link>
+                              <Link href="/super-admin/roles" onClick={() => setSuperAdminMenu(false)} className="flex items-center gap-2 px-8 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
+                                จัดการ Role
+                              </Link>
+                              <Link href="/super-admin/logs" onClick={() => setSuperAdminMenu(false)} className="flex items-center gap-2 px-8 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
+                                ประวัติการใช้งาน
+                              </Link>
+                              <Link href="/super-admin/settings" onClick={() => setSuperAdminMenu(false)} className="flex items-center gap-2 px-8 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
+                                ตั้งค่าทั่วไป
+                              </Link>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 )}
                 {user.role === "student" && (
                   <Link href="/dashboard/reviews" className="flex items-center gap-1.5 text-sm px-3 py-2 rounded-lg text-gray-600 hover:text-indigo-600 hover:bg-gray-50 transition-colors">
