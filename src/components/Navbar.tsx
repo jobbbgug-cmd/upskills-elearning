@@ -156,10 +156,10 @@ export default function Navbar() {
                     >
                       <ShieldCheck className="w-4 h-4" />
                       จัดการหลังบ้าน
-                      {pendingMembers > 0 && (
-                        <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold">{pendingMembers}</span>
-                      )}
                       <ChevronDown className={`w-3.5 h-3.5 transition-transform ${superAdminMenu ? "rotate-180" : ""}`} />
+                      {pendingMembers > 0 && (
+                        <span className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold">{pendingMembers}</span>
+                      )}
                     </button>
                     {superAdminMenu && (
                       <div className="absolute right-0 top-full mt-2 w-72 bg-white rounded-xl shadow-xl border border-gray-200 py-2 z-50">
