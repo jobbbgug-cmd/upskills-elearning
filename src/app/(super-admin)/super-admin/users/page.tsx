@@ -89,7 +89,7 @@ export default function SuperAdminUsersPage() {
     const [usersRes, instRes, studentsRes] = await Promise.all([
       fetch(`/api/admin/users${qs}`),
       fetch("/api/admin/institutions"),
-      fetch("/api/admin/users?role=student"),
+      fetch("/api/admin/users?role=student&unassigned=true"),
     ]);
     if (usersRes.ok) setUsers(await usersRes.json());
     if (instRes.ok) setInstitutions(await instRes.json());

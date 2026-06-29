@@ -25,6 +25,17 @@ export async function GET(req: NextRequest) {
       filter.role = roleParam;
     }
 
+    // If unassigned=true and role=student, exclude students already assigned to parents
+    const unassignedParam = req.nextUrl.searchParams.get("unassigned");
+    if (unassignedParam === "true" && roleParam === "student") {
+      // Find all parents with assigned students
+      const parentsWithStudents = await User.find({ role: "parent", studentId: { $exists: true, $ne: "" } }).select("studentId").lean();
+      const assignedStudentIds = parentsWithStudents.map((p) => p.studentId);
+
+      // Exclude those students from results
+      filter._id = { $nin: assignedStudentIds };
+    }
+
     const users = await User.find(filter).select("-password").sort({ createdAt: -1 }).lean();
     return NextResponse.json(JSON.parse(JSON.stringify(users)));
   } catch {

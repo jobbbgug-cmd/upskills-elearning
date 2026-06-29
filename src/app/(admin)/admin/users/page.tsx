@@ -81,7 +81,7 @@ export default function AdminUsersPage() {
     const [usersRes, meRes, studentsRes] = await Promise.all([
       fetch("/api/admin/users"),
       fetch("/api/auth/me"),
-      fetch("/api/admin/users?role=student")
+      fetch("/api/admin/users?role=student&unassigned=true")
     ]);
     if (usersRes.ok) setUsers(await usersRes.json());
     if (meRes.ok) { const d = await meRes.json(); setMyRole(d.user?.role ?? ""); }
