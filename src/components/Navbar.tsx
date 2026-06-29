@@ -160,7 +160,7 @@ export default function Navbar() {
                   </Link>
                 )}
                 {user.role === "super_admin" && (
-                  <div className="relative" ref={dropdownRef}>
+                  <div className="relative z-50" ref={dropdownRef}>
                     <button
                       onClick={() => setSuperAdminDropdown(!superAdminDropdown)}
                       className="flex items-center gap-1.5 text-sm font-medium px-3 py-2 rounded-lg text-rose-600 hover:bg-rose-50 transition-colors"
@@ -170,7 +170,7 @@ export default function Navbar() {
                       <ChevronDown className={`w-3.5 h-3.5 transition-transform ${superAdminDropdown ? "rotate-180" : ""}`} />
                     </button>
                     {superAdminDropdown && (
-                      <div className="absolute right-0 top-full mt-2 w-60 bg-white rounded-xl shadow-lg border border-gray-200 py-2 z-50">
+                      <div className="fixed top-auto right-4 md:absolute md:right-0 md:top-full mt-2 w-56 md:w-60 bg-white rounded-xl shadow-lg border border-gray-200 py-2 z-[9999]">
                         {/* Dashboard */}
                         <div>
                           <p className="px-4 pt-3 pb-1 text-xs font-semibold text-gray-500 uppercase tracking-wide">ภาพรวม</p>
