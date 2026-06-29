@@ -152,10 +152,13 @@ export default function Navbar() {
                   <div className="relative">
                     <button
                       onClick={() => setSuperAdminMenu(!superAdminMenu)}
-                      className="flex items-center gap-1.5 text-sm font-medium px-3 py-2 rounded-lg text-rose-600 hover:bg-rose-50 transition-colors"
+                      className="flex items-center gap-1.5 text-sm font-medium px-3 py-2 rounded-lg text-rose-600 hover:bg-rose-50 transition-colors relative"
                     >
                       <ShieldCheck className="w-4 h-4" />
                       จัดการหลังบ้าน
+                      {pendingMembers > 0 && (
+                        <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold">{pendingMembers}</span>
+                      )}
                       <ChevronDown className={`w-3.5 h-3.5 transition-transform ${superAdminMenu ? "rotate-180" : ""}`} />
                     </button>
                     {superAdminMenu && (
