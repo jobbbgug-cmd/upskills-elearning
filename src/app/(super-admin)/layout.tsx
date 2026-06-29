@@ -82,20 +82,25 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
     router.push("/");
   };
 
-  const section = (id: string, title: string, badge?: number) => (
-    <button
-      onClick={() => toggleGroup(id)}
-      className="w-full flex items-center justify-between px-3 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider hover:text-gray-600 transition-colors group"
-    >
-      <span className="flex items-center gap-2">
-        {title}
-        {badge !== undefined && badge > 0 && (
-          <span className="w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold">{badge}</span>
-        )}
-      </span>
-      <ChevronDown className={`w-4 h-4 transition-transform ${expandedGroups.has(id) ? "rotate-180" : ""}`} />
-    </button>
-  );
+  const section = (id: string, title: string, badge?: number) => {
+    const isOpen = expandedGroups.has(id);
+    return (
+      <button
+        onClick={() => toggleGroup(id)}
+        className={`w-full flex items-center gap-3 px-3 py-1 text-sm rounded-lg transition-colors ${
+          isOpen ? "bg-violet-50 text-violet-700 font-semibold" : "text-gray-700 hover:bg-gray-50 hover:text-violet-600"
+        }`}
+      >
+        <span className="flex-1 flex items-center gap-2 text-left">
+          {title}
+          {badge !== undefined && badge > 0 && (
+            <span className="ml-auto w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold">{badge}</span>
+          )}
+        </span>
+        <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
+      </button>
+    );
+  };
 
   const nav = (href: string, icon: React.ReactNode, label: string, badge?: number) => {
     const active = pathname === href || (href !== "/super-admin" && pathname.startsWith(href));
@@ -139,7 +144,7 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
         <nav
           ref={navRef}
           onScroll={(e) => sessionStorage.setItem("superadmin-nav-scroll", String((e.currentTarget as HTMLElement).scrollTop))}
-          className="flex-1 p-3 space-y-0.5 overflow-y-auto"
+          className="flex-1 p-3 space-y-1 overflow-y-auto"
         >
           {/* Platform */}
           <div className="pt-2 pb-1">{section("platform", "แพลตฟอร์ม")}</div>
