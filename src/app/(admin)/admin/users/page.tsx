@@ -181,7 +181,7 @@ export default function AdminUsersPage() {
   };
 
   const openCreate = () => {
-    setCreateForm({ name: "", email: "", role: "student", gradeLevel: "", password: "" });
+    setCreateForm({ name: "", email: "", role: "student", gradeLevel: "", password: "", studentId: "", studentName: "" });
     setCreateError("");
     setCreateShowPass(false);
     setCreateCopied(false);
