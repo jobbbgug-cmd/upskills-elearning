@@ -15,6 +15,7 @@ export default function Navbar() {
   const [isNavigating, setIsNavigating] = useState(false);
   const [superAdminMenu, setSuperAdminMenu] = useState(false);
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
+  const [pendingMembers, setPendingMembers] = useState(0);
   const router   = useRouter();
   const pathname = usePathname();
 
@@ -39,7 +40,16 @@ export default function Navbar() {
       .then((r) => r.json())
       .then((d) => {
         const u = d.user ?? null;
-        if (u) setUser(u);
+        if (u) {
+          setUser(u);
+          // Fetch pending members count for super-admin
+          if (u.role === "super_admin") {
+            fetch("/api/admin/users/pending")
+              .then((r) => r.json())
+              .then((data) => setPendingMembers(Array.isArray(data) ? data.length : 0))
+              .catch(() => {});
+          }
+        }
         const qs = u?.institutionId ? `?institutionId=${u.institutionId}` : "";
         return fetch(`/api/branding${qs}`)
           .then((r) => r.json())
@@ -180,7 +190,12 @@ export default function Navbar() {
                         {/* จัดการสมาชิก */}
                         <div className="border-t border-gray-100 mt-1">
                           <button onClick={() => toggleGroup("members")} className="w-full flex items-center justify-between px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
-                            <span>จัดการสมาชิก</span>
+                            <span className="flex items-center gap-2">
+                              จัดการสมาชิก
+                              {pendingMembers > 0 && (
+                                <span className="w-2 h-2 bg-red-500 rounded-full"></span>
+                              )}
+                            </span>
                             <ChevronDown className={`w-4 h-4 transition-transform ${expandedGroups.has("members") ? "rotate-180" : ""}`} />
                           </button>
                           {expandedGroups.has("members") && (
