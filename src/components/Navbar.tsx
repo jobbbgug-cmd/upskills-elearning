@@ -372,8 +372,18 @@ export default function Navbar() {
                 {user.role === "super_admin" && (
                   <>
                     <Link href="/super-admin" onClick={() => setMenuOpen(false)} className="block px-3 py-2 text-sm text-rose-600 font-medium hover:bg-rose-50 rounded-lg">ภาพรวม</Link>
-                    <Link href="/super-admin/members" onClick={() => setMenuOpen(false)} className="block px-3 py-2 text-sm text-rose-600 hover:bg-rose-50 rounded-lg">อนุมัติสมาชิก</Link>
-                    <Link href="/super-admin/users" onClick={() => setMenuOpen(false)} className="block px-3 py-2 text-sm text-rose-600 hover:bg-rose-50 rounded-lg">จัดการผู้ใช้</Link>
+                    <div className="border-t border-gray-100 my-1"></div>
+                    <div className="px-3 py-2">
+                      <p className="text-xs font-medium text-gray-500 mb-1">จัดการสมาชิก</p>
+                      <Link href="/super-admin/members" onClick={() => setMenuOpen(false)} className="flex items-center gap-2 pl-3 py-2 text-sm text-rose-600 hover:bg-rose-50 rounded-lg">
+                        อนุมัติสมาชิก
+                        {pendingMembers > 0 && (
+                          <span className="ml-auto w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold">{pendingMembers}</span>
+                        )}
+                      </Link>
+                      <Link href="/super-admin/users" onClick={() => setMenuOpen(false)} className="block pl-3 py-2 text-sm text-rose-600 hover:bg-rose-50 rounded-lg">จัดการผู้ใช้</Link>
+                    </div>
+                    <div className="border-t border-gray-100 my-1"></div>
                     <Link href="/super-admin/finance" onClick={() => setMenuOpen(false)} className="block px-3 py-2 text-sm text-rose-600 hover:bg-rose-50 rounded-lg">ข้อมูลทางการเงิน</Link>
                     <Link href="/super-admin/settings" onClick={() => setMenuOpen(false)} className="block px-3 py-2 text-sm text-rose-600 hover:bg-rose-50 rounded-lg">ตั้งค่าทั่วไป</Link>
                   </>
