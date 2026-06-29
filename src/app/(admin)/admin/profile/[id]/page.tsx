@@ -565,13 +565,13 @@ export default function UserProfilePage({ params }: { params: Promise<{ id: stri
                   {course.homework?.length > 0 && (
                     <div>
                       <p className="text-xs text-gray-500 mb-1">งานมอบหมาย</p>
-                      <p className="text-lg font-bold text-green-600">{course.homework.filter(h => h.sub).length}/{course.homework.length}</p>
+                      <p className="text-lg font-bold text-green-600">{course.homework.filter((h: any) => h.sub).length}/{course.homework.length}</p>
                     </div>
                   )}
                   {course.quiz?.length > 0 && (
                     <div>
                       <p className="text-xs text-gray-500 mb-1">ข้อสอบ</p>
-                      <p className="text-lg font-bold text-purple-600">{course.quiz.filter(q => q.attempt).length}/{course.quiz.length}</p>
+                      <p className="text-lg font-bold text-purple-600">{course.quiz.filter((q: any) => q.attempt).length}/{course.quiz.length}</p>
                     </div>
                   )}
                 </div>
