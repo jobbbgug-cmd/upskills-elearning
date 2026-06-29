@@ -140,25 +140,6 @@ export default function Navbar() {
                     Forum
                   </Link>
                 )}
-                {user.role === "student" && (
-                  <Link href="/dashboard/reviews" className="flex items-center gap-1.5 text-sm px-3 py-2 rounded-lg text-gray-600 hover:text-indigo-600 hover:bg-gray-50 transition-colors">
-                    <Star className="w-4 h-4" />
-                    รีวิว
-                  </Link>
-                )}
-                {user && <NotificationBell />}
-                {(user.role === "student" || user.role === "parent") && (
-                  <Link href="/student" className="flex items-center gap-1.5 text-sm font-medium px-3 py-2 rounded-lg text-emerald-600 hover:bg-emerald-50 transition-colors">
-                    <BookOpen className="w-4 h-4" />
-                    ศูนย์การเรียน
-                  </Link>
-                )}
-                {(user.role === "admin" || user.role === "teacher") && (
-                  <Link href="/admin" className="flex items-center gap-1.5 text-sm font-medium px-3 py-2 rounded-lg text-indigo-600 hover:bg-indigo-50 transition-colors">
-                    <User className="w-4 h-4" />
-                    จัดการหลังบ้าน
-                  </Link>
-                )}
                 {user.role === "super_admin" && (
                   <div ref={dropdownRef}>
                     <button
@@ -229,6 +210,25 @@ export default function Navbar() {
                       </div>
                     )}
                   </div>
+                )}
+                {user.role === "student" && (
+                  <Link href="/dashboard/reviews" className="flex items-center gap-1.5 text-sm px-3 py-2 rounded-lg text-gray-600 hover:text-indigo-600 hover:bg-gray-50 transition-colors">
+                    <Star className="w-4 h-4" />
+                    รีวิว
+                  </Link>
+                )}
+                {user && <NotificationBell />}
+                {(user.role === "student" || user.role === "parent") && (
+                  <Link href="/student" className="flex items-center gap-1.5 text-sm font-medium px-3 py-2 rounded-lg text-emerald-600 hover:bg-emerald-50 transition-colors">
+                    <BookOpen className="w-4 h-4" />
+                    ศูนย์การเรียน
+                  </Link>
+                )}
+                {(user.role === "admin" || user.role === "teacher") && !user.role === "super_admin" && (
+                  <Link href="/admin" className="flex items-center gap-1.5 text-sm font-medium px-3 py-2 rounded-lg text-indigo-600 hover:bg-indigo-50 transition-colors">
+                    <User className="w-4 h-4" />
+                    จัดการหลังบ้าน
+                  </Link>
                 )}
                 <Link href="/dashboard/profile" className="flex items-center gap-1.5 text-sm px-3 py-2 rounded-lg text-gray-500 hover:text-violet-600 hover:bg-violet-50 transition-colors">
                   <User className="w-4 h-4" />
