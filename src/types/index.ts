@@ -103,7 +103,7 @@ export interface IUser {
   _id: string;
   name: string;
   email: string;
-  role: "student" | "teacher" | "admin" | "super_admin";
+  role: "student" | "teacher" | "parent" | "admin" | "super_admin";
   status: "pending" | "approved" | "rejected";
   gradeLevel?: GradeLevel;
   profileImage?: string;

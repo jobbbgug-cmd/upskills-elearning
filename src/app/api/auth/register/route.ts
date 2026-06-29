@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "กรุณาระบุช่องทางการรับ Username/Password" }, { status: 400 });
     }
 
-    const allowedRoles = ["student", "teacher"];
+    const allowedRoles = ["student", "teacher", "parent"];
     const userRole = allowedRoles.includes(role) ? role : "student";
 
     await connectDB();
@@ -34,8 +34,8 @@ export async function POST(req: NextRequest) {
       email,
       role: userRole,
       gradeLevel: resolvedGradeLevel,
-      teacherId: userRole === "student" ? (teacherId ?? "") : "",
-      teacherName: userRole === "student" ? (teacherName ?? "") : "",
+      teacherId: (userRole === "student" || userRole === "parent") ? (teacherId ?? "") : "",
+      teacherName: (userRole === "student" || userRole === "parent") ? (teacherName ?? "") : "",
       status: "pending",
       password: "",
       contactChannel,

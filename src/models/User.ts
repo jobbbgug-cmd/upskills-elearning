@@ -13,7 +13,7 @@ export interface IUserDocument extends Document {
   name: string;
   email: string;
   password: string;
-  role: "student" | "teacher" | "admin" | "owner" | "super_admin";
+  role: "student" | "teacher" | "parent" | "admin" | "owner" | "super_admin";
   status: "pending" | "approved" | "rejected";
   gradeLevel?: string;
   profileImage?: string;
@@ -21,6 +21,9 @@ export interface IUserDocument extends Document {
   teacherName?: string;
   contactChannel?: string;
   contactId?: string;
+  // parent fields
+  studentId?: string;
+  studentName?: string;
   // student extended profile
   nickname?: string;
   phone?: string;
@@ -56,7 +59,7 @@ const UserSchema = new Schema<IUserDocument>(
     name:           { type: String, required: true, trim: true },
     email:          { type: String, required: true, unique: true, lowercase: true, trim: true },
     password:       { type: String, default: "" },
-    role:           { type: String, enum: ["student", "teacher", "admin", "owner", "super_admin"], default: "student" },
+    role:           { type: String, enum: ["student", "teacher", "parent", "admin", "owner", "super_admin"], default: "student" },
     status:         { type: String, enum: ["pending", "approved", "rejected"], default: "pending" },
     gradeLevel:     { type: String },
     profileImage:   { type: String, default: "" },
@@ -64,6 +67,9 @@ const UserSchema = new Schema<IUserDocument>(
     teacherName:    { type: String, default: "" },
     contactChannel: { type: String, default: "" },
     contactId:      { type: String, default: "" },
+    // parent fields
+    studentId:      { type: String, default: "" },
+    studentName:    { type: String, default: "" },
     // student extended profile
     nickname:       { type: String, default: "" },
     phone:          { type: String, default: "" },

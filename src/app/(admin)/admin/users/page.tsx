@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Search, Shield, ShieldCheck, User, GraduationCap, Trash2, ChevronDown, Pencil, X, Eye, EyeOff, Copy, Check, Camera, UserPlus, ExternalLink } from "lucide-react";
+import { Search, Shield, ShieldCheck, User, GraduationCap, Trash2, ChevronDown, Pencil, X, Eye, EyeOff, Copy, Check, Camera, UserPlus, ExternalLink, Heart } from "lucide-react";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import LoadingSpinner from "@/components/LoadingSpinner";
 
@@ -10,15 +10,18 @@ interface UserItem {
   _id: string;
   name: string;
   email: string;
-  role: "student" | "teacher" | "admin" | "owner" | "super_admin";
+  role: "student" | "teacher" | "parent" | "admin" | "owner" | "super_admin";
   gradeLevel?: string;
   profileImage?: string;
   status: "pending" | "approved" | "rejected";
   createdAt: string;
+  studentId?: string;
+  studentName?: string;
 }
 
 const ROLES = [
   { value: "student",     label: "นักเรียน",    color: "bg-blue-50 text-blue-700 border-blue-200",       badge: "bg-blue-100 text-blue-700",      icon: User },
+  { value: "parent",      label: "ผู้ปกครอง",    color: "bg-pink-50 text-pink-700 border-pink-200",       badge: "bg-pink-100 text-pink-700",      icon: Heart },
   { value: "teacher",     label: "ครู",          color: "bg-green-50 text-green-700 border-green-200",    badge: "bg-green-100 text-green-700",    icon: GraduationCap },
   { value: "admin",       label: "Admin",        color: "bg-purple-50 text-purple-700 border-purple-200", badge: "bg-purple-100 text-purple-700",  icon: Shield },
   { value: "owner",       label: "Owner",        color: "bg-violet-50 text-violet-700 border-violet-200", badge: "bg-violet-100 text-violet-700",  icon: ShieldCheck },
@@ -40,17 +43,24 @@ function generatePassword(len = 10) {
   return Array.from({ length: len }, () => chars[Math.floor(Math.random() * chars.length)]).join("");
 }
 
+interface StudentOption {
+  _id: string;
+  name: string;
+  gradeLevel?: string;
+}
+
 export default function AdminUsersPage() {
   const [users, setUsers]           = useState<UserItem[]>([]);
+  const [students, setStudents]     = useState<StudentOption[]>([]);
   const [loading, setLoading]       = useState(true);
   const [search, setSearch]         = useState("");
-  const [filterRole, setFilterRole] = useState<"all" | "student" | "teacher" | "admin" | "owner" | "super_admin">("all");
+  const [filterRole, setFilterRole] = useState<"all" | "student" | "teacher" | "parent" | "admin" | "owner" | "super_admin">("all");
   const [updating, setUpdating]     = useState<string | null>(null);
   const [myRole, setMyRole]         = useState<string>("");
 
   // Edit modal
   const [editUser, setEditUser]     = useState<UserItem | null>(null);
-  const [editForm, setEditForm]     = useState<{ name: string; email: string; role: UserItem["role"]; gradeLevel: string; password: string; profileImage: string }>({ name: "", email: "", role: "student", gradeLevel: "", password: "", profileImage: "" });
+  const [editForm, setEditForm]     = useState<{ name: string; email: string; role: UserItem["role"]; gradeLevel: string; password: string; profileImage: string; studentId: string; studentName: string }>({ name: "", email: "", role: "student", gradeLevel: "", password: "", profileImage: "", studentId: "", studentName: "" });
   const [showPass, setShowPass]     = useState(false);
   const [saveError, setSaveError]   = useState("");
   const [copied, setCopied]         = useState(false);
@@ -60,7 +70,7 @@ export default function AdminUsersPage() {
 
   // Create user modal
   const [createOpen, setCreateOpen]     = useState(false);
-  const [createForm, setCreateForm]     = useState({ name: "", email: "", role: "student" as UserItem["role"], gradeLevel: "", password: "" });
+  const [createForm, setCreateForm]     = useState({ name: "", email: "", role: "student" as UserItem["role"], gradeLevel: "", password: "", studentId: "", studentName: "" });
   const [createError, setCreateError]   = useState("");
   const [creating, setCreating]         = useState(false);
   const [createShowPass, setCreateShowPass] = useState(false);
@@ -68,9 +78,14 @@ export default function AdminUsersPage() {
 
   const load = async () => {
     setLoading(true);
-    const [usersRes, meRes] = await Promise.all([fetch("/api/admin/users"), fetch("/api/auth/me")]);
+    const [usersRes, meRes, studentsRes] = await Promise.all([
+      fetch("/api/admin/users"),
+      fetch("/api/auth/me"),
+      fetch("/api/admin/users?role=student")
+    ]);
     if (usersRes.ok) setUsers(await usersRes.json());
     if (meRes.ok) { const d = await meRes.json(); setMyRole(d.user?.role ?? ""); }
+    if (studentsRes.ok) setStudents(await studentsRes.json());
     setLoading(false);
   };
 
@@ -87,8 +102,8 @@ export default function AdminUsersPage() {
 
   const openEdit = (u: UserItem) => {
     setEditUser(u);
-    const gradeLevel = u.role === "student" ? (u.gradeLevel ?? "") : "ทุกระดับชั้น";
-    setEditForm({ name: u.name, email: u.email, role: u.role, gradeLevel, password: "", profileImage: u.profileImage ?? "" });
+    const gradeLevel = (u.role === "student" || u.role === "parent") ? (u.gradeLevel ?? "") : "ทุกระดับชั้น";
+    setEditForm({ name: u.name, email: u.email, role: u.role, gradeLevel, password: "", profileImage: u.profileImage ?? "", studentId: u.studentId ?? "", studentName: u.studentName ?? "" });
     setShowPass(false);
     setSaveError("");
     setCopied(false);
@@ -119,6 +134,8 @@ export default function AdminUsersPage() {
       role: editForm.role,
       gradeLevel: editForm.gradeLevel,
       profileImage: editForm.profileImage,
+      studentId: editForm.role === "parent" ? editForm.studentId : "",
+      studentName: editForm.role === "parent" ? editForm.studentName : "",
     };
     if (editForm.password) body.password = editForm.password;
 
@@ -191,7 +208,9 @@ export default function AdminUsersPage() {
         email: createForm.email,
         password: createForm.password,
         role: createForm.role,
-        gradeLevel: createForm.role === "student" ? createForm.gradeLevel : "ทุกระดับชั้น",
+        gradeLevel: (createForm.role === "student" || createForm.role === "parent") ? createForm.gradeLevel : "ทุกระดับชั้น",
+        studentId: createForm.role === "parent" ? createForm.studentId : "",
+        studentName: createForm.role === "parent" ? createForm.studentName : "",
         status: "approved",
       }),
     });
@@ -213,7 +232,7 @@ export default function AdminUsersPage() {
     return matchRole && matchSearch;
   });
 
-  const counts = { student: 0, teacher: 0, admin: 0, owner: 0, super_admin: 0 };
+  const counts = { student: 0, teacher: 0, parent: 0, admin: 0, owner: 0, super_admin: 0 };
   visibleUsers.forEach((u) => { if (u.role in counts) counts[u.role as keyof typeof counts]++; });
 
   const inputCls = "w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white";
@@ -320,9 +339,9 @@ export default function AdminUsersPage() {
                       </div>
                     </td>
                     <td className="px-5 py-4 text-sm text-gray-500">
-                      {u.role !== "student"
-                        ? <span className="text-indigo-600 font-medium">ทุกระดับชั้น</span>
-                        : (u.gradeLevel || "—")}
+                      {(u.role === "student" || u.role === "parent")
+                        ? (u.gradeLevel || "—")
+                        : <span className="text-indigo-600 font-medium">ทุกระดับชั้น</span>}
                     </td>
                     <td className="px-5 py-4 text-sm text-gray-500">
                       {new Date(u.createdAt).toLocaleDateString("th-TH", { day: "numeric", month: "short", year: "numeric" })}
@@ -348,12 +367,10 @@ export default function AdminUsersPage() {
                     </td>
                     <td className="px-5 py-4 text-right">
                       <div className="flex items-center justify-end gap-1">
-                        {u.role === "student" && (
-                          <Link href={`/admin/students/${u._id}`}
-                            className="p-1.5 text-gray-400 hover:text-violet-600 hover:bg-violet-50 rounded-lg transition-colors" title="ดูโปรไฟล์นักเรียน">
-                            <ExternalLink className="w-4 h-4" />
-                          </Link>
-                        )}
+                        <Link href={`/admin/students/${u._id}`}
+                          className="p-1.5 text-gray-400 hover:text-violet-600 hover:bg-violet-50 rounded-lg transition-colors" title={u.role === "student" ? "ดูโปรไฟล์นักเรียน" : "ดูโปรไฟล์"}>
+                          <ExternalLink className="w-4 h-4" />
+                        </Link>
                         {u.role !== "owner" && (
                           <button onClick={() => openEdit(u)}
                             className="p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors" title="แก้ไข">
@@ -407,26 +424,50 @@ export default function AdminUsersPage() {
                 <select value={createForm.role}
                   onChange={(e) => {
                     const r = e.target.value as UserItem["role"];
-                    setCreateForm({ ...createForm, role: r, gradeLevel: r === "student" ? "" : "ทุกระดับชั้น" });
+                    setCreateForm({ ...createForm, role: r, gradeLevel: (r === "student" || r === "parent") ? "" : "ทุกระดับชั้น" });
                   }}
                   className={inputCls}>
                   {visibleRoles.map((r) => <option key={r.value} value={r.value}>{r.label}</option>)}
                 </select>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">ระดับชั้น</label>
-                {createForm.role === "student" ? (
+              {createForm.role === "student" && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">ระดับชั้น</label>
                   <select value={createForm.gradeLevel} onChange={(e) => setCreateForm({ ...createForm, gradeLevel: e.target.value })} className={inputCls}>
                     <option value="">— ไม่ระบุ —</option>
                     {GRADE_LEVELS.map((g) => <option key={g} value={g}>{g}</option>)}
                   </select>
-                ) : (
+                </div>
+              )}
+              {createForm.role !== "student" && createForm.role !== "parent" && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">ระดับชั้น</label>
                   <div className="flex items-center gap-2 px-4 py-2.5 bg-indigo-50 border border-indigo-200 rounded-xl">
                     <span className="text-sm font-semibold text-indigo-700">ทุกระดับชั้น</span>
                     <span className="text-xs text-indigo-400">(กำหนดอัตโนมัติตาม Role)</span>
                   </div>
-                )}
-              </div>
+                </div>
+              )}
+              {createForm.role === "parent" && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">นักเรียน <span className="text-red-500">*</span></label>
+                  {students.length === 0 ? (
+                    <div className="flex items-center gap-2 px-4 py-2.5 bg-yellow-50 border border-yellow-200 rounded-xl text-sm text-yellow-700">
+                      ⚠️ ยังไม่มีนักเรียนในระบบ กรุณาสร้างนักเรียนก่อน
+                    </div>
+                  ) : (
+                    <select value={createForm.studentId} onChange={(e) => {
+                      const selected = students.find((s) => s._id === e.target.value);
+                      setCreateForm({ ...createForm, studentId: e.target.value, studentName: selected?.name ?? "" });
+                    }} className={inputCls}>
+                      <option value="">— เลือกนักเรียน —</option>
+                      {students.map((s) => (
+                        <option key={s._id} value={s._id}>{s.name} ({s.gradeLevel || "—"})</option>
+                      ))}
+                    </select>
+                  )}
+                </div>
+              )}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">รหัสผ่าน <span className="text-red-500">*</span></label>
                 <div className="flex gap-2">
@@ -542,7 +583,7 @@ export default function AdminUsersPage() {
                 <select value={editForm.role}
                   onChange={(e) => {
                     const newRole = e.target.value as UserItem["role"];
-                    const newGrade = newRole === "student" ? "" : "ทุกระดับชั้น";
+                    const newGrade = (newRole === "student" || newRole === "parent") ? "" : "ทุกระดับชั้น";
                     setEditForm({ ...editForm, role: newRole, gradeLevel: newGrade });
                   }}
                   className={inputCls}>
@@ -553,7 +594,7 @@ export default function AdminUsersPage() {
               {/* Grade level */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">ระดับชั้น</label>
-                {editForm.role === "student" ? (
+                {(editForm.role === "student" || editForm.role === "parent") ? (
                   <select value={editForm.gradeLevel}
                     onChange={(e) => setEditForm({ ...editForm, gradeLevel: e.target.value })}
                     className={inputCls}>
@@ -567,6 +608,22 @@ export default function AdminUsersPage() {
                   </div>
                 )}
               </div>
+
+              {/* Student selection for parent */}
+              {editForm.role === "parent" && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">นักเรียน <span className="text-red-500">*</span></label>
+                  <select value={editForm.studentId} onChange={(e) => {
+                    const selected = students.find((s) => s._id === e.target.value);
+                    setEditForm({ ...editForm, studentId: e.target.value, studentName: selected?.name ?? "" });
+                  }} className={inputCls}>
+                    <option value="">— เลือกนักเรียน —</option>
+                    {students.map((s) => (
+                      <option key={s._id} value={s._id}>{s.name} ({s.gradeLevel || "—"})</option>
+                    ))}
+                  </select>
+                </div>
+              )}
 
               {/* Password section */}
               <div>

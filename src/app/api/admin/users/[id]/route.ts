@@ -16,7 +16,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
 
     const update: Record<string, unknown> = {};
     if (body.role !== undefined) {
-      if (!["student", "teacher", "admin", "super_admin"].includes(body.role))
+      if (!["student", "teacher", "parent", "admin", "super_admin"].includes(body.role))
         return NextResponse.json({ error: "Role ไม่ถูกต้อง" }, { status: 400 });
       if (body.role === "super_admin" && auth.role !== "super_admin")
         return NextResponse.json({ error: "ไม่มีสิทธิ์กำหนด Super Admin" }, { status: 403 });
@@ -31,6 +31,8 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     if (body.gradeLevel !== undefined) update.gradeLevel = body.gradeLevel;
     if (body.status !== undefined) update.status = body.status;
     if (body.profileImage !== undefined) update.profileImage = body.profileImage;
+    if (body.studentId !== undefined) update.studentId = body.studentId;
+    if (body.studentName !== undefined) update.studentName = body.studentName;
     if (body.institutionId !== undefined && auth.role === "super_admin") {
       update.institutionId = body.institutionId || null;
     }

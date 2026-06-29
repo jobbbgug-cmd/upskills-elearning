@@ -11,7 +11,21 @@ export async function GET(req: NextRequest) {
     if (!auth || auth.role !== "admin" && auth.role !== "super_admin") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     await connectDB();
     const institutionId = await resolveInstitutionId(req, auth.institutionId);
-    const users = await User.find(tenantFilter(institutionId)).select("-password").sort({ createdAt: -1 }).lean();
+
+    const filter: Record<string, unknown> = {};
+
+    // Only add institutionId filter if it's provided
+    if (institutionId) {
+      filter.institutionId = institutionId;
+    }
+
+    // Add role filter if requested
+    const roleParam = req.nextUrl.searchParams.get("role");
+    if (roleParam) {
+      filter.role = roleParam;
+    }
+
+    const users = await User.find(filter).select("-password").sort({ createdAt: -1 }).lean();
     return NextResponse.json(JSON.parse(JSON.stringify(users)));
   } catch {
     return NextResponse.json({ error: "เกิดข้อผิดพลาด" }, { status: 500 });
@@ -23,12 +37,12 @@ export async function POST(req: NextRequest) {
     const auth = await getAuthUser();
     if (!auth || auth.role !== "admin" && auth.role !== "super_admin") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const { name, email, password, role, gradeLevel, status } = await req.json();
+    const { name, email, password, role, gradeLevel, status, studentId, studentName } = await req.json();
     if (!name || !email || !password) return NextResponse.json({ error: "กรุณากรอกข้อมูลให้ครบ" }, { status: 400 });
     if (!email.toLowerCase().endsWith("@gmail.com")) return NextResponse.json({ error: "อีเมลต้องเป็น @gmail.com เท่านั้น" }, { status: 400 });
     if (password.length < 6) return NextResponse.json({ error: "รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร" }, { status: 400 });
 
-    const allowedRoles = ["student", "teacher", "admin", "owner", "super_admin"];
+    const allowedRoles = ["student", "teacher", "parent", "admin", "owner", "super_admin"];
     const userRole = allowedRoles.includes(role) ? role : "student";
 
     await connectDB();
@@ -44,7 +58,9 @@ export async function POST(req: NextRequest) {
       email,
       password: hashed,
       role: userRole,
-      gradeLevel: gradeLevel ?? (userRole === "student" ? "" : "ทุกระดับชั้น"),
+      gradeLevel: gradeLevel ?? (userRole === "student" || userRole === "parent" ? "" : "ทุกระดับชั้น"),
+      studentId: userRole === "parent" ? (studentId ?? "") : "",
+      studentName: userRole === "parent" ? (studentName ?? "") : "",
       status: status ?? "approved",
       contactChannel: "",
       contactId: "",

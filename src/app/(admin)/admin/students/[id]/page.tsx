@@ -23,6 +23,7 @@ interface Student {
   _id: string;
   name: string;
   email: string;
+  role?: "student" | "teacher" | "parent" | "admin" | "owner" | "super_admin";
   nickname?: string;
   phone?: string;
   birthDate?: string;
@@ -37,6 +38,8 @@ interface Student {
   parentName?: string;
   parentPhone?: string;
   parentRelation?: string;
+  studentId?: string;
+  studentName?: string;
   groups?: string[];
   documents?: StudentDoc[];
   notes?: string;
@@ -77,6 +80,7 @@ export default function StudentDetailPage({ params }: { params: Promise<{ id: st
   const [saving,    setSaving]    = useState(false);
   const [saved,     setSaved]     = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [myRole,    setMyRole]    = useState<string>("");
 
   // form fields
   const [form, setForm] = useState({
@@ -105,9 +109,14 @@ export default function StudentDetailPage({ params }: { params: Promise<{ id: st
   const docFileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    fetch(`/api/admin/students/${id}`)
-      .then((r) => r.json())
-      .then((d: Student) => {
+    const loadData = async () => {
+      const [studentRes, meRes] = await Promise.all([
+        fetch(`/api/admin/students/${id}`),
+        fetch("/api/auth/me"),
+      ]);
+
+      if (studentRes.ok) {
+        const d: Student = await studentRes.json();
         setStudent(d);
         setForm({
           name:           d.name           ?? "",
@@ -129,8 +138,17 @@ export default function StudentDetailPage({ params }: { params: Promise<{ id: st
         });
         setGroups(d.groups ?? []);
         setProvinceInput(d.province ?? "");
-      })
-      .finally(() => setLoading(false));
+      }
+
+      if (meRes.ok) {
+        const meData = await meRes.json();
+        setMyRole(meData.user?.role ?? "");
+      }
+
+      setLoading(false);
+    };
+
+    loadData();
   }, [id]);
 
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -213,13 +231,24 @@ export default function StudentDetailPage({ params }: { params: Promise<{ id: st
   const initials = student.name.split(" ").map((w) => w[0]).join("").toUpperCase().slice(0, 2);
   const inputCls = "w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white";
 
-  const TABS: { key: Tab; label: string; icon: React.ReactNode }[] = [
-    { key: "info",      label: "ข้อมูลส่วนตัว",   icon: <User className="w-4 h-4" /> },
-    { key: "parent",    label: "ผู้ปกครอง",         icon: <Phone className="w-4 h-4" /> },
-    { key: "groups",    label: "กลุ่ม / แท็ก",      icon: <Tag className="w-4 h-4" /> },
-    { key: "documents", label: "เอกสาร",             icon: <FileText className="w-4 h-4" /> },
-    { key: "progress",  label: "ความก้าวหน้า",       icon: <TrendingUp className="w-4 h-4" /> },
-  ];
+  const getTabs = (): { key: Tab; label: string; icon: React.ReactNode }[] => {
+    if (student?.role === "parent") {
+      return [
+        { key: "info",      label: "ข้อมูลส่วนตัว", icon: <User className="w-4 h-4" /> },
+        { key: "parent",    label: "นักเรียน",      icon: <Phone className="w-4 h-4" /> },
+        { key: "documents", label: "เอกสาร",        icon: <FileText className="w-4 h-4" /> },
+      ];
+    }
+    return [
+      { key: "info",      label: "ข้อมูลส่วนตัว",   icon: <User className="w-4 h-4" /> },
+      { key: "parent",    label: myRole === "parent" ? "นักเรียน" : "ผู้ปกครอง", icon: <Phone className="w-4 h-4" /> },
+      { key: "groups",    label: "กลุ่ม / แท็ก",      icon: <Tag className="w-4 h-4" /> },
+      { key: "documents", label: "เอกสาร",             icon: <FileText className="w-4 h-4" /> },
+      { key: "progress",  label: "ความก้าวหน้า",       icon: <TrendingUp className="w-4 h-4" /> },
+    ];
+  };
+
+  const TABS = getTabs();
 
   const handleTabChange = (t: Tab) => {
     setTab(t);
@@ -235,8 +264,8 @@ export default function StudentDetailPage({ params }: { params: Promise<{ id: st
   return (
     <div className="max-w-3xl mx-auto space-y-6">
       {/* Back */}
-      <Link href="/admin/students" className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-indigo-600 transition-colors">
-        <ArrowLeft className="w-4 h-4" /> กลับรายชื่อนักเรียน
+      <Link href="/admin/users" className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-indigo-600 transition-colors">
+        <ArrowLeft className="w-4 h-4" /> กลับรายชื่อผู้ใช้
       </Link>
 
       {/* Header card */}
@@ -473,26 +502,48 @@ export default function StudentDetailPage({ params }: { params: Promise<{ id: st
       {/* Tab: ผู้ปกครอง */}
       {tab === "parent" && (
         <div className="bg-white rounded-2xl border border-gray-100 p-6 space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">ชื่อผู้ปกครอง</label>
-              <input value={form.parentName} onChange={(e) => setForm({ ...form, parentName: e.target.value })} className={inputCls} placeholder="ชื่อ-นามสกุลผู้ปกครอง" />
+          {student?.role === "parent" ? (
+            // Parent viewing their child's information
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">ชื่อนักเรียน</label>
+                <input value={student.studentName ?? ""} disabled className={`${inputCls} opacity-60`} placeholder="ชื่อ-นามสกุล" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">ระดับชั้น</label>
+                <input value={student.gradeLevel ?? ""} disabled className={`${inputCls} opacity-60`} placeholder="ระดับชั้น" />
+              </div>
+              <div className="sm:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">ID นักเรียน</label>
+                <input value={student.studentId ?? ""} disabled className={`${inputCls} opacity-60`} placeholder="ID" />
+              </div>
+              <div className="sm:col-span-2 p-3 bg-blue-50 rounded-xl text-sm text-blue-700 border border-blue-200">
+                ข้อมูลนักเรียนที่ผู้ปกครองนี้เป็นผู้ดูแล
+              </div>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">เบอร์โทรผู้ปกครอง</label>
-              <input value={form.parentPhone} onChange={(e) => setForm({ ...form, parentPhone: e.target.value })} className={inputCls} placeholder="0X-XXXX-XXXX" />
+          ) : (
+            // Student viewing their parent's information
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">ชื่อผู้ปกครอง</label>
+                <input value={form.parentName} onChange={(e) => setForm({ ...form, parentName: e.target.value })} className={inputCls} placeholder="ชื่อ-นามสกุลผู้ปกครอง" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">เบอร์โทรผู้ปกครอง</label>
+                <input value={form.parentPhone} onChange={(e) => setForm({ ...form, parentPhone: e.target.value })} className={inputCls} placeholder="0X-XXXX-XXXX" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">ความสัมพันธ์</label>
+                <select value={form.parentRelation} onChange={(e) => setForm({ ...form, parentRelation: e.target.value })} className={inputCls}>
+                  <option value="">— ไม่ระบุ —</option>
+                  <option value="father">บิดา</option>
+                  <option value="mother">มารดา</option>
+                  <option value="guardian">ผู้ปกครอง</option>
+                  <option value="other">อื่น ๆ</option>
+                </select>
+              </div>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">ความสัมพันธ์</label>
-              <select value={form.parentRelation} onChange={(e) => setForm({ ...form, parentRelation: e.target.value })} className={inputCls}>
-                <option value="">— ไม่ระบุ —</option>
-                <option value="father">บิดา</option>
-                <option value="mother">มารดา</option>
-                <option value="guardian">ผู้ปกครอง</option>
-                <option value="other">อื่น ๆ</option>
-              </select>
-            </div>
-          </div>
+          )}
         </div>
       )}
 

@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowLeft, CheckCircle, User, GraduationCap, ChevronDown, Building2 } from "lucide-react";
+import { ArrowLeft, CheckCircle, User, GraduationCap, ChevronDown, Building2, Heart } from "lucide-react";
 import { GradeLevel } from "@/types";
 
 interface Teacher { _id: string; name: string; }
@@ -27,7 +27,7 @@ export default function RegisterPage() {
   const [form, setForm] = useState({
     name: "",
     email: "",
-    role: "student" as "student" | "teacher",
+    role: "student" as "student" | "teacher" | "parent",
     gradeLevel: "" as GradeLevel | "",
     teacherId: "",
     teacherName: "",
@@ -89,6 +89,8 @@ export default function RegisterPage() {
           <p className="text-gray-500 text-sm leading-relaxed mb-2">
             คำขอสมัครสมาชิกของคุณถูกส่งแล้ว<br />
             {form.teacherName && <><strong className="text-violet-600">ครู {form.teacherName}</strong> จะตรวจสอบและ</>}
+            {form.role === "parent" && !form.teacherName && <>Admin จะตรวจสอบและ</>}
+            {form.role === "teacher" && <>Admin จะตรวจสอบและ</>}
             ส่ง <strong>Username / Password</strong><br />
             ให้ทาง <strong className="text-indigo-600">{selectedChannel?.emoji} {form.contactChannel}</strong>
           </p>
@@ -118,9 +120,10 @@ export default function RegisterPage() {
         <form onSubmit={handleSubmit} className="space-y-4">
 
           {/* Role */}
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-3 gap-3">
             {([
               { value: "student", label: "นักเรียน", icon: User, desc: "ผู้เรียน" },
+              { value: "parent", label: "ผู้ปกครอง", icon: Heart, desc: "ผู้ปกครอง" },
               { value: "teacher", label: "ครู/อาจารย์", icon: GraduationCap, desc: "ผู้สอน" },
             ] as const).map((r) => {
               const Icon = r.icon;
@@ -192,6 +195,34 @@ export default function RegisterPage() {
                 className="w-full bg-gray-100 rounded-2xl px-4 py-3.5 text-sm text-gray-700 outline-none focus:ring-2 focus:ring-violet-400"
               >
                 <option value="">-- ครู/อาจารย์ผู้สอน --</option>
+                {teachers.map((t) => (
+                  <option key={t._id} value={t._id}>{t.name}</option>
+                ))}
+              </select>
+            </>
+          )}
+
+          {/* Grade level + Teacher — parent only */}
+          {form.role === "parent" && (
+            <>
+              <select
+                value={form.gradeLevel}
+                onChange={(e) => setForm({ ...form, gradeLevel: e.target.value as GradeLevel })}
+                className="w-full bg-gray-100 rounded-2xl px-4 py-3.5 text-sm text-gray-700 outline-none focus:ring-2 focus:ring-violet-400"
+              >
+                <option value="">-- ระดับชั้นของลูก --</option>
+                {GRADE_LEVELS.map((g) => <option key={g} value={g}>{g}</option>)}
+              </select>
+
+              <select
+                value={form.teacherId}
+                onChange={(e) => {
+                  const selected = teachers.find((t) => t._id === e.target.value);
+                  setForm({ ...form, teacherId: e.target.value, teacherName: selected?.name ?? "" });
+                }}
+                className="w-full bg-gray-100 rounded-2xl px-4 py-3.5 text-sm text-gray-700 outline-none focus:ring-2 focus:ring-violet-400"
+              >
+                <option value="">-- ครู/อาจารย์ของลูก --</option>
                 {teachers.map((t) => (
                   <option key={t._id} value={t._id}>{t.name}</option>
                 ))}

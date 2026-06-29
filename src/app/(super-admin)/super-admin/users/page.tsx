@@ -1,7 +1,8 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
-import { Search, Shield, ShieldCheck, User, GraduationCap, Trash2, ChevronDown, Pencil, X, Eye, EyeOff, Copy, Check, Camera, Building2, UserPlus } from "lucide-react";
+import Link from "next/link";
+import { Search, Shield, ShieldCheck, User, GraduationCap, Trash2, ChevronDown, Pencil, X, Eye, EyeOff, Copy, Check, Camera, Building2, UserPlus, Heart, ExternalLink } from "lucide-react";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import LoadingSpinner from "@/components/LoadingSpinner";
 
@@ -9,12 +10,14 @@ interface UserItem {
   _id: string;
   name: string;
   email: string;
-  role: "student" | "teacher" | "admin" | "owner" | "super_admin";
+  role: "student" | "teacher" | "parent" | "admin" | "owner" | "super_admin";
   gradeLevel?: string;
   profileImage?: string;
   status: "pending" | "approved" | "rejected";
   createdAt: string;
   institutionId?: string;
+  studentId?: string;
+  studentName?: string;
 }
 
 interface Institution {
@@ -22,8 +25,15 @@ interface Institution {
   name: string;
 }
 
+interface StudentOption {
+  _id: string;
+  name: string;
+  gradeLevel?: string;
+}
+
 const ROLES = [
   { value: "student",     label: "นักเรียน",    color: "bg-blue-50 text-blue-700 border-blue-200",       badge: "bg-blue-100 text-blue-700",      icon: User },
+  { value: "parent",      label: "ผู้ปกครอง",    color: "bg-pink-50 text-pink-700 border-pink-200",       badge: "bg-pink-100 text-pink-700",      icon: Heart },
   { value: "teacher",     label: "ครู",          color: "bg-green-50 text-green-700 border-green-200",    badge: "bg-green-100 text-green-700",    icon: GraduationCap },
   { value: "admin",       label: "Admin",        color: "bg-purple-50 text-purple-700 border-purple-200", badge: "bg-purple-100 text-purple-700",  icon: Shield },
   { value: "owner",       label: "Owner",        color: "bg-violet-50 text-violet-700 border-violet-200", badge: "bg-violet-100 text-violet-700",  icon: ShieldCheck },
@@ -48,15 +58,16 @@ function generatePassword(len = 10) {
 export default function SuperAdminUsersPage() {
   const [users, setUsers]           = useState<UserItem[]>([]);
   const [institutions, setInstitutions] = useState<Institution[]>([]);
+  const [students, setStudents]     = useState<StudentOption[]>([]);
   const [loading, setLoading]       = useState(true);
   const [search, setSearch]         = useState("");
-  const [filterRole, setFilterRole] = useState<"all" | "student" | "teacher" | "admin" | "super_admin">("all");
+  const [filterRole, setFilterRole] = useState<"all" | "student" | "teacher" | "parent" | "admin" | "super_admin">("all");
   const [filterInstitution, setFilterInstitution] = useState("all");
   const [updating, setUpdating]     = useState<string | null>(null);
 
   // Edit modal
   const [editUser, setEditUser]     = useState<UserItem | null>(null);
-  const [editForm, setEditForm]     = useState<{ name: string; email: string; role: UserItem["role"]; gradeLevel: string; password: string; profileImage: string; institutionId: string }>({ name: "", email: "", role: "student", gradeLevel: "", password: "", profileImage: "", institutionId: "" });
+  const [editForm, setEditForm]     = useState<{ name: string; email: string; role: UserItem["role"]; gradeLevel: string; password: string; profileImage: string; institutionId: string; studentId: string; studentName: string }>({ name: "", email: "", role: "student", gradeLevel: "", password: "", profileImage: "", institutionId: "", studentId: "", studentName: "" });
   const [showPass, setShowPass]     = useState(false);
   const [saveError, setSaveError]   = useState("");
   const [copied, setCopied]         = useState(false);
@@ -66,7 +77,7 @@ export default function SuperAdminUsersPage() {
 
   // Create modal
   const [createOpen, setCreateOpen]   = useState(false);
-  const [createForm, setCreateForm]   = useState({ name: "", email: "", role: "student" as UserItem["role"], gradeLevel: "", password: "", institutionId: "" });
+  const [createForm, setCreateForm]   = useState({ name: "", email: "", role: "student" as UserItem["role"], gradeLevel: "", password: "", institutionId: "", studentId: "", studentName: "" });
   const [createError, setCreateError] = useState("");
   const [creating, setCreating]       = useState(false);
   const [createShowPass, setCreateShowPass] = useState(false);
@@ -75,12 +86,14 @@ export default function SuperAdminUsersPage() {
   const load = async (institutionId?: string) => {
     setLoading(true);
     const qs = institutionId && institutionId !== "all" ? `?institutionId=${institutionId}` : "";
-    const [usersRes, instRes] = await Promise.all([
+    const [usersRes, instRes, studentsRes] = await Promise.all([
       fetch(`/api/admin/users${qs}`),
       fetch("/api/admin/institutions"),
+      fetch("/api/admin/users?role=student"),
     ]);
     if (usersRes.ok) setUsers(await usersRes.json());
     if (instRes.ok) setInstitutions(await instRes.json());
+    if (studentsRes.ok) setStudents(await studentsRes.json());
     setLoading(false);
   };
 
@@ -99,8 +112,8 @@ export default function SuperAdminUsersPage() {
 
   const openEdit = (u: UserItem) => {
     setEditUser(u);
-    const gradeLevel = u.role === "student" ? (u.gradeLevel ?? "") : "ทุกระดับชั้น";
-    setEditForm({ name: u.name, email: u.email, role: u.role, gradeLevel, password: "", profileImage: u.profileImage ?? "", institutionId: u.institutionId ?? "" });
+    const gradeLevel = (u.role === "student" || u.role === "parent") ? (u.gradeLevel ?? "") : "ทุกระดับชั้น";
+    setEditForm({ name: u.name, email: u.email, role: u.role, gradeLevel, password: "", profileImage: u.profileImage ?? "", institutionId: u.institutionId ?? "", studentId: u.studentId ?? "", studentName: u.studentName ?? "" });
     setShowPass(false);
     setSaveError("");
     setCopied(false);
@@ -132,6 +145,8 @@ export default function SuperAdminUsersPage() {
       gradeLevel: editForm.gradeLevel,
       profileImage: editForm.profileImage,
       institutionId: editForm.institutionId,
+      studentId: editForm.role === "parent" ? editForm.studentId : "",
+      studentName: editForm.role === "parent" ? editForm.studentName : "",
     };
     if (editForm.password) body.password = editForm.password;
 
@@ -201,7 +216,9 @@ export default function SuperAdminUsersPage() {
         email: createForm.email,
         password: createForm.password,
         role: createForm.role,
-        gradeLevel: createForm.role === "student" ? createForm.gradeLevel : "ทุกระดับชั้น",
+        gradeLevel: (createForm.role === "student" || createForm.role === "parent") ? createForm.gradeLevel : "ทุกระดับชั้น",
+        studentId: createForm.role === "parent" ? createForm.studentId : "",
+        studentName: createForm.role === "parent" ? createForm.studentName : "",
         status: "approved",
       }),
     });
@@ -223,7 +240,7 @@ export default function SuperAdminUsersPage() {
     return matchRole && matchSearch;
   });
 
-  const counts = { student: 0, teacher: 0, admin: 0, owner: 0, super_admin: 0 };
+  const counts = { student: 0, teacher: 0, parent: 0, admin: 0, owner: 0, super_admin: 0 };
   users.forEach((u) => { if (u.role in counts) counts[u.role as keyof typeof counts]++; });
 
   const inputCls = "w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-violet-500 bg-white";
@@ -352,9 +369,9 @@ export default function SuperAdminUsersPage() {
                       ) : <span className="text-gray-300 text-xs">—</span>}
                     </td>
                     <td className="px-5 py-4 text-sm text-gray-500">
-                      {u.role !== "student"
-                        ? <span className="text-violet-600 font-medium">ทุกระดับชั้น</span>
-                        : (u.gradeLevel || "—")}
+                      {(u.role === "student" || u.role === "parent")
+                        ? (u.gradeLevel || "—")
+                        : <span className="text-violet-600 font-medium">ทุกระดับชั้น</span>}
                     </td>
                     <td className="px-5 py-4 text-sm text-gray-500">
                       {new Date(u.createdAt).toLocaleDateString("th-TH", { day: "numeric", month: "short", year: "numeric" })}
@@ -376,6 +393,10 @@ export default function SuperAdminUsersPage() {
                     </td>
                     <td className="px-5 py-4 text-right">
                       <div className="flex items-center justify-end gap-1">
+                        <Link href={`/admin/students/${u._id}`}
+                          className="p-1.5 text-gray-400 hover:text-violet-600 hover:bg-violet-50 rounded-lg transition-colors" title={u.role === "student" ? "ดูโปรไฟล์นักเรียน" : "ดูโปรไฟล์"}>
+                          <ExternalLink className="w-4 h-4" />
+                        </Link>
                         <button onClick={() => openEdit(u)}
                           className="p-1.5 text-gray-400 hover:text-violet-600 hover:bg-violet-50 rounded-lg transition-colors" title="แก้ไข">
                           <Pencil className="w-4 h-4" />
@@ -435,7 +456,7 @@ export default function SuperAdminUsersPage() {
                 <select value={createForm.role}
                   onChange={(e) => {
                     const r = e.target.value as UserItem["role"];
-                    setCreateForm({ ...createForm, role: r, gradeLevel: r === "student" ? "" : "ทุกระดับชั้น" });
+                    setCreateForm({ ...createForm, role: r, gradeLevel: (r === "student" || r === "parent") ? "" : "ทุกระดับชั้น" });
                   }}
                   className={inputCls}>
                   {ROLES.map((r) => <option key={r.value} value={r.value}>{r.label}</option>)}
@@ -449,6 +470,26 @@ export default function SuperAdminUsersPage() {
                     <option value="">— ไม่ระบุ —</option>
                     {GRADE_LEVELS.map((g) => <option key={g} value={g}>{g}</option>)}
                   </select>
+                </div>
+              )}
+              {createForm.role === "parent" && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">นักเรียน <span className="text-red-500">*</span></label>
+                  {students.length === 0 ? (
+                    <div className="flex items-center gap-2 px-4 py-2.5 bg-yellow-50 border border-yellow-200 rounded-xl text-sm text-yellow-700">
+                      ⚠️ ยังไม่มีนักเรียนในระบบ กรุณาสร้างนักเรียนก่อน
+                    </div>
+                  ) : (
+                    <select value={createForm.studentId} onChange={(e) => {
+                      const selected = students.find((s) => s._id === e.target.value);
+                      setCreateForm({ ...createForm, studentId: e.target.value, studentName: selected?.name ?? "" });
+                    }} className={inputCls}>
+                      <option value="">— เลือกนักเรียน —</option>
+                      {students.map((s) => (
+                        <option key={s._id} value={s._id}>{s.name} ({s.gradeLevel || "—"})</option>
+                      ))}
+                    </select>
+                  )}
                 </div>
               )}
 
@@ -568,7 +609,7 @@ export default function SuperAdminUsersPage() {
                 <select value={editForm.role}
                   onChange={(e) => {
                     const newRole = e.target.value as UserItem["role"];
-                    const newGrade = newRole === "student" ? "" : "ทุกระดับชั้น";
+                    const newGrade = (newRole === "student" || newRole === "parent") ? "" : "ทุกระดับชั้น";
                     setEditForm({ ...editForm, role: newRole, gradeLevel: newGrade });
                   }}
                   className={inputCls}>
@@ -578,7 +619,7 @@ export default function SuperAdminUsersPage() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">ระดับชั้น</label>
-                {editForm.role === "student" ? (
+                {(editForm.role === "student" || editForm.role === "parent") ? (
                   <select value={editForm.gradeLevel}
                     onChange={(e) => setEditForm({ ...editForm, gradeLevel: e.target.value })}
                     className={inputCls}>
@@ -592,6 +633,21 @@ export default function SuperAdminUsersPage() {
                   </div>
                 )}
               </div>
+
+              {editForm.role === "parent" && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">นักเรียน <span className="text-red-500">*</span></label>
+                  <select value={editForm.studentId} onChange={(e) => {
+                    const selected = students.find((s) => s._id === e.target.value);
+                    setEditForm({ ...editForm, studentId: e.target.value, studentName: selected?.name ?? "" });
+                  }} className={inputCls}>
+                    <option value="">— เลือกนักเรียน —</option>
+                    {students.map((s) => (
+                      <option key={s._id} value={s._id}>{s.name} ({s.gradeLevel || "—"})</option>
+                    ))}
+                  </select>
+                </div>
+              )}
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">
