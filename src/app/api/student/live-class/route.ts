@@ -13,7 +13,12 @@ export async function GET(req: NextRequest) {
 
     await connectDB();
 
-    const sessions = await LiveSession.find()
+    const query: Record<string, any> = {};
+    if (auth.institutionId) {
+      query.institutionId = auth.institutionId;
+    }
+
+    const sessions = await LiveSession.find(query)
       .populate("courseId", "title")
       .sort({ scheduledAt: -1 })
       .lean();

@@ -13,7 +13,12 @@ export async function GET(req: NextRequest) {
 
     await connectDB();
 
-    const quizzes = await Quiz.find({ isActive: true })
+    const query: Record<string, any> = { isActive: true };
+    if (auth.institutionId) {
+      query.institutionId = auth.institutionId;
+    }
+
+    const quizzes = await Quiz.find(query)
       .populate("courseId", "title")
       .sort({ createdAt: -1 })
       .lean();

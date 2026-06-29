@@ -13,8 +13,12 @@ export async function GET(req: NextRequest) {
 
     await connectDB();
 
-    // Get all courses
-    const courses = await Course.find({ isActive: true }).select("_id title").lean();
+    // Get courses for user's institution only
+    const courseFilter: any = { isActive: true };
+    if (auth.institutionId) {
+      courseFilter.institutionId = auth.institutionId;
+    }
+    const courses = await Course.find(courseFilter).select("_id title").lean();
 
     const summary = await Promise.all(
       courses.map(async (course: any) => {

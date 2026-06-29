@@ -15,8 +15,11 @@ export async function GET(req: NextRequest) {
 
     const studentId = auth.role === "parent" ? null : auth.userId;
     const query: Record<string, any> = { isActive: true };
+    if (auth.institutionId) {
+      query.institutionId = auth.institutionId;
+    }
 
-    // Get all homework for the institution
+    // Get all homework for the user's institution
     const homeworks = await Homework.find(query)
       .populate("courseId", "title")
       .sort({ dueDate: -1 })
