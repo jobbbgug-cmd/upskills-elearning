@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
 import { getAuthUser } from "@/lib/auth";
-import Quiz from "@/models/Quiz";
+import { Quiz } from "@/models/Quiz";
 import Course from "@/models/Course";
 
 export async function GET(req: NextRequest) {

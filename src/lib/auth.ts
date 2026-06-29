@@ -7,7 +7,7 @@ export interface JwtPayload {
   userId: string;
   email: string;
   name: string;
-  role: "student" | "teacher" | "admin" | "super_admin";
+  role: "student" | "teacher" | "admin" | "super_admin" | "parent";
   institutionId?: string;
   isOwner?: boolean;
 }
