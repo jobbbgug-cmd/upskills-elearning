@@ -23,11 +23,22 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
   const [user, setUser]               = useState<UserInfo | null>(null);
   const [isNavigating, setIsNavigating] = useState(false);
   const [pendingMembers, setPendingMembers] = useState(0);
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(["platform", "members"]));
   const pathname = usePathname();
   const router   = useRouter();
   const dropdownRef = useRef<HTMLDivElement>(null);
   const navRef      = useRef<HTMLElement>(null);
   const close = () => setOpen(false);
+
+  const toggleGroup = (group: string) => {
+    const newSet = new Set(expandedGroups);
+    if (newSet.has(group)) {
+      newSet.delete(group);
+    } else {
+      newSet.add(group);
+    }
+    setExpandedGroups(newSet);
+  };
 
   useEffect(() => {
     const nav = navRef.current;
@@ -70,6 +81,21 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
     await fetch("/api/auth/me", { method: "DELETE" });
     router.push("/");
   };
+
+  const section = (id: string, title: string, badge?: number) => (
+    <button
+      onClick={() => toggleGroup(id)}
+      className="w-full flex items-center justify-between px-3 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider hover:text-gray-600 transition-colors group"
+    >
+      <span className="flex items-center gap-2">
+        {title}
+        {badge !== undefined && badge > 0 && (
+          <span className="w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold">{badge}</span>
+        )}
+      </span>
+      <ChevronDown className={`w-4 h-4 transition-transform ${expandedGroups.has(id) ? "rotate-180" : ""}`} />
+    </button>
+  );
 
   const nav = (href: string, icon: React.ReactNode, label: string, badge?: number) => {
     const active = pathname === href || (href !== "/super-admin" && pathname.startsWith(href));
@@ -116,46 +142,62 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
           className="flex-1 p-3 space-y-0.5 overflow-y-auto"
         >
           {/* Platform */}
-          <p className="px-3 pt-2 pb-1 text-xs font-semibold text-gray-400 uppercase tracking-wider">แพลตฟอร์ม</p>
-          {nav("/super-admin", <LayoutDashboard className="w-4 h-4" />, "ภาพรวม")}
-          {nav("/super-admin/analytics", <BarChart2 className="w-4 h-4" />, "Analytics")}
-          {nav("/super-admin/institutions", <Building2 className="w-4 h-4" />, "สถาบันทั้งหมด")}
-          {nav("/super-admin/trials", <FlaskConical className="w-4 h-4" />, "คำขอทดลองใช้งาน")}
-          {nav("/super-admin/payouts", <Receipt className="w-4 h-4" />, "Commission & Payout")}
+          <div className="pt-2 pb-1">{section("platform", "แพลตฟอร์ม")}</div>
+          
+          {expandedGroups.has("platform") && (
+            <>
+              {nav("/super-admin", <LayoutDashboard className="w-4 h-4" />, "ภาพรวม")}
+              {nav("/super-admin/analytics", <BarChart2 className="w-4 h-4" />, "Analytics")}
+              {nav("/super-admin/institutions", <Building2 className="w-4 h-4" />, "สถาบันทั้งหมด")}
+              {nav("/super-admin/trials", <FlaskConical className="w-4 h-4" />, "คำขอทดลองใช้งาน")}
+              {nav("/super-admin/payouts", <Receipt className="w-4 h-4" />, "Commission & Payout")}
+            </>
+          )}
 
           {/* Member management */}
-          <div className="px-3 pt-4 pb-1 flex items-center justify-between">
-            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">จัดการสมาชิก</p>
-            {pendingMembers > 0 && (
-              <span className="w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold">{pendingMembers}</span>
-            )}
-          </div>
-          {nav("/super-admin/members", <UserCheck className="w-4 h-4" />, "อนุมัติสมาชิก", pendingMembers)}
+          <div className="pt-4 pb-1">{section("members", "จัดการสมาชิก", pendingMembers)}</div>
+          {expandedGroups.has("members") && (
+            <>
+              {nav("/super-admin/members", <UserCheck className="w-4 h-4" />, "อนุมัติสมาชิก", pendingMembers)}
           {nav("/super-admin/users", <UserCog className="w-4 h-4" />, "จัดการผู้ใช้งาน")}
+            </>
+          )}
 
           {/* Phase 5-6 features */}
-          <p className="px-3 pt-4 pb-1 text-xs font-semibold text-gray-400 uppercase tracking-wider">ฟีเจอร์แพลตฟอร์ม</p>
-          {nav("/super-admin/live",    <Radio className="w-4 h-4" />,        "Live Sessions")}
+          <div className="pt-4 pb-1">{section("features", "ฟีเจอร์แพลตฟอร์ม")}</div>
+          {expandedGroups.has("features") && (
+            <>
+              {nav("/super-admin/live",    <Radio className="w-4 h-4" />,        "Live Sessions")}
           {nav("/super-admin/reviews", <Star className="w-4 h-4" />,         "รีวิวคอร์ส")}
           {nav("/super-admin/forum",   <MessageSquare className="w-4 h-4" />, "Forum")}
           {nav("/super-admin/coupons", <Tag className="w-4 h-4" />,          "คูปองส่วนลด")}
+            </>
+          )}
 
           {/* Content management */}
-          <p className="px-3 pt-4 pb-1 text-xs font-semibold text-gray-400 uppercase tracking-wider">จัดการเนื้อหา</p>
-          {nav("/super-admin/courses", <BookOpen className="w-4 h-4" />, "จัดการคอร์ส")}
+          <div className="pt-4 pb-1">{section("content", "จัดการเนื้อหา")}</div>
+          {expandedGroups.has("content") && (
+            <>
+              {nav("/super-admin/courses", <BookOpen className="w-4 h-4" />, "จัดการคอร์ส")}
           {nav("/super-admin/content", <FileText className="w-4 h-4" />, "เนื้อหาการเรียน")}
           {nav("/super-admin/revenue", <TrendingUp className="w-4 h-4" />, "รายได้")}
           {nav("/super-admin/schedule", <CalendarDays className="w-4 h-4" />, "ตารางสอน")}
           {nav("/super-admin/student-schedule", <GraduationCap className="w-4 h-4" />, "ตารางเรียน")}
+            </>
+          )}
 
           {/* System */}
-          <p className="px-3 pt-4 pb-1 text-xs font-semibold text-gray-400 uppercase tracking-wider">จัดการระบบ</p>
-          {nav("/super-admin/bookings", <Users className="w-4 h-4" />, "ตรวจสอบการชำระ")}
+          <div className="pt-4 pb-1">{section("system", "จัดการระบบ")}</div>
+          {expandedGroups.has("system") && (
+            <>
+              {nav("/super-admin/bookings", <Users className="w-4 h-4" />, "ตรวจสอบการชำระ")}
           {nav("/super-admin/finance", <Wallet className="w-4 h-4" />, "ข้อมูลทางการเงิน")}
           {nav("/super-admin/banners", <Images className="w-4 h-4" />, "จัดการแบนเนอร์")}
           {nav("/super-admin/roles", <Shield className="w-4 h-4" />, "จัดการ Role")}
           {nav("/super-admin/logs", <ClipboardList className="w-4 h-4" />, "ประวัติการใช้งาน")}
           {nav("/super-admin/settings", <Settings className="w-4 h-4" />, "ตั้งค่าทั่วไป")}
+            </>
+          )}
         </nav>
 
         <div className="p-3 border-t border-gray-100 space-y-0.5">
