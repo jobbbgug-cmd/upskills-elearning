@@ -22,6 +22,7 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
   const [userDropdown, setUserDropdown] = useState(false);
   const [user, setUser]               = useState<UserInfo | null>(null);
   const [isNavigating, setIsNavigating] = useState(false);
+  const [pendingMembers, setPendingMembers] = useState(0);
   const pathname = usePathname();
   const router   = useRouter();
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -46,6 +47,13 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
   }, []);
 
   useEffect(() => {
+    fetch("/api/admin/users/pending")
+      .then((r) => r.json())
+      .then((data) => setPendingMembers(Array.isArray(data) ? data.length : 0))
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
     const handleClick = (e: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
         setUserDropdown(false);
@@ -60,7 +68,7 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
     router.push("/");
   };
 
-  const nav = (href: string, icon: React.ReactNode, label: string) => {
+  const nav = (href: string, icon: React.ReactNode, label: string, badge?: number) => {
     const active = pathname === href || (href !== "/super-admin" && pathname.startsWith(href));
     return (
       <Link
@@ -74,6 +82,9 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
       >
         {icon}
         {label}
+        {badge !== undefined && badge > 0 && (
+          <span className="ml-auto w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold">{badge}</span>
+        )}
       </Link>
     );
   };
@@ -111,7 +122,7 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
 
           {/* Member management */}
           <p className="px-3 pt-4 pb-1 text-xs font-semibold text-gray-400 uppercase tracking-wider">จัดการสมาชิก</p>
-          {nav("/super-admin/members", <UserCheck className="w-4 h-4" />, "อนุมัติสมาชิก")}
+          {nav("/super-admin/members", <UserCheck className="w-4 h-4" />, "อนุมัติสมาชิก", pendingMembers)}
           {nav("/super-admin/users", <UserCog className="w-4 h-4" />, "จัดการผู้ใช้งาน")}
 
           {/* Phase 5-6 features */}
