@@ -121,7 +121,12 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
           {nav("/super-admin/payouts", <Receipt className="w-4 h-4" />, "Commission & Payout")}
 
           {/* Member management */}
-          <p className="px-3 pt-4 pb-1 text-xs font-semibold text-gray-400 uppercase tracking-wider">จัดการสมาชิก</p>
+          <div className="px-3 pt-4 pb-1 flex items-center justify-between">
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">จัดการสมาชิก</p>
+            {pendingMembers > 0 && (
+              <span className="w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold">{pendingMembers}</span>
+            )}
+          </div>
           {nav("/super-admin/members", <UserCheck className="w-4 h-4" />, "อนุมัติสมาชิก", pendingMembers)}
           {nav("/super-admin/users", <UserCog className="w-4 h-4" />, "จัดการผู้ใช้งาน")}
 
