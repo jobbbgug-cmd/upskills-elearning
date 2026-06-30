@@ -150,7 +150,11 @@ export default function LoginPage() {
       if (!res.ok) {
         setError(data.error ?? "เกิดข้อผิดพลาด");
       } else {
-        router.push(data.user.role === "admin" ? "/admin" : "/dashboard");
+        const role = data.user.role;
+        let redirectPath = "/dashboard";
+        if (["admin", "owner"].includes(role)) redirectPath = "/admin";
+        if (["super_admin"].includes(role)) redirectPath = "/super-admin";
+        router.push(redirectPath);
         router.refresh();
       }
     } catch {

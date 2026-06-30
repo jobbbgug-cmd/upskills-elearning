@@ -269,19 +269,35 @@ export default function SuperAdminUsersPage() {
 
       {/* Stats */}
       <div className="grid gap-4 mb-8" style={{ gridTemplateColumns: `repeat(${ROLES.length + 1}, 1fr)` }}>
-        <div className="bg-gray-50 rounded-2xl p-5">
+        <div className="bg-white rounded-2xl border border-gray-100 border-l-4 border-l-violet-500 p-5">
           <div className="text-3xl font-bold text-gray-900">{users.length}</div>
           <div className="text-sm text-gray-500 mt-1">ทั้งหมด</div>
         </div>
         {ROLES.map((r) => {
           const Icon = r.icon;
+          const borderColors: Record<string, string> = {
+            student: "border-l-blue-500",
+            parent: "border-l-pink-500",
+            teacher: "border-l-green-500",
+            admin: "border-l-purple-500",
+            owner: "border-l-violet-500",
+            super_admin: "border-l-rose-500",
+          };
+          const textColors: Record<string, string> = {
+            student: "text-blue-600",
+            parent: "text-pink-600",
+            teacher: "text-green-600",
+            admin: "text-purple-600",
+            owner: "text-violet-600",
+            super_admin: "text-rose-600",
+          };
           return (
-            <div key={r.value} className={`rounded-2xl p-5 ${r.badge}`}>
+            <div key={r.value} className={`bg-white rounded-2xl border border-gray-100 border-l-4 ${borderColors[r.value]} p-5`}>
               <div className="flex items-center justify-between mb-1">
-                <div className="text-3xl font-bold">{counts[r.value]}</div>
-                <Icon className="w-6 h-6 opacity-60" />
+                <div className="text-3xl font-bold text-gray-900">{counts[r.value]}</div>
+                <Icon className={`w-6 h-6 ${textColors[r.value]}`} />
               </div>
-              <div className="text-sm opacity-75">{r.label}</div>
+              <div className="text-sm text-gray-600">{r.label}</div>
             </div>
           );
         })}
