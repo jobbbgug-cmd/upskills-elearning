@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { LayoutDashboard, ListChecks, Users, LogOut, Images, UserCog, UserCheck, BookOpen, TrendingUp, CalendarDays, GraduationCap, Menu, X, Wallet, AlertTriangle, Palette, Shield, ShieldCheck, User, ChevronDown, ChevronRight, Home, Building2, School, ClipboardCheck, FileText, PenLine, Bell, BarChart2, Radio, Receipt, Globe, Monitor, Star, Tag, MessageSquare, LayoutGrid } from "lucide-react";
 import NotificationBell from "@/components/NotificationBell";
 import { PLAN_LABELS } from "@/lib/planLimits";
+import { THEMES, getTheme, setTheme, type Theme } from "@/lib/theme";
 
 interface Subscription {
   plan: string | null;
@@ -32,6 +33,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [isNavigating, setIsNavigating]       = useState(false);
   const [branches, setBranches]               = useState<BranchOption[]>([]);
   const [activeBranchId, setActiveBranchId]   = useState<string>("");
+  const [currentTheme, setCurrentTheme]       = useState<Theme>('default');
+  const [themeOpen, setThemeOpen]             = useState(false);
   const [switchingBranch, setSwitchingBranch] = useState(false);
   const dropdownRef  = useRef<HTMLDivElement>(null);
   const moreMenuRef  = useRef<HTMLDivElement>(null);
@@ -50,8 +53,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }, []);
 
   useEffect(() => {
+    const theme = getTheme();
+    setCurrentTheme(theme);
+  }, []);
+
+  useEffect(() => {
     setIsNavigating(false);
     setMoreMenuOpen(false);
+    setThemeOpen(false);
     const GP: Record<string, string[]> = {
       teaching:  ["/admin/students","/admin/attendance","/admin/homework","/admin/quiz","/admin/live","/admin/teacher-portal","/admin/forum"],
       courses:   ["/admin/courses","/admin/content","/admin/schedule","/dashboard/schedule"],
@@ -200,6 +209,38 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <User className="w-4 h-4" />
             โปรไฟล์ของฉัน
           </Link>
+
+          {/* Theme Switcher */}
+          <div className="relative border-t border-gray-100">
+            <button onClick={() => setThemeOpen(!themeOpen)} className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors text-left">
+              <Palette className="w-4 h-4" />
+              ธีมสี
+              <ChevronDown className={`w-3.5 h-3.5 ml-auto transition-transform ${themeOpen ? 'rotate-180' : ''}`} />
+            </button>
+            {themeOpen && (
+              <div className="absolute right-0 top-full mt-1 w-44 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+                {(Object.entries(THEMES) as [Theme, typeof THEMES[Theme]][]).map(([key, theme]) => (
+                  <button
+                    key={key}
+                    onClick={() => {
+                      setTheme(key);
+                      setCurrentTheme(key);
+                      setThemeOpen(false);
+                    }}
+                    className={`w-full flex items-center gap-2 px-3 py-2 text-sm text-left transition-colors ${
+                      currentTheme === key
+                        ? 'bg-indigo-50 text-gray-900 font-medium'
+                        : 'text-gray-600 hover:bg-gray-50'
+                    }`}
+                  >
+                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: theme.primary }} />
+                    {theme.name}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
           <button
             onClick={handleLogout}
             className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"

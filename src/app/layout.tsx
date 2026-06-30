@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Kanit } from "next/font/google";
 import "./globals.css";
+import ThemeProvider from "@/components/ThemeProvider";
 
 const kanit = Kanit({
   subsets: ["thai", "latin"],
@@ -34,7 +35,9 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="th" className={kanit.variable}>
-      <body className="bg-gray-50 min-h-screen font-kanit">{children}</body>
+      <body className="bg-gray-50 min-h-screen font-kanit">
+        <ThemeProvider>{children}</ThemeProvider>
+      </body>
     </html>
   );
 }

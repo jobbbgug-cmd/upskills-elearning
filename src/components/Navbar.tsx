@@ -3,10 +3,11 @@ import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { Menu, X, User, LogOut, LayoutDashboard, CalendarDays, ShieldCheck, BookOpen, ClipboardCheck, PenLine, Award, Radio, Receipt, MessageSquare, Star, ChevronDown } from "lucide-react";
+import { Menu, X, User, LogOut, LayoutDashboard, CalendarDays, ShieldCheck, BookOpen, ClipboardCheck, PenLine, Award, Radio, Receipt, MessageSquare, Star, ChevronDown, Palette } from "lucide-react";
 import NotificationBell from "@/components/NotificationBell";
 import { IUser, IBranding } from "@/types";
 import TrialRequestModal from "@/components/TrialRequestModal";
+import { THEMES, getTheme, setTheme, type Theme } from "@/lib/theme";
 
 export default function Navbar() {
   const [user, setUser]               = useState<IUser | null>(null);
@@ -16,6 +17,8 @@ export default function Navbar() {
   const [superAdminMenu, setSuperAdminMenu] = useState(false);
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
   const [pendingMembers, setPendingMembers] = useState(0);
+  const [currentTheme, setCurrentTheme] = useState<Theme>('default');
+  const [themeOpen, setThemeOpen] = useState(false);
   const router   = useRouter();
   const pathname = usePathname();
 
@@ -23,7 +26,13 @@ export default function Navbar() {
     setIsNavigating(false);
     setMenuOpen(false);
     setSuperAdminMenu(false);
+    setThemeOpen(false);
   }, [pathname]);
+
+  useEffect(() => {
+    const theme = getTheme();
+    setCurrentTheme(theme);
+  }, []);
 
   const toggleGroup = (group: string) => {
     const newSet = new Set(expandedGroups);
@@ -314,6 +323,38 @@ export default function Navbar() {
                   <User className="w-4 h-4" />
                   โปรไฟล์
                 </Link>
+
+                {/* Theme Switcher */}
+                <div className="relative">
+                  <button onClick={() => setThemeOpen(!themeOpen)} className="flex items-center gap-1.5 text-sm px-3 py-2 rounded-lg text-gray-500 hover:text-violet-600 hover:bg-violet-50 transition-colors w-full text-left">
+                    <Palette className="w-4 h-4" />
+                    ธีมสี
+                    <ChevronDown className={`w-3.5 h-3.5 ml-auto transition-transform ${themeOpen ? 'rotate-180' : ''}`} />
+                  </button>
+                  {themeOpen && (
+                    <div className="absolute right-0 top-full mt-1 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+                      {(Object.entries(THEMES) as [Theme, typeof THEMES[Theme]][]).map(([key, theme]) => (
+                        <button
+                          key={key}
+                          onClick={() => {
+                            setTheme(key);
+                            setCurrentTheme(key);
+                            setThemeOpen(false);
+                          }}
+                          className={`w-full flex items-center gap-2 px-3 py-2 text-sm text-left transition-colors ${
+                            currentTheme === key
+                              ? 'bg-violet-50 text-gray-900 font-medium'
+                              : 'text-gray-600 hover:bg-gray-50'
+                          }`}
+                        >
+                          <div className="w-3 h-3 rounded-full" style={{ backgroundColor: theme.primary }} />
+                          {theme.name}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
                 <button onClick={logout} className="flex items-center gap-1.5 text-sm px-3 py-2 rounded-lg text-gray-500 hover:text-red-600 hover:bg-red-50 transition-colors">
                   <LogOut className="w-4 h-4" />
                   ออกจากระบบ
