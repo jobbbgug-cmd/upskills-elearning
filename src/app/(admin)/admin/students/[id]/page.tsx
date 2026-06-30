@@ -60,6 +60,13 @@ const DOC_TYPES = [
   { value: "other",       label: "เอกสารอื่น ๆ" },
 ];
 
+const PARENT_RELATIONS: Record<string, string> = {
+  father: "บิดา",
+  mother: "มารดา",
+  guardian: "ผู้ปกครอง",
+  other: "อื่น ๆ",
+};
+
 type Tab = "info" | "parent" | "groups" | "documents" | "progress";
 
 interface CourseProgress {
@@ -157,7 +164,7 @@ export default function StudentDetailPage({ params }: { params: Promise<{ id: st
     const loadParents = async () => {
       setLoadingParents(true);
       try {
-        const res = await fetch("/api/admin/users?role=parent");
+        const res = await fetch("/api/admin/users?role=parent", { credentials: "include" });
         if (res.ok) {
           const data = await res.json();
           const parentList = Array.isArray(data) ? data : (data.users || []);
@@ -166,6 +173,8 @@ export default function StudentDetailPage({ params }: { params: Promise<{ id: st
             name: p.name,
             phone: p.phone,
           })));
+        } else {
+          console.error("Failed to load parents:", res.status, res.statusText);
         }
       } catch (err) {
         console.error("Failed to load parents:", err);
@@ -554,6 +563,7 @@ export default function StudentDetailPage({ params }: { params: Promise<{ id: st
                   value={form.parentName}
                   onChange={(e) => {
                     const selectedParent = parents.find(p => p.name === e.target.value);
+                    console.log("Selected parent:", e.target.value, selectedParent, "Parents list:", parents);
                     if (selectedParent) {
                       setForm({ ...form, parentName: selectedParent.name, parentPhone: selectedParent.phone || "" });
                     } else {

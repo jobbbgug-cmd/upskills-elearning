@@ -53,6 +53,13 @@ const GRADE_LEVELS = [
   "ปวช.","ปวส.","มหาวิทยาลัย","ทั่วไป",
 ];
 
+const PARENT_RELATIONS: Record<string, string> = {
+  father: "บิดา",
+  mother: "มารดา",
+  guardian: "ผู้ปกครอง",
+  other: "อื่น ๆ",
+};
+
 interface StudentItem {
   _id: string;
   name: string;
@@ -143,7 +150,7 @@ export default function UserProfilePage({ params }: { params: Promise<{ id: stri
   const loadParentStudents = async () => {
     setLoadingStudents(true);
     try {
-      const res = await fetch(`/api/admin/users/${id}/students`);
+      const res = await fetch(`/api/admin/users/${id}/students`, { credentials: "include" });
       if (res.ok) {
         const data = await res.json();
         setStudents(Array.isArray(data) ? data : []);
@@ -509,7 +516,7 @@ export default function UserProfilePage({ params }: { params: Promise<{ id: stri
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">ความสัมพันธ์</label>
-              <input value={user.parentRelation ?? ""} className={inputCls + " opacity-50 cursor-not-allowed"} disabled placeholder="— ไม่ระบุ —" />
+              <input value={user.parentRelation ? PARENT_RELATIONS[user.parentRelation] || user.parentRelation : ""} className={inputCls + " opacity-50 cursor-not-allowed"} disabled placeholder="— ไม่ระบุ —" />
             </div>
           </div>
         </div>

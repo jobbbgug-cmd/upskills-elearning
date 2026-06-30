@@ -48,6 +48,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
         return NextResponse.json({ error: "อีเมลต้องเป็น @gmail.com เท่านั้น" }, { status: 400 });
       update.email = body.email;
     }
+    if (body.phone !== undefined) update.phone = body.phone;
     if (body.gradeLevel !== undefined) update.gradeLevel = body.gradeLevel;
     if (body.status !== undefined) update.status = body.status;
     if (body.profileImage !== undefined) update.profileImage = body.profileImage;
