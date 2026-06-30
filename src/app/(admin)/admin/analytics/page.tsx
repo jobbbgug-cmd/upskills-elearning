@@ -74,18 +74,18 @@ export default function AnalyticsPage() {
       {/* Summary KPIs */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">
         {[
-          { icon: <Users className="w-5 h-5 text-indigo-500" />, bg: "bg-indigo-50", label: "นักเรียน", value: data.totalStudents },
-          { icon: <BookOpen className="w-5 h-5 text-teal-500" />, bg: "bg-teal-50", label: "การลงทะเบียน", value: totalEnrolled },
-          { icon: <Video className="w-5 h-5 text-violet-500" />, bg: "bg-violet-50", label: "เฉลี่ยดูคลิป", value: `${avgWatching}%` },
-          { icon: <FileText className="w-5 h-5 text-amber-500" />, bg: "bg-amber-50", label: "ส่งการบ้าน", value: totalHwSub },
-          { icon: <PenLine className="w-5 h-5 text-rose-500" />, bg: "bg-rose-50", label: "ทำข้อสอบ", value: totalQuizAttempts },
+          { icon: <Users className="w-5 h-5 text-indigo-600" />, border: "border-l-indigo-500", label: "นักเรียน", value: data.totalStudents },
+          { icon: <BookOpen className="w-5 h-5 text-amber-600" />, border: "border-l-amber-500", label: "การลงทะเบียน", value: totalEnrolled },
+          { icon: <Video className="w-5 h-5 text-violet-600" />, border: "border-l-violet-500", label: "เฉลี่ยดูคลิป", value: `${avgWatching}%` },
+          { icon: <FileText className="w-5 h-5 text-green-600" />, border: "border-l-green-500", label: "ส่งการบ้าน", value: totalHwSub },
+          { icon: <PenLine className="w-5 h-5 text-rose-600" />, border: "border-l-rose-500", label: "ทำข้อสอบ", value: totalQuizAttempts },
         ].map((item, i) => (
-          <div key={i} className="bg-white rounded-2xl border border-gray-100 p-4 flex items-center gap-3">
-            <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${item.bg}`}>{item.icon}</div>
-            <div>
-              <p className="text-xl font-bold text-gray-900">{item.value}</p>
-              <p className="text-xs text-gray-400">{item.label}</p>
+          <div key={i} className={`bg-white rounded-2xl border border-gray-100 border-l-4 ${item.border} p-5`}>
+            <div className="flex items-center gap-3 mb-2">
+              {item.icon}
+              <p className="text-2xl font-bold text-gray-900">{item.value}</p>
             </div>
+            <p className="text-xs text-gray-500">{item.label}</p>
           </div>
         ))}
       </div>
