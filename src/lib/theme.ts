@@ -15,14 +15,14 @@ export const THEMES: Record<Theme, { name: string; primary: string; accent: stri
   },
   'pastel-blue': {
     name: 'Pastel Blue',
-    primary: '#a5d8ff',
-    accent: '#7dd3fc',
+    primary: '#0369a1',
+    accent: '#0284c7',
     className: 'theme-pastel-blue',
   },
   'pastel-green': {
     name: 'Pastel Green',
-    primary: '#bfdbfe',
-    accent: '#86efac',
+    primary: '#7ed266',
+    accent: '#04ff60',
     className: 'theme-pastel-green',
   },
   'pastel-purple': {
@@ -33,8 +33,8 @@ export const THEMES: Record<Theme, { name: string; primary: string; accent: stri
   },
   'pastel-orange': {
     name: 'Pastel Orange',
-    primary: '#fed7aa',
-    accent: '#fdba74',
+    primary: '#f97316',
+    accent: '#ea580c',
     className: 'theme-pastel-orange',
   },
 };
@@ -50,6 +50,8 @@ export const applyTheme = (theme: Theme) => {
   document.documentElement.style.setProperty('--color-primary', colors.primary);
   document.documentElement.style.setProperty('--color-accent', colors.accent);
   document.documentElement.style.setProperty('--color-primary-rgb', hexToRgb(colors.primary));
+  const hoverColor = getComputedStyle(document.documentElement).getPropertyValue('--color-hover') || colors.primary;
+  document.documentElement.style.setProperty('--color-hover-rgb', hexToRgb(hoverColor));
   document.documentElement.classList.remove(
     'theme-default',
     'theme-pastel-pink',
@@ -59,6 +61,8 @@ export const applyTheme = (theme: Theme) => {
     'theme-pastel-orange'
   );
   document.documentElement.classList.add(colors.className);
+  // Force CSS variables update by triggering a reflow
+  void document.documentElement.offsetHeight;
 };
 
 export const getTheme = (): Theme => {

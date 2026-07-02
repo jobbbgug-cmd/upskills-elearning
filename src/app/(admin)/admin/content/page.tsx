@@ -37,7 +37,7 @@ export default async function ContentListPage() {
           <div className="flex items-center gap-3 mt-1">
             <p className="text-gray-500 text-sm">สร้างชุดเนื้อหาและนำไปใช้กับคอร์สที่ต้องการ</p>
             {institutionName && (
-              <span className="inline-flex items-center gap-1 text-xs font-semibold text-green-700 bg-green-50 px-2.5 py-1 rounded-full">
+              <span className="inline-flex items-center gap-1 text-xs font-semibold theme-badge px-2.5 py-1 rounded-full">
                 <Building2 className="w-3 h-3" />
                 {institutionName}
               </span>
@@ -46,7 +46,7 @@ export default async function ContentListPage() {
         </div>
         <Link
           href="/admin/content/new"
-          className="flex items-center gap-2 px-4 py-2.5 bg-green-600 text-white text-sm font-semibold rounded-xl hover:bg-green-700 transition-colors"
+          className="flex items-center gap-2 px-4 py-2.5 theme-button text-sm font-semibold rounded-xl transition-colors"
         >
           <Plus className="w-4 h-4" />
           สร้างชุดเนื้อหาใหม่
@@ -115,7 +115,7 @@ export default async function ContentListPage() {
                 <div className="flex items-center gap-2 shrink-0">
                   <Link
                     href={`/admin/content/${c._id}`}
-                    className="flex items-center gap-1.5 px-3 py-2 text-sm text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors font-medium"
+                    className="flex items-center gap-1.5 px-3 py-2 text-sm theme-link rounded-lg transition-colors font-medium hover:bg-gray-100"
                   >
                     <Pencil className="w-3.5 h-3.5" />
                     แก้ไข

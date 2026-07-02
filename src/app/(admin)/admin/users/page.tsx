@@ -255,7 +255,7 @@ export default function AdminUsersPage() {
         </div>
         {(myRole === "admin" || myRole === "super_admin" || myRole === "owner") && (
           <button onClick={openCreate}
-            className="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 text-white text-sm font-semibold rounded-xl hover:bg-indigo-700 transition-colors shrink-0">
+            className="flex items-center gap-2 px-4 py-2.5 theme-button text-sm font-semibold rounded-xl transition-colors shrink-0">
             <UserPlus className="w-4 h-4" />
             เพิ่มผู้ใช้
           </button>
@@ -306,12 +306,20 @@ export default function AdminUsersPage() {
             className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white" />
         </div>
         <div className="flex gap-2">
-          {([{ value: "all", label: "ทั้งหมด" }, ...visibleRoles.map((r) => ({ value: r.value, label: r.label }))] as const).map((f) => (
-            <button key={f.value} onClick={() => setFilterRole(f.value as typeof filterRole)}
-              className={`px-4 py-2.5 rounded-xl text-sm font-medium transition-colors whitespace-nowrap ${filterRole === f.value ? "bg-indigo-600 text-white" : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"}`}>
-              {f.label}
-            </button>
-          ))}
+          {([{ value: "all", label: "ทั้งหมด" }, ...visibleRoles.map((r) => ({ value: r.value, label: r.label }))] as const).map((f) => {
+            const isActive = filterRole === f.value;
+            const isAll = f.value === "all";
+            const roleInfo_ = !isAll ? roleInfo(f.value) : null;
+            const activeClass = isAll
+              ? "theme-button"
+              : roleInfo_?.color ?? "";
+            return (
+              <button key={f.value} onClick={() => setFilterRole(f.value as typeof filterRole)}
+                className={`px-4 py-2.5 rounded-xl text-sm font-medium transition-colors whitespace-nowrap ${isActive ? activeClass : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"}`}>
+                {f.label}
+              </button>
+            );
+          })}
         </div>
       </div>
 

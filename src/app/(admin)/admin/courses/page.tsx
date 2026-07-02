@@ -39,7 +39,7 @@ export default async function AdminCoursesPage() {
           <div className="flex items-center gap-3 mt-1">
             <p className="text-gray-500 text-sm">คอร์สทั้งหมด {courses.length} คอร์ส</p>
             {institutionName && (
-              <span className="inline-flex items-center gap-1 text-xs font-semibold text-indigo-700 bg-indigo-50 px-2.5 py-1 rounded-full">
+              <span className="inline-flex items-center gap-1 text-xs font-semibold theme-badge px-2.5 py-1 rounded-full">
                 <Building2 className="w-3 h-3" />
                 {institutionName}
               </span>
@@ -48,7 +48,7 @@ export default async function AdminCoursesPage() {
         </div>
         <Link
           href="/admin/courses/new"
-          className="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 text-white text-sm font-medium rounded-xl hover:bg-indigo-700 transition-colors"
+          className="flex items-center gap-2 px-4 py-2.5 theme-button text-sm font-medium rounded-xl transition-colors"
         >
           <Plus className="w-4 h-4" />
           สร้างคอร์สใหม่
@@ -59,7 +59,7 @@ export default async function AdminCoursesPage() {
         <div className="bg-white rounded-2xl border border-gray-100 p-16 text-center text-gray-400">
           <BookOpen className="w-12 h-12 mx-auto mb-3 opacity-40" />
           <p>ยังไม่มีคอร์ส</p>
-          <Link href="/admin/courses/new" className="text-indigo-600 text-sm font-medium hover:underline mt-2 inline-block">
+          <Link href="/admin/courses/new" className="px-4 py-2.5 theme-button text-sm font-medium rounded-xl mt-2 inline-flex items-center gap-2">
             + สร้างคอร์สแรก
           </Link>
         </div>

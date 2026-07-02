@@ -303,17 +303,17 @@ export default function UserProfilePage({ params }: { params: Promise<{ id: stri
         <div className="flex items-center gap-5">
           {/* Avatar */}
           <div className="relative shrink-0">
-            <div className="w-20 h-20 rounded-full bg-indigo-100 flex items-center justify-center overflow-hidden border-4 border-white shadow-md">
+            <div className="w-20 h-20 rounded-full theme-card flex items-center justify-center overflow-hidden border-4 border-white shadow-md">
               {form.profileImage ? (
                 <Image src={form.profileImage} alt={user.name} width={80} height={80} className="w-full h-full object-cover" />
               ) : (
-                <span className="text-2xl font-bold text-indigo-600">{initials}</span>
+                <span className="text-2xl font-bold theme-link">{initials}</span>
               )}
             </div>
             <button
               onClick={() => fileRef.current?.click()}
               disabled={uploading}
-              className="absolute bottom-0 right-0 w-7 h-7 bg-indigo-600 text-white rounded-full flex items-center justify-center shadow hover:bg-indigo-700 transition-colors disabled:opacity-60"
+              className="absolute bottom-0 right-0 w-7 h-7 theme-button rounded-full flex items-center justify-center shadow transition-colors disabled:opacity-60"
             >
               {uploading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Camera className="w-3.5 h-3.5" />}
             </button>
@@ -337,8 +337,7 @@ export default function UserProfilePage({ params }: { params: Promise<{ id: stri
           <button
             onClick={handleSave}
             disabled={saving}
-            className="shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-xl text-white text-sm font-semibold disabled:opacity-60 transition-colors"
-            style={{ background: "linear-gradient(90deg,#4f46e5,#7c3aed)" }}
+            className="shrink-0 flex items-center gap-2 px-4 py-2.5 theme-button rounded-xl text-sm font-semibold disabled:opacity-60 transition-colors"
           >
             {saving  ? <Loader2 className="w-4 h-4 animate-spin" /> :
              saved   ? <CheckCircle2 className="w-4 h-4" /> :
@@ -355,7 +354,7 @@ export default function UserProfilePage({ params }: { params: Promise<{ id: stri
             key={t.key}
             onClick={() => handleTabChange(t.key)}
             className={`flex-1 flex items-center justify-center gap-1.5 py-2 text-sm font-medium rounded-lg transition-colors ${
-              tab === t.key ? "bg-white text-indigo-700 shadow-sm" : "text-gray-500 hover:text-gray-700"
+              tab === t.key ? "theme-tab-active" : "text-gray-500 hover:text-gray-700"
             }`}
           >
             {t.icon} <span className="hidden sm:inline">{t.label}</span>
@@ -422,7 +421,7 @@ export default function UserProfilePage({ params }: { params: Promise<{ id: stri
             <button
               onClick={handleAddDoc}
               disabled={uploading2 || !docName || !docUrl}
-              className="px-4 py-2.5 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700 transition-colors disabled:opacity-50 flex items-center gap-2"
+              className="px-4 py-2.5 theme-button rounded-xl font-medium transition-colors disabled:opacity-50 flex items-center gap-2"
             >
               <Upload className="w-4 h-4" /> เพิ่มเอกสาร
             </button>
@@ -447,7 +446,7 @@ export default function UserProfilePage({ params }: { params: Promise<{ id: stri
                       href={doc.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="p-2 text-gray-400 hover:text-indigo-600 transition-colors"
+                      className="p-2 text-gray-400 hover:theme-link transition-colors"
                     >
                       <ExternalLink className="w-4 h-4" />
                     </a>
@@ -480,17 +479,17 @@ export default function UserProfilePage({ params }: { params: Promise<{ id: stri
               <Link
                 key={s._id}
                 href={`/admin/students/${s._id}`}
-                className="bg-white rounded-xl border border-gray-100 p-4 hover:border-indigo-300 hover:shadow-sm transition-all flex items-center justify-between group"
+                className="bg-white rounded-xl border border-gray-100 p-4 hover:shadow-sm transition-all flex items-center justify-between group theme-item-hover"
               >
                 <div className="min-w-0 flex-1">
-                  <p className="font-medium text-gray-900 group-hover:text-indigo-600">{s.name}</p>
+                  <p className="font-medium text-gray-900 group-hover-text">{s.name}</p>
                   <div className="flex gap-2 text-xs text-gray-500 mt-1">
                     {s.gradeLevel && <span>{s.gradeLevel}</span>}
                     {s.phone && <span>•</span>}
                     {s.phone && <span>{s.phone}</span>}
                   </div>
                 </div>
-                <ExternalLink className="w-4 h-4 text-gray-300 group-hover:text-indigo-600 transition-colors shrink-0 ml-2" />
+                <ExternalLink className="w-4 h-4 text-gray-300 group-hover-text transition-colors shrink-0 ml-2" />
               </Link>
             ))
           ) : (

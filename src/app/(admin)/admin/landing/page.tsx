@@ -51,7 +51,7 @@ export default function LandingBuilderPage() {
 
   const inputCls = "w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white";
   const Toggle = ({ on, onChange }: { on: boolean; onChange: () => void }) => (
-    <button type="button" onClick={onChange} className={`transition-colors ${on ? "text-indigo-600" : "text-gray-300"}`}>
+    <button type="button" onClick={onChange} className={`transition-colors ${on ? "theme-toggle-on" : "theme-toggle-off"}`}>
       {on ? <ToggleRight className="w-6 h-6" /> : <ToggleLeft className="w-6 h-6" />}
     </button>
   );
@@ -87,7 +87,7 @@ export default function LandingBuilderPage() {
             <Eye className="w-4 h-4" /> Preview
           </a>
           <button onClick={save} disabled={saving}
-            className="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 text-white text-sm font-semibold rounded-xl hover:bg-indigo-700 disabled:opacity-50 transition-colors">
+            className="flex items-center gap-2 px-4 py-2.5 theme-button text-sm font-semibold rounded-xl disabled:opacity-50 transition-colors">
             <Save className="w-4 h-4" />{saving ? "บันทึก..." : saved ? "บันทึกแล้ว ✓" : "บันทึก"}
           </button>
         </div>
@@ -99,7 +99,7 @@ export default function LandingBuilderPage() {
           <div className="space-y-1">
             {SECTIONS.map((s) => (
               <button key={s.key} onClick={() => setSection(s.key)}
-                className={`w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium transition-colors flex items-center gap-2 ${section === s.key ? "bg-indigo-600 text-white" : "text-gray-600 hover:bg-gray-100"}`}>
+                className={`w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium transition-colors flex items-center gap-2 ${section === s.key ? "theme-button" : "text-gray-600 hover:bg-gray-100"}`}>
                 <GripVertical className="w-3.5 h-3.5 opacity-40" /> {s.label}
               </button>
             ))}
@@ -165,7 +165,7 @@ export default function LandingBuilderPage() {
                 ))}
               </div>
               {config.features.items.length < 6 && (
-                <button onClick={addFeature} className="flex items-center gap-1.5 text-sm text-indigo-600 hover:text-indigo-800 font-medium">
+                <button onClick={addFeature} className="flex items-center gap-1.5 text-sm theme-link font-medium">
                   <Plus className="w-4 h-4" /> เพิ่มจุดเด่น
                 </button>
               )}
@@ -192,7 +192,7 @@ export default function LandingBuilderPage() {
                 ))}
               </div>
               {config.testimonials.items.length < 6 && (
-                <button onClick={addTestimonial} className="flex items-center gap-1.5 text-sm text-indigo-600 hover:text-indigo-800 font-medium">
+                <button onClick={addTestimonial} className="flex items-center gap-1.5 text-sm theme-link font-medium">
                   <Plus className="w-4 h-4" /> เพิ่มรีวิว
                 </button>
               )}

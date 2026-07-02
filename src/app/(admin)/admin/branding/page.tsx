@@ -112,7 +112,7 @@ export default function BrandingPage() {
       {/* Institution name & tagline */}
       <div className="bg-white rounded-2xl border border-gray-100 p-5 space-y-4">
         <h2 className="font-semibold text-gray-900 flex items-center gap-2">
-          <Globe className="w-4 h-4 text-indigo-500" /> ข้อมูลสถาบัน
+          <Globe className="w-4 h-4 theme-link" /> ข้อมูลสถาบัน
         </h2>
         <div>
           <label className="block text-xs font-medium text-gray-600 mb-1.5">ชื่อสถาบัน</label>
@@ -139,7 +139,7 @@ export default function BrandingPage() {
       {/* Logo */}
       <div className="bg-white rounded-2xl border border-gray-100 p-5 space-y-4">
         <h2 className="font-semibold text-gray-900 flex items-center gap-2">
-          <Upload className="w-4 h-4 text-indigo-500" /> โลโก้
+          <Upload className="w-4 h-4 theme-link" /> โลโก้
         </h2>
         <div className="flex items-center gap-4">
           <div className="w-32 h-14 rounded-xl border border-gray-200 bg-gray-50 flex items-center justify-center overflow-hidden px-2">
@@ -173,7 +173,7 @@ export default function BrandingPage() {
       {/* Primary color */}
       <div className="bg-white rounded-2xl border border-gray-100 p-5 space-y-4">
         <h2 className="font-semibold text-gray-900 flex items-center gap-2">
-          <Palette className="w-4 h-4 text-indigo-500" /> สีหลัก (Primary Color)
+          <Palette className="w-4 h-4 theme-link" /> สีหลัก (Primary Color)
         </h2>
         <div className="flex flex-wrap gap-2">
           {PRESET_COLORS.map((c) => (
@@ -279,8 +279,7 @@ export default function BrandingPage() {
       <button
         onClick={save}
         disabled={saving}
-        className="flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white transition-colors disabled:opacity-50"
-        style={{ backgroundColor: form.primaryColor }}
+        className="flex items-center gap-2 px-6 py-3 theme-button rounded-xl text-sm font-semibold transition-colors disabled:opacity-50"
       >
         {saved ? <><Check className="w-4 h-4" /> บันทึกแล้ว</> : saving ? "กำลังบันทึก..." : "บันทึกการตั้งค่า"}
       </button>

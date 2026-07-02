@@ -77,7 +77,7 @@ export default function AdminCouponsPage() {
           <p className="text-gray-500 text-sm mt-1">สร้างและจัดการโค้ดส่วนลดสำหรับผู้เรียน</p>
         </div>
         <button onClick={() => setShowForm(true)}
-          className="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 text-white text-sm font-semibold rounded-xl hover:bg-indigo-700 transition-colors">
+          className="flex items-center gap-2 px-4 py-2.5 theme-button text-sm font-semibold rounded-xl transition-colors">
           <Plus className="w-4 h-4" /> สร้างคูปอง
         </button>
       </div>

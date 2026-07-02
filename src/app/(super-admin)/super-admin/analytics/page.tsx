@@ -151,7 +151,7 @@ export default function SuperAdminAnalyticsPage() {
                       <p className="text-xs text-gray-500">{PLAN_LABELS[inst.plan] ?? inst.plan}</p>
                     </div>
                     <div className="text-right shrink-0">
-                      <p className={`text-xs font-bold ${daysLeft <= 7 ? "text-red-600" : "text-orange-600"}`}>เหลือ {daysLeft} วัน</p>
+                      <p className="text-xs font-bold theme-link">เหลือ {daysLeft} วัน</p>
                       <p className="text-xs text-gray-400">{new Date(inst.planExpiresAt).toLocaleDateString("th-TH")}</p>
                     </div>
                   </div>

@@ -97,7 +97,7 @@ export default function AdminLivePage() {
           <p className="text-gray-500 text-sm mt-1">จัดการห้องเรียน Live</p>
         </div>
         <button onClick={() => setShowForm(true)}
-          className="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 text-white text-sm font-semibold rounded-xl hover:bg-indigo-700 transition-colors">
+          className="flex items-center gap-2 px-4 py-2.5 theme-button text-sm font-semibold rounded-xl transition-colors">
           <Plus className="w-4 h-4" /> สร้าง Live ใหม่
         </button>
       </div>
@@ -221,7 +221,7 @@ export default function AdminLivePage() {
             </div>
             <div className="flex gap-3 px-6 py-5 border-t border-gray-100 shrink-0">
               <button onClick={handleCreate} disabled={saving || !form.title || !form.scheduledAt}
-                className="flex-1 py-2.5 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 disabled:opacity-50 text-sm">
+                className="flex-1 py-2.5 theme-button font-semibold rounded-xl disabled:opacity-50 text-sm">
                 {saving ? "กำลังสร้าง..." : "สร้าง Live"}
               </button>
               <button onClick={() => setShowForm(false)} className="flex-1 py-2.5 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 text-sm">ยกเลิก</button>

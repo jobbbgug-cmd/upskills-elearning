@@ -73,7 +73,7 @@ export default function AdminQuizPage() {
   const inputCls = "w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white";
   const Toggle = ({ on, label, onChange }: { on: boolean; label: string; onChange: () => void }) => (
     <label className="flex items-center gap-2 cursor-pointer select-none">
-      <button type="button" onClick={onChange} className={`shrink-0 transition-colors ${on ? "text-indigo-600" : "text-gray-300"}`}>
+      <button type="button" onClick={onChange} className={`shrink-0 transition-colors ${on ? "theme-toggle-on" : "theme-toggle-off"}`}>
         {on ? <ToggleRight className="w-7 h-7" /> : <ToggleLeft className="w-7 h-7" />}
       </button>
       <span className="text-sm text-gray-700">{label}</span>
@@ -88,7 +88,7 @@ export default function AdminQuizPage() {
           <p className="text-gray-500 text-sm mt-1">สร้างและจัดการข้อสอบ</p>
         </div>
         <button onClick={() => setShowForm(true)}
-          className="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 text-white text-sm font-semibold rounded-xl hover:bg-indigo-700 transition-colors">
+          className="flex items-center gap-2 px-4 py-2.5 theme-button text-sm font-semibold rounded-xl transition-colors">
           <Plus className="w-4 h-4" /> สร้างข้อสอบ
         </button>
       </div>
@@ -179,7 +179,7 @@ export default function AdminQuizPage() {
             </div>
             <div className="flex gap-3 px-6 py-5 border-t border-gray-100 shrink-0">
               <button onClick={handleCreate} disabled={creating || !form.title}
-                className="flex-1 py-2.5 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 disabled:opacity-50 transition-colors text-sm">
+                className="flex-1 py-2.5 theme-button font-semibold rounded-xl disabled:opacity-50 transition-colors text-sm">
                 {creating ? "กำลังสร้าง..." : "สร้างข้อสอบ"}
               </button>
               <button onClick={() => setShowForm(false)}

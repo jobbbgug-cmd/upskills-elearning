@@ -112,7 +112,7 @@ export default function AdminNotificationsPage() {
       <div className="flex gap-1 mb-6 bg-gray-100 p-1 rounded-xl w-fit">
         {(["send", "certs"] as const).map((t) => (
           <button key={t} onClick={() => setTab(t)}
-            className={`px-5 py-2 rounded-lg text-sm font-semibold transition-colors ${tab === t ? "bg-white text-indigo-600 shadow-sm" : "text-gray-500 hover:text-gray-700"}`}>
+            className={`px-5 py-2 rounded-lg text-sm font-semibold transition-colors ${tab === t ? "theme-tab-active" : "text-gray-500 hover:text-gray-700"}`}>
             {t === "send" ? <span className="flex items-center gap-1.5"><Bell className="w-4 h-4" />ส่งการแจ้งเตือน</span>
                           : <span className="flex items-center gap-1.5"><span>🏆</span>ออกใบรับรอง</span>}
           </button>
@@ -148,11 +148,11 @@ export default function AdminNotificationsPage() {
               <label className="block text-sm font-medium text-gray-700 mb-2">ส่งถึง</label>
               <div className="flex gap-3 mb-2">
                 <label className="flex items-center gap-2 cursor-pointer">
-                  <input type="radio" checked={nForm.sendToAll} onChange={() => setNForm({ ...nForm, sendToAll: true, targetUserIds: [] })} className="accent-indigo-600" />
+                  <input type="radio" checked={nForm.sendToAll} onChange={() => setNForm({ ...nForm, sendToAll: true, targetUserIds: [] })} className="theme-input" />
                   <span className="text-sm text-gray-700">นักเรียนทั้งหมด</span>
                 </label>
                 <label className="flex items-center gap-2 cursor-pointer">
-                  <input type="radio" checked={!nForm.sendToAll} onChange={() => setNForm({ ...nForm, sendToAll: false })} className="accent-indigo-600" />
+                  <input type="radio" checked={!nForm.sendToAll} onChange={() => setNForm({ ...nForm, sendToAll: false })} className="theme-input" />
                   <span className="text-sm text-gray-700">เลือกนักเรียน</span>
                 </label>
               </div>
@@ -188,7 +188,7 @@ export default function AdminNotificationsPage() {
             </div>
 
             <button onClick={sendNotif} disabled={sending || !nForm.title}
-              className="w-full flex items-center justify-center gap-2 py-2.5 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 disabled:opacity-50 transition-colors text-sm">
+              className="w-full flex items-center justify-center gap-2 py-2.5 theme-button font-semibold rounded-xl disabled:opacity-50 transition-colors text-sm">
               <Send className="w-4 h-4" />{sending ? "กำลังส่ง..." : "ส่งการแจ้งเตือน"}
             </button>
           </div>
@@ -241,7 +241,7 @@ export default function AdminNotificationsPage() {
               <textarea value={cForm.description} onChange={(e) => setCForm({ ...cForm, description: e.target.value })} rows={2} className={`${inputCls} resize-none`} placeholder="เนื้อหาที่จะแสดงในใบรับรอง..." />
             </div>
             <button onClick={issueCert} disabled={issuingCert || !cForm.studentId || !cForm.title}
-              className="w-full flex items-center justify-center gap-2 py-2.5 bg-amber-500 text-white font-semibold rounded-xl hover:bg-amber-600 disabled:opacity-50 transition-colors text-sm">
+              className="w-full flex items-center justify-center gap-2 py-2.5 theme-button font-semibold rounded-xl disabled:opacity-50 transition-colors text-sm">
               🏆 {issuingCert ? "กำลังออก..." : "ออกใบรับรอง"}
             </button>
           </div>

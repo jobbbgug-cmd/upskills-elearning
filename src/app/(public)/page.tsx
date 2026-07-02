@@ -87,7 +87,7 @@ export default async function HomePage() {
       )}
 
       {/* ─── Trial CTA ─── */}
-      <section className="bg-gradient-to-r from-violet-500 to-indigo-600 px-4 md:px-8 py-5 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <section className="theme-gradient-bg px-4 md:px-8 py-5 flex flex-col sm:flex-row items-center justify-between gap-4">
         <div className="text-white text-center sm:text-left">
           <p className="font-bold text-lg">ทดลองใช้งานระบบฟรี 30 วัน</p>
           <p className="text-violet-100 text-sm">ไม่ต้องใช้บัตรเครดิต · ทีมงานติดต่อกลับภายใน 1-2 วันทำการ</p>

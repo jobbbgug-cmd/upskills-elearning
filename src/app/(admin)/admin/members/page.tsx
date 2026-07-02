@@ -83,6 +83,7 @@ export default function AdminMembersPage() {
   const ROLE_MAP: Record<string, { label: string; badge: string; icon: React.ReactNode }> = {
     student:     { label: "นักเรียน",   badge: "bg-blue-100 text-blue-700",    icon: <User className="w-4 h-4 text-blue-600" /> },
     teacher:     { label: "ครู",         badge: "bg-green-100 text-green-700",  icon: <GraduationCap className="w-4 h-4 text-green-600" /> },
+    parent:      { label: "ผู้ปกครอง",   badge: "bg-amber-100 text-amber-700",  icon: <User className="w-4 h-4 text-amber-600" /> },
     admin:       { label: "Admin",       badge: "bg-purple-100 text-purple-700",icon: <Shield className="w-4 h-4 text-purple-600" /> },
     super_admin: { label: "Super Admin", badge: "bg-rose-100 text-rose-700",    icon: <ShieldCheck className="w-4 h-4 text-rose-600" /> },
   };
@@ -201,7 +202,7 @@ export default function AdminMembersPage() {
                   </div>
                   <p className="text-sm text-gray-400 mt-0.5">{u.email}</p>
                   {u.contactChannel && (
-                    <div className="inline-flex items-center gap-1.5 mt-1.5 bg-violet-50 border border-violet-200 rounded-lg px-2.5 py-1 text-xs text-violet-700 font-medium">
+                    <div className="inline-flex items-center gap-1.5 mt-1.5 border rounded-lg px-2.5 py-1 text-xs font-medium theme-badge">
                       <span>📨 ส่งทาง {u.contactChannel}:</span>
                       <span className="font-bold">{u.contactId}</span>
                     </div>

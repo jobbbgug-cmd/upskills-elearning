@@ -166,7 +166,7 @@ export default function SuperAdminStudentSchedulePage() {
                       ${!isCurr?"bg-gray-50/60":isSel?"bg-indigo-50":colIdx===0||colIdx===6?"bg-rose-50/20":"bg-white"}
                       ${isCurr?"cursor-pointer hover:bg-indigo-50/40":""}`}>
                     <div className={`w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center rounded-full text-xs font-medium mb-1 ml-auto
-                      ${isToday?"bg-indigo-600 text-white font-bold":isSel?"bg-indigo-200 text-indigo-800":!isCurr?"text-gray-300":"text-gray-700"}`}>
+                      ${isToday?"theme-today":isSel?"bg-gray-200 text-gray-800":!isCurr?"text-gray-300":"text-gray-700"}`}>
                       {cell.day}
                     </div>
                     <div className="space-y-0.5">

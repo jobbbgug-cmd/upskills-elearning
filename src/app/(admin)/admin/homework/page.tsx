@@ -89,7 +89,7 @@ export default function AdminHomeworkPage() {
           <p className="text-gray-500 text-sm mt-1">สร้างและจัดการการบ้านสำหรับนักเรียน</p>
         </div>
         <button onClick={() => setShowForm(true)}
-          className="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 text-white text-sm font-semibold rounded-xl hover:bg-indigo-700 transition-colors">
+          className="flex items-center gap-2 px-4 py-2.5 theme-button text-sm font-semibold rounded-xl transition-colors">
           <Plus className="w-4 h-4" /> สร้างการบ้าน
         </button>
       </div>
@@ -195,7 +195,7 @@ export default function AdminHomeworkPage() {
             </div>
             <div className="flex gap-3 px-6 py-5 border-t border-gray-100 shrink-0">
               <button onClick={handleCreate} disabled={creating || !form.courseId || !form.title || !form.dueDate}
-                className="flex-1 py-2.5 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 disabled:opacity-50 transition-colors text-sm">
+                className="flex-1 py-2.5 theme-button font-semibold rounded-xl disabled:opacity-50 transition-colors text-sm">
                 {creating ? "กำลังสร้าง..." : "สร้างการบ้าน"}
               </button>
               <button onClick={() => setShowForm(false)}

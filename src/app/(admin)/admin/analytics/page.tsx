@@ -95,9 +95,10 @@ export default function AnalyticsPage() {
         <span className="text-xs text-gray-400 font-medium">เรียงตาม:</span>
         {(["enrolled", "watchingRate", "hwSubmitted", "quizAttempts"] as const).map((key) => {
           const labels: Record<string, string> = { enrolled: "จำนวนนักเรียน", watchingRate: "% ดูคลิป", hwSubmitted: "ส่งการบ้าน", quizAttempts: "ทำข้อสอบ" };
+          const colorClass: Record<string, string> = { enrolled: "sort-enrolled", watchingRate: "sort-watching", hwSubmitted: "sort-homework", quizAttempts: "sort-quiz" };
           return (
             <button key={key} onClick={() => setSortBy(key)}
-              className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors ${sortBy === key ? "bg-indigo-600 text-white" : "bg-white border border-gray-200 text-gray-600 hover:border-indigo-300"}`}>
+              className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors ${sortBy === key ? colorClass[key] : "bg-white border border-gray-200 text-gray-600 hover:border-gray-300"}`}>
               {labels[key]}
             </button>
           );

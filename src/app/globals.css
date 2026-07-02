@@ -3,6 +3,7 @@
 :root {
   --color-primary: #7c3aed;
   --color-accent: #6d28d9;
+  --color-hover: #6d28d9;
 }
 
 @theme {
@@ -24,148 +25,43 @@ body {
 .theme-default {
   --color-primary: #7c3aed;
   --color-accent: #6d28d9;
+  --color-hover: #6d28d9;
 }
 
 .theme-pastel-pink {
   --color-primary: #f9a8d4;
-  --color-accent: #f472b6;
+  --color-accent: #ef449c;
+  --color-hover: #f472b6;
 }
 
 .theme-pastel-blue {
-  --color-primary: #a5d8ff;
-  --color-accent: #7dd3fc;
+  --color-primary: #0369a1;
+  --color-accent: #0284c7;
+  --color-hover: #0891b2;
 }
 
 .theme-pastel-green {
-  --color-primary: #bfdbfe;
-  --color-accent: #86efac;
+  --color-primary: #7ed266;
+  --color-accent: #04ff60;
+  --color-hover: #86efac;
 }
 
 .theme-pastel-purple {
   --color-primary: #d8b4fe;
-  --color-accent: #c084fc;
+  --color-accent: rgb(167, 92, 242);
+  --color-hover: #c084fc;
 }
 
 .theme-pastel-orange {
-  --color-primary: #fed7aa;
-  --color-accent: #fdba74;
-}
-
-/* Apply theme to all interactive elements */
-.bg-indigo-600,
-.bg-violet-600,
-[class*="bg-indigo-"],
-[class*="bg-violet-"] {
-  background-color: var(--color-primary) !important;
-}
-
-.hover\:bg-indigo-700:hover,
-.hover\:bg-violet-700:hover,
-button:hover[class*="bg-indigo-"],
-button:hover[class*="bg-violet-"] {
-  background-color: var(--color-accent) !important;
-}
-
-/* Theme text colors */
-.text-indigo-600,
-.text-violet-600,
-.text-indigo-500,
-.text-violet-500 {
-  color: var(--color-primary) !important;
-}
-
-.text-indigo-700,
-.text-violet-700 {
-  color: var(--color-accent) !important;
-}
-
-/* Logo and branding text */
-.text-violet-700,
-[class*="text-violet"],
-[class*="text-indigo"] {
-  color: var(--color-primary) !important;
-}
-
-/* Theme border colors */
-.border-indigo-200,
-.border-violet-200 {
-  border-color: var(--color-primary) !important;
-}
-
-.border-indigo-500,
-.border-violet-500 {
-  border-color: var(--color-primary) !important;
-}
-
-/* Theme background colors for hover states */
-.hover\:bg-indigo-50:hover,
-.hover\:bg-violet-50:hover {
-  background-color: rgba(var(--color-primary-rgb), 0.05) !important;
-}
-
-/* Theme ring colors for focus */
-.focus\:ring-indigo-500:focus,
-.focus\:ring-violet-500:focus {
-  --tw-ring-color: var(--color-primary) !important;
-}
-
-/* Override ALL indigo and violet text */
-html.theme-pastel-pink .text-indigo-600,
-html.theme-pastel-pink .text-violet-600,
-html.theme-pastel-pink .text-indigo-700,
-html.theme-pastel-pink .text-violet-700,
-html.theme-pastel-pink .text-indigo-500,
-html.theme-pastel-blue .text-indigo-600,
-html.theme-pastel-blue .text-violet-600,
-html.theme-pastel-blue .text-indigo-700,
-html.theme-pastel-blue .text-violet-700,
-html.theme-pastel-blue .text-indigo-500,
-html.theme-pastel-green .text-indigo-600,
-html.theme-pastel-green .text-violet-600,
-html.theme-pastel-green .text-indigo-700,
-html.theme-pastel-green .text-violet-700,
-html.theme-pastel-green .text-indigo-500,
-html.theme-pastel-purple .text-indigo-600,
-html.theme-pastel-purple .text-violet-600,
-html.theme-pastel-purple .text-indigo-700,
-html.theme-pastel-purple .text-violet-700,
-html.theme-pastel-purple .text-indigo-500,
-html.theme-pastel-orange .text-indigo-600,
-html.theme-pastel-orange .text-violet-600,
-html.theme-pastel-orange .text-indigo-700,
-html.theme-pastel-orange .text-violet-700,
-html.theme-pastel-orange .text-indigo-500 {
-  color: var(--color-primary) !important;
+  --color-primary: #f97316;
+  --color-accent: #ea580c;
+  --color-hover: #fb923c;
 }
 
 
-/* Force theme color on all text elements when theme is active */
-html.theme-pastel-pink [class*="text-indigo-"],
-html.theme-pastel-pink [class*="text-violet-"],
-html.theme-pastel-blue [class*="text-indigo-"],
-html.theme-pastel-blue [class*="text-violet-"],
-html.theme-pastel-green [class*="text-indigo-"],
-html.theme-pastel-green [class*="text-violet-"],
-html.theme-pastel-purple [class*="text-indigo-"],
-html.theme-pastel-purple [class*="text-violet-"],
-html.theme-pastel-orange [class*="text-indigo-"],
-html.theme-pastel-orange [class*="text-violet-"] {
-  color: var(--color-primary) !important;
-}
 
-/* Also apply to hover states */
-html.theme-pastel-pink [class*="hover:text-indigo-"]:hover,
-html.theme-pastel-pink [class*="hover:text-violet-"]:hover,
-html.theme-pastel-blue [class*="hover:text-indigo-"]:hover,
-html.theme-pastel-blue [class*="hover:text-violet-"]:hover,
-html.theme-pastel-green [class*="hover:text-indigo-"]:hover,
-html.theme-pastel-green [class*="hover:text-violet-"]:hover,
-html.theme-pastel-purple [class*="hover:text-indigo-"]:hover,
-html.theme-pastel-purple [class*="hover:text-violet-"]:hover,
-html.theme-pastel-orange [class*="hover:text-indigo-"]:hover,
-html.theme-pastel-orange [class*="hover:text-violet-"]:hover {
-  color: var(--color-accent) !important;
-}
+
+
 
 /* Custom theme-aware menu classes */
 .menu-active {
@@ -177,13 +73,17 @@ html.theme-pastel-orange [class*="hover:text-violet-"]:hover {
   color: #ffffff !important;
 }
 
+.menu-active span {
+  color: #ffffff !important;
+}
+
 .menu-active svg {
   color: #ffffff !important;
   stroke: #ffffff !important;
 }
 
 .menu-active:hover {
-  background: var(--color-accent) !important;
+  background: var(--color-hover) !important;
   color: #ffffff !important;
 }
 
@@ -200,5 +100,128 @@ html.theme-pastel-orange [class*="hover:text-violet-"]:hover {
 
 .theme-badge * {
   color: #ffffff !important;
+}
+
+/* Theme-aware button */
+.theme-button {
+  background-color: var(--color-primary) !important;
+  color: #ffffff !important;
+}
+
+.theme-button:hover {
+  background-color: var(--color-hover) !important;
+}
+
+/* Theme-aware card */
+.theme-card {
+  background-color: rgba(var(--color-primary-rgb), 0.1) !important;
+  border-color: rgba(var(--color-primary-rgb), 0.2) !important;
+}
+
+.theme-card svg {
+  color: var(--color-primary) !important;
+}
+
+.theme-card .card-title {
+  color: var(--color-primary) !important;
+}
+
+.theme-card .card-label {
+  color: var(--color-primary) !important;
+}
+
+/* Theme-aware toggle */
+.theme-toggle-on {
+  color: var(--color-primary) !important;
+}
+
+.theme-toggle-off {
+  color: #d1d5db !important;
+}
+
+/* Theme-aware link */
+.theme-link {
+  color: var(--color-primary) !important;
+  font-weight: 500;
+}
+
+.theme-link:hover {
+  color: var(--color-hover) !important;
+  text-decoration: underline;
+}
+
+/* Theme-aware today indicator */
+.theme-today {
+  background-color: var(--color-primary) !important;
+  color: #ffffff !important;
+  font-weight: bold;
+}
+
+/* Theme-aware tab active */
+.theme-tab-active {
+  background-color: #ffffff !important;
+  color: var(--color-primary) !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Theme-aware item hover */
+.theme-item-hover:hover {
+  border-color: rgba(var(--color-primary-rgb), 0.3) !important;
+}
+
+.theme-item-hover:hover .group-hover-text {
+  color: var(--color-primary) !important;
+}
+
+/* Theme-aware hover color */
+.hover\:theme-link:hover {
+  color: var(--color-primary) !important;
+}
+
+/* Sort button colors */
+.sort-enrolled {
+  background-color: #0369a1 !important;
+  color: #ffffff !important;
+}
+
+.sort-watching {
+  background-color: #f97316 !important;
+  color: #ffffff !important;
+}
+
+.sort-homework {
+  background-color: #22c55e !important;
+  color: #ffffff !important;
+}
+
+.sort-quiz {
+  background-color: #ef4444 !important;
+  color: #ffffff !important;
+}
+
+/* Theme-aware light background */
+.theme-bg-light {
+  background-color: rgba(var(--color-primary-rgb), 0.1) !important;
+}
+
+/* Theme-aware radio/checkbox */
+.theme-input {
+  accent-color: var(--color-primary) !important;
+}
+
+/* Theme-aware gradient background */
+.theme-gradient-bg {
+  background: linear-gradient(to right, rgba(var(--color-primary-rgb), 0.6), var(--color-primary)) !important;
+}
+
+/* Trial status badge */
+.trial-label {
+  color: var(--color-primary) !important;
+  font-weight: 600;
+}
+
+.trial-card {
+  background-color: rgba(var(--color-hover-rgb), 0.1) !important;
+  border-color: rgba(var(--color-hover-rgb), 0.2) !important;
 }
 

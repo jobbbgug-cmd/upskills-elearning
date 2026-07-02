@@ -146,7 +146,7 @@ export default function AdminBannersPage() {
         </div>
         <button
           onClick={() => { setEditingId(null); setForm(EMPTY_FORM); setShowForm(true); }}
-          className="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 text-white text-sm font-semibold rounded-xl hover:bg-indigo-700 transition-colors"
+          className="flex items-center gap-2 px-4 py-2.5 theme-button text-sm font-semibold rounded-xl transition-colors"
         >
           <Plus className="w-4 h-4" />
           เพิ่มแบนเนอร์
@@ -271,7 +271,7 @@ export default function AdminBannersPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-2">ประเภทปุ่ม</label>
                 <div className="flex gap-3">
                   <label className={`flex-1 flex items-center gap-3 px-4 py-3 rounded-xl border-2 cursor-pointer transition-colors ${form.buttonType === "link" ? "border-indigo-500 bg-indigo-50" : "border-gray-200 hover:border-gray-300"}`}>
-                    <input type="radio" name="buttonType" value="link" checked={form.buttonType === "link"} onChange={() => setForm({ ...form, buttonType: "link" })} className="accent-indigo-600" />
+                    <input type="radio" name="buttonType" value="link" checked={form.buttonType === "link"} onChange={() => setForm({ ...form, buttonType: "link" })} className="theme-input" />
                     <div>
                       <p className="text-sm font-semibold text-gray-800">ลิงก์ URL</p>
                       <p className="text-xs text-gray-500">พาผู้ใช้ไปยัง URL ที่กำหนด</p>
@@ -343,7 +343,7 @@ export default function AdminBannersPage() {
             </div>
 
             <div className="flex gap-3 pt-2">
-              <button type="submit" className="px-5 py-2.5 bg-indigo-600 text-white text-sm font-semibold rounded-xl hover:bg-indigo-700 transition-colors">
+              <button type="submit" className="px-5 py-2.5 theme-button text-sm font-semibold rounded-xl transition-colors">
                 {editingId ? "บันทึกการแก้ไข" : "บันทึกแบนเนอร์"}
               </button>
               <button type="button" onClick={closeForm} className="px-5 py-2.5 bg-gray-100 text-gray-700 text-sm font-semibold rounded-xl hover:bg-gray-200 transition-colors">

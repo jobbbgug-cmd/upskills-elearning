@@ -201,7 +201,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <div className="text-sm font-medium text-gray-800">{userName}</div>
             <div className="text-xs text-gray-400">{ROLE_LABELS[role] ?? role}</div>
             {institutionName && (
-              <div className="text-xs text-indigo-500 mt-0.5 truncate">{institutionName}</div>
+              <div className="text-xs theme-link mt-0.5 truncate">{institutionName}</div>
             )}
           </div>
           <Link href="/admin/profile" onClick={() => setUserDropdown(false)}
@@ -285,7 +285,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               {badge}
             </span>
           )}
-          <ChevronDown className={`w-3.5 h-3.5 text-gray-400 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
+          <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${isOpen ? "rotate-180" : ""} ${hasActive ? "text-white" : "text-gray-400"}`} />
         </button>
         {isOpen && (
           <div className="ml-3 pl-3 border-l border-gray-100 space-y-0.5 mt-0.5 mb-1">
@@ -301,9 +301,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     return (
       <Link href={href} onClick={() => { setMoreMenuOpen(false); if (!active) setIsNavigating(true); }}
         className={`flex items-center gap-2 px-2 py-1.5 text-sm rounded-lg transition-colors ${
-          active ? "bg-indigo-50 text-indigo-700 font-medium" : "text-gray-600 hover:bg-gray-50 hover:text-indigo-600"
+          active ? "menu-active font-medium" : "text-gray-600 hover:bg-gray-50"
         }`}>
-        <span className={active ? "text-indigo-500" : "text-gray-400"}>{icon}</span>
+        {icon}
         {label}
       </Link>
     );
@@ -440,10 +440,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               {subscription.isExpired && <p className="text-red-600">แผนหมดอายุแล้ว</p>}
               {!subscription.isActive && <p className="text-red-600">สถาบันถูกระงับ</p>}
               {subscription.daysLeft !== null && !subscription.isExpired && subscription.daysLeft <= 7 && (
-                <p className="text-orange-600">หมดอายุใน {subscription.daysLeft} วัน</p>
+                <p className="theme-link">หมดอายุใน {subscription.daysLeft} วัน</p>
               )}
               {subscription.daysLeft !== null && !subscription.isExpired && subscription.daysLeft > 7 && (
-                <p className="text-gray-500">เหลือ {subscription.daysLeft} วัน</p>
+                <p className="theme-link">เหลือ {subscription.daysLeft} วัน</p>
               )}
               {subscription.daysLeft === null && <p className="text-gray-500">ไม่มีวันหมดอายุ</p>}
             </div>
@@ -526,9 +526,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   ] as { id: string; label: string; icon: React.ReactNode }[]).map(({ id, label, icon }) => (
                     <div key={id} className="relative" onMouseEnter={() => setActiveMoreGroup(id)}>
                       <button className={`w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg transition-colors ${
-                        activeMoreGroup === id ? "bg-indigo-50 text-indigo-700" : "text-gray-700 hover:bg-gray-50 hover:text-indigo-600"
+                        activeMoreGroup === id ? "menu-active" : "text-gray-700 hover:bg-gray-50"
                       }`}>
-                        <span className={activeMoreGroup === id ? "text-indigo-500" : "text-gray-400"}>{icon}</span>
+                        <span>{icon}</span>
                         <span className="flex-1 text-left">{label}</span>
                         <ChevronRight className="w-3.5 h-3.5 text-gray-300" />
                       </button>
@@ -589,9 +589,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </div>
 
             {institutionName && (
-              <div className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 bg-gray-50 rounded-lg max-w-[160px]">
-                <Building2 className="w-3.5 h-3.5 text-gray-400 shrink-0" />
-                <span className="text-sm text-gray-600 font-medium truncate">{institutionName}</span>
+              <div className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 theme-bg-light rounded-lg max-w-[160px]">
+                <Building2 className="w-3.5 h-3.5 theme-link shrink-0" />
+                <span className="text-sm theme-link font-medium truncate">{institutionName}</span>
               </div>
             )}
 
