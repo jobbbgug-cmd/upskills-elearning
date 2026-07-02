@@ -140,8 +140,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
             <BranchFilter branches={branches} selected={selectedBranchId} />
           )}
           {displayName && (
-            <span className={`inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full
-              ${auth.isOwner ? "bg-violet-50 text-violet-700 border border-violet-200" : "bg-indigo-50 text-indigo-700 border border-indigo-100"}`}>
+            <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full theme-badge">
               <Building2 className="w-3.5 h-3.5" />{displayName}
             </span>
           )}

@@ -260,8 +260,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <Link href={href} onClick={() => { close(); if (!active) setIsNavigating(true); }}
         className={`flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg transition-colors ${
           active
-            ? "bg-indigo-50 text-indigo-700 font-medium"
-            : "text-gray-600 hover:bg-gray-50 hover:text-indigo-600"
+            ? "menu-active font-medium"
+            : "text-gray-600 hover:bg-gray-50 menu-hover"
         }`}>
         {icon}
         {label}
@@ -276,9 +276,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <div key={id}>
         <button onClick={() => toggleGroup(id)}
           className={`w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg transition-colors ${
-            hasActive ? "bg-indigo-50/60 text-indigo-700 font-semibold" : "text-gray-700 hover:bg-gray-50 hover:text-indigo-600"
+            hasActive ? "menu-active font-semibold" : "text-gray-700 hover:bg-gray-50 menu-hover"
           }`}>
-          <span className={hasActive ? "text-indigo-500" : "text-gray-400"}>{icon}</span>
+          <span>{icon}</span>
           <span className="flex-1 text-left">{label}</span>
           {badge !== undefined && badge > 0 && (
             <span className="bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full min-w-[20px] text-center">
@@ -501,7 +501,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <div className="relative" ref={moreMenuRef}>
               <button onClick={() => setMoreMenuOpen((v) => !v)}
                 className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-xl transition-colors ${
-                  moreMenuOpen ? "bg-indigo-50 text-indigo-700" : "text-gray-600 hover:bg-gray-50 hover:text-indigo-600"
+                  moreMenuOpen ? "menu-active" : "text-gray-600 hover:bg-gray-50 menu-hover"
                 }`}>
                 <LayoutGrid className="w-4 h-4" />
                 เมนูอื่นๆ

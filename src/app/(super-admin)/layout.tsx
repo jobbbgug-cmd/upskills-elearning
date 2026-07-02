@@ -96,7 +96,7 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
       <button
         onClick={() => toggleGroup(id)}
         className={`w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg transition-colors ${
-          isOpen ? "bg-violet-50 text-violet-700 font-medium" : "text-gray-600 hover:bg-gray-50 hover:text-violet-600"
+          isOpen ? "menu-active font-medium" : "text-gray-600 hover:bg-gray-50 menu-hover"
         }`}
       >
         <span className="flex-1 text-left">
@@ -118,8 +118,8 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
         onClick={() => { close(); if (!active) setIsNavigating(true); }}
         className={`flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg transition-colors ${
           active
-            ? "bg-violet-50 text-violet-700 font-medium"
-            : "text-gray-600 hover:bg-gray-50 hover:text-violet-600"
+            ? "menu-active font-medium"
+            : "text-gray-600 hover:bg-gray-50 menu-hover"
         }`}
       >
         {icon}

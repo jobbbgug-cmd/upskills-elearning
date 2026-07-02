@@ -138,39 +138,6 @@ html.theme-pastel-orange .text-indigo-500 {
   color: var(--color-primary) !important;
 }
 
-/* White text on dark colored backgrounds */
-.bg-indigo-600,
-.bg-violet-600,
-.bg-indigo-500,
-.bg-violet-500,
-.bg-indigo-700,
-.bg-violet-700 {
-  color: #ffffff !important;
-}
-
-.bg-indigo-600 *,
-.bg-violet-600 *,
-.bg-indigo-500 *,
-.bg-violet-500 *,
-.bg-indigo-700 *,
-.bg-violet-700 * {
-  color: #ffffff !important;
-}
-
-/* Dark text on light colored backgrounds - override all themes */
-html .bg-indigo-50,
-html .bg-violet-50,
-html .bg-indigo-100,
-html .bg-violet-100 {
-  color: #111827 !important;
-}
-
-html .bg-indigo-50 *,
-html .bg-violet-50 *,
-html .bg-indigo-100 *,
-html .bg-violet-100 * {
-  color: #111827 !important;
-}
 
 /* Force theme color on all text elements when theme is active */
 html.theme-pastel-pink [class*="text-indigo-"],
@@ -200,24 +167,38 @@ html.theme-pastel-orange [class*="hover:text-violet-"]:hover {
   color: var(--color-accent) !important;
 }
 
-/* Ultra-aggressive: force white on ANY bg-indigo or bg-violet */
-[class*="bg-indigo-"],
-[class*="bg-violet-"] {
-  color: white !important;
+/* Custom theme-aware menu classes */
+.menu-active {
+  background: var(--color-primary) !important;
+  color: #ffffff !important;
 }
 
-[class*="bg-indigo-"] *,
-[class*="bg-violet-"] * {
-  color: white !important;
+.menu-active * {
+  color: #ffffff !important;
 }
 
-/* Specifically for buttons */
-button[class*="bg-indigo-"],
-button[class*="bg-violet-"] {
-  color: white !important;
+.menu-active svg {
+  color: #ffffff !important;
+  stroke: #ffffff !important;
 }
 
-button[class*="bg-indigo-"] *,
-button[class*="bg-violet-"] * {
-  color: white !important;
+.menu-active:hover {
+  background: var(--color-accent) !important;
+  color: #ffffff !important;
 }
+
+.menu-hover:hover {
+  color: var(--color-primary) !important;
+}
+
+/* Theme-aware badge */
+.theme-badge {
+  background: var(--color-primary) !important;
+  color: #ffffff !important;
+  border-color: var(--color-primary) !important;
+}
+
+.theme-badge * {
+  color: #ffffff !important;
+}
+
