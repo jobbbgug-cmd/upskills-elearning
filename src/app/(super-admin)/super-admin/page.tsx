@@ -167,8 +167,8 @@ function StatBox({ icon: Icon, label, value, sub, href, isMoney = false }: {
 }) {
   return (
     <Link href={href} className="bg-white rounded-2xl border border-l-4 border-gray-100 p-5 hover:shadow-md transition-all group" style={{ borderLeftColor: 'var(--color-primary)' }}>
-      <div className="mb-3">
-        <Icon className="w-6 h-6" style={{ color: 'var(--color-primary)' }} />
+      <div className="mb-3" style={{ color: 'var(--color-primary)' }}>
+        <Icon className="w-6 h-6" />
       </div>
       <div className="text-2xl font-bold text-gray-900">
         {isMoney ? `฿${value.toLocaleString()}` : value.toLocaleString()}
