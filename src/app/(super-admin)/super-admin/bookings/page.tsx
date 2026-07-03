@@ -136,25 +136,26 @@ export default function SuperAdminBookingsPage() {
         </button>
         <button onClick={() => setTab("all")}
           className={cn("px-4 py-2 rounded-xl text-sm font-semibold transition-colors",
-            tab === "all" ? "bg-violet-600 text-white" : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"
+            tab === "all" ? "text-white theme-button" : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"
           )}>
           ทั้งหมด ({bookings.length})
         </button>
 
         {/* Institution filter */}
         <div className="relative">
-          <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+          <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none" style={{ color: 'var(--color-primary)' }} />
           <select
             value={filterInstitution}
             onChange={(e) => handleInstitutionChange(e.target.value)}
-            className="pl-9 pr-8 py-2 border border-gray-200 rounded-xl text-sm text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-violet-500 appearance-none cursor-pointer"
+            className="pl-9 pr-8 py-2 border rounded-xl text-sm appearance-none cursor-pointer"
+            style={{ borderColor: 'rgba(var(--color-primary-rgb), 0.3)', backgroundColor: 'rgba(var(--color-primary-rgb), 0.1)', color: 'var(--color-primary)', focusRingColor: 'rgba(var(--color-primary-rgb), 0.4)' } as any}
           >
             <option value="all">ทุกสถาบัน</option>
             {institutions.map((i) => (
               <option key={i._id} value={i._id}>{i.name}</option>
             ))}
           </select>
-          <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none" />
+          <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 pointer-events-none" style={{ color: 'var(--color-primary)' }} />
         </div>
 
         {/* Search */}
@@ -188,8 +189,8 @@ export default function SuperAdminBookingsPage() {
                 <div className="flex-1 space-y-2 min-w-0">
                   {instName && (
                     <div className="flex items-center gap-1.5">
-                      <Building2 className="w-3.5 h-3.5 text-violet-400 shrink-0" />
-                      <span className="text-xs font-semibold text-violet-700 bg-violet-50 px-2 py-0.5 rounded-full">{instName}</span>
+                      <Building2 className="w-3.5 h-3.5 shrink-0" style={{ color: 'var(--color-primary)' }} />
+                      <span className="text-xs font-semibold px-2 py-0.5 rounded-full" style={{ color: 'var(--color-primary)', backgroundColor: 'rgba(var(--color-primary-rgb), 0.1)' }}>{instName}</span>
                     </div>
                   )}
                   <div className="flex flex-wrap items-center gap-2">
@@ -207,7 +208,7 @@ export default function SuperAdminBookingsPage() {
                     </p>
                   )}
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-xs font-bold bg-violet-50 text-violet-700 px-2.5 py-1 rounded-lg">ที่นั่ง {booking.seatNumber}</span>
+                    <span className="text-xs font-bold px-2.5 py-1 rounded-lg" style={{ color: 'var(--color-primary)', backgroundColor: 'rgba(var(--color-primary-rgb), 0.1)' }}>ที่นั่ง {booking.seatNumber}</span>
                     <span className={cn("text-xs font-semibold px-2.5 py-1 rounded-lg", statusInfo.cls)}>{statusInfo.label}</span>
                   </div>
                   <p className="text-xs text-gray-400">จองเมื่อ {new Date(booking.createdAt).toLocaleDateString("th-TH", { day: "numeric", month: "short", year: "numeric" })}</p>
