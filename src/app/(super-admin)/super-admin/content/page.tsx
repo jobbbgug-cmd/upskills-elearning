@@ -114,15 +114,15 @@ export default function SuperAdminContentPage() {
                 <tr key={c._id} className="hover:bg-gray-50 transition-colors">
                   <td className="px-5 py-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-violet-50 flex items-center justify-center shrink-0">
-                        <FileText className="w-4 h-4 text-violet-500" />
+                      <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: 'rgba(var(--color-primary-rgb), 0.1)' }}>
+                        <FileText className="w-4 h-4" style={{ color: 'var(--color-primary)' }} />
                       </div>
                       <p className="text-sm font-medium text-gray-900">{c.name}</p>
                     </div>
                   </td>
                   <td className="px-5 py-4">
                     {c.institutionId ? (
-                      <span className="inline-flex items-center gap-1 text-xs font-semibold text-violet-700 bg-violet-50 px-2 py-0.5 rounded-full">
+                      <span className="inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full" style={{ color: 'var(--color-primary)', backgroundColor: 'rgba(var(--color-primary-rgb), 0.1)' }}>
                         <Building2 className="w-3 h-3" />{institutionNames[c.institutionId] ?? "สถาบัน"}
                       </span>
                     ) : <span className="text-gray-300 text-xs">—</span>}

@@ -189,7 +189,7 @@ export default function InstitutionsPage() {
         </div>
         <button
           onClick={() => { setCreating(true); setError(""); }}
-          className="flex items-center gap-2 px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white text-sm font-medium rounded-xl transition-colors"
+          className="flex items-center gap-2 px-4 py-2 text-white text-sm font-medium rounded-xl transition-colors theme-button"
         >
           <Plus className="w-4 h-4" /> เพิ่มสถาบัน
         </button>
@@ -214,11 +214,13 @@ export default function InstitutionsPage() {
 
           return (
             <div key={inst._id} className={`bg-white rounded-xl border overflow-hidden transition-all hover:shadow-sm ${!inst.isActive ? "border-red-100" : "border-gray-100"}`}>
-              <div className={`h-0.5 w-full bg-gradient-to-r ${planColor[inst.plan] ?? planColor.trial}`} />
+              <div className={`h-0.5 w-full ${inst.plan === "trial" ? "" : `bg-gradient-to-r ${planColor[inst.plan] ?? planColor.trial}`}`}
+                style={inst.plan === "trial" ? { background: `linear-gradient(to right, rgba(var(--color-primary-rgb), 0.6), var(--color-primary))` } : undefined} />
 
               <div className="px-4 py-3 flex items-center gap-3">
                 {/* Avatar */}
-                <div className={`w-9 h-9 rounded-lg bg-gradient-to-br ${planColor[inst.plan] ?? planColor.trial} flex items-center justify-center shrink-0`}>
+                <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${inst.plan === "trial" ? "" : `bg-gradient-to-br ${planColor[inst.plan] ?? planColor.trial}`}`}
+                  style={inst.plan === "trial" ? { background: `linear-gradient(to bottom right, rgba(var(--color-primary-rgb), 0.8), var(--color-primary))` } : undefined}>
                   <span className="text-white text-xs font-bold">{initials}</span>
                 </div>
 
@@ -243,9 +245,9 @@ export default function InstitutionsPage() {
 
                 {/* Revenue + commission */}
                 <div className="text-right shrink-0">
-                  <p className="text-base font-extrabold text-violet-700">฿{fmtB(inst.stats.revenue)}</p>
+                  <p className="text-base font-extrabold theme-link">฿{fmtB(inst.stats.revenue)}</p>
                   {commissionAmount && (
-                    <p className="text-xs text-violet-400">คอม {inst.commissionRate}% = ฿{commissionAmount}</p>
+                    <p className="text-xs theme-link">คอม {inst.commissionRate}% = ฿{commissionAmount}</p>
                   )}
                 </div>
 
@@ -303,7 +305,7 @@ export default function InstitutionsPage() {
             {error && <p className="text-red-500 text-sm">{error}</p>}
             <div className="flex gap-3 pt-2">
               <button onClick={saveEdit} disabled={saving}
-                className="flex-1 bg-violet-600 hover:bg-violet-700 text-white text-sm font-medium py-2 rounded-lg transition-colors disabled:opacity-50">
+                className="flex-1 text-white text-sm font-medium py-2 rounded-lg transition-colors disabled:opacity-50 theme-button">
                 {saving ? "กำลังบันทึก..." : "บันทึก"}
               </button>
               <button onClick={() => setEditing(null)}
@@ -404,7 +406,7 @@ export default function InstitutionsPage() {
               <button
                 onClick={createInstitution}
                 disabled={saving || !newForm.slug || !newForm.name || !newForm.ownerName || !newForm.ownerEmail || !newForm.ownerPassword}
-                className="flex-1 bg-violet-600 hover:bg-violet-700 text-white text-sm font-medium py-2 rounded-lg transition-colors disabled:opacity-50">
+                className="flex-1 text-white text-sm font-medium py-2 rounded-lg transition-colors disabled:opacity-50 theme-button">
                 {saving ? "กำลังสร้าง..." : "สร้างสถาบัน"}
               </button>
               <button onClick={() => { setCreating(false); setError(""); }}
@@ -481,7 +483,7 @@ function SuccessModal({ admin, onClose }: { admin: CreatedAdmin; onClose: () => 
           className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-colors ${
             copied
               ? "bg-green-500 text-white"
-              : "bg-violet-600 hover:bg-violet-700 text-white"
+              : "theme-button"
           }`}
         >
           {copied ? (

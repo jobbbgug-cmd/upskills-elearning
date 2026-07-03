@@ -328,12 +328,24 @@ export default function SuperAdminUsersPage() {
         </div>
 
         <div className="flex gap-2 flex-wrap">
-          {([{ value: "all", label: "ทั้งหมด" }, ...ROLES.map((r) => ({ value: r.value, label: r.label }))] as const).map((f) => (
-            <button key={f.value} onClick={() => setFilterRole(f.value as typeof filterRole)}
-              className={`px-4 py-2.5 rounded-xl text-sm font-medium transition-colors whitespace-nowrap ${filterRole === f.value ? "bg-violet-600 text-white" : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"}`}>
-              {f.label}
-            </button>
-          ))}
+          {([{ value: "all", label: "ทั้งหมด" }, ...ROLES.map((r) => ({ value: r.value, label: r.label }))] as const).map((f) => {
+            const roleInfo = f.value !== "all" ? ROLES.find((r) => r.value === f.value) : null;
+            const darkColorMap: Record<string, string> = {
+              student: "bg-blue-700 text-white",
+              parent: "bg-pink-600 text-white",
+              teacher: "bg-green-700 text-white",
+              admin: "bg-purple-700 text-white",
+              owner: "bg-violet-700 text-white",
+              super_admin: "bg-rose-700 text-white",
+            };
+            const activeColor = f.value === "all" ? "bg-gray-700 text-white" : darkColorMap[f.value] || "bg-gray-100 text-gray-600";
+            return (
+              <button key={f.value} onClick={() => setFilterRole(f.value as typeof filterRole)}
+                className={`px-4 py-2.5 rounded-xl text-sm font-medium transition-colors whitespace-nowrap ${filterRole === f.value ? activeColor : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"}`}>
+                {f.label}
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -379,7 +391,7 @@ export default function SuperAdminUsersPage() {
                     </td>
                     <td className="px-5 py-4">
                       {u.institutionId ? (
-                        <span className="inline-flex items-center gap-1 text-xs font-semibold text-violet-700 bg-violet-50 px-2 py-0.5 rounded-full">
+                        <span className="inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full" style={{ color: 'var(--color-primary)', backgroundColor: 'rgba(var(--color-primary-rgb), 0.1)' }}>
                           <Building2 className="w-3 h-3" />{institutionNames[u.institutionId] ?? "สถาบัน"}
                         </span>
                       ) : <span className="text-gray-300 text-xs">—</span>}

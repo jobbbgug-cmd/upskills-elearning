@@ -78,41 +78,41 @@ export default async function SuperAdminPage() {
 
       {/* Key stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatBox icon={Building2} label="สถาบันทั้งหมด" value={s.totalInstitutions} sub={`ใช้งานอยู่ ${s.activeInstitutions}`} color="violet" href="/super-admin/institutions" />
-        <StatBox icon={Users} label="ผู้ใช้ทั้งหมด" value={s.totalUsers} sub="ทุกสถาบัน" color="blue" href="/super-admin/institutions" />
-        <StatBox icon={BookOpen} label="คอร์สทั้งหมด" value={s.totalCourses} sub="ทุกสถาบัน" color="indigo" href="/super-admin/institutions" />
-        <StatBox icon={TrendingUp} label="รายได้รวม" value={s.totalRevenue} sub={`${s.totalConfirmed} bookings`} color="green" href="/super-admin/institutions" isMoney />
+        <StatBox icon={Building2} label="สถาบันทั้งหมด" value={s.totalInstitutions} sub={`ใช้งานอยู่ ${s.activeInstitutions}`} href="/super-admin/institutions" />
+        <StatBox icon={Users} label="ผู้ใช้ทั้งหมด" value={s.totalUsers} sub="ทุกสถาบัน" href="/super-admin/institutions" />
+        <StatBox icon={BookOpen} label="คอร์สทั้งหมด" value={s.totalCourses} sub="ทุกสถาบัน" href="/super-admin/institutions" />
+        <StatBox icon={TrendingUp} label="รายได้รวม" value={s.totalRevenue} sub={`${s.totalConfirmed} bookings`} href="/super-admin/institutions" isMoney />
       </div>
 
       {/* Revenue/booking split */}
       <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-        <div className="bg-white rounded-2xl border border-l-4 border-gray-100 border-l-green-500 p-5">
+        <div className="bg-white rounded-2xl border border-l-4 border-gray-100 p-5" style={{ borderLeftColor: 'var(--color-primary)' }}>
           <div className="flex items-center gap-2 mb-3">
-            <CheckCircle2 className="w-5 h-5 text-green-600" />
+            <CheckCircle2 className="w-5 h-5" style={{ color: 'var(--color-primary)' }} />
             <span className="text-gray-700 text-sm font-medium">รายได้รับแล้ว</span>
           </div>
           <div className="text-3xl font-extrabold text-gray-900">฿{s.totalRevenue.toLocaleString()}</div>
           <div className="text-gray-500 text-xs mt-1">{s.totalConfirmed} การจองยืนยันแล้ว</div>
         </div>
-        <div className="bg-white rounded-2xl border border-l-4 border-gray-100 border-l-violet-500 p-5">
+        <div className="bg-white rounded-2xl border border-l-4 border-gray-100 p-5" style={{ borderLeftColor: 'var(--color-primary)' }}>
           <div className="flex items-center gap-2 mb-3">
-            <Percent className="w-5 h-5 text-violet-600" />
+            <Percent className="w-5 h-5" style={{ color: 'var(--color-primary)' }} />
             <span className="text-gray-700 text-sm font-medium">ค่าคอมมิชชั่นรวม</span>
           </div>
           <div className="text-3xl font-extrabold text-gray-900">฿{(() => { const r = s.totalCommission; const p = r.toString().split("."); p[0] = p[0].replace(/\B(?=(\d{3})+(?!\d))/g, ","); return p.join("."); })()}</div>
           <div className="text-gray-500 text-xs mt-1">จากรายได้ที่ยืนยันแล้ว</div>
         </div>
-        <div className="bg-white rounded-2xl border border-l-4 border-gray-100 border-l-amber-500 p-5">
+        <div className="bg-white rounded-2xl border border-l-4 border-gray-100 p-5" style={{ borderLeftColor: 'var(--color-primary)' }}>
           <div className="flex items-center gap-2 mb-3">
-            <Clock3 className="w-5 h-5 text-amber-600" />
+            <Clock3 className="w-5 h-5" style={{ color: 'var(--color-primary)' }} />
             <span className="text-gray-700 text-sm font-medium">รอดำเนินการ</span>
           </div>
           <div className="text-3xl font-extrabold text-gray-900">{s.totalPending}</div>
           <div className="text-gray-500 text-xs mt-1">การจองรอตรวจสอบ</div>
         </div>
-        <div className="bg-white rounded-2xl border border-l-4 border-gray-100 border-l-indigo-500 p-5">
+        <div className="bg-white rounded-2xl border border-l-4 border-gray-100 p-5" style={{ borderLeftColor: 'var(--color-primary)' }}>
           <div className="flex items-center gap-2 mb-3">
-            <Building2 className="w-5 h-5 text-indigo-600" />
+            <Building2 className="w-5 h-5" style={{ color: 'var(--color-primary)' }} />
             <span className="text-gray-700 text-sm font-medium">สถาบันตามแผน</span>
           </div>
           <div className="space-y-1.5 mt-1">
@@ -130,7 +130,7 @@ export default async function SuperAdminPage() {
       <div className="bg-white rounded-2xl border border-gray-100 p-5">
         <div className="flex items-center justify-between mb-4">
           <h2 className="font-semibold text-gray-900">สถาบันล่าสุด</h2>
-          <Link href="/super-admin/institutions" className="text-sm text-violet-600 hover:underline flex items-center gap-1">
+          <Link href="/super-admin/institutions" className="text-sm theme-link hover:underline flex items-center gap-1">
             ดูทั้งหมด <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>
@@ -161,26 +161,14 @@ export default async function SuperAdminPage() {
   );
 }
 
-function StatBox({ icon: Icon, label, value, sub, color, href, isMoney = false }: {
+function StatBox({ icon: Icon, label, value, sub, href, isMoney = false }: {
   icon: React.ComponentType<{ className?: string }>;
-  label: string; value: number; sub: string; color: string; href: string; isMoney?: boolean;
+  label: string; value: number; sub: string; href: string; isMoney?: boolean;
 }) {
-  const borderColors: Record<string, string> = {
-    violet: "border-l-violet-500",
-    blue:   "border-l-blue-500",
-    indigo: "border-l-indigo-500",
-    green:  "border-l-green-500",
-  };
-  const iconColors: Record<string, string> = {
-    violet: "text-violet-600",
-    blue:   "text-blue-600",
-    indigo: "text-indigo-600",
-    green:  "text-green-600",
-  };
   return (
-    <Link href={href} className={`bg-white rounded-2xl border border-l-4 border-gray-100 ${borderColors[color] ?? borderColors.violet} p-5 hover:shadow-md transition-all group`}>
+    <Link href={href} className="bg-white rounded-2xl border border-l-4 border-gray-100 p-5 hover:shadow-md transition-all group" style={{ borderLeftColor: 'var(--color-primary)' }}>
       <div className="mb-3">
-        <Icon className={`w-6 h-6 ${iconColors[color] ?? iconColors.violet}`} />
+        <Icon className="w-6 h-6" style={{ color: 'var(--color-primary)' }} />
       </div>
       <div className="text-2xl font-bold text-gray-900">
         {isMoney ? `฿${value.toLocaleString()}` : value.toLocaleString()}
@@ -192,14 +180,20 @@ function StatBox({ icon: Icon, label, value, sub, color, href, isMoney = false }
 }
 
 function PlanBadge({ plan }: { plan: string }) {
-  const styles: Record<string, string> = {
-    trial:      "bg-gray-50 text-gray-600 border-gray-200",
-    starter:    "bg-blue-50 text-blue-600 border-blue-200",
-    pro:        "bg-violet-50 text-violet-600 border-violet-200",
-    enterprise: "bg-amber-50 text-amber-700 border-amber-200",
-  };
+  const isTrial = plan === "trial";
   return (
-    <span className={`text-xs px-2 py-0.5 rounded-full border font-medium ${styles[plan] ?? styles.trial}`}>
+    <span
+      className="text-xs px-2 py-0.5 rounded-full border font-medium"
+      style={isTrial ? {
+        backgroundColor: 'rgba(var(--color-primary-rgb), 0.1)',
+        color: 'var(--color-primary)',
+        borderColor: 'rgba(var(--color-primary-rgb), 0.2)'
+      } : {
+        backgroundColor: plan === "starter" ? "#dbeafe" : plan === "pro" ? "#faf5ff" : "#fef3c7",
+        color: plan === "starter" ? "#1e40af" : plan === "pro" ? "#6d28d9" : "#b45309",
+        borderColor: plan === "starter" ? "#bfdbfe" : plan === "pro" ? "#e9d5ff" : "#fde68a"
+      }}
+    >
       {PLAN_LABELS[plan] ?? plan}
     </span>
   );

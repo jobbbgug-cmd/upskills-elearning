@@ -71,8 +71,8 @@ interface CreatedAdmin {
 
 /* ── config ── */
 const STATUS_CONFIG = {
-  pending:   { label: "รอดำเนินการ", color: "bg-amber-100 text-amber-700 border-amber-200", icon: Clock },
-  contacted: { label: "ติดต่อแล้ว",  color: "bg-blue-100 text-blue-700 border-blue-200",   icon: PhoneCall },
+  pending:   { label: "รอดำเนินการ", color: "bg-yellow-100 text-yellow-700 border-yellow-200", icon: Clock },
+  contacted: { label: "ติดต่อแล้ว",  color: "bg-amber-500 text-white border-amber-600", icon: PhoneCall },
   approved:  { label: "อนุมัติแล้ว", color: "bg-green-100 text-green-700 border-green-200", icon: CheckCircle2 },
   rejected:  { label: "ปฏิเสธ",      color: "bg-red-100 text-red-700 border-red-200",       icon: XCircle },
 };
@@ -82,6 +82,13 @@ const NEXT_STATUS: Record<string, string[]> = {
   contacted: ["approved", "rejected"],
   approved:  [],
   rejected:  [],
+};
+
+const STATUS_BUTTON_COLORS: Record<string, string> = {
+  pending:   "bg-yellow-100 text-yellow-700 border-yellow-200",
+  contacted: "bg-amber-500 text-white border-amber-600",
+  approved:  "bg-green-100 text-green-700 border-green-200",
+  rejected:  "bg-red-100 text-red-700 border-red-200",
 };
 
 /* ── main page ── */
@@ -212,7 +219,7 @@ export default function TrialsPage() {
           <h1 className="text-2xl font-bold text-gray-900">คำขอทดลองใช้งาน</h1>
           <p className="text-gray-500 text-sm mt-1">รายการคำขอจากหน้าเว็บไซต์</p>
         </div>
-        <button onClick={load} className="flex items-center gap-2 text-sm text-gray-600 hover:text-teal-600 border border-gray-200 hover:border-teal-300 px-3 py-1.5 rounded-lg transition-colors">
+        <button onClick={load} className="flex items-center gap-2 text-sm theme-link border border-gray-200 px-3 py-1.5 rounded-lg transition-colors hover:border-gray-300">
           <RefreshCw className="w-4 h-4" />รีเฟรช
         </button>
       </div>
@@ -220,15 +227,15 @@ export default function TrialsPage() {
       {/* Filter tabs */}
       <div className="flex gap-2 flex-wrap">
         {[
-          { key: "all", label: "ทั้งหมด" },
-          { key: "pending", label: "รอดำเนินการ" },
-          { key: "contacted", label: "ติดต่อแล้ว" },
-          { key: "approved", label: "อนุมัติแล้ว" },
-          { key: "rejected", label: "ปฏิเสธ" },
-        ].map(({ key, label }) => (
+          { key: "all", label: "ทั้งหมด", activeColor: "bg-gray-500 text-white border-gray-500" },
+          { key: "pending", label: "รอดำเนินการ", activeColor: "bg-yellow-100 text-yellow-700 border-yellow-200" },
+          { key: "contacted", label: "ติดต่อแล้ว", activeColor: "bg-amber-500 text-white border-amber-600" },
+          { key: "approved", label: "อนุมัติแล้ว", activeColor: "bg-green-100 text-green-700 border-green-200" },
+          { key: "rejected", label: "ปฏิเสธ", activeColor: "bg-red-100 text-red-700 border-red-200" },
+        ].map(({ key, label, activeColor }) => (
           <button key={key} onClick={() => setFilter(key)}
             className={`px-4 py-1.5 rounded-full text-sm font-medium border transition-colors ${
-              filter === key ? "bg-teal-500 text-white border-teal-500" : "bg-white text-gray-600 border-gray-200 hover:border-teal-300"
+              filter === key ? activeColor : "bg-white text-gray-600 border-gray-200 hover:border-gray-300"
             }`}>
             {label} ({counts[key as keyof typeof counts]})
           </button>
@@ -282,7 +289,7 @@ export default function TrialsPage() {
                         className={`mt-4 inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-xl shadow-sm transition-colors ${
                           item.institutionCreated
                             ? "bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200"
-                            : "bg-violet-600 hover:bg-violet-700 text-white"
+                            : "text-white theme-button"
                         }`}
                       >
                         <Building2 className="w-4 h-4" />
@@ -294,9 +301,10 @@ export default function TrialsPage() {
                   <div className="flex flex-col gap-1.5 shrink-0">
                     {nextStatuses.map((s) => {
                       const nc = STATUS_CONFIG[s as keyof typeof STATUS_CONFIG];
+                      const btnColor = STATUS_BUTTON_COLORS[s] || STATUS_BUTTON_COLORS.pending;
                       return (
                         <button key={s} onClick={() => updateStatus(item._id, s)}
-                          className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${nc.color} hover:opacity-80`}>
+                          className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${btnColor} hover:opacity-80`}>
                           {nc.label}
                         </button>
                       );

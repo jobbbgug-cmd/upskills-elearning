@@ -250,7 +250,7 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
           <Link href="/" className="lg:hidden">
             <Image src="/logo.png" alt="UPSkills" width={100} height={34} className="object-contain" />
           </Link>
-          <span className="hidden lg:block text-sm font-semibold text-violet-700">Super Admin Panel</span>
+          <span className="hidden lg:block text-sm font-semibold theme-link">Super Admin Panel</span>
 
           {/* User menu */}
           <div className="ml-auto relative" ref={dropdownRef}>
@@ -267,7 +267,7 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
               </div>
               <div className="text-left hidden sm:block">
                 <div className="text-sm font-medium text-gray-800 leading-tight">{user?.name || "Super Admin"}</div>
-                <div className="text-xs text-violet-500 leading-tight">Super Admin</div>
+                <div className="text-xs theme-link leading-tight">Super Admin</div>
               </div>
               <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${userDropdown ? "rotate-180" : ""}`} />
             </button>
@@ -275,7 +275,7 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
               <div className="absolute right-0 top-full mt-2 w-44 bg-white rounded-xl shadow-lg border border-gray-100 py-1 z-50">
                 <div className="px-3 py-2 border-b border-gray-100">
                   <div className="text-sm font-medium text-gray-800">{user?.name || "Super Admin"}</div>
-                  <div className="text-xs text-violet-500">Super Admin</div>
+                  <div className="text-xs theme-link">Super Admin</div>
                 </div>
                 <Link href="/super-admin/profile" onClick={() => setUserDropdown(false)}
                   className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">

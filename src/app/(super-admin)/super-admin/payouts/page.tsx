@@ -180,7 +180,7 @@ export default function PayoutsPage() {
         </div>
         <button
           onClick={() => { setCreating(true); setError(""); }}
-          className="flex items-center gap-2 px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white text-sm font-medium rounded-xl transition-colors"
+          className="flex items-center gap-2 px-4 py-2 text-white text-sm font-medium rounded-xl transition-colors theme-button"
         >
           <Plus className="w-4 h-4" /> สร้าง Payout
         </button>
@@ -239,8 +239,8 @@ export default function PayoutsPage() {
                 {/* Institution name + badge */}
                 <div className="flex items-center justify-between gap-3 mb-3">
                   <div className="flex items-center gap-2.5 min-w-0">
-                    <div className="w-8 h-8 rounded-lg bg-violet-50 flex items-center justify-center shrink-0">
-                      <Building2 className="w-4 h-4 text-violet-500" />
+                    <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: 'rgba(var(--color-primary-rgb), 0.1)' }}>
+                      <Building2 className="w-4 h-4" style={{ color: 'var(--color-primary)' }} />
                     </div>
                     <div className="min-w-0">
                       <p className="text-sm font-semibold text-gray-900 truncate">{row.name}</p>
@@ -249,7 +249,7 @@ export default function PayoutsPage() {
                   </div>
                   <button
                     onClick={() => openCreateFor(row._id)}
-                    className="shrink-0 flex items-center gap-1 text-xs px-3 py-1.5 bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition-colors"
+                    className="shrink-0 flex items-center gap-1 text-xs px-3 py-1.5 text-white rounded-lg transition-colors theme-button"
                   >
                     <Plus className="w-3.5 h-3.5" /> สร้าง Payout
                   </button>

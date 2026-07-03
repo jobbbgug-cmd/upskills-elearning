@@ -172,6 +172,21 @@ function MonthlyChart({ monthly, filterMonth, setFilterMonth }: {
 }) {
   const chartData = monthly.map((m) => ({ ...m, label: monthLabel(m.month) }));
   const totalCommission = chartData.reduce((s, m) => s + m.commission, 0);
+  const [gradientColors, setGradientColors] = useState<{ active: { start: string; end: string }; normal: { start: string; end: string } }>({
+    active: { start: "#7c3aed", end: "#a855f7" },
+    normal: { start: "#c4b5fd", end: "#ddd6fe" }
+  });
+
+  useEffect(() => {
+    const style = getComputedStyle(document.documentElement);
+    const primary = style.getPropertyValue('--color-primary')?.trim() || "#7c3aed";
+    const hover = style.getPropertyValue('--color-hover')?.trim() || "#a855f7";
+    setGradientColors({
+      active: { start: primary, end: hover },
+      normal: { start: "#d8b4fe", end: "#f3e8ff" }
+    });
+  }, []);
+
   if (!chartData.length) return null;
 
   function formatB(val: number) {
@@ -208,12 +223,12 @@ function MonthlyChart({ monthly, filterMonth, setFilterMonth }: {
         >
           <defs>
             <linearGradient id="commGradActive" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#7c3aed" />
-              <stop offset="100%" stopColor="#a855f7" />
+              <stop offset="0%" stopColor={gradientColors.active.start} />
+              <stop offset="100%" stopColor={gradientColors.active.end} />
             </linearGradient>
             <linearGradient id="commGradNormal" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#c4b5fd" />
-              <stop offset="100%" stopColor="#ddd6fe" />
+              <stop offset="0%" stopColor={gradientColors.normal.start} />
+              <stop offset="100%" stopColor={gradientColors.normal.end} />
             </linearGradient>
           </defs>
           <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />

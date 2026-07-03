@@ -59,7 +59,7 @@ export default function SuperAdminLivePage() {
       <div className="flex gap-2 mb-5">
         {(["all", "live", "upcoming", "ended"] as const).map((t) => (
           <button key={t} onClick={() => setTab(t)}
-            className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${tab === t ? "bg-violet-600 text-white" : "bg-white border border-gray-200 text-gray-600 hover:border-violet-300"}`}>
+            className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${tab === t ? "text-white theme-button" : "bg-white border border-gray-200 text-gray-600 hover:border-gray-300"}`}>
             {t === "all" ? "ทั้งหมด" : STATUS_TH[t]}
           </button>
         ))}

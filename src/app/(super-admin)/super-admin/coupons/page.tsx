@@ -86,7 +86,7 @@ export default function SuperAdminCouponsPage() {
         <div className="flex gap-2">
           {(["all", "active", "inactive"] as const).map((f) => (
             <button key={f} onClick={() => setFilterActive(f)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-colors ${filterActive === f ? "bg-violet-600 text-white" : "bg-white border border-gray-200 text-gray-600 hover:border-violet-300"}`}>
+              className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-colors ${filterActive === f ? "text-white theme-button" : "bg-white border border-gray-200 text-gray-600 hover:border-gray-300"}`}>
               {f === "all" ? "ทั้งหมด" : f === "active" ? "ใช้งานได้" : "ปิดใช้งาน"}
             </button>
           ))}

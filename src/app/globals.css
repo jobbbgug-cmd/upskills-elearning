@@ -227,3 +227,11 @@ body {
   border-color: rgba(var(--color-hover-rgb), 0.2) !important;
 }
 
+/* Theme-aware select focus */
+select.theme-input:focus {
+  outline: none !important;
+  ring: 2px !important;
+  ring-color: var(--color-primary) !important;
+  box-shadow: 0 0 0 2px rgba(var(--color-primary-rgb), 0.1), 0 0 0 4px var(--color-primary) !important;
+}
+
