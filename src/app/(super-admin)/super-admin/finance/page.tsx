@@ -40,8 +40,8 @@ const EMPTY: FinanceForm = {
   qrCodeImage: "",
 };
 
-const inputClass =
-  "w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-violet-500";
+const getInputClass = () =>
+  "w-full px-4 py-2.5 border rounded-xl text-sm text-gray-900 focus:outline-none focus:ring-2";
 
 export default function SuperAdminFinancePage() {
   const [form, setForm]           = useState<FinanceForm>(EMPTY);
@@ -131,25 +131,26 @@ export default function SuperAdminFinancePage() {
       {/* Institution selector */}
       <div className="bg-white rounded-2xl border border-gray-200 p-5 mb-6">
         <div className="flex items-center gap-2 mb-3">
-          <Building2 className="w-5 h-5 text-violet-500" />
+          <Building2 className="w-5 h-5" style={{ color: 'var(--color-primary)' }} />
           <h2 className="font-semibold text-gray-900">เลือกสถาบัน</h2>
         </div>
         <div className="relative">
-          <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+          <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none" style={{ color: 'var(--color-primary)' }} />
           <select
             value={selectedInstitution}
             onChange={(e) => setSelectedInstitution(e.target.value)}
-            className="w-full pl-9 pr-8 py-2.5 border border-gray-200 rounded-xl text-sm text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-violet-500 appearance-none cursor-pointer"
+            className="w-full pl-9 pr-8 py-2.5 border rounded-xl text-sm appearance-none cursor-pointer"
+            style={{ borderColor: 'rgba(var(--color-primary-rgb), 0.3)', backgroundColor: 'rgba(var(--color-primary-rgb), 0.1)', color: 'var(--color-primary)', '--tw-ring-color': 'rgba(var(--color-primary-rgb), 0.4)' } as any}
           >
             <option value="">-- เลือกสถาบัน --</option>
             {institutions.map((i) => (
               <option key={i._id} value={i._id}>{i.name}</option>
             ))}
           </select>
-          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none" style={{ color: 'var(--color-primary)' }} />
         </div>
         {selectedInstitutionName && (
-          <p className="text-xs text-violet-600 mt-2 font-medium">
+          <p className="text-xs mt-2 font-medium" style={{ color: 'var(--color-primary)' }}>
             กำลังดูข้อมูลของ: {selectedInstitutionName}
           </p>
         )}
@@ -167,7 +168,7 @@ export default function SuperAdminFinancePage() {
           {/* QR Code */}
           <div className="bg-white rounded-2xl border border-gray-200 p-6 space-y-4">
             <div className="flex items-center gap-2">
-              <QrCode className="w-5 h-5 text-violet-500" />
+              <QrCode className="w-5 h-5" style={{ color: 'var(--color-primary)' }} />
               <h2 className="font-semibold text-gray-900">QR Code การชำระเงิน</h2>
             </div>
 
@@ -189,7 +190,10 @@ export default function SuperAdminFinancePage() {
                   type="button"
                   onClick={() => qrRef.current?.click()}
                   disabled={uploading}
-                  className="flex items-center gap-2 px-4 py-2.5 border-2 border-dashed border-violet-300 rounded-xl text-sm text-violet-600 hover:border-violet-500 hover:bg-violet-50 transition-colors disabled:opacity-50 w-full justify-center"
+                  className="flex items-center gap-2 px-4 py-2.5 border-2 border-dashed rounded-xl text-sm transition-colors disabled:opacity-50 w-full justify-center"
+                  style={{ borderColor: 'rgba(var(--color-primary-rgb), 0.5)', color: 'var(--color-primary)', backgroundColor: 'rgba(var(--color-primary-rgb), 0.05)' }}
+                  onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'rgba(var(--color-primary-rgb), 0.8)'; e.currentTarget.style.backgroundColor = 'rgba(var(--color-primary-rgb), 0.1)'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'rgba(var(--color-primary-rgb), 0.5)'; e.currentTarget.style.backgroundColor = 'rgba(var(--color-primary-rgb), 0.05)'; }}
                 >
                   <Upload className="w-4 h-4" />
                   {uploading ? "กำลังอัปโหลด..." : "อัปโหลด QR Code"}
@@ -211,7 +215,7 @@ export default function SuperAdminFinancePage() {
           {/* Bank account */}
           <div className="bg-white rounded-2xl border border-gray-200 p-6 space-y-4">
             <div className="flex items-center gap-2">
-              <Building2 className="w-5 h-5 text-violet-500" />
+              <Building2 className="w-5 h-5" style={{ color: 'var(--color-primary)' }} />
               <h2 className="font-semibold text-gray-900">บัญชีธนาคาร</h2>
             </div>
 
@@ -224,7 +228,8 @@ export default function SuperAdminFinancePage() {
                 <input
                   value={form.bankAccount}
                   onChange={(e) => setForm({ ...form, bankAccount: e.target.value })}
-                  className={inputClass}
+                  className={getInputClass()}
+                  style={{ borderColor: 'rgba(var(--color-primary-rgb), 0.3)', '--tw-ring-color': 'rgba(var(--color-primary-rgb), 0.4)' } as any}
                   placeholder="เช่น 000-0-00000-0"
                 />
               </div>
@@ -233,7 +238,8 @@ export default function SuperAdminFinancePage() {
                 <input
                   value={form.bankName}
                   onChange={(e) => setForm({ ...form, bankName: e.target.value })}
-                  className={inputClass}
+                  className={getInputClass()}
+                  style={{ borderColor: 'rgba(var(--color-primary-rgb), 0.3)', '--tw-ring-color': 'rgba(var(--color-primary-rgb), 0.4)' } as any}
                   placeholder="เช่น นาย สมชาย ใจดี"
                 />
               </div>
@@ -243,7 +249,8 @@ export default function SuperAdminFinancePage() {
                   <select
                     value={form.bankBrand}
                     onChange={(e) => setForm({ ...form, bankBrand: e.target.value })}
-                    className={`${inputClass} appearance-none pr-10`}
+                    className={`${getInputClass()} appearance-none pr-10`}
+                    style={{ borderColor: 'rgba(var(--color-primary-rgb), 0.3)', '--tw-ring-color': 'rgba(var(--color-primary-rgb), 0.4)' } as any}
                   >
                     {THAI_BANKS.map((b) => (
                       <option key={b.value} value={b.value}>{b.label}</option>
@@ -267,7 +274,7 @@ export default function SuperAdminFinancePage() {
           {/* Promptpay */}
           <div className="bg-white rounded-2xl border border-gray-200 p-6 space-y-4">
             <div className="flex items-center gap-2">
-              <Phone className="w-5 h-5 text-violet-500" />
+              <Phone className="w-5 h-5" style={{ color: 'var(--color-primary)' }} />
               <h2 className="font-semibold text-gray-900">พร้อมเพย์</h2>
             </div>
             <div>
@@ -275,7 +282,8 @@ export default function SuperAdminFinancePage() {
               <input
                 value={form.promptpay}
                 onChange={(e) => setForm({ ...form, promptpay: e.target.value })}
-                className={inputClass}
+                className={getInputClass()}
+                style={{ borderColor: 'rgba(var(--color-primary-rgb), 0.3)', '--tw-ring-color': 'rgba(var(--color-primary-rgb), 0.4)' } as any}
                 placeholder="เช่น 0812345678"
               />
             </div>
@@ -286,7 +294,7 @@ export default function SuperAdminFinancePage() {
             <button
               type="submit"
               disabled={saving}
-              className="flex items-center gap-2 px-6 py-3 bg-violet-600 text-white font-semibold rounded-xl hover:bg-violet-700 transition-colors disabled:opacity-50"
+              className="flex items-center gap-2 px-6 py-3 text-white font-semibold rounded-xl transition-colors disabled:opacity-50 theme-button"
             >
               <Save className="w-4 h-4" />
               {saving ? "กำลังบันทึก..." : "บันทึก"}
