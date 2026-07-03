@@ -6,6 +6,7 @@ import Institution from "@/models/Institution";
 import BannerSlider from "@/components/BannerSlider";
 import PricingSection from "@/components/PricingSection";
 import TrialRequestModal from "@/components/TrialRequestModal";
+import PublicPageThemeReset from "@/components/PublicPageThemeReset";
 import { IBanner, GradeLevel } from "@/types";
 import {
   BookOpen, Users, Video, CheckCircle, Star, Zap, Shield,
@@ -44,6 +45,7 @@ export default async function HomePage() {
 
   return (
     <div className="overflow-x-hidden">
+      <PublicPageThemeReset />
 
       {/* ─── Hero / Banner ─── */}
       {banners.length > 0 ? (
@@ -90,7 +92,7 @@ export default async function HomePage() {
       <section className="theme-gradient-bg px-4 md:px-8 py-5 flex flex-col sm:flex-row items-center justify-between gap-4">
         <div className="text-white text-center sm:text-left">
           <p className="font-bold text-lg">ทดลองใช้งานระบบฟรี 30 วัน</p>
-          <p className="text-violet-100 text-sm">ไม่ต้องใช้บัตรเครดิต · ทีมงานติดต่อกลับภายใน 1-2 วันทำการ</p>
+          <p className="text-white/80 text-sm">ไม่ต้องใช้บัตรเครดิต · ทีมงานติดต่อกลับภายใน 1-2 วันทำการ</p>
         </div>
         <TrialRequestModal />
       </section>
@@ -100,9 +102,9 @@ export default async function HomePage() {
         <div className="max-w-5xl mx-auto px-4 py-8 grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
           {[
             { icon: Building2, label: "สถาบันที่ใช้งาน", value: `${institutionCount}+`, color: "text-violet-600" },
-            { icon: Users,     label: "ที่นั่งต่อรอบ",   value: "≥ 10 คน",   color: "text-indigo-600" },
-            { icon: Video,     label: "สอนสดผ่าน",       value: "Jitsi Meet", color: "text-blue-600" },
-            { icon: Clock,     label: "พร้อมใช้งาน",     value: "24/7",       color: "text-green-600" },
+            { icon: Users,     label: "ที่นั่งต่อรอบ",   value: "≥ 10 คน",   color: "text-violet-600" },
+            { icon: Video,     label: "สอนสดผ่าน",       value: "Jitsi Meet", color: "text-violet-600" },
+            { icon: Clock,     label: "พร้อมใช้งาน",     value: "24/7",       color: "text-violet-600" },
           ].map(({ icon: Icon, label, value, color }) => (
             <div key={label} className="flex flex-col items-center gap-1">
               <Icon className={`w-6 h-6 ${color} mb-1`} />
@@ -141,7 +143,7 @@ export default async function HomePage() {
               ].map(({ icon: Icon, title, desc }) => (
                 <div key={title} className="flex gap-5 p-5 bg-white rounded-2xl border border-gray-100 hover:border-indigo-100 hover:shadow-md transition-all">
                   <div className="w-12 h-12 rounded-xl bg-indigo-50 flex items-center justify-center shrink-0">
-                    <Icon className="w-6 h-6 text-indigo-600" />
+                    <Icon className="w-6 h-6 text-violet-600" />
                   </div>
                   <div>
                     <p className="font-bold text-gray-900 text-base">{title}</p>
@@ -299,10 +301,10 @@ export default async function HomePage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {[
-              { icon: CalendarCheck, title: "ระบบจองที่นั่ง",      desc: "นักเรียนจองเอง กำหนดจำนวนที่นั่งสูงสุดต่อรอบ ปิดรับอัตโนมัติเมื่อเต็ม",    color: "bg-indigo-50 text-indigo-600" },
+              { icon: CalendarCheck, title: "ระบบจองที่นั่ง",      desc: "นักเรียนจองเอง กำหนดจำนวนที่นั่งสูงสุดต่อรอบ ปิดรับอัตโนมัติเมื่อเต็ม",    color: "bg-indigo-50 text-violet-600" },
               { icon: BookOpen,      title: "จัดการคอร์ส",          desc: "สร้างคอร์ส กำหนดราคา รอบเรียน วิชา ระดับชั้น ได้อย่างยืดหยุ่น",            color: "bg-violet-50 text-violet-600" },
-              { icon: Video,         title: "สอนสดออนไลน์",         desc: "เปิดห้องเรียน Jitsi Meet ได้ทันที นักเรียนเข้าจาก Dashboard ได้เลย",          color: "bg-blue-50 text-blue-600" },
-              { icon: TrendingUp,    title: "รายงานรายได้",          desc: "ดู Revenue ย้อนหลัง Commission แยกตามสถาบัน Export ได้",                       color: "bg-green-50 text-green-600" },
+              { icon: Video,         title: "สอนสดออนไลน์",         desc: "เปิดห้องเรียน Jitsi Meet ได้ทันที นักเรียนเข้าจาก Dashboard ได้เลย",          color: "bg-blue-50 text-violet-600" },
+              { icon: TrendingUp,    title: "รายงานรายได้",          desc: "ดู Revenue ย้อนหลัง Commission แยกตามสถาบัน Export ได้",                       color: "bg-green-50 text-violet-600" },
               { icon: Users,         title: "จัดการสมาชิก",          desc: "อนุมัติ/ปฏิเสธคำขอ กำหนด Role ดูประวัติการจองของสมาชิกแต่ละคน",             color: "bg-orange-50 text-orange-600" },
               { icon: Shield,        title: "ระบบ Multi-tenant",    desc: "รองรับหลายสถาบันในระบบเดียว ข้อมูลแยกกันชัดเจน ปลอดภัย 100%",                 color: "bg-rose-50 text-rose-600" },
               { icon: Smartphone,    title: "รองรับทุกอุปกรณ์",     desc: "Responsive Design ใช้งานได้บน มือถือ แท็บเล็ต และคอมพิวเตอร์",                 color: "bg-teal-50 text-teal-600" },
@@ -313,7 +315,7 @@ export default async function HomePage() {
                 <div className={`w-10 h-10 rounded-xl ${color} flex items-center justify-center mb-4`}>
                   <Icon className="w-5 h-5" />
                 </div>
-                <p className="font-bold text-gray-900 mb-1.5 group-hover:text-indigo-600 transition-colors">{title}</p>
+                <p className="font-bold text-gray-900 mb-1.5 group-hover:text-violet-600 transition-colors">{title}</p>
                 <p className="text-xs text-gray-500 leading-relaxed">{desc}</p>
               </div>
             ))}
@@ -393,9 +395,9 @@ export default async function HomePage() {
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-14">
             {[
-              { icon: Award,    value: "99.9%",   label: "System Uptime",      color: "text-green-600",  bg: "bg-green-50" },
+              { icon: Award,    value: "99.9%",   label: "System Uptime",      color: "text-violet-600",  bg: "bg-green-50" },
               { icon: Zap,      value: "< 1 วิ",  label: "ความเร็วโหลดหน้า",  color: "text-yellow-600", bg: "bg-yellow-50" },
-              { icon: Shield,   value: "256-bit", label: "การเข้ารหัสข้อมูล", color: "text-blue-600",   bg: "bg-blue-50" },
+              { icon: Shield,   value: "256-bit", label: "การเข้ารหัสข้อมูล", color: "text-violet-600",   bg: "bg-blue-50" },
               { icon: MessageSquare, value: "24/7", label: "Support ออนไลน์", color: "text-violet-600", bg: "bg-violet-50" },
             ].map(({ icon: Icon, value, label, color, bg }) => (
               <div key={label} className={`${bg} rounded-2xl p-6 text-center border border-transparent`}>
@@ -440,7 +442,7 @@ export default async function HomePage() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <TrialRequestModal>
-              <span className="bg-yellow-400 text-gray-900 font-bold px-8 py-4 rounded-xl hover:bg-yellow-300 transition-colors shadow-lg text-base inline-block">
+              <span className="text-white font-bold px-8 py-4 rounded-xl transition-colors shadow-lg text-base inline-block" style={{ backgroundColor: 'var(--color-primary)' }}>
                 เริ่มต้นใช้งานฟรี →
               </span>
             </TrialRequestModal>
@@ -464,7 +466,7 @@ export default async function HomePage() {
                 className="bg-white rounded-2xl p-5 text-center border border-gray-100 hover:border-indigo-200 hover:shadow-md transition-all group"
               >
                 <div className="text-3xl mb-2">{group.emoji}</div>
-                <div className="text-base font-bold text-gray-800 group-hover:text-indigo-600 transition-colors">{group.label}</div>
+                <div className="text-base font-bold text-gray-800 group-hover:text-violet-600 transition-colors">{group.label}</div>
                 <div className="text-xs text-gray-400 mt-1">{group.grades.join(" · ")}</div>
               </Link>
             ))}
