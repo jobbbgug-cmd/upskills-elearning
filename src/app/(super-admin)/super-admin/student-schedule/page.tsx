@@ -101,9 +101,10 @@ export default function SuperAdminStudentSchedulePage() {
         </div>
         <div className="flex flex-col sm:flex-row gap-2">
           <div className="flex items-center gap-2">
-            <Building2 className="w-4 h-4 text-violet-500 shrink-0" />
+            <Building2 className="w-4 h-4 shrink-0" style={{ color: 'var(--color-primary)' }} />
             <select value={selectedInst} onChange={e => setSelectedInst(e.target.value)}
-              className="text-sm border border-violet-200 bg-violet-50 text-violet-800 font-medium rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-violet-300 min-w-[200px]">
+              className="text-sm border font-medium rounded-xl px-3 py-2 focus:outline-none focus:ring-2 min-w-[200px]"
+              style={{ borderColor: 'rgba(var(--color-primary-rgb), 0.3)', backgroundColor: 'rgba(var(--color-primary-rgb), 0.1)', color: 'var(--color-primary)', '--tw-ring-color': 'rgba(var(--color-primary-rgb), 0.4)' } as any}>
               <option value="">— เลือกสถาบัน —</option>
               {institutions.map(i => <option key={i._id} value={i._id}>{i.name}</option>)}
             </select>
