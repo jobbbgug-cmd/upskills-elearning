@@ -133,7 +133,7 @@ export default function SuperAdminBannersPage() {
         </div>
         <button
           onClick={() => { setEditingId(null); setForm(EMPTY_FORM); setShowForm(true); }}
-          className="flex items-center gap-2 px-4 py-2.5 bg-violet-600 text-white text-sm font-semibold rounded-xl hover:bg-violet-700 transition-colors"
+          className="flex items-center gap-2 px-4 py-2.5 text-white text-sm font-semibold rounded-xl transition-colors theme-button"
         >
           <Plus className="w-4 h-4" />
           เพิ่มแบนเนอร์
@@ -151,19 +151,22 @@ export default function SuperAdminBannersPage() {
               {/* Desktop image */}
               <div className="border border-gray-200 rounded-2xl p-4 flex flex-col">
                 <div className="flex items-center gap-2 mb-1">
-                  <Monitor className="w-4 h-4 text-violet-500" />
+                  <Monitor className="w-4 h-4" style={{ color: 'var(--color-primary)' }} />
                   <span className="text-sm font-semibold text-gray-700">รูป Desktop *</span>
                 </div>
                 <div className="flex items-start gap-3 mb-3">
                   <p className="flex-1 text-xs text-gray-500">
-                    ต้องใช้รูป <span className="font-semibold text-violet-600">แนวนอน</span> เท่านั้น — แนะนำ <span className="font-semibold text-violet-600">2560 × 860px</span>
+                    ต้องใช้รูป <span className="font-semibold" style={{ color: 'var(--color-primary)' }}>แนวนอน</span> เท่านั้น — แนะนำ <span className="font-semibold" style={{ color: 'var(--color-primary)' }}>2560 × 860px</span>
                   </p>
                   <input ref={desktopFileRef} type="file" accept="image/*" className="hidden" onChange={(e) => handleUpload(e, "desktop")} />
                   <button
                     type="button"
                     onClick={() => desktopFileRef.current?.click()}
                     disabled={uploading === "desktop"}
-                    className="shrink-0 flex items-center gap-2 px-3 py-2 border-2 border-dashed border-gray-300 rounded-xl text-sm text-gray-500 hover:border-violet-400 hover:text-violet-600 transition-colors disabled:opacity-50"
+                    className="shrink-0 flex items-center gap-2 px-3 py-2 border-2 border-dashed rounded-xl text-sm transition-colors disabled:opacity-50"
+                    style={{ borderColor: 'rgba(var(--color-primary-rgb), 0.4)', color: 'var(--color-primary)' }}
+                    onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'rgba(var(--color-primary-rgb), 0.6)'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'rgba(var(--color-primary-rgb), 0.4)'; }}
                   >
                     <Upload className="w-4 h-4" />
                     {uploading === "desktop" ? "กำลังอัปโหลด..." : "อัปโหลดรูป Desktop"}
@@ -234,7 +237,8 @@ export default function SuperAdminBannersPage() {
                   value={form.title}
                   onChange={(e) => setForm({ ...form, title: e.target.value })}
                   placeholder="เช่น คอร์สใหม่มาแล้ว!"
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-violet-500"
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm text-gray-900 focus:outline-none focus:ring-2"
+                  style={{ '--tw-ring-color': 'rgba(var(--color-primary-rgb), 0.5)' } as any}
                 />
               </div>
               <div className="md:col-span-2">
@@ -250,8 +254,8 @@ export default function SuperAdminBannersPage() {
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-2">ประเภทปุ่ม</label>
                 <div className="flex gap-3">
-                  <label className={`flex-1 flex items-center gap-3 px-4 py-3 rounded-xl border-2 cursor-pointer transition-colors ${form.buttonType === "link" ? "border-violet-500 bg-violet-50" : "border-gray-200 hover:border-gray-300"}`}>
-                    <input type="radio" name="buttonType" value="link" checked={form.buttonType === "link"} onChange={() => setForm({ ...form, buttonType: "link" })} className="accent-violet-600" />
+                  <label style={{ borderColor: form.buttonType === "link" ? 'var(--color-primary)' : '', backgroundColor: form.buttonType === "link" ? 'rgba(var(--color-primary-rgb), 0.05)' : '' }} className={`flex-1 flex items-center gap-3 px-4 py-3 rounded-xl border-2 cursor-pointer transition-colors ${form.buttonType === "link" ? "" : "border-gray-200 hover:border-gray-300"}`}>
+                    <input type="radio" name="buttonType" value="link" checked={form.buttonType === "link"} onChange={() => setForm({ ...form, buttonType: "link" })} style={{ accentColor: 'var(--color-primary)' }} />
                     <div>
                       <p className="text-sm font-semibold text-gray-800">ลิงก์ URL</p>
                       <p className="text-xs text-gray-500">พาผู้ใช้ไปยัง URL ที่กำหนด</p>
@@ -275,7 +279,8 @@ export default function SuperAdminBannersPage() {
                       value={form.linkUrl}
                       onChange={(e) => setForm({ ...form, linkUrl: e.target.value })}
                       placeholder="https://... หรือ /courses"
-                      className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-violet-500"
+                      className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm text-gray-900 focus:outline-none focus:ring-2"
+                  style={{ '--tw-ring-color': 'rgba(var(--color-primary-rgb), 0.5)' } as any}
                     />
                   </div>
                   <div>
@@ -283,7 +288,8 @@ export default function SuperAdminBannersPage() {
                     <input
                       value={form.linkText}
                       onChange={(e) => setForm({ ...form, linkText: e.target.value })}
-                      className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-violet-500"
+                      className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm text-gray-900 focus:outline-none focus:ring-2"
+                  style={{ '--tw-ring-color': 'rgba(var(--color-primary-rgb), 0.5)' } as any}
                     />
                   </div>
                 </>
@@ -294,7 +300,8 @@ export default function SuperAdminBannersPage() {
                     value={form.linkText}
                     onChange={(e) => setForm({ ...form, linkText: e.target.value })}
                     placeholder="สมัครสมาชิก"
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-violet-500"
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm text-gray-900 focus:outline-none focus:ring-2"
+                  style={{ '--tw-ring-color': 'rgba(var(--color-primary-rgb), 0.5)' } as any}
                   />
                 </div>
               )}
@@ -307,7 +314,7 @@ export default function SuperAdminBannersPage() {
                       type="button"
                       onClick={() => setForm({ ...form, bgColor: c })}
                       className="w-8 h-8 rounded-lg border-2 transition-all"
-                      style={{ background: c, borderColor: form.bgColor === c ? "#7c3aed" : "transparent" }}
+                      style={{ background: c, borderColor: form.bgColor === c ? 'var(--color-primary)' : "transparent" }}
                     />
                   ))}
                   <input
@@ -322,7 +329,7 @@ export default function SuperAdminBannersPage() {
             </div>
 
             <div className="flex gap-3 pt-2">
-              <button type="submit" className="px-5 py-2.5 bg-violet-600 text-white text-sm font-semibold rounded-xl hover:bg-violet-700 transition-colors">
+              <button type="submit" className="px-5 py-2.5 text-white text-sm font-semibold rounded-xl transition-colors theme-button">
                 {editingId ? "บันทึกการแก้ไข" : "บันทึกแบนเนอร์"}
               </button>
               <button type="button" onClick={closeForm} className="px-5 py-2.5 bg-gray-100 text-gray-700 text-sm font-semibold rounded-xl hover:bg-gray-200 transition-colors">
@@ -369,8 +376,8 @@ export default function SuperAdminBannersPage() {
 
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-1 mb-1">
-                  <Building2 className="w-3 h-3 text-violet-400 shrink-0" />
-                  <span className="text-xs text-violet-600 font-medium truncate">
+                  <Building2 className="w-3 h-3 shrink-0" style={{ color: 'var(--color-primary)' }} />
+                  <span className="text-xs font-medium truncate" style={{ color: 'var(--color-primary)' }}>
                     {banner.institutionId
                       ? (institutionNames[banner.institutionId] ?? "สถาบัน")
                       : "ระดับแพลตฟอร์ม"}
@@ -384,7 +391,7 @@ export default function SuperAdminBannersPage() {
                 </div>
                 <p className="text-sm text-gray-400 truncate mt-0.5">{banner.subtitle}</p>
                 {banner.buttonType !== "register" && banner.linkUrl && (
-                  <p className="text-xs text-violet-500 mt-1 truncate">{banner.linkUrl}</p>
+                  <p className="text-xs mt-1 truncate" style={{ color: 'var(--color-primary)' }}>{banner.linkUrl}</p>
                 )}
               </div>
 
