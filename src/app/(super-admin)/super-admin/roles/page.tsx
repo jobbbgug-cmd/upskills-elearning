@@ -251,7 +251,7 @@ export default function SuperAdminRolesPage() {
             const Icon = r.icon;
             return (
               <button key={key} onClick={() => setFilterRole(filterRole === key ? "all" : key)}
-                className={`flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors ${filterRole === key ? "text-white shadow-sm theme-button" : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"}`}>
+                className={`flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors shadow-sm ${filterRole === key ? `${r.badge} ${r.border}` : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"}`}>
                 <Icon className="w-3.5 h-3.5" />{r.label} <span className="opacity-70">{counts[key]}</span>
               </button>
             );
