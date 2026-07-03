@@ -83,8 +83,8 @@ const ACTION_COLORS: Record<string, string> = {
 };
 
 const ROLE_BADGE: Record<string, string> = {
-  super_admin: "bg-violet-100 text-violet-700",
-  admin:       "bg-blue-100 text-blue-700",
+  super_admin: "bg-rose-100 text-rose-700",
+  admin:       "bg-purple-100 text-purple-700",
   owner:       "bg-indigo-100 text-indigo-700",
   teacher:     "bg-green-100 text-green-700",
   guest:       "bg-gray-100 text-gray-500",
@@ -160,11 +160,12 @@ export default function ActivityLogsPage() {
             value={filterSearch}
             onChange={(e) => setFilterSearch(e.target.value)}
             placeholder="ค้นหาชื่อ อีเมล หรือรายละเอียด..."
-            className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 bg-white"
+            className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 bg-white"
+            style={{ '--tw-ring-color': 'rgba(var(--color-primary-rgb), 0.5)' } as any}
           />
         </div>
 
-        <select value={filterRole} onChange={(e) => { setFilterRole(e.target.value); }} className="px-3 py-2.5 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-violet-500">
+        <select value={filterRole} onChange={(e) => { setFilterRole(e.target.value); }} className="px-3 py-2.5 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2" style={{ '--tw-ring-color': 'rgba(var(--color-primary-rgb), 0.5)' } as any}>
           <option value="">ทุก Role</option>
           <option value="super_admin">Super Admin</option>
           <option value="admin">Admin</option>
@@ -172,7 +173,7 @@ export default function ActivityLogsPage() {
           {isSuperAdmin && <option value="guest">ผู้เยี่ยมชม</option>}
         </select>
 
-        <select value={filterAction} onChange={(e) => { setFilterAction(e.target.value); }} className="px-3 py-2.5 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-violet-500">
+        <select value={filterAction} onChange={(e) => { setFilterAction(e.target.value); }} className="px-3 py-2.5 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2" style={{ '--tw-ring-color': 'rgba(var(--color-primary-rgb), 0.5)' } as any}>
           <option value="">ทุกการดำเนินการ</option>
           {Object.entries(ACTION_LABELS)
             .filter(([k]) => isSuperAdmin || !["trial_button_click", "trial_form_submit"].includes(k))
@@ -181,8 +182,8 @@ export default function ActivityLogsPage() {
             ))}
         </select>
 
-        <input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} className="px-3 py-2.5 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-violet-500" />
-        <input type="date" value={dateTo}   onChange={(e) => setDateTo(e.target.value)}   className="px-3 py-2.5 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-violet-500" />
+        <input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} className="px-3 py-2.5 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2" style={{ '--tw-ring-color': 'rgba(var(--color-primary-rgb), 0.5)' } as any} />
+        <input type="date" value={dateTo}   onChange={(e) => setDateTo(e.target.value)}   className="px-3 py-2.5 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2" style={{ '--tw-ring-color': 'rgba(var(--color-primary-rgb), 0.5)' } as any} />
       </div>
 
       {/* Stats */}
@@ -196,7 +197,7 @@ export default function ActivityLogsPage() {
           <div className="text-sm text-gray-500 mt-0.5">เข้าสู่ระบบ (หน้านี้)</div>
         </div>
         <div className="bg-white rounded-2xl border border-gray-100 p-4">
-          <div className="text-2xl font-bold text-violet-600">{new Set(logs.map((l) => l.userId)).size}</div>
+          <div className="text-2xl font-bold" style={{ color: 'var(--color-primary)' }}>{new Set(logs.map((l) => l.userId)).size}</div>
           <div className="text-sm text-gray-500 mt-0.5">ผู้ใช้งาน (หน้านี้)</div>
         </div>
       </div>
@@ -237,7 +238,7 @@ export default function ActivityLogsPage() {
                   </td>
                   <td className="px-5 py-3.5 text-sm text-gray-500">
                     {l.institutionName ? (
-                      <span className="inline-flex items-center gap-1 text-xs text-violet-700 bg-violet-50 px-2 py-0.5 rounded-full font-medium">
+                      <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-medium" style={{ color: 'var(--color-primary)', backgroundColor: 'rgba(var(--color-primary-rgb), 0.1)' }}>
                         <Building2 className="w-3 h-3" />{l.institutionName}
                       </span>
                     ) : <span className="text-gray-300 text-xs">—</span>}
