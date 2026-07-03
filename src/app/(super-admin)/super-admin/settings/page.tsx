@@ -3,8 +3,8 @@ import { useState, useEffect } from "react";
 import { Bell, Save, Mail, CheckCircle2, Send, AlertCircle } from "lucide-react";
 import LoadingSpinner from "@/components/LoadingSpinner";
 
-const inputClass =
-  "w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-violet-500";
+const getInputClass = () =>
+  "w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm text-gray-900 focus:outline-none focus:ring-2";
 
 export default function SettingsPage() {
   const [notifyEmail, setNotifyEmail] = useState("");
@@ -59,16 +59,16 @@ export default function SettingsPage() {
       {/* Email notification */}
       <div className="bg-white rounded-2xl border border-gray-200 p-6">
         <div className="flex items-center gap-2 mb-1">
-          <Bell className="w-5 h-5 text-violet-500" />
+          <Bell className="w-5 h-5" style={{ color: 'var(--color-primary)' }} />
           <h2 className="font-semibold text-gray-900">การแจ้งเตือนผ่านอีเมล</h2>
         </div>
         <p className="text-sm text-gray-500 mb-4">
           ระบบจะส่งอีเมลแจ้งเตือนไปยังที่อยู่นี้เมื่อมี:
         </p>
         <ul className="text-sm text-gray-500 mb-6 space-y-1.5 ml-1">
-          <li className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-violet-400 shrink-0" />คำขอทดลองใช้งานใหม่เข้ามา</li>
-          <li className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-violet-400 shrink-0" />คำขอสมัครสมาชิกใหม่เข้ามา</li>
-          <li className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-violet-400 shrink-0" />แจ้งเตือนการชำระเงินใหม่เข้ามา</li>
+          <li className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: 'var(--color-primary)' }} />คำขอทดลองใช้งานใหม่เข้ามา</li>
+          <li className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: 'var(--color-primary)' }} />คำขอสมัครสมาชิกใหม่เข้ามา</li>
+          <li className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: 'var(--color-primary)' }} />แจ้งเตือนการชำระเงินใหม่เข้ามา</li>
         </ul>
 
         {loading ? (
@@ -86,7 +86,8 @@ export default function SettingsPage() {
                 value={notifyEmail}
                 onChange={(e) => setNotifyEmail(e.target.value)}
                 placeholder="email@example.com"
-                className={inputClass}
+                className={getInputClass()}
+                style={{ '--tw-ring-color': 'rgba(var(--color-primary-rgb), 0.5)' } as any}
               />
               <p className="text-xs text-gray-400 mt-1.5">
                 การแจ้งเตือนทั้งหมดจะถูกส่งไปยัง email นี้เพียงที่เดียว
@@ -97,7 +98,7 @@ export default function SettingsPage() {
               <button
                 type="submit"
                 disabled={saving}
-                className="flex items-center gap-2 px-6 py-2.5 bg-violet-600 text-white font-semibold rounded-xl hover:bg-violet-700 transition-colors disabled:opacity-50"
+                className="flex items-center gap-2 px-6 py-2.5 text-white font-semibold rounded-xl transition-colors disabled:opacity-50 theme-button"
               >
                 <Save className="w-4 h-4" />
                 {saving ? "กำลังบันทึก..." : "บันทึก"}
