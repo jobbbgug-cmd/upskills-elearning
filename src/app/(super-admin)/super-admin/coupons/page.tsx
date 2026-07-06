@@ -70,12 +70,12 @@ export default function SuperAdminCouponsPage() {
       {/* Summary KPIs */}
       <div className="grid grid-cols-3 gap-4 mb-6">
         {[
-          { label: "คูปองทั้งหมด",  value: coupons.length,  color: "bg-violet-50 text-violet-700" },
-          { label: "ใช้งานได้",      value: activeCount,     color: "bg-green-50  text-green-700"  },
-          { label: "ใช้งานแล้ว (ครั้ง)", value: totalUsed,  color: "bg-blue-50   text-blue-700"   },
-        ].map((k) => (
+          { label: "คูปองทั้งหมด",  value: coupons.length },
+          { label: "ใช้งานได้",      value: activeCount },
+          { label: "ใช้งานแล้ว (ครั้ง)", value: totalUsed },
+        ].map((k, i) => (
           <div key={k.label} className="bg-white rounded-2xl border border-gray-100 p-4">
-            <p className={`text-2xl font-bold ${k.color.split(" ")[1]}`}>{k.value.toLocaleString()}</p>
+            <p className="text-2xl font-bold" style={{ color: i === 0 ? 'var(--color-primary)' : i === 1 ? '#16a34a' : '#2563eb' }}>{k.value.toLocaleString()}</p>
             <p className="text-xs text-gray-500 mt-0.5">{k.label}</p>
           </div>
         ))}
@@ -94,7 +94,8 @@ export default function SuperAdminCouponsPage() {
         <input
           value={search} onChange={(e) => setSearch(e.target.value)}
           placeholder="ค้นหาโค้ด / สถาบัน..."
-          className="ml-auto w-56 border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 bg-white"
+          className="ml-auto w-56 border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 bg-white"
+          style={{ '--tw-ring-color': 'rgba(var(--color-primary-rgb), 0.5)' } as any}
         />
       </div>
 
@@ -113,15 +114,15 @@ export default function SuperAdminCouponsPage() {
             const inactive = !c.isActive || expired || full;
             const usePct  = c.maxUses ? Math.round((c.usedCount / c.maxUses) * 100) : null;
             return (
-              <div key={c._id} className={`bg-white rounded-2xl border p-4 ${inactive ? "border-gray-100 opacity-60" : "border-violet-100"}`}>
+              <div key={c._id} className="bg-white rounded-2xl border p-4" style={{ borderColor: inactive ? '#f3f4f6' : 'rgba(var(--color-primary-rgb), 0.3)', opacity: inactive ? 0.6 : 1 }}>
                 <div className="flex items-center gap-4">
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${inactive ? "bg-gray-100" : "bg-violet-50"}`}>
-                    <Tag className={`w-5 h-5 ${inactive ? "text-gray-400" : "text-violet-500"}`} />
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: inactive ? '#f3f4f6' : 'rgba(var(--color-primary-rgb), 0.1)' }}>
+                    <Tag className="w-5 h-5" style={{ color: inactive ? '#9ca3af' : 'var(--color-primary)' }} />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-bold text-gray-900 tracking-widest text-sm font-mono">{c.code}</span>
-                      <button onClick={() => copy(c.code)} className="text-gray-400 hover:text-violet-500 transition-colors">
+                      <button onClick={() => copy(c.code)} className="text-gray-400 transition-colors" style={{ color: 'rgb(156, 163, 175)' }} onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--color-primary)'; }} onMouseLeave={(e) => { e.currentTarget.style.color = 'rgb(156, 163, 175)'; }}>
                         {copied === c.code ? <Check className="w-3.5 h-3.5 text-green-500" /> : <Copy className="w-3.5 h-3.5" />}
                       </button>
                       <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${c.type === "percent" ? "bg-indigo-100 text-indigo-700" : "bg-teal-100 text-teal-700"}`}>
@@ -133,7 +134,7 @@ export default function SuperAdminCouponsPage() {
                     </div>
                     <div className="flex items-center gap-3 mt-1 text-xs text-gray-400 flex-wrap">
                       <span className="flex items-center gap-1">
-                        <Building2 className="w-3 h-3 text-violet-400" />
+                        <Building2 className="w-3 h-3" style={{ color: 'var(--color-primary)' }} />
                         {c.institutionId?.name ?? "—"}
                       </span>
                       <span>ใช้แล้ว {c.usedCount}{c.maxUses ? `/${c.maxUses} (${usePct}%)` : ""} ครั้ง</span>
@@ -148,8 +149,8 @@ export default function SuperAdminCouponsPage() {
                     {/* Usage bar */}
                     {usePct !== null && (
                       <div className="mt-2 h-1.5 bg-gray-100 rounded-full overflow-hidden w-48">
-                        <div className={`h-full rounded-full transition-all ${usePct >= 100 ? "bg-red-400" : usePct >= 75 ? "bg-orange-400" : "bg-violet-400"}`}
-                          style={{ width: `${Math.min(usePct, 100)}%` }} />
+                        <div className={`h-full rounded-full transition-all ${usePct >= 100 ? "bg-red-400" : usePct >= 75 ? "bg-orange-400" : ""}`}
+                          style={{ width: `${Math.min(usePct, 100)}%`, backgroundColor: usePct < 75 ? 'var(--color-primary)' : undefined }} />
                       </div>
                     )}
                   </div>
