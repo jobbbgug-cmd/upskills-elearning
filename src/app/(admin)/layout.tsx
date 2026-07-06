@@ -3,7 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, ListChecks, Users, LogOut, Images, UserCog, UserCheck, BookOpen, TrendingUp, CalendarDays, GraduationCap, Menu, X, Wallet, AlertTriangle, Palette, Shield, ShieldCheck, User, ChevronDown, ChevronRight, Home, Building2, School, ClipboardCheck, FileText, PenLine, Bell, BarChart2, Radio, Receipt, Globe, Monitor, Star, Tag, MessageSquare, LayoutGrid } from "lucide-react";
+import { LayoutDashboard, ListChecks, Users, LogOut, Images, UserCog, UserCheck, BookOpen, TrendingUp, CalendarDays, GraduationCap, Menu, X, Wallet, AlertTriangle, Palette, Shield, ShieldCheck, User, ChevronDown, ChevronRight, Home, Building2, School, ClipboardCheck, FileText, PenLine, Bell, BarChart2, Radio, Receipt, Globe, Monitor, Star, Tag, MessageSquare, LayoutGrid, Award } from "lucide-react";
 import NotificationBell from "@/components/NotificationBell";
 import { PLAN_LABELS } from "@/lib/planLimits";
 import { THEMES, getTheme, setTheme, type Theme } from "@/lib/theme";
@@ -65,7 +65,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       teaching:  ["/admin/students","/admin/attendance","/admin/homework","/admin/quiz","/admin/live","/admin/teacher-portal","/admin/forum"],
       courses:   ["/admin/courses","/admin/content","/admin/schedule","/dashboard/schedule"],
       members:   ["/admin/members","/admin/users"],
-      finance:   ["/admin/analytics","/admin/revenue","/admin/billing","/admin/coupons","/admin/bookings","/admin/finance"],
+      finance:   ["/admin/analytics","/admin/revenue","/admin/billing","/admin/certificates","/admin/coupons","/admin/bookings","/admin/finance"],
       marketing: ["/admin/landing","/admin/reviews","/admin/notifications","/admin/banners"],
       settings:  ["/admin/roles","/admin/branding"],
     };
@@ -382,11 +382,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           )}
 
           {renderGroup("finance", "รายได้และการเงิน", <TrendingUp className="w-4 h-4" />,
-            ["/admin/analytics","/admin/revenue","/admin/billing","/admin/coupons","/admin/bookings","/admin/finance"],
+            ["/admin/analytics","/admin/revenue","/admin/billing","/admin/certificates","/admin/coupons","/admin/bookings","/admin/finance"],
             <>
               {isAdmin                         && navLink("/admin/analytics", <BarChart2 className="w-4 h-4" />, "Analytics")}
               {(isAdmin || role === "teacher") && navLink("/admin/revenue",   <TrendingUp className="w-4 h-4" />, "รายได้")}
               {isAdmin                         && navLink("/admin/billing",   <Receipt className="w-4 h-4" />,    "Billing & ใบเสร็จ")}
+              {isAdmin                         && navLink("/admin/certificates", <Award className="w-4 h-4" />,    "ใบรับรอง")}
               {isAdmin                         && navLink("/admin/coupons",   <Tag className="w-4 h-4" />,        "คูปองส่วนลด")}
               {role === "super_admin"          && navLink("/admin/bookings",  <Users className="w-4 h-4" />,
                 <span className="flex items-center justify-between w-full gap-2">
@@ -562,6 +563,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                             {isAdmin                         && moreLink("/admin/analytics", <BarChart2 className="w-3.5 h-3.5" />,  "Analytics")}
                             {(isAdmin || role === "teacher") && moreLink("/admin/revenue",   <TrendingUp className="w-3.5 h-3.5" />, "รายได้")}
                             {isAdmin                         && moreLink("/admin/billing",   <Receipt className="w-3.5 h-3.5" />,    "Billing & ใบเสร็จ")}
+                            {isAdmin                         && moreLink("/admin/certificates", <Award className="w-3.5 h-3.5" />,    "ใบรับรอง")}
                             {isAdmin                         && moreLink("/admin/coupons",   <Tag className="w-3.5 h-3.5" />,        "คูปองส่วนลด")}
                             {role === "super_admin"          && moreLink("/admin/bookings",  <Users className="w-3.5 h-3.5" />,
                               <span className="flex items-center gap-2">ตรวจสอบการชำระ

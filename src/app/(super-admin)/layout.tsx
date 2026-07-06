@@ -7,7 +7,7 @@ import {
   UserCog, Users, Wallet, Images, Shield, Home,
   UserCheck, BookOpen, FileText, TrendingUp, ChevronDown, FlaskConical, Settings,
   CalendarDays, GraduationCap, ClipboardList, BarChart2,
-  Radio, Star, MessageSquare, Tag, Palette,
+  Radio, Star, MessageSquare, Tag, Palette, Award,
 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { THEMES, getTheme, setTheme, type Theme } from "@/lib/theme";
@@ -204,6 +204,7 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
           {expandedGroups.has("system") && (
             <>
               {nav("/super-admin/bookings", <Users className="w-4 h-4" />, "ตรวจสอบการชำระ")}
+          {nav("/super-admin/certificates", <Award className="w-4 h-4" />, "ใบรับรอง")}
           {nav("/super-admin/finance", <Wallet className="w-4 h-4" />, "ข้อมูลทางการเงิน")}
           {nav("/super-admin/banners", <Images className="w-4 h-4" />, "จัดการแบนเนอร์")}
           {nav("/super-admin/roles", <Shield className="w-4 h-4" />, "จัดการ Role")}
