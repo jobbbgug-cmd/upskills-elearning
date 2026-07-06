@@ -1,6 +1,6 @@
 "use client";
-import { useState, useEffect } from "react";
-import { Tag, Building2, Copy, Check } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
+import { Tag, Building2, Copy, Check, Plus, X, AlertCircle } from "lucide-react";
 import LoadingSpinner from "@/components/LoadingSpinner";
 
 interface Coupon {
@@ -24,13 +24,67 @@ export default function SuperAdminCouponsPage() {
   const [filterActive, setFilterActive] = useState<"all" | "active" | "inactive">("all");
   const [copied,   setCopied]   = useState<string | null>(null);
 
-  useEffect(() => {
+  const [showCreate, setShowCreate] = useState(false);
+  const [creating, setCreating] = useState(false);
+  const [createError, setCreateError] = useState("");
+  const [createSuccess, setCreateSuccess] = useState(false);
+  const [createForm, setCreateForm] = useState({
+    code: "",
+    type: "percent" as "percent" | "fixed",
+    value: 0,
+    maxUses: null as number | null,
+    expiresAt: "",
+    isActive: true,
+  });
+
+  const load = useCallback(async () => {
     setLoading(true);
-    fetch("/api/super-admin/coupons")
-      .then((r) => r.json())
-      .then((d) => setCoupons(Array.isArray(d) ? d : []))
-      .finally(() => setLoading(false));
+    try {
+      const res = await fetch("/api/super-admin/coupons");
+      const data = await res.json();
+      setCoupons(Array.isArray(data) ? data : []);
+    } catch {
+      setCoupons([]);
+    }
+    setLoading(false);
   }, []);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  const handleCreate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setCreateError("");
+    if (!createForm.code || createForm.value <= 0) {
+      setCreateError("กรุณากรอกข้อมูลให้ครบถ้วน");
+      return;
+    }
+
+    setCreating(true);
+    try {
+      const res = await fetch("/api/super-admin/coupons", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...createForm,
+          expiresAt: createForm.expiresAt ? new Date(createForm.expiresAt).toISOString() : null,
+        }),
+      });
+      if (res.ok) {
+        setCreateSuccess(true);
+        setCreateForm({ code: "", type: "percent", value: 0, maxUses: null, expiresAt: "", isActive: true });
+        setTimeout(() => { setShowCreate(false); setCreateSuccess(false); }, 1500);
+        load();
+      } else {
+        const err = await res.json();
+        setCreateError(err.error || "เกิดข้อผิดพลาด");
+      }
+    } catch (err) {
+      setCreateError("เกิดข้อผิดพลาด");
+    }
+    setCreating(false);
+  };
 
   const copy = (code: string) => {
     navigator.clipboard.writeText(code);
@@ -62,10 +116,142 @@ export default function SuperAdminCouponsPage() {
 
   return (
     <div>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">คูปอง/โปรโมชั่น (Platform-wide)</h1>
-        <p className="text-gray-500 text-sm mt-1">โปรโมชั่นและคูปองทุกสถาบันบนแพลตฟอร์ม</p>
+      <div className="mb-6 flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">คูปอง/โปรโมชั่น (Platform-wide)</h1>
+          <p className="text-gray-500 text-sm mt-1">โปรโมชั่นและคูปองทุกสถาบันบนแพลตฟอร์ม</p>
+        </div>
+        <button
+          onClick={() => setShowCreate(true)}
+          className="flex items-center gap-2 px-4 py-2.5 text-white text-sm font-semibold rounded-xl transition-colors theme-button"
+        >
+          <Plus className="w-4 h-4" /> สร้างคูปอง
+        </button>
       </div>
+
+      {/* Create Modal */}
+      {showCreate && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md">
+            <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
+              <h2 className="text-lg font-bold text-gray-900">สร้างคูปอง/โปรโมชั่นใหม่</h2>
+              <button onClick={() => setShowCreate(false)} className="p-1.5 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <form onSubmit={handleCreate}>
+              <div className="px-6 py-5 space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">รหัสคูปอง *</label>
+                  <input
+                    required
+                    type="text"
+                    value={createForm.code}
+                    onChange={(e) => setCreateForm({ ...createForm, code: e.target.value.toUpperCase() })}
+                    placeholder="เช่น SUMMER2024"
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm text-gray-900 focus:outline-none focus:ring-2 bg-white font-mono"
+                    style={{ '--tw-ring-color': 'rgba(var(--color-primary-rgb), 0.5)' } as any}
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1.5">ประเภท *</label>
+                    <select
+                      value={createForm.type}
+                      onChange={(e) => setCreateForm({ ...createForm, type: e.target.value as "percent" | "fixed" })}
+                      className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm text-gray-900 focus:outline-none focus:ring-2 bg-white"
+                      style={{ '--tw-ring-color': 'rgba(var(--color-primary-rgb), 0.5)' } as any}
+                    >
+                      <option value="percent">เปอร์เซ็นต์ (%)</option>
+                      <option value="fixed">จำนวนเงิน (฿)</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1.5">ค่าลด *</label>
+                    <input
+                      required
+                      type="number"
+                      step={createForm.type === "percent" ? "1" : "0.01"}
+                      min="0"
+                      value={createForm.value}
+                      onChange={(e) => setCreateForm({ ...createForm, value: parseFloat(e.target.value) || 0 })}
+                      placeholder="0"
+                      className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm text-gray-900 focus:outline-none focus:ring-2 bg-white"
+                      style={{ '--tw-ring-color': 'rgba(var(--color-primary-rgb), 0.5)' } as any}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">จำนวนการใช้สูงสุด (ไม่บังคับ)</label>
+                  <input
+                    type="number"
+                    min="1"
+                    value={createForm.maxUses || ""}
+                    onChange={(e) => setCreateForm({ ...createForm, maxUses: e.target.value ? parseInt(e.target.value) : null })}
+                    placeholder="ไม่จำกัด"
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm text-gray-900 focus:outline-none focus:ring-2 bg-white"
+                    style={{ '--tw-ring-color': 'rgba(var(--color-primary-rgb), 0.5)' } as any}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">วันหมดอายุ (ไม่บังคับ)</label>
+                  <input
+                    type="date"
+                    value={createForm.expiresAt}
+                    onChange={(e) => setCreateForm({ ...createForm, expiresAt: e.target.value })}
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm text-gray-900 focus:outline-none focus:ring-2 bg-white"
+                    style={{ '--tw-ring-color': 'rgba(var(--color-primary-rgb), 0.5)' } as any}
+                  />
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <input
+                    type="checkbox"
+                    id="isActive"
+                    checked={createForm.isActive}
+                    onChange={(e) => setCreateForm({ ...createForm, isActive: e.target.checked })}
+                    className="w-4 h-4 border border-gray-300 rounded cursor-pointer"
+                  />
+                  <label htmlFor="isActive" className="text-sm text-gray-700 cursor-pointer">เปิดใช้งาน</label>
+                </div>
+
+                {createError && (
+                  <div className="flex items-start gap-2 text-sm p-3 rounded-xl bg-red-50 text-red-700">
+                    <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
+                    <span>{createError}</span>
+                  </div>
+                )}
+                {createSuccess && (
+                  <div className="flex items-start gap-2 text-sm p-3 rounded-xl bg-green-50 text-green-700">
+                    <Check className="w-4 h-4 mt-0.5 shrink-0" />
+                    <span>สร้างคูปองสำเร็จ</span>
+                  </div>
+                )}
+              </div>
+              <div className="flex gap-3 px-6 py-5 border-t border-gray-100">
+                <button
+                  type="submit"
+                  disabled={creating}
+                  className="flex-1 py-2.5 text-white font-semibold rounded-xl disabled:opacity-50 transition-colors text-sm theme-button"
+                >
+                  {creating ? "กำลังสร้าง..." : "สร้างคูปอง"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowCreate(false)}
+                  className="flex-1 py-2.5 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 transition-colors text-sm"
+                >
+                  ยกเลิก
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Summary KPIs */}
       <div className="grid grid-cols-3 gap-4 mb-6">
