@@ -24,7 +24,7 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
   const [user, setUser]               = useState<UserInfo | null>(null);
   const [isNavigating, setIsNavigating] = useState(false);
   const [pendingMembers, setPendingMembers] = useState(0);
-  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(["platform", "members"]));
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
   const [currentTheme, setCurrentTheme] = useState<Theme>('default');
   const [themeOpen, setThemeOpen] = useState(false);
   const pathname = usePathname();
