@@ -86,11 +86,16 @@ export default function SuperAdminCertificatesPage() {
 
         if (studentsRes.ok) {
           const all = await studentsRes.json();
-          setStudents(all.filter((u: any) => u.role === "student"));
+          setStudents(Array.isArray(all) ? all.filter((u: any) => u.role === "student") : []);
         }
-        if (coursesRes.ok) setCourses(await coursesRes.json());
+        if (coursesRes.ok) {
+          const data = await coursesRes.json();
+          setCourses(Array.isArray(data) ? data : (data?.courses ? data.courses : []));
+        }
       } catch (err) {
         console.error(err);
+        setStudents([]);
+        setCourses([]);
       }
     };
 
