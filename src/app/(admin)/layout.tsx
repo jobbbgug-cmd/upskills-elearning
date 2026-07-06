@@ -3,7 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, ListChecks, Users, LogOut, Images, UserCog, UserCheck, BookOpen, TrendingUp, CalendarDays, GraduationCap, Menu, X, Wallet, AlertTriangle, Palette, Shield, ShieldCheck, User, ChevronDown, ChevronRight, Home, Building2, School, ClipboardCheck, FileText, PenLine, Bell, BarChart2, Radio, Receipt, Globe, Monitor, Star, Tag, MessageSquare, LayoutGrid, Award } from "lucide-react";
+import { LayoutDashboard, ListChecks, Users, LogOut, Images, UserCog, UserCheck, BookOpen, TrendingUp, CalendarDays, GraduationCap, Menu, X, Wallet, AlertTriangle, Palette, Shield, ShieldCheck, User, ChevronDown, ChevronRight, Home, Building2, School, ClipboardCheck, FileText, PenLine, Bell, BarChart2, Radio, Receipt, Globe, Monitor, Star, Tag, MessageSquare, LayoutGrid, Award, ShoppingCart } from "lucide-react";
 import NotificationBell from "@/components/NotificationBell";
 import { PLAN_LABELS } from "@/lib/planLimits";
 import { THEMES, getTheme, setTheme, type Theme } from "@/lib/theme";
@@ -65,7 +65,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       teaching:  ["/admin/students","/admin/attendance","/admin/homework","/admin/quiz","/admin/live","/admin/teacher-portal","/admin/forum"],
       courses:   ["/admin/courses","/admin/content","/admin/schedule","/dashboard/schedule"],
       members:   ["/admin/members","/admin/users"],
-      finance:   ["/admin/analytics","/admin/revenue","/admin/billing","/admin/certificates","/admin/coupons","/admin/bookings","/admin/finance"],
+      finance:   ["/admin/analytics","/admin/revenue","/admin/billing","/admin/certificates","/admin/coupons","/admin/bookings","/admin/orders","/admin/finance"],
       marketing: ["/admin/landing","/admin/reviews","/admin/notifications","/admin/banners"],
       settings:  ["/admin/roles","/admin/branding"],
     };
@@ -399,6 +399,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   )}
                 </span>
               )}
+              {isAdmin && navLink("/admin/orders", <ShoppingCart className="w-4 h-4" />, "จัดการคำสั่งซื้อ")}
               {role === "super_admin" && navLink("/admin/finance", <Wallet className="w-4 h-4" />, "ข้อมูลทางการเงิน")}
             </>
           )}
@@ -570,6 +571,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                                 {pendingBookings > 0 && <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 rounded-full">{pendingBookings}</span>}
                               </span>
                             )}
+                            {isAdmin && moreLink("/admin/orders", <ShoppingCart className="w-3.5 h-3.5" />, "จัดการคำสั่งซื้อ")}
                             {role === "super_admin" && moreLink("/admin/finance", <Wallet className="w-3.5 h-3.5" />, "ข้อมูลทางการเงิน")}
                           </>}
                           {id === "marketing" && <>
