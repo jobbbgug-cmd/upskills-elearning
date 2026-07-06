@@ -63,8 +63,8 @@ export default function SuperAdminCouponsPage() {
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">คูปองส่วนลด (Platform-wide)</h1>
-        <p className="text-gray-500 text-sm mt-1">คูปองทุกสถาบันบนแพลตฟอร์ม</p>
+        <h1 className="text-2xl font-bold text-gray-900">คูปอง/โปรโมชั่น (Platform-wide)</h1>
+        <p className="text-gray-500 text-sm mt-1">โปรโมชั่นและคูปองทุกสถาบันบนแพลตฟอร์ม</p>
       </div>
 
       {/* Summary KPIs */}

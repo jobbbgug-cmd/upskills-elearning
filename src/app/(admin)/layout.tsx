@@ -388,7 +388,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               {(isAdmin || role === "teacher") && navLink("/admin/revenue",   <TrendingUp className="w-4 h-4" />, "รายได้")}
               {isAdmin                         && navLink("/admin/billing",   <Receipt className="w-4 h-4" />,    "Billing & ใบเสร็จ")}
               {isAdmin                         && navLink("/admin/certificates", <Award className="w-4 h-4" />,    "ใบรับรอง")}
-              {isAdmin                         && navLink("/admin/coupons",   <Tag className="w-4 h-4" />,        "คูปองส่วนลด")}
+              {isAdmin                         && navLink("/admin/coupons",   <Tag className="w-4 h-4" />,        "คูปอง/โปรโมชั่น")}
               {role === "super_admin"          && navLink("/admin/bookings",  <Users className="w-4 h-4" />,
                 <span className="flex items-center justify-between w-full gap-2">
                   ตรวจสอบการชำระ
@@ -564,7 +564,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                             {(isAdmin || role === "teacher") && moreLink("/admin/revenue",   <TrendingUp className="w-3.5 h-3.5" />, "รายได้")}
                             {isAdmin                         && moreLink("/admin/billing",   <Receipt className="w-3.5 h-3.5" />,    "Billing & ใบเสร็จ")}
                             {isAdmin                         && moreLink("/admin/certificates", <Award className="w-3.5 h-3.5" />,    "ใบรับรอง")}
-                            {isAdmin                         && moreLink("/admin/coupons",   <Tag className="w-3.5 h-3.5" />,        "คูปองส่วนลด")}
+                            {isAdmin                         && moreLink("/admin/coupons",   <Tag className="w-3.5 h-3.5" />,        "คูปอง/โปรโมชั่น")}
                             {role === "super_admin"          && moreLink("/admin/bookings",  <Users className="w-3.5 h-3.5" />,
                               <span className="flex items-center gap-2">ตรวจสอบการชำระ
                                 {pendingBookings > 0 && <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 rounded-full">{pendingBookings}</span>}

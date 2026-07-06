@@ -183,7 +183,7 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
               {nav("/super-admin/live",    <Radio className="w-4 h-4" />,        "Live Sessions")}
           {nav("/super-admin/reviews", <Star className="w-4 h-4" />,         "รีวิวคอร์ส")}
           {nav("/super-admin/forum",   <MessageSquare className="w-4 h-4" />, "Forum")}
-          {nav("/super-admin/coupons", <Tag className="w-4 h-4" />,          "คูปองส่วนลด")}
+          {nav("/super-admin/coupons", <Tag className="w-4 h-4" />,          "คูปอง/โปรโมชั่น")}
             </>
           )}
 
