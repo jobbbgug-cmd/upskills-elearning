@@ -1,69 +1,76 @@
 import { NextRequest, NextResponse } from "next/server";
-import { connectDB } from "@/lib/mongodb";
 import { getAuthUser } from "@/lib/auth";
-import { resolveInstitutionId, tenantFilter } from "@/lib/tenant";
-import { withinLimit } from "@/lib/planLimits";
+import { connectDB } from "@/lib/mongodb";
 import Course from "@/models/Course";
-import Institution from "@/models/Institution";
 
 export async function GET(req: NextRequest) {
   try {
     const auth = await getAuthUser();
-    if (!auth || (auth.role !== "admin" && auth.role !== "super_admin" && auth.role !== "teacher")) {
+    if (!auth || auth.role !== "admin") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     await connectDB();
-    const institutionId = await resolveInstitutionId(req, auth.institutionId);
-    const base = tenantFilter(institutionId);
-    const filter = auth.role === "teacher" ? { ...base, instructorId: auth.userId } : base;
-    const courses = await Course.find(filter).sort({ createdAt: -1 });
-    return NextResponse.json({ courses });
+
+    const search = req.nextUrl.searchParams.get("search");
+
+    const filter: Record<string, any> = { institutionId: auth.institutionId };
+
+    let query = Course.find(filter);
+
+    if (search) {
+      const searchRegex = new RegExp(search, "i");
+      query = query.or([
+        { title: searchRegex },
+        { description: searchRegex },
+      ]);
+    }
+
+    const courses = await query.sort({ createdAt: -1 }).lean();
+
+    return NextResponse.json(courses);
   } catch (err) {
     console.error(err);
-    return NextResponse.json({ error: "เกิดข้อผิดพลาด" }, { status: 500 });
+    return NextResponse.json({ error: "Failed to fetch courses" }, { status: 500 });
   }
 }
 
 export async function POST(req: NextRequest) {
   try {
     const auth = await getAuthUser();
-    if (!auth || (auth.role !== "admin" && auth.role !== "super_admin" && auth.role !== "teacher")) {
+    if (!auth || auth.role !== "admin") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const body = await req.json();
     await connectDB();
-    const institutionId = await resolveInstitutionId(req, auth.institutionId);
+    const body = await req.json();
 
-    // Phase 4: plan limit check
-    if (institutionId) {
-      const inst = await Institution.findById(institutionId).select("plan planExpiresAt isActive").lean() as {
-        plan: string; planExpiresAt: Date | null; isActive: boolean;
-      } | null;
-      if (inst) {
-        if (!inst.isActive)
-          return NextResponse.json({ error: "สถาบันถูกระงับการใช้งาน กรุณาติดต่อผู้ดูแลระบบ" }, { status: 403 });
-        if (inst.planExpiresAt && inst.planExpiresAt < new Date())
-          return NextResponse.json({ error: "แผนสมาชิกหมดอายุแล้ว กรุณาต่ออายุก่อนสร้างคอร์สใหม่" }, { status: 403 });
-        const courseCount = await Course.countDocuments({ institutionId });
-        if (!withinLimit(inst.plan as Parameters<typeof withinLimit>[0], "maxCourses", courseCount))
-          return NextResponse.json({
-            error: `แผน ${inst.plan} ของคุณถึงขีดจำกัดแล้ว ไม่สามารถสร้างคอร์สเพิ่มได้ กรุณาอัปเกรดแผน`,
-          }, { status: 403 });
-      }
+    const { title, description, price, image, isActive } = body;
+
+    if (!title || price === undefined) {
+      return NextResponse.json(
+        { error: "Missing required fields" },
+        { status: 400 }
+      );
     }
 
-    if (auth.role === "teacher") {
-      body.instructorId = auth.userId;
-      body.instructor = auth.name;
-    }
-    if (institutionId) body.institutionId = institutionId;
+    const course = new Course({
+      institutionId: auth.institutionId,
+      title,
+      description: description || "",
+      price,
+      image: image || "",
+      isActive: isActive !== false,
+    });
 
-    const course = await Course.create(body);
-    return NextResponse.json({ course }, { status: 201 });
-  } catch (err) {
+    await course.save();
+
+    return NextResponse.json(course, { status: 201 });
+  } catch (err: any) {
     console.error(err);
-    return NextResponse.json({ error: "เกิดข้อผิดพลาด" }, { status: 500 });
+    return NextResponse.json(
+      { error: err.message || "Failed to create course" },
+      { status: 500 }
+    );
   }
 }
