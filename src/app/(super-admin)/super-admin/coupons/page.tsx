@@ -85,14 +85,26 @@ export default function SuperAdminCouponsPage() {
     setIsMounted(true);
   }, []);
 
-  // Save state to sessionStorage when it changes
+  // Save active tab
   useEffect(() => {
     if (isMounted) {
       sessionStorage.setItem("superadmin-coupons-tab", activeTab);
+    }
+  }, [activeTab, isMounted]);
+
+  // Save filter
+  useEffect(() => {
+    if (isMounted) {
       sessionStorage.setItem("superadmin-coupons-filter", filterActive);
+    }
+  }, [filterActive, isMounted]);
+
+  // Save search
+  useEffect(() => {
+    if (isMounted) {
       sessionStorage.setItem("superadmin-coupons-search", search);
     }
-  }, [activeTab, filterActive, search, isMounted]);
+  }, [search, isMounted]);
 
   const load = useCallback(async () => {
     setLoading(true);
