@@ -40,6 +40,7 @@ export default function SuperAdminCouponsPage() {
   const [search, setSearch] = useState("");
   const [filterActive, setFilterActive] = useState<"all" | "active" | "inactive">("all");
   const [activeTab, setActiveTab] = useState<ItemType>("coupon");
+  const [isMounted, setIsMounted] = useState(false);
   const [copied, setCopied] = useState<string | null>(null);
 
   const [showCreate, setShowCreate] = useState(false);
@@ -66,6 +67,33 @@ export default function SuperAdminCouponsPage() {
     isActive: true,
   });
 
+  // Restore state from sessionStorage on mount
+  useEffect(() => {
+    const savedTab = sessionStorage.getItem("superadmin-coupons-tab");
+    const savedFilter = sessionStorage.getItem("superadmin-coupons-filter");
+    const savedSearch = sessionStorage.getItem("superadmin-coupons-search");
+
+    if (savedTab && ["coupon", "promotion", "package"].includes(savedTab)) {
+      setActiveTab(savedTab as ItemType);
+    }
+    if (savedFilter && ["all", "active", "inactive"].includes(savedFilter)) {
+      setFilterActive(savedFilter as any);
+    }
+    if (savedSearch) {
+      setSearch(savedSearch);
+    }
+    setIsMounted(true);
+  }, []);
+
+  // Save state to sessionStorage when it changes
+  useEffect(() => {
+    if (isMounted) {
+      sessionStorage.setItem("superadmin-coupons-tab", activeTab);
+      sessionStorage.setItem("superadmin-coupons-filter", filterActive);
+      sessionStorage.setItem("superadmin-coupons-search", search);
+    }
+  }, [activeTab, filterActive, search, isMounted]);
+
   const load = useCallback(async () => {
     setLoading(true);
     try {
@@ -79,8 +107,10 @@ export default function SuperAdminCouponsPage() {
   }, [activeTab]);
 
   useEffect(() => {
-    load();
-  }, [load]);
+    if (isMounted) {
+      load();
+    }
+  }, [load, isMounted]);
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
