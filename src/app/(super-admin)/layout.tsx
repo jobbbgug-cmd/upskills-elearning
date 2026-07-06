@@ -7,7 +7,7 @@ import {
   UserCog, Users, Wallet, Images, Shield, Home,
   UserCheck, BookOpen, FileText, TrendingUp, ChevronDown, FlaskConical, Settings,
   CalendarDays, GraduationCap, ClipboardList, BarChart2,
-  Radio, Star, MessageSquare, Tag, Palette, Award, ShoppingCart,
+  Radio, Star, MessageSquare, Tag, Palette, Award, ShoppingCart, Package,
 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { THEMES, getTheme, setTheme, type Theme } from "@/lib/theme";
@@ -183,7 +183,15 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
               {nav("/super-admin/live",    <Radio className="w-4 h-4" />,        "Live Sessions")}
           {nav("/super-admin/reviews", <Star className="w-4 h-4" />,         "รีวิวคอร์ส")}
           {nav("/super-admin/forum",   <MessageSquare className="w-4 h-4" />, "Forum")}
-          {nav("/super-admin/coupons", <Tag className="w-4 h-4" />,          "คูปอง/โปรโมชั่น")}
+            </>
+          )}
+
+          {/* E-commerce */}
+          <div className="pt-4 pb-1">{section("commerce", "ระบบขาย")}</div>
+          {expandedGroups.has("commerce") && (
+            <>
+              {nav("/super-admin/products", <Package className="w-4 h-4" />,      "จัดการสินค้า")}
+          {nav("/super-admin/coupons",  <Tag className="w-4 h-4" />,         "คูปอง/โปรโมชั่น")}
             </>
           )}
 
