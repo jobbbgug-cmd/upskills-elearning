@@ -110,6 +110,11 @@ export default function SuperAdminCouponsPage() {
     setLoading(true);
     try {
       const res = await fetch(`/api/super-admin/coupons?type=${activeTab}`);
+      if (!res.ok) {
+        setItems([]);
+        setLoading(false);
+        return;
+      }
       const data = await res.json();
       setItems(Array.isArray(data) ? data : []);
     } catch {
@@ -170,8 +175,12 @@ export default function SuperAdminCouponsPage() {
         setTimeout(() => { setShowCreate(false); setCreateSuccess(false); }, 1500);
         load();
       } else {
-        const err = await res.json();
-        setCreateError(err.error || "เกิดข้อผิดพลาด");
+        try {
+          const err = await res.json();
+          setCreateError(err.error || "เกิดข้อผิดพลาด");
+        } catch {
+          setCreateError("เกิดข้อผิดพลาดบนเซิร์ฟเวอร์");
+        }
       }
     } catch (err) {
       setCreateError("เกิดข้อผิดพลาด");

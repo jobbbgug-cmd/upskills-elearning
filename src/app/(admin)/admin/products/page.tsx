@@ -61,10 +61,20 @@ export default function AdminProductsPage() {
 
       if (activeTab === "product") {
         const res = await fetch(`/api/admin/products?${params.toString()}`);
+        if (!res.ok) {
+          setProducts([]);
+          setLoading(false);
+          return;
+        }
         const data = await res.json();
         setProducts(Array.isArray(data) ? data : []);
       } else {
         const res = await fetch(`/api/admin/courses?${params.toString()}`);
+        if (!res.ok) {
+          setCourses([]);
+          setLoading(false);
+          return;
+        }
         const data = await res.json();
         setCourses(Array.isArray(data) ? data : []);
       }
@@ -139,8 +149,12 @@ export default function AdminProductsPage() {
           load();
         }, 1500);
       } else {
-        const err = await res.json();
-        setError(err.error || "เกิดข้อผิดพลาด");
+        try {
+          const err = await res.json();
+          setError(err.error || "เกิดข้อผิดพลาด");
+        } catch {
+          setError("เกิดข้อผิดพลาดบนเซิร์ฟเวอร์");
+        }
       }
     } catch (err) {
       setError("เกิดข้อผิดพลาด");

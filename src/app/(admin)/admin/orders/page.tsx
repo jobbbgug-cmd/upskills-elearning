@@ -39,6 +39,11 @@ export default function AdminOrdersPage() {
     setLoading(true);
     try {
       const res = await fetch("/api/admin/sales");
+      if (!res.ok) {
+        setOrders([]);
+        setLoading(false);
+        return;
+      }
       const data = await res.json();
       setOrders(Array.isArray(data.orders) ? data.orders : []);
     } catch (err) {
