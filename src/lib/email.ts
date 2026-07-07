@@ -22,7 +22,7 @@ export async function sendPaymentSlipNotification(info: {
 }) {
   await transporter.sendMail({
     from: `"UPSkills System" <${process.env.SMTP_USER}>`,
-    to: info.to ?? process.env.NOTIFY_EMAIL ?? "jobbbgug@gmail.com",
+    to: info.to ?? process.env.NOTIFY_EMAIL ?? "upskillsth@gmail.com",
     subject: `[UPSkills] มีสลิปชำระเงินรอตรวจสอบ — ${info.courseTitle}`,
     html: `
       <div style="font-family:Arial,sans-serif;max-width:520px;margin:0 auto;background:#f9fafb;padding:24px;border-radius:12px;">
@@ -78,7 +78,7 @@ export async function sendNewMemberNotification(member: {
 
   await transporter.sendMail({
     from: `"UPSkills System" <${process.env.SMTP_USER}>`,
-    to: member.to ?? process.env.NOTIFY_EMAIL ?? "jobbbgug@gmail.com",
+    to: member.to ?? process.env.NOTIFY_EMAIL ?? "upskillsth@gmail.com",
     subject: `[UPSkills] มีสมาชิกใหม่รออนุมัติ — ${member.name}`,
     html: `
       <div style="font-family:Arial,sans-serif;max-width:520px;margin:0 auto;background:#f9fafb;padding:24px;border-radius:12px;">
@@ -130,7 +130,7 @@ export async function sendTrialRequestNotification(info: {
 }) {
   await transporter.sendMail({
     from: `"UPSkills System" <${process.env.SMTP_USER}>`,
-    to: info.to ?? process.env.NOTIFY_EMAIL ?? "jobbbgug@gmail.com",
+    to: info.to ?? process.env.NOTIFY_EMAIL ?? "upskillsth@gmail.com",
     subject: `[UPSkills] คำขอทดลองใช้งานใหม่ — ${info.institutionName}`,
     html: `
       <div style="font-family:Arial,sans-serif;max-width:520px;margin:0 auto;background:#f0fdfa;padding:24px;border-radius:12px;">

@@ -17,7 +17,7 @@ export default function SettingsPage() {
   useEffect(() => {
     fetch("/api/super-admin/system-settings?key=trialNotifyEmail")
       .then((r) => r.json())
-      .then((d) => { setNotifyEmail(d.value || "jobbbgug@gmail.com"); })
+      .then((d) => { setNotifyEmail(d.value || "upskillsth@gmail.com"); })
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);

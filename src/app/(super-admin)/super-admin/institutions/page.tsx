@@ -31,7 +31,7 @@ ${roleLabel}
 
 โทรศัพท์: 094-801-8302
 
-อีเมล: jobbbgug@gmail.com
+อีเมล: upskillsth@gmail.com
 
 Line ID: job0948018302`;
 }
