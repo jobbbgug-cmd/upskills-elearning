@@ -115,6 +115,97 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {/* ─── About UPSkills - Comprehensive Overview ─── */}
+      <section className="py-20 px-4 bg-white">
+        <div className="max-w-6xl mx-auto">
+          <div className="mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 leading-tight">
+              UPSkills ระบบบริหารจัดการสถาบันการศึกษา<br />
+              <span className="text-indigo-600">ครบวงจร (All-in-One Education Management Platform)</span>
+            </h2>
+            <p className="text-lg text-gray-600 leading-relaxed mb-6">
+              ระบบที่ออกแบบมาเพื่อช่วยให้สถาบันสามารถบริหารจัดการทุกขั้นตอนของการเรียนการสอนได้อย่างมีประสิทธิภาพ
+              รองรับทั้ง การเรียนออนไลน์ (Online) และ การเรียนที่สถาบัน (On-site) ภายในระบบเดียว
+            </p>
+            <p className="text-base text-gray-600 leading-relaxed">
+              UPSkills ช่วยลดภาระงานของผู้บริหาร ครู และเจ้าหน้าที่ พร้อมเพิ่มความสะดวกให้กับนักเรียนและผู้ปกครอง
+              ตั้งแต่การสมัครเรียน การชำระเงิน การติดตามผลการเรียน ไปจนถึงการบริหารข้อมูลทั้งหมดของสถาบัน
+            </p>
+          </div>
+
+          {/* Features Grid */}
+          <div className="mb-16">
+            <h3 className="text-2xl font-bold text-gray-900 mb-8">✨ ฟีเจอร์เด่นของระบบ</h3>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {[
+                { emoji: "🏫", title: "รองรับการเรียนทั้ง Online และ On-site" },
+                { emoji: "👨‍🎓", title: "จัดการข้อมูลนักเรียน ครู และเจ้าหน้าที่" },
+                { emoji: "📚", title: "จัดการคอร์สเรียน วิชา ห้องเรียน และตารางเรียน" },
+                { emoji: "🗓️", title: "จัดตารางเรียนและตารางสอน" },
+                { emoji: "📝", title: "ระบบสมัครและลงทะเบียนเรียนออนไลน์" },
+                { emoji: "✅", title: "ระบบเช็กชื่อเข้าเรียน" },
+                { emoji: "🎥", title: "Live Class และเรียนย้อนหลัง" },
+                { emoji: "📹", title: "อัปโหลดวิดีโอ เอกสาร และสื่อการสอน" },
+                { emoji: "📝", title: "ระบบแบบทดสอบ พร้อมตรวจคะแนนอัตโนมัติ" },
+                { emoji: "📈", title: "ติดตามผลการเรียนและความก้าวหน้าของนักเรียน" },
+                { emoji: "🏆", title: "ระบบออกใบประกาศนียบัตรอัตโนมัติ" },
+                { emoji: "💳", title: "ระบบรับชำระเงิน พร้อมออกใบเสร็จ" },
+                { emoji: "📦", title: "ระบบขายคอร์สเรียนออนไลน์" },
+                { emoji: "🛒", title: "ระบบขายสินค้า เช่น หนังสือ แบบฝึกหัด และอุปกรณ์การเรียน" },
+                { emoji: "📦", title: "จัดการสต๊อกสินค้าและประวัติการสั่งซื้อ" },
+                { emoji: "🎟️", title: "ระบบคูปอง ส่วนลด และโปรโมชั่น" },
+                { emoji: "📢", title: "ระบบประกาศข่าวสารและแจ้งเตือน" },
+                { emoji: "💬", title: "Forum สำหรับถาม-ตอบระหว่างครูและนักเรียน" },
+                { emoji: "📊", title: "Dashboard รายงานและสถิติแบบเรียลไทม์" },
+                { emoji: "🏢", title: "รองรับหลายสาขา (Multi Branch)" },
+                { emoji: "🎨", title: "ปรับแต่งโลโก้ สีธีม และข้อมูลของสถาบัน" },
+                { emoji: "🔐", title: "กำหนดสิทธิ์การใช้งานตามบทบาท (Role Management)" },
+                { emoji: "📱", title: "รองรับการใช้งานบนคอมพิวเตอร์ แท็บเล็ต และสมาร์ตโฟน" },
+                { emoji: "☁️", title: "ใช้งานผ่านเว็บไซต์ ไม่ต้องติดตั้งโปรแกรม" },
+              ].map(({ emoji, title }) => (
+                <div key={title} className="flex items-start gap-3 p-4 bg-gray-50 rounded-xl border border-gray-100 hover:border-indigo-200 transition-colors">
+                  <span className="text-2xl shrink-0">{emoji}</span>
+                  <p className="text-sm text-gray-700 font-medium">{title}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Use Cases */}
+          <div>
+            <h3 className="text-2xl font-bold text-gray-900 mb-8">🎯 เหมาะสำหรับ</h3>
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {[
+                { emoji: "📖", title: "สถาบันกวดวิชา" },
+                { emoji: "🌏", title: "โรงเรียนสอนภาษา" },
+                { emoji: "🎼", title: "โรงเรียนดนตรี" },
+                { emoji: "🎨", title: "โรงเรียนศิลปะ" },
+                { emoji: "💻", title: "สถาบันสอนเขียนโปรแกรม" },
+                { emoji: "👨‍🏫", title: "ศูนย์ฝึกอบรม" },
+                { emoji: "🏫", title: "โรงเรียนและองค์กรที่จัดอบรม" },
+              ].map(({ emoji, title }) => (
+                <div key={title} className="flex items-center gap-3 p-4 bg-indigo-50 rounded-xl border border-indigo-100">
+                  <span className="text-2xl">{emoji}</span>
+                  <p className="font-semibold text-gray-800">{title}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="mt-12 p-8 bg-gradient-to-r from-indigo-50 to-violet-50 rounded-2xl border border-indigo-100">
+            <p className="text-lg text-gray-800 leading-relaxed mb-4">
+              <strong>UPSkills ไม่ใช่เพียงระบบเรียนออนไลน์</strong> แต่เป็น <strong>ระบบบริหารสถาบันครบวงจร</strong>
+              ที่ช่วยให้ทุกกระบวนการทำงานเชื่อมต่อกันในแพลตฟอร์มเดียว ช่วยลดขั้นตอนการทำงาน เพิ่มประสิทธิภาพการบริหาร
+              และรองรับการเติบโตของสถาบันในระยะยาว
+            </p>
+            <p className="text-base text-gray-700">
+              หากทางสถาบันสนใจ ทางเรายินดีสาธิตการใช้งานระบบ พร้อมเปิดให้ทดลองใช้งาน ฟรี
+              และสามารถปรับแต่งฟังก์ชันให้เหมาะกับรูปแบบการดำเนินงานของแต่ละสถาบันได้
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* ─── รู้จัก UPSkills ─── */}
       <section className="py-28 px-4 bg-gray-50">
         <div className="max-w-6xl mx-auto">
