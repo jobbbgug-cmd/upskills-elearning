@@ -101,7 +101,7 @@ export default function AdminProductsPage() {
     setError("");
 
     if (activeTab === "product") {
-      if (!form.name || form.price < 0 || form.stock < 0) {
+      if (!form.name || form.price < 0 || form.stock < 0 || !form.sku) {
         setError("กรุณากรอกข้อมูลให้ถูกต้อง");
         return;
       }
@@ -382,9 +382,10 @@ export default function AdminProductsPage() {
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                        SKU
+                        รหัสสินค้า (SKU) *
                       </label>
                       <input
+                        required
                         type="text"
                         value={form.sku}
                         onChange={(e) => setForm({ ...form, sku: e.target.value })}
