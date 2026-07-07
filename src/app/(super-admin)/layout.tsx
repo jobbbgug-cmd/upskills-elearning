@@ -90,13 +90,26 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
     router.push("/");
   };
 
+  const getSectionColor = (id: string): { bg: string; text: string; border: string } => {
+    const colors: Record<string, { bg: string; text: string; border: string }> = {
+      platform: { bg: "bg-blue-600", text: "text-blue-600", border: "border-blue-200" },
+      members: { bg: "bg-purple-600", text: "text-purple-600", border: "border-purple-200" },
+      features: { bg: "bg-green-600", text: "text-green-600", border: "border-green-200" },
+      commerce: { bg: "bg-orange-600", text: "text-orange-600", border: "border-orange-200" },
+      content: { bg: "bg-pink-600", text: "text-pink-600", border: "border-pink-200" },
+      system: { bg: "bg-indigo-600", text: "text-indigo-600", border: "border-indigo-200" },
+    };
+    return colors[id] || { bg: "bg-violet-600", text: "text-violet-600", border: "border-violet-200" };
+  };
+
   const section = (id: string, title: string, badge?: number) => {
     const isOpen = expandedGroups.has(id);
+    const colors = getSectionColor(id);
     return (
       <button
         onClick={() => toggleGroup(id)}
         className={`w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg transition-colors ${
-          isOpen ? "menu-active font-medium" : "text-gray-600 hover:bg-gray-50 menu-hover"
+          isOpen ? `${colors.bg} text-white font-medium` : "text-gray-600 hover:bg-gray-50 menu-hover"
         }`}
       >
         <span className="flex-1 text-left">
@@ -105,20 +118,21 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
         {badge !== undefined && badge > 0 && (
           <span className="w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold">{badge}</span>
         )}
-        <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
+        <ChevronDown className={`w-4 h-4 ${isOpen ? "text-white" : "text-gray-400"} transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
       </button>
     );
   };
 
-  const nav = (href: string, icon: React.ReactNode, label: string, badge?: number) => {
+  const nav = (href: string, icon: React.ReactNode, label: string, badge?: number, groupId?: string) => {
     const active = pathname === href || (href !== "/super-admin" && pathname.startsWith(href));
+    const colors = groupId ? getSectionColor(groupId) : { bg: "bg-violet-600", text: "text-violet-600", border: "border-violet-200" };
     return (
       <Link
         href={href}
         onClick={() => { close(); if (!active) setIsNavigating(true); }}
         className={`flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg transition-colors ${
           active
-            ? "menu-active font-medium"
+            ? `${colors.bg} text-white font-medium`
             : "text-gray-600 hover:bg-gray-50 menu-hover"
         }`}
       >
@@ -156,14 +170,14 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
         >
           {/* Platform */}
           <div className="pt-2 pb-1">{section("platform", "แพลตฟอร์ม")}</div>
-          
+
           {expandedGroups.has("platform") && (
             <>
-              {nav("/super-admin", <LayoutDashboard className="w-4 h-4" />, "ภาพรวม")}
-              {nav("/super-admin/analytics", <BarChart2 className="w-4 h-4" />, "Analytics")}
-              {nav("/super-admin/institutions", <Building2 className="w-4 h-4" />, "สถาบันทั้งหมด")}
-              {nav("/super-admin/trials", <FlaskConical className="w-4 h-4" />, "คำขอทดลองใช้งาน")}
-              {nav("/super-admin/payouts", <Receipt className="w-4 h-4" />, "Commission & Payout")}
+              {nav("/super-admin", <LayoutDashboard className="w-4 h-4" />, "ภาพรวม", undefined, "platform")}
+              {nav("/super-admin/analytics", <BarChart2 className="w-4 h-4" />, "Analytics", undefined, "platform")}
+              {nav("/super-admin/institutions", <Building2 className="w-4 h-4" />, "สถาบันทั้งหมด", undefined, "platform")}
+              {nav("/super-admin/trials", <FlaskConical className="w-4 h-4" />, "คำขอทดลองใช้งาน", undefined, "platform")}
+              {nav("/super-admin/payouts", <Receipt className="w-4 h-4" />, "Commission & Payout", undefined, "platform")}
             </>
           )}
 
@@ -171,8 +185,8 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
           <div className="pt-4 pb-1">{section("members", "จัดการสมาชิก", pendingMembers)}</div>
           {expandedGroups.has("members") && (
             <>
-              {nav("/super-admin/members", <UserCheck className="w-4 h-4" />, "อนุมัติสมาชิก", pendingMembers)}
-          {nav("/super-admin/users", <UserCog className="w-4 h-4" />, "จัดการผู้ใช้งาน")}
+              {nav("/super-admin/members", <UserCheck className="w-4 h-4" />, "อนุมัติสมาชิก", pendingMembers, "members")}
+              {nav("/super-admin/users", <UserCog className="w-4 h-4" />, "จัดการผู้ใช้งาน", undefined, "members")}
             </>
           )}
 
@@ -180,9 +194,9 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
           <div className="pt-4 pb-1">{section("features", "ฟีเจอร์แพลตฟอร์ม")}</div>
           {expandedGroups.has("features") && (
             <>
-              {nav("/super-admin/live",    <Radio className="w-4 h-4" />,        "Live Sessions")}
-          {nav("/super-admin/reviews", <Star className="w-4 h-4" />,         "รีวิวคอร์ส")}
-          {nav("/super-admin/forum",   <MessageSquare className="w-4 h-4" />, "Forum")}
+              {nav("/super-admin/live", <Radio className="w-4 h-4" />, "Live Sessions", undefined, "features")}
+              {nav("/super-admin/reviews", <Star className="w-4 h-4" />, "รีวิวคอร์ส", undefined, "features")}
+              {nav("/super-admin/forum", <MessageSquare className="w-4 h-4" />, "Forum", undefined, "features")}
             </>
           )}
 
@@ -190,8 +204,8 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
           <div className="pt-4 pb-1">{section("commerce", "ระบบขาย")}</div>
           {expandedGroups.has("commerce") && (
             <>
-              {nav("/super-admin/products", <Package className="w-4 h-4" />,      "จัดการสินค้า")}
-          {nav("/super-admin/coupons",  <Tag className="w-4 h-4" />,         "คูปอง/โปรโมชั่น")}
+              {nav("/super-admin/products", <Package className="w-4 h-4" />, "จัดการสินค้า", undefined, "commerce")}
+              {nav("/super-admin/coupons", <Tag className="w-4 h-4" />, "คูปอง/โปรโมชั่น", undefined, "commerce")}
             </>
           )}
 
@@ -199,11 +213,11 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
           <div className="pt-4 pb-1">{section("content", "จัดการเนื้อหา")}</div>
           {expandedGroups.has("content") && (
             <>
-              {nav("/super-admin/courses", <BookOpen className="w-4 h-4" />, "จัดการคอร์ส")}
-          {nav("/super-admin/content", <FileText className="w-4 h-4" />, "เนื้อหาการเรียน")}
-          {nav("/super-admin/revenue", <TrendingUp className="w-4 h-4" />, "รายได้")}
-          {nav("/super-admin/schedule", <CalendarDays className="w-4 h-4" />, "ตารางสอน")}
-          {nav("/super-admin/student-schedule", <GraduationCap className="w-4 h-4" />, "ตารางเรียน")}
+              {nav("/super-admin/courses", <BookOpen className="w-4 h-4" />, "จัดการคอร์ส", undefined, "content")}
+              {nav("/super-admin/content", <FileText className="w-4 h-4" />, "เนื้อหาการเรียน", undefined, "content")}
+              {nav("/super-admin/revenue", <TrendingUp className="w-4 h-4" />, "รายได้", undefined, "content")}
+              {nav("/super-admin/schedule", <CalendarDays className="w-4 h-4" />, "ตารางสอน", undefined, "content")}
+              {nav("/super-admin/student-schedule", <GraduationCap className="w-4 h-4" />, "ตารางเรียน", undefined, "content")}
             </>
           )}
 
@@ -211,14 +225,14 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
           <div className="pt-4 pb-1">{section("system", "จัดการระบบ")}</div>
           {expandedGroups.has("system") && (
             <>
-              {nav("/super-admin/bookings", <Users className="w-4 h-4" />, "ตรวจสอบการชำระ")}
-          {nav("/super-admin/orders", <ShoppingCart className="w-4 h-4" />, "จัดการคำสั่งซื้อ")}
-          {nav("/super-admin/certificates", <Award className="w-4 h-4" />, "ใบรับรอง")}
-          {nav("/super-admin/finance", <Wallet className="w-4 h-4" />, "ข้อมูลทางการเงิน")}
-          {nav("/super-admin/banners", <Images className="w-4 h-4" />, "จัดการแบนเนอร์")}
-          {nav("/super-admin/roles", <Shield className="w-4 h-4" />, "จัดการ Role")}
-          {nav("/super-admin/logs", <ClipboardList className="w-4 h-4" />, "ประวัติการใช้งาน")}
-          {nav("/super-admin/settings", <Settings className="w-4 h-4" />, "ตั้งค่าทั่วไป")}
+              {nav("/super-admin/bookings", <Users className="w-4 h-4" />, "ตรวจสอบการชำระ", undefined, "system")}
+              {nav("/super-admin/orders", <ShoppingCart className="w-4 h-4" />, "จัดการคำสั่งซื้อ", undefined, "system")}
+              {nav("/super-admin/certificates", <Award className="w-4 h-4" />, "ใบรับรอง", undefined, "system")}
+              {nav("/super-admin/finance", <Wallet className="w-4 h-4" />, "ข้อมูลทางการเงิน", undefined, "system")}
+              {nav("/super-admin/banners", <Images className="w-4 h-4" />, "จัดการแบนเนอร์", undefined, "system")}
+              {nav("/super-admin/roles", <Shield className="w-4 h-4" />, "จัดการ Role", undefined, "system")}
+              {nav("/super-admin/logs", <ClipboardList className="w-4 h-4" />, "ประวัติการใช้งาน", undefined, "system")}
+              {nav("/super-admin/settings", <Settings className="w-4 h-4" />, "ตั้งค่าทั่วไป", undefined, "system")}
             </>
           )}
         </nav>
