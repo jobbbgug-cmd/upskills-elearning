@@ -1,27 +1,29 @@
+import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
 import { getAuthUser } from "@/lib/auth";
 import Order from "@/models/Order";
 import Product from "@/models/Product";
 
-export async function PATCH(req: Request, { params }: { params: { id: string } }) {
+export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     await connectDB();
     const user = await getAuthUser();
 
     if (!user || !["admin", "super_admin"].includes(user.role)) {
-      return Response.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const body = await req.json();
     const { status } = body;
 
-    const order = await Order.findById(params.id);
+    const order = await Order.findById(id);
     if (!order) {
-      return Response.json({ error: "Order not found" }, { status: 404 });
+      return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }
 
     if (user.role === "admin" && String(order.institutionId) !== String(user.institutionId)) {
-      return Response.json({ error: "Forbidden" }, { status: 403 });
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     const oldStatus = order.status;
@@ -35,29 +37,30 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
       });
     }
 
-    return Response.json(order);
+    return NextResponse.json(order);
   } catch (error) {
     console.error(error);
-    return Response.json({ error: "Failed to update order" }, { status: 500 });
+    return NextResponse.json({ error: "Failed to update order" }, { status: 500 });
   }
 }
 
-export async function DELETE(req: Request, { params }: { params: { id: string } }) {
+export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     await connectDB();
     const user = await getAuthUser();
 
     if (!user || !["admin", "super_admin"].includes(user.role)) {
-      return Response.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const order = await Order.findById(params.id);
+    const order = await Order.findById(id);
     if (!order) {
-      return Response.json({ error: "Order not found" }, { status: 404 });
+      return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }
 
     if (user.role === "admin" && String(order.institutionId) !== String(user.institutionId)) {
-      return Response.json({ error: "Forbidden" }, { status: 403 });
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     // Restore stock if product order
@@ -67,11 +70,11 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
       });
     }
 
-    await Order.findByIdAndDelete(params.id);
+    await Order.findByIdAndDelete(id);
 
-    return Response.json({ success: true });
+    return NextResponse.json({ success: true });
   } catch (error) {
     console.error(error);
-    return Response.json({ error: "Failed to delete order" }, { status: 500 });
+    return NextResponse.json({ error: "Failed to delete order" }, { status: 500 });
   }
 }

@@ -627,12 +627,12 @@ export default function AdminCouponsPage() {
                       {item.itemType === "promotion" && <span className="font-bold text-gray-900">{item.title}</span>}
                       {item.itemType === "package" && <span className="font-bold text-gray-900">{item.name}</span>}
 
-                      {item.itemType === "coupon" && item.type && (
+                      {item.itemType === "coupon" && item.type && item.value !== undefined && (
                         <span className="text-xs px-2 py-0.5 rounded-full font-semibold bg-indigo-100 text-indigo-700">
                           {item.type === "percent" ? `ลด ${item.value}%` : `ลด ฿${item.value.toLocaleString()}`}
                         </span>
                       )}
-                      {item.itemType === "promotion" && item.type && (
+                      {item.itemType === "promotion" && item.type && item.value !== undefined && (
                         <span className="text-xs px-2 py-0.5 rounded-full font-semibold bg-purple-100 text-purple-700">
                           {item.type === "percent" ? `ลด ${item.value}%` : `ลด ฿${item.value.toLocaleString()}`}
                         </span>

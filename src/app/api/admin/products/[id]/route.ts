@@ -5,9 +5,10 @@ import Product from "@/models/Product";
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const auth = await getAuthUser();
     if (!auth || auth.role !== "admin") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -17,7 +18,7 @@ export async function PATCH(
     const body = await req.json();
 
     const product = await Product.findByIdAndUpdate(
-      params.id,
+      id,
       { ...body, institutionId: auth.institutionId },
       { new: true }
     );
@@ -37,17 +38,18 @@ export async function PATCH(
 }
 
 export async function DELETE(
-  req: NextRequest,
-  { params }: { params: { id: string } }
+  _req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const auth = await getAuthUser();
     if (!auth || auth.role !== "admin") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     await connectDB();
-    const product = await Product.findByIdAndDelete(params.id);
+    const product = await Product.findByIdAndDelete(id);
 
     if (!product) {
       return NextResponse.json({ error: "Product not found" }, { status: 404 });
