@@ -23,6 +23,7 @@ type Cell = { day: number; month: "prev" | "curr" | "next" };
 
 export default function StudentSchedulePage() {
   const [role, setRole] = useState("");
+  const [activeTab, setActiveTab] = useState<"student" | "teacher">("student");
   const [students, setStudents] = useState<Student[]>([]);
   const [selectedStudentId, setSelectedStudentId] = useState("all");
   const [events, setEvents] = useState<SessionEvent[]>([]);
@@ -50,13 +51,23 @@ export default function StudentSchedulePage() {
 
   useEffect(() => {
     if (loadingInit) return;
+
+    // For teacher tab, always load teacher schedule
+    if (activeTab === "teacher") {
+      setLoadingEvents(true);
+      setSelectedDate(null);
+      fetch("/api/schedule/teacher").then(r => r.json()).then(d => { setEvents(d.events ?? []); setLoadingEvents(false); });
+      return;
+    }
+
+    // For student tab
     if (role === "admin" && selectedStudentId === "all") { setEvents([]); return; }
     setLoadingEvents(true);
     setSelectedDate(null);
     const url = role === "admin" && selectedStudentId !== "all"
       ? `/api/schedule/student?userId=${selectedStudentId}` : "/api/schedule/student";
     fetch(url).then(r => r.json()).then(d => { setEvents(d.events ?? []); setLoadingEvents(false); });
-  }, [loadingInit, role, selectedStudentId]);
+  }, [loadingInit, role, selectedStudentId, activeTab]);
 
   // Build course→color map
   const courseColor = useMemo(() => {
@@ -102,14 +113,17 @@ export default function StudentSchedulePage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">ตารางเรียน</h1>
+          <h1 className="text-2xl font-bold text-gray-900">
+            {activeTab === "teacher" ? "ตารางสอน" : "ตารางเรียน"}
+          </h1>
           <p className="text-sm text-gray-500 mt-0.5">
-            {role === "admin" && selectedStudent
+            {activeTab === "teacher" ? "ตารางการสอนของครูทั้งหมด" :
+             role === "admin" && selectedStudent
               ? `ของ ${selectedStudent.name}${selectedStudent.gradeLevel ? ` · ${selectedStudent.gradeLevel}` : ""}`
               : "คอร์สที่จองและยืนยันแล้วทั้งหมด"}
           </p>
         </div>
-        {role === "admin" && students.length > 0 && (
+        {role === "admin" && students.length > 0 && activeTab === "student" && (
           <div className="flex items-center gap-2">
             <User className="w-4 h-4 text-gray-400 shrink-0" />
             <select value={selectedStudentId} onChange={e => setSelectedStudentId(e.target.value)}
@@ -121,7 +135,30 @@ export default function StudentSchedulePage() {
         )}
       </div>
 
-      {role === "admin" && selectedStudentId === "all" ? (
+      {/* Tabs */}
+      {(role === "admin" || role === "super_admin") && (
+        <div className="flex gap-1 bg-gray-100 rounded-xl p-1 w-fit">
+          {[
+            { key: "student", label: "ตารางเรียน", icon: "👨‍🎓" },
+            { key: "teacher", label: "ตารางสอน", icon: "👨‍🏫" },
+          ].map((t) => (
+            <button
+              key={t.key}
+              onClick={() => setActiveTab(t.key as typeof activeTab)}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${
+                activeTab === t.key
+                  ? "bg-white shadow-sm text-gray-900"
+                  : "text-gray-500 hover:text-gray-700"
+              }`}
+            >
+              <span>{t.icon}</span>
+              {t.label}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {role === "admin" && activeTab === "student" && selectedStudentId === "all" ? (
         <div className="bg-white rounded-2xl border border-gray-100 p-16 text-center">
           <User className="w-10 h-10 mx-auto mb-3 text-gray-300" />
           <p className="text-sm text-gray-500 font-medium">เลือกนักเรียนเพื่อดูตารางเรียน</p>
