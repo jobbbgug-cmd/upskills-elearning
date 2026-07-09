@@ -132,31 +132,31 @@ export default function StudentSchedulePage() {
               {students.map(s => <option key={s._id} value={s._id}>{s.name}{s.gradeLevel ? ` (${s.gradeLevel})` : ""}</option>)}
             </select>
           </div>
+        )} {role !== "admin" && (
+          <div />
         )}
       </div>
 
       {/* Tabs */}
-      {(role === "admin" || role === "super_admin") && (
-        <div className="flex gap-1 bg-gray-100 rounded-xl p-1 w-fit">
-          {[
-            { key: "student", label: "ตารางเรียน", icon: "👨‍🎓" },
-            { key: "teacher", label: "ตารางสอน", icon: "👨‍🏫" },
-          ].map((t) => (
-            <button
-              key={t.key}
-              onClick={() => setActiveTab(t.key as typeof activeTab)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${
-                activeTab === t.key
-                  ? "bg-white shadow-sm text-gray-900"
-                  : "text-gray-500 hover:text-gray-700"
-              }`}
-            >
-              <span>{t.icon}</span>
-              {t.label}
-            </button>
-          ))}
-        </div>
-      )}
+      <div className="flex gap-1 bg-gray-100 rounded-xl p-1 w-fit">
+        {[
+          { key: "student", label: "ตารางเรียน", icon: "👨‍🎓" },
+          { key: "teacher", label: "ตารางสอน", icon: "👨‍🏫" },
+        ].map((t) => (
+          <button
+            key={t.key}
+            onClick={() => setActiveTab(t.key as typeof activeTab)}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${
+              activeTab === t.key
+                ? "bg-white shadow-sm text-gray-900"
+                : "text-gray-500 hover:text-gray-700"
+            }`}
+          >
+            <span>{t.icon}</span>
+            {t.label}
+          </button>
+        ))}
+      </div>
 
       {role === "admin" && activeTab === "student" && selectedStudentId === "all" ? (
         <div className="bg-white rounded-2xl border border-gray-100 p-16 text-center">
