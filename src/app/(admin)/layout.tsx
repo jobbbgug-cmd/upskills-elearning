@@ -261,7 +261,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <Link href={href} onClick={() => { close(); if (!active) setIsNavigating(true); }}
         className={`flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg transition-colors ${
           active
-            ? "menu-active font-medium"
+            ? "menu-nav-active font-medium"
             : "text-gray-600 hover:bg-gray-50 menu-hover"
         }`}>
         {icon}
@@ -277,7 +277,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <div key={id}>
         <button onClick={() => toggleGroup(id)}
           className={`w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg transition-colors ${
-            hasActive ? "menu-active font-semibold" : "text-gray-700 hover:bg-gray-50 menu-hover"
+            hasActive ? "menu-section-active font-semibold" : "menu-text-primary hover:bg-gray-50"
           }`}>
           <span>{icon}</span>
           <span className="flex-1 text-left">{label}</span>
@@ -286,7 +286,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               {badge}
             </span>
           )}
-          <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${isOpen ? "rotate-180" : ""} ${hasActive ? "text-white" : "text-gray-400"}`} />
+          <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
         </button>
         {isOpen && (
           <div className="ml-3 pl-3 border-l border-gray-100 space-y-0.5 mt-0.5 mb-1">
@@ -301,8 +301,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     const active = pathname === href || (href !== "/admin" && pathname.startsWith(href));
     return (
       <Link href={href} onClick={() => { setMoreMenuOpen(false); if (!active) setIsNavigating(true); }}
-        className={`flex items-center gap-2 px-2 py-1.5 text-sm rounded-lg transition-colors ${
-          active ? "menu-active font-medium" : "text-gray-600 hover:bg-gray-50"
+        className={`flex items-center gap-2 px-2 py-1.5 text-sm rounded-lg transition-colors menu-hover ${
+          active ? "menu-nav-active font-medium" : "text-gray-600 hover:bg-gray-50"
         }`}>
         {icon}
         {label}

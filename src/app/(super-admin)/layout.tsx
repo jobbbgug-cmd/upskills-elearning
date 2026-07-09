@@ -102,13 +102,14 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
     return colors[id] || { bg: "bg-violet-600", text: "text-violet-600", border: "border-violet-200" };
   };
 
-  const section = (id: string, title: string, badge?: number) => {
+  const section = (id: string, title: string, badge?: number, colorStyle?: 'primary' | 'accent') => {
     const isOpen = expandedGroups.has(id);
+    const activeClass = colorStyle === 'accent' ? 'menu-accent' : 'menu-section-active';
     return (
       <button
         onClick={() => toggleGroup(id)}
         className={`w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg transition-colors ${
-          isOpen ? `menu-active text-white font-medium` : "text-gray-600 hover:bg-gray-50 menu-hover"
+          isOpen ? `${activeClass} font-medium` : "menu-text-primary hover:bg-gray-50"
         }`}
       >
         <span className="flex-1 text-left">
@@ -117,20 +118,21 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
         {badge !== undefined && badge > 0 && (
           <span className="w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold">{badge}</span>
         )}
-        <ChevronDown className={`w-4 h-4 ${isOpen ? "text-white" : "text-gray-400"} transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
+        <ChevronDown className={`w-4 h-4 ${isOpen ? "rotate-180" : ""} text-gray-400 transition-transform duration-200`} />
       </button>
     );
   };
 
-  const nav = (href: string, icon: React.ReactNode, label: string, badge?: number, groupId?: string) => {
+  const nav = (href: string, icon: React.ReactNode, label: string, badge?: number, groupId?: string, colorStyle?: 'primary' | 'accent') => {
     const active = pathname === href || (href !== "/super-admin" && pathname.startsWith(href));
+    const activeClass = colorStyle === 'accent' ? 'menu-accent' : 'menu-nav-active';
     return (
       <Link
         href={href}
         onClick={() => { close(); if (!active) setIsNavigating(true); }}
         className={`flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg transition-colors ${
           active
-            ? `menu-active text-white font-medium`
+            ? `${activeClass} font-medium`
             : "text-gray-600 hover:bg-gray-50 menu-hover"
         }`}
       >
@@ -189,11 +191,11 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
           )}
 
           {/* Phase 5-6 features */}
-          <div className="pt-4 pb-1">{section("features", "ฟีเจอร์แพลตฟอร์ม")}</div>
+          <div className="pt-4 pb-1">{section("features", "ฟีเจอร์แพลตฟอร์ม", undefined, "accent")}</div>
           {expandedGroups.has("features") && (
             <>
               {nav("/super-admin/live", <Radio className="w-4 h-4" />, "Live Sessions", undefined, "features")}
-              {nav("/super-admin/reviews", <Star className="w-4 h-4" />, "รีวิวคอร์ส", undefined, "features")}
+              {nav("/super-admin/reviews", <Star className="w-4 h-4" />, "รีวิวคอร์ส", undefined, "features", "primary")}
               {nav("/super-admin/forum", <MessageSquare className="w-4 h-4" />, "Forum", undefined, "features")}
             </>
           )}

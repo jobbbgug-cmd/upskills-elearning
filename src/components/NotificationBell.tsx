@@ -35,11 +35,15 @@ export default function NotificationBell() {
   const ref = useRef<HTMLDivElement>(null);
 
   const fetch_ = async () => {
-    const res = await fetch("/api/notifications");
-    if (!res.ok) return;
-    const d = await res.json();
-    setNotifs(d.notifications ?? []);
-    setUnread(d.unreadCount ?? 0);
+    try {
+      const res = await fetch("/api/notifications");
+      if (!res.ok) return;
+      const d = await res.json();
+      setNotifs(d.notifications ?? []);
+      setUnread(d.unreadCount ?? 0);
+    } catch (error) {
+      console.error("Failed to fetch notifications:", error);
+    }
   };
 
   useEffect(() => {

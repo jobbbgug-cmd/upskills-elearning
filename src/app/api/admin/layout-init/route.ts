@@ -8,8 +8,9 @@ import { PLAN_LABELS } from "@/lib/planLimits";
 import { tenantFilter } from "@/lib/tenant";
 
 export async function GET() {
-  const auth = await getAuthUser();
-  if (!auth) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  try {
+    const auth = await getAuthUser();
+    if (!auth) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   await connectDB();
 
@@ -49,4 +50,8 @@ export async function GET() {
         }
       : null,
   });
+  } catch (error) {
+    console.error("layout-init error:", error);
+    return NextResponse.json({ error: "เกิดข้อผิดพลาด" }, { status: 500 });
+  }
 }

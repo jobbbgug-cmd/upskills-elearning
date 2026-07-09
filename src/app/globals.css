@@ -66,6 +66,78 @@ body {
 
 
 /* Custom theme-aware menu classes */
+/* Section Active - Main heading selected */
+.menu-section-active {
+  background: var(--color-primary) !important;
+  color: #ffffff !important;
+}
+
+.menu-section-active * {
+  color: #ffffff !important;
+}
+
+.menu-section-active span {
+  color: #ffffff !important;
+}
+
+.menu-section-active svg {
+  color: #ffffff !important;
+  stroke: #ffffff !important;
+  opacity: 0.8;
+}
+
+/* Section Hover - Main heading hovered */
+.menu-section-active:hover {
+  background: rgba(var(--color-primary-rgb), 0.15) !important;
+  color: var(--color-primary) !important;
+}
+
+.menu-section-active:hover * {
+  color: var(--color-primary) !important;
+}
+
+.menu-section-active:hover svg {
+  stroke: var(--color-primary) !important;
+}
+
+/* Nav Item Active - Submenu selected */
+.menu-nav-active {
+  background: rgba(var(--color-primary-rgb), 0.2) !important;
+  color: var(--color-primary) !important;
+  fill: var(--color-primary) !important;
+}
+
+.menu-nav-active * {
+  color: var(--color-primary) !important;
+  fill: var(--color-primary) !important;
+}
+
+.menu-nav-active span {
+  color: var(--color-primary) !important;
+}
+
+.menu-nav-active svg {
+  color: var(--color-primary) !important;
+  fill: var(--color-primary) !important;
+  stroke: var(--color-primary) !important;
+  opacity: 0.7;
+}
+
+/* Nav Item Hover - Submenu hovered */
+.menu-nav-active:hover {
+  background: rgba(var(--color-primary-rgb), 0.15) !important;
+  color: var(--color-primary) !important;
+}
+
+.menu-nav-active:hover * {
+  color: var(--color-primary) !important;
+}
+
+.menu-nav-active:hover svg {
+  stroke: var(--color-primary) !important;
+}
+
+/* Fallback for backward compatibility */
 .menu-active {
   background: var(--color-primary) !important;
   color: #ffffff !important;
@@ -85,12 +157,49 @@ body {
 }
 
 .menu-active:hover {
+  background: rgba(var(--color-primary-rgb), 0.15) !important;
+  color: var(--color-primary) !important;
+}
+
+.menu-accent {
+  background: var(--color-accent) !important;
+  color: #ffffff !important;
+}
+
+.menu-accent * {
+  color: #ffffff !important;
+}
+
+.menu-accent span {
+  color: #ffffff !important;
+}
+
+.menu-accent svg {
+  color: #ffffff !important;
+  stroke: #ffffff !important;
+}
+
+.menu-accent:hover {
   background: var(--color-hover) !important;
   color: #ffffff !important;
 }
 
 .menu-hover:hover {
   color: var(--color-primary) !important;
+}
+
+.menu-text-primary {
+  color: var(--color-primary) !important;
+}
+
+.menu-text-primary * {
+  color: var(--color-primary) !important;
+}
+
+.menu-text-primary svg {
+  color: var(--color-primary) !important;
+  stroke: var(--color-primary) !important;
+  opacity: 0.6;
 }
 
 /* Theme-aware badge */

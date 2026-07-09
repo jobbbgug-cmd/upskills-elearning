@@ -8,7 +8,13 @@ import { tenantFilter } from "@/lib/tenant";
 // GET — get own notifications (with unread count)
 export async function GET(req: NextRequest) {
   try {
-    const auth = await getAuthUser();
+    let auth;
+    try {
+      auth = await getAuthUser();
+    } catch (authError) {
+      console.error("getAuthUser error:", authError);
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
     if (!auth) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     await connectDB();
     const { searchParams } = new URL(req.url);
