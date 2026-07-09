@@ -104,12 +104,11 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
 
   const section = (id: string, title: string, badge?: number) => {
     const isOpen = expandedGroups.has(id);
-    const colors = getSectionColor(id);
     return (
       <button
         onClick={() => toggleGroup(id)}
         className={`w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg transition-colors ${
-          isOpen ? `${colors.bg} text-white font-medium` : "text-gray-600 hover:bg-gray-50 menu-hover"
+          isOpen ? `menu-active text-white font-medium` : "text-gray-600 hover:bg-gray-50 menu-hover"
         }`}
       >
         <span className="flex-1 text-left">
@@ -125,14 +124,13 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
 
   const nav = (href: string, icon: React.ReactNode, label: string, badge?: number, groupId?: string) => {
     const active = pathname === href || (href !== "/super-admin" && pathname.startsWith(href));
-    const colors = groupId ? getSectionColor(groupId) : { bg: "bg-violet-600", text: "text-violet-600", border: "border-violet-200" };
     return (
       <Link
         href={href}
         onClick={() => { close(); if (!active) setIsNavigating(true); }}
         className={`flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg transition-colors ${
           active
-            ? `${colors.bg} text-white font-medium`
+            ? `menu-active text-white font-medium`
             : "text-gray-600 hover:bg-gray-50 menu-hover"
         }`}
       >
