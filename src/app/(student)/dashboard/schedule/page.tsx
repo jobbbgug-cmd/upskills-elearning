@@ -118,22 +118,28 @@ export default function StudentSchedulePage() {
           </div>
           <div className="p-1 space-y-1">
             {[
-              { key: "student", label: "ตารางเรียน", icon: "👨‍🎓" },
-              { key: "teacher", label: "ตารางสอน", icon: "👨‍🏫" },
-            ].map((t) => (
-              <button
-                key={t.key}
-                onClick={() => setActiveTab(t.key as typeof activeTab)}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
-                  activeTab === t.key
-                    ? "bg-indigo-50 text-indigo-700 border border-indigo-200"
-                    : "text-gray-600 hover:bg-gray-50"
-                }`}
-              >
-                <span className="text-lg">{t.icon}</span>
-                {t.label}
-              </button>
-            ))}
+              { key: "student", label: "ตารางเรียน", icon: "👨‍🎓", color: "indigo" },
+              { key: "teacher", label: "ตารางสอน", icon: "👨‍🏫", color: "green" },
+            ].map((t) => {
+              const colorClasses = {
+                indigo: "bg-indigo-50 text-indigo-700 border border-indigo-200",
+                green: "bg-green-50 text-green-700 border border-green-200",
+              };
+              return (
+                <button
+                  key={t.key}
+                  onClick={() => setActiveTab(t.key as typeof activeTab)}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
+                    activeTab === t.key
+                      ? colorClasses[t.color as keyof typeof colorClasses]
+                      : "text-gray-600 hover:bg-gray-50"
+                  }`}
+                >
+                  <span className="text-lg">{t.icon}</span>
+                  {t.label}
+                </button>
+              );
+            })}
           </div>
         </div>
       </div>
