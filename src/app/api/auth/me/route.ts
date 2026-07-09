@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { verifyToken } from "@/lib/auth";
 import { connectDB } from "@/lib/mongodb";
 import User from "@/models/User";
+import Institution from "@/models/Institution";
 import { cookies } from "next/headers";
 
 export async function GET() {
