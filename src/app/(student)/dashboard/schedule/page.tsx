@@ -109,54 +109,61 @@ export default function StudentSchedulePage() {
   if (loadingInit) return <LoadingSpinner />;
 
   return (
-    <div className="space-y-5">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">
-            {activeTab === "teacher" ? "ตารางสอน" : "ตารางเรียน"}
-          </h1>
-          <p className="text-sm text-gray-500 mt-0.5">
-            {activeTab === "teacher" ? "ตารางการสอนของครูทั้งหมด" :
-             role === "admin" && selectedStudent
-              ? `ของ ${selectedStudent.name}${selectedStudent.gradeLevel ? ` · ${selectedStudent.gradeLevel}` : ""}`
-              : "คอร์สที่จองและยืนยันแล้วทั้งหมด"}
-          </p>
-        </div>
-        {role === "admin" && students.length > 0 && activeTab === "student" && (
-          <div className="flex items-center gap-2">
-            <User className="w-4 h-4 text-gray-400 shrink-0" />
-            <select value={selectedStudentId} onChange={e => setSelectedStudentId(e.target.value)}
-              className="text-sm border border-gray-200 rounded-xl px-3 py-2 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-300 min-w-[200px]">
-              <option value="all">เลือกนักเรียน...</option>
-              {students.map(s => <option key={s._id} value={s._id}>{s.name}{s.gradeLevel ? ` (${s.gradeLevel})` : ""}</option>)}
-            </select>
+    <div className="flex gap-6">
+      {/* Left Sidebar Menu */}
+      <div className="w-56 shrink-0">
+        <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden sticky top-6">
+          <div className="p-4 border-b border-gray-100">
+            <h3 className="font-semibold text-gray-900 text-sm">ตารางการเรียน</h3>
           </div>
-        )} {role !== "admin" && (
-          <div />
-        )}
+          <div className="p-1 space-y-1">
+            {[
+              { key: "student", label: "ตารางเรียน", icon: "👨‍🎓" },
+              { key: "teacher", label: "ตารางสอน", icon: "👨‍🏫" },
+            ].map((t) => (
+              <button
+                key={t.key}
+                onClick={() => setActiveTab(t.key as typeof activeTab)}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
+                  activeTab === t.key
+                    ? "bg-indigo-50 text-indigo-700 border border-indigo-200"
+                    : "text-gray-600 hover:bg-gray-50"
+                }`}
+              >
+                <span className="text-lg">{t.icon}</span>
+                {t.label}
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
 
-      {/* Tabs */}
-      <div className="flex gap-1 bg-gray-100 rounded-xl p-1 w-fit">
-        {[
-          { key: "student", label: "ตารางเรียน", icon: "👨‍🎓" },
-          { key: "teacher", label: "ตารางสอน", icon: "👨‍🏫" },
-        ].map((t) => (
-          <button
-            key={t.key}
-            onClick={() => setActiveTab(t.key as typeof activeTab)}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${
-              activeTab === t.key
-                ? "bg-white shadow-sm text-gray-900"
-                : "text-gray-500 hover:text-gray-700"
-            }`}
-          >
-            <span>{t.icon}</span>
-            {t.label}
-          </button>
-        ))}
-      </div>
+      {/* Main Content */}
+      <div className="flex-1 space-y-5">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">
+              {activeTab === "teacher" ? "ตารางสอน" : "ตารางเรียน"}
+            </h1>
+            <p className="text-sm text-gray-500 mt-0.5">
+              {activeTab === "teacher" ? "ตารางการสอนของครูทั้งหมด" :
+               role === "admin" && selectedStudent
+                ? `ของ ${selectedStudent.name}${selectedStudent.gradeLevel ? ` · ${selectedStudent.gradeLevel}` : ""}`
+                : "คอร์สที่จองและยืนยันแล้วทั้งหมด"}
+            </p>
+          </div>
+          {role === "admin" && students.length > 0 && activeTab === "student" && (
+            <div className="flex items-center gap-2">
+              <User className="w-4 h-4 text-gray-400 shrink-0" />
+              <select value={selectedStudentId} onChange={e => setSelectedStudentId(e.target.value)}
+                className="text-sm border border-gray-200 rounded-xl px-3 py-2 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-300 min-w-[200px]">
+                <option value="all">เลือกนักเรียน...</option>
+                {students.map(s => <option key={s._id} value={s._id}>{s.name}{s.gradeLevel ? ` (${s.gradeLevel})` : ""}</option>)}
+              </select>
+            </div>
+          )}
+        </div>
 
       {role === "admin" && activeTab === "student" && selectedStudentId === "all" ? (
         <div className="bg-white rounded-2xl border border-gray-100 p-16 text-center">
@@ -275,6 +282,7 @@ export default function StudentSchedulePage() {
           )}
         </>
       )}
+      </div>
     </div>
   );
 }
