@@ -216,8 +216,9 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
               {nav("/super-admin/courses", <BookOpen className="w-4 h-4" />, "จัดการคอร์ส", undefined, "content")}
               {nav("/super-admin/content", <FileText className="w-4 h-4" />, "เนื้อหาการเรียน", undefined, "content")}
               {nav("/super-admin/revenue", <TrendingUp className="w-4 h-4" />, "รายได้", undefined, "content")}
-              {nav("/super-admin/schedule", <CalendarDays className="w-4 h-4" />, "ตารางสอน", undefined, "content")}
-              {nav("/super-admin/student-schedule", <GraduationCap className="w-4 h-4" />, "ตารางเรียน", undefined, "content")}
+              {nav("/super-admin/schedule", <CalendarDays className="w-4 h-4" />, "ตารางเรียน", undefined, "content")}
+              {nav("/super-admin/teacher-schedule", <CalendarDays className="w-4 h-4" />, "ตารางสอน", undefined, "content")}
+              {nav("/super-admin/student-schedule", <GraduationCap className="w-4 h-4" />, "ตารางเรียนนักเรียน", undefined, "content")}
             </>
           )}
 

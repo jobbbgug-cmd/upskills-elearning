@@ -88,32 +88,7 @@ export default function TeacherSchedulePage() {
   if (loading) return <LoadingSpinner />;
 
   return (
-    <div className="flex gap-6">
-      {/* Left Sidebar Menu */}
-      <div className="w-56 shrink-0">
-        <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden sticky top-6">
-          <div className="p-4 border-b border-gray-100">
-            <h3 className="font-semibold text-gray-900 text-sm">ตารางการเรียน</h3>
-          </div>
-          <div className="p-1 space-y-1">
-            <button
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors text-gray-600 hover:bg-gray-50"
-            >
-              <span className="text-lg">👨‍🎓</span>
-              ตารางเรียน
-            </button>
-            <button
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors bg-green-50 text-green-700 border border-green-200"
-            >
-              <span className="text-lg">👨‍🏫</span>
-              ตารางสอน
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <div className="flex-1 space-y-5">
+    <div className="space-y-5">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
@@ -266,7 +241,6 @@ export default function TeacherSchedulePage() {
           )}
         </div>
       )}
-      </div>
     </div>
   );
 }

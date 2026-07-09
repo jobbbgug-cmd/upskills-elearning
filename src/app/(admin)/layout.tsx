@@ -63,7 +63,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     setThemeOpen(false);
     const GP: Record<string, string[]> = {
       teaching:  ["/admin/students","/admin/attendance","/admin/homework","/admin/quiz","/admin/live","/admin/teacher-portal","/admin/forum"],
-      courses:   ["/admin/courses","/admin/content","/admin/schedule","/dashboard/schedule"],
+      courses:   ["/admin/courses","/admin/content","/admin/schedule","/admin/teacher-schedule","/dashboard/schedule"],
       members:   ["/admin/members","/admin/users"],
       commerce:  ["/admin/orders","/admin/products","/admin/coupons"],
       finance:   ["/admin/analytics","/admin/revenue","/admin/billing","/admin/certificates","/admin/bookings","/admin/finance"],
@@ -355,12 +355,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           )}
 
           {renderGroup("courses", "คอร์สและเนื้อหา", <BookOpen className="w-4 h-4" />,
-            ["/admin/courses","/admin/content","/admin/schedule","/dashboard/schedule"],
+            ["/admin/courses","/admin/content","/admin/schedule","/admin/teacher-schedule","/dashboard/schedule"],
             <>
-              {(isAdmin || role === "teacher") && navLink("/admin/courses",    <ListChecks className="w-4 h-4" />,   "จัดการคอร์ส")}
-              {(isAdmin || role === "teacher") && navLink("/admin/content",    <BookOpen className="w-4 h-4" />,     "เนื้อหาการเรียน")}
-              {(isAdmin || role === "teacher") && navLink("/admin/schedule",   <CalendarDays className="w-4 h-4" />, "ตารางสอน")}
-              {isAdmin                         && navLink("/dashboard/schedule",<GraduationCap className="w-4 h-4" />,"ตารางเรียน")}
+              {(isAdmin || role === "teacher") && navLink("/admin/courses",        <ListChecks className="w-4 h-4" />,   "จัดการคอร์ส")}
+              {(isAdmin || role === "teacher") && navLink("/admin/content",        <BookOpen className="w-4 h-4" />,     "เนื้อหาการเรียน")}
+              {(isAdmin || role === "teacher") && navLink("/admin/schedule",       <CalendarDays className="w-4 h-4" />, "ตารางเรียน")}
+              {(isAdmin || role === "teacher") && navLink("/admin/teacher-schedule", <CalendarDays className="w-4 h-4" />, "ตารางสอน")}
+              {isAdmin                         && navLink("/dashboard/schedule",    <GraduationCap className="w-4 h-4" />,"ตารางเรียนนักเรียน")}
             </>
           )}
 
@@ -555,10 +556,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                             {(isAdmin || role === "teacher") && moreLink("/admin/forum",          <MessageSquare className="w-3.5 h-3.5" />,  "Forum")}
                           </>}
                           {id === "courses" && <>
-                            {(isAdmin || role === "teacher") && moreLink("/admin/courses",      <ListChecks className="w-3.5 h-3.5" />,    "จัดการคอร์ส")}
-                            {(isAdmin || role === "teacher") && moreLink("/admin/content",      <BookOpen className="w-3.5 h-3.5" />,      "เนื้อหาการเรียน")}
-                            {(isAdmin || role === "teacher") && moreLink("/admin/schedule",     <CalendarDays className="w-3.5 h-3.5" />,  "ตารางสอน")}
-                            {isAdmin                         && moreLink("/dashboard/schedule", <GraduationCap className="w-3.5 h-3.5" />, "ตารางเรียน")}
+                            {(isAdmin || role === "teacher") && moreLink("/admin/courses",         <ListChecks className="w-3.5 h-3.5" />,    "จัดการคอร์ส")}
+                            {(isAdmin || role === "teacher") && moreLink("/admin/content",         <BookOpen className="w-3.5 h-3.5" />,      "เนื้อหาการเรียน")}
+                            {(isAdmin || role === "teacher") && moreLink("/admin/schedule",        <CalendarDays className="w-3.5 h-3.5" />,  "ตารางเรียน")}
+                            {(isAdmin || role === "teacher") && moreLink("/admin/teacher-schedule", <CalendarDays className="w-3.5 h-3.5" />,  "ตารางสอน")}
+                            {isAdmin                         && moreLink("/dashboard/schedule",    <GraduationCap className="w-3.5 h-3.5" />, "ตารางเรียนนักเรียน")}
                           </>}
                           {id === "members" && <>
                             {isAdmin && moreLink("/admin/members", <UserCheck className="w-3.5 h-3.5" />,
