@@ -4,7 +4,9 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
   return (
     <div>
       <Navbar />
-      <main className="max-w-5xl mx-auto px-4 py-10">{children}</main>
+      <main className="px-4 py-10">
+        <div className="max-w-6xl mx-auto">{children}</div>
+      </main>
     </div>
   );
 }
