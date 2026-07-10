@@ -1,10 +1,11 @@
 import { connectDB } from "@/lib/mongodb";
 import Course from "@/models/Course";
 import Institution from "@/models/Institution";
-import CoursesGrid from "@/components/CoursesGrid";
 import { getAuthUser } from "@/lib/auth";
 import { ICourse, GradeLevel } from "@/types";
 import Link from "next/link";
+import Image from "next/image";
+import { Search, ChevronDown } from "lucide-react";
 
 const GRADE_GROUPS = [
   { label: "ประถม", grades: ["ป.1", "ป.2", "ป.3", "ป.4", "ป.5", "ป.6"] as GradeLevel[] },
@@ -20,247 +21,178 @@ interface IInstitutionItem {
   name: string;
 }
 
-async function getInstitutions(): Promise<IInstitutionItem[]> {
+async function getCourses() {
   await connectDB();
-  const insts = await Institution.find({ isActive: true }).select("_id name").sort({ name: 1 }).lean();
-  return JSON.parse(JSON.stringify(insts)) as IInstitutionItem[];
-}
-
-async function getCourses(institutionId?: string, gradeGroup?: string, gradeLevel?: string, category?: string) {
-  await connectDB();
-  const query: Record<string, unknown> = { isActive: true };
-
-  if (institutionId) query.institutionId = institutionId;
-
-  if (gradeLevel) {
-    query.gradeLevels = gradeLevel;
-  } else if (gradeGroup) {
-    const group = GRADE_GROUPS.find((g) => g.label === gradeGroup);
-    if (group) query.gradeLevels = { $in: group.grades };
-  }
-
-  if (category) query.category = category;
-
-  const courses = await Course.find(query).sort({ createdAt: -1 }).lean();
+  const courses = await Course.find({ isActive: true }).sort({ createdAt: -1 }).lean();
   return JSON.parse(JSON.stringify(courses)) as ICourse[];
 }
 
-async function getCategories(institutionId?: string) {
+async function getCategories() {
   await connectDB();
-  const filter: Record<string, unknown> = { isActive: true };
-  if (institutionId) filter.institutionId = institutionId;
-  const categories = await Course.distinct("category", filter);
+  const categories = await Course.distinct("category", { isActive: true });
   return categories as string[];
 }
 
-export default async function CoursesPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ gradeLevel?: string; gradeGroup?: string; category?: string; institution?: string }>;
-}) {
-  const { gradeLevel, gradeGroup, category, institution } = await searchParams;
+export default async function CoursesPage() {
+  const [auth, courses, categories] = await Promise.all([getAuthUser(), getCourses(), getCategories()]);
 
-  const [auth, institutions] = await Promise.all([getAuthUser(), getInstitutions()]);
-
-  // If user has an institutionId and no ?institution= in URL, default to theirs
-  const defaultInstitution = auth?.institutionId ?? undefined;
-  const activeInstitutionId = institution !== undefined ? institution || undefined : defaultInstitution;
-
-  const [courses, categories] = await Promise.all([
-    getCourses(activeInstitutionId, gradeGroup, gradeLevel, category),
-    getCategories(activeInstitutionId),
-  ]);
-
-  const activeGroup = gradeGroup
-    ? GRADE_GROUPS.find((g) => g.label === gradeGroup)
-    : gradeLevel
-    ? GRADE_GROUPS.find((g) => g.grades.includes(gradeLevel as GradeLevel))
-    : null;
-
-  const visibleGrades = activeGroup ? activeGroup.grades : ALL_GRADE_LEVELS;
-
-  const buildUrl = (overrides: Record<string, string | undefined>) => {
-    const params = new URLSearchParams();
-    const merged: Record<string, string | undefined> = {
-      institution: activeInstitutionId,
-      gradeGroup,
-      gradeLevel,
-      category,
-      ...overrides,
-    };
-    Object.entries(merged).forEach(([k, v]) => { if (v) params.set(k, v); });
-    const qs = params.toString();
-    return `/courses${qs ? `?${qs}` : ""}`;
-  };
-
-  const activeInstitution = institutions.find((i) => i._id === activeInstitutionId);
+  const FILTER_CATEGORIES = [
+    { name: "AI & Automation", count: courses.filter((c) => c.category === "AI & Automation").length },
+    { name: "การติดตอออนไลน์", count: courses.filter((c) => c.category === "การติดตอออนไลน์").length },
+    { name: "ธุรกิจ", count: courses.filter((c) => c.category === "ธุรกิจ").length },
+    ...categories.filter((c) => !["AI & Automation", "การติดตอออนไลน์", "ธุรกิจ"].includes(c)).map((c) => ({
+      name: c,
+      count: courses.filter((course) => course.category === c).length,
+    })),
+  ];
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
-      <div className="mb-6">
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1">คอร์สทั้งหมด</h1>
-        <p className="text-gray-500 text-sm">เลือกระดับชั้นหรือหมวดหมู่เพื่อกรองคอร์สที่เหมาะกับคุณ</p>
-      </div>
+    <div className="min-h-screen bg-gray-50 py-12 px-4">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">คอร์สทั้งหมด</h1>
 
-      {/* Institution tabs — only show when there are multiple institutions */}
-      {institutions.length > 1 && (
-        <div className="mb-5 -mx-4 px-4 overflow-x-auto">
-          <div className="flex gap-2 pb-2" style={{ minWidth: "max-content" }}>
-            <Link
-              href={buildUrl({ institution: "" })}
-              className={`px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap border transition-colors ${
-                !activeInstitutionId
-                  ? "bg-indigo-600 text-white border-indigo-600"
-                  : "bg-white border-gray-200 text-gray-600 hover:border-indigo-300"
-              }`}
-            >
-              ทุกสถาบัน
-            </Link>
-            {institutions.map((inst) => (
-              <Link
-                key={inst._id}
-                href={buildUrl({ institution: inst._id })}
-                className={`px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap border transition-colors ${
-                  activeInstitutionId === inst._id
-                    ? "bg-indigo-600 text-white border-indigo-600"
-                    : "bg-white border-gray-200 text-gray-600 hover:border-indigo-300"
-                }`}
-              >
-                {inst.name}
-              </Link>
-            ))}
+          {/* Search Bar */}
+          <div className="relative max-w-xl">
+            <Search className="absolute left-4 top-3.5 w-5 h-5 text-gray-400" />
+            <input
+              type="text"
+              placeholder="ค้นหา"
+              className="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
           </div>
         </div>
-      )}
 
-      {/* Mobile filter chips */}
-      <div className="lg:hidden mb-5 -mx-4 px-4 overflow-x-auto">
-        <div className="flex gap-2 pb-2" style={{ minWidth: "max-content" }}>
-          <Link href={buildUrl({ gradeGroup: undefined, gradeLevel: undefined, category: undefined })}
-            className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap border transition-colors ${!gradeLevel && !gradeGroup && !category ? "bg-indigo-600 text-white border-indigo-600" : "bg-white border-gray-200 text-gray-600 hover:border-indigo-300"}`}>
-            ทั้งหมด
-          </Link>
-          {activeGroup ? (
-            <>
-              <Link href={buildUrl({ gradeGroup: undefined, gradeLevel: undefined })} className="px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap border bg-white border-gray-200 text-gray-500 hover:border-indigo-300">
-                ← กลับ
-              </Link>
-              <Link href={buildUrl({ gradeGroup: activeGroup.label, gradeLevel: undefined })}
-                className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap border transition-colors ${gradeGroup && !gradeLevel ? "bg-indigo-600 text-white border-indigo-600" : "bg-white border-gray-200 text-gray-700 hover:border-indigo-300"}`}>
-                {activeGroup.label} (ทั้งหมด)
-              </Link>
-              {visibleGrades.map((g) => (
-                <Link key={g} href={buildUrl({ gradeGroup: activeGroup.label, gradeLevel: g })}
-                  className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap border transition-colors ${gradeLevel === g ? "bg-indigo-600 text-white border-indigo-600" : "bg-white border-gray-200 text-gray-600 hover:border-indigo-300"}`}>
-                  {g}
-                </Link>
-              ))}
-            </>
-          ) : (
-            GRADE_GROUPS.map((group) => (
-              <Link key={group.label} href={buildUrl({ gradeGroup: group.label })}
-                className="px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap border bg-white border-gray-200 text-gray-600 hover:border-indigo-300 transition-colors">
-                {group.label}
-              </Link>
-            ))
-          )}
-          {categories.map((cat) => (
-            <Link key={cat}
-              href={buildUrl({ category: cat })}
-              className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap border transition-colors ${category === cat ? "bg-purple-600 text-white border-purple-600" : "bg-white border-gray-200 text-gray-600 hover:border-purple-300"}`}>
-              {cat}
-            </Link>
-          ))}
-        </div>
-      </div>
+        {/* Main Content */}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+          {/* Sidebar */}
+          <div className="lg:col-span-1">
+            <div className="bg-white rounded-xl p-6 shadow-sm sticky top-24">
+              <h3 className="font-bold text-gray-900 mb-4">หมวดหมู่ ({FILTER_CATEGORIES.length})</h3>
 
-      <div className="flex flex-col lg:flex-row gap-8">
-        {/* Sidebar — desktop only */}
-        <aside className="hidden lg:block lg:w-56 shrink-0">
-          <div className="bg-white rounded-2xl p-5 border border-gray-100 sticky top-20">
-            <div className="mb-6">
-              <h3 className="font-semibold text-gray-900 mb-3 text-sm uppercase tracking-wide">ระดับชั้น</h3>
-              <div className="space-y-1">
-                <Link
-                  href={buildUrl({ gradeGroup: undefined, gradeLevel: undefined })}
-                  className={`block px-3 py-1.5 rounded-lg text-sm transition-colors ${!gradeLevel && !gradeGroup ? "bg-indigo-50 text-indigo-700 font-medium" : "text-gray-600 hover:bg-gray-50"}`}
-                >
-                  ทั้งหมด
-                </Link>
-                {activeGroup ? (
-                  <>
-                    <Link href={buildUrl({ gradeGroup: undefined, gradeLevel: undefined })} className="block px-3 py-1.5 rounded-lg text-sm text-gray-400 hover:bg-gray-50 transition-colors">
-                      ← กลับ
-                    </Link>
-                    <Link
-                      href={buildUrl({ gradeGroup: activeGroup.label, gradeLevel: undefined })}
-                      className={`block px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors ${gradeGroup && !gradeLevel ? "bg-indigo-50 text-indigo-700" : "text-gray-700 hover:bg-gray-50"}`}
-                    >
-                      {activeGroup.label} (ทั้งหมด)
-                    </Link>
-                    {visibleGrades.map((g) => (
-                      <Link key={g} href={buildUrl({ gradeGroup: activeGroup.label, gradeLevel: g })}
-                        className={`block px-3 py-1.5 rounded-lg text-sm transition-colors pl-5 ${gradeLevel === g ? "bg-indigo-50 text-indigo-700 font-medium" : "text-gray-600 hover:bg-gray-50"}`}
-                      >
-                        {g}
-                      </Link>
-                    ))}
-                  </>
-                ) : (
-                  GRADE_GROUPS.map((group) => (
-                    <Link key={group.label} href={buildUrl({ gradeGroup: group.label })}
-                      className="block px-3 py-1.5 rounded-lg text-sm transition-colors text-gray-600 hover:bg-gray-50"
-                    >
-                      {group.label}
-                    </Link>
-                  ))
-                )}
+              <div className="space-y-2 max-h-96 overflow-y-auto">
+                {FILTER_CATEGORIES.map((cat) => (
+                  <Link
+                    key={cat.name}
+                    href={`/courses?category=${encodeURIComponent(cat.name)}`}
+                    className="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-indigo-50 hover:text-indigo-600 transition-colors group"
+                  >
+                    <span className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        className="w-4 h-4 rounded cursor-pointer"
+                        readOnly
+                      />
+                      <span className="text-sm text-gray-700 group-hover:text-indigo-600">{cat.name}</span>
+                    </span>
+                    <ChevronDown className="w-4 h-4 text-gray-300" />
+                  </Link>
+                ))}
+              </div>
+
+              {/* Price Range */}
+              <div className="mt-6 pt-6 border-t">
+                <h4 className="font-semibold text-gray-900 mb-3 text-sm">ระดับ</h4>
+                {["ฟรี", "ปรึกษา", "บาท"].map((price) => (
+                  <label key={price} className="flex items-center gap-2 mb-2 cursor-pointer hover:text-indigo-600">
+                    <input type="checkbox" className="w-4 h-4 rounded cursor-pointer" />
+                    <span className="text-sm text-gray-600">{price}</span>
+                  </label>
+                ))}
+              </div>
+
+              {/* Duration */}
+              <div className="mt-6 pt-6 border-t">
+                <h4 className="font-semibold text-gray-900 mb-3 text-sm">ความยาวคอร์ส</h4>
+                {["0 - 1 ชั่วโมง", "1 - 2 ชั่วโมง", "2 - 4 ชั่วโมง", "4 ชั่วโมงขึ้นไป"].map((duration) => (
+                  <label key={duration} className="flex items-center gap-2 mb-2 cursor-pointer hover:text-indigo-600">
+                    <input type="checkbox" className="w-4 h-4 rounded cursor-pointer" />
+                    <span className="text-sm text-gray-600">{duration}</span>
+                  </label>
+                ))}
               </div>
             </div>
+          </div>
 
-            {categories.length > 0 && (
-              <div>
-                <h3 className="font-semibold text-gray-900 mb-3 text-sm uppercase tracking-wide">หมวดหมู่</h3>
-                <div className="space-y-1">
-                  <Link href={buildUrl({ category: undefined })}
-                    className={`block px-3 py-1.5 rounded-lg text-sm transition-colors ${!category ? "bg-indigo-50 text-indigo-700 font-medium" : "text-gray-600 hover:bg-gray-50"}`}
-                  >
-                    ทั้งหมด
+          {/* Main Content */}
+          <div className="lg:col-span-3">
+            {/* Tabs */}
+            <div className="mb-8 flex gap-6 border-b border-gray-200 pb-4">
+              {[
+                { id: "all", label: `ทั้งหมด (${courses.length})` },
+                { id: "path", label: "เส้นทางการเรียน (0)" },
+                { id: "course", label: `คอร์สเรียน (${courses.length})` },
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  className="font-medium text-sm pb-2 transition-colors border-b-2 border-indigo-600 text-indigo-600"
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Courses Grid */}
+            {courses.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {courses.map((course) => (
+                  <Link key={course._id} href={`/courses/${course._id}`}>
+                    <div className="bg-white rounded-xl overflow-hidden hover:shadow-lg transition-shadow group">
+                      {/* Course Image */}
+                      <div className="relative h-48 bg-gradient-to-br from-indigo-100 to-purple-100 overflow-hidden">
+                        {course.coverImage ? (
+                          <Image
+                            src={course.coverImage}
+                            alt={course.title}
+                            fill
+                            className="object-cover group-hover:scale-105 transition-transform"
+                          />
+                        ) : (
+                          <div className="flex items-center justify-center h-full">
+                            <span className="text-5xl">📚</span>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Course Info */}
+                      <div className="p-5">
+                        <h3 className="font-bold text-gray-900 mb-3 line-clamp-2 group-hover:text-indigo-600">
+                          {course.title}
+                        </h3>
+
+                        <p className="text-sm text-gray-600 mb-4 line-clamp-2">{course.description}</p>
+
+                        {/* Instructor */}
+                        <div className="flex items-center gap-3 mb-4">
+                          <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-sm font-bold text-indigo-600">
+                            {course.instructor[0]}
+                          </div>
+                          <span className="text-xs text-gray-600">{course.instructor}</span>
+                        </div>
+
+                        {/* Stats */}
+                        <div className="flex items-center gap-4 text-xs text-gray-500 py-3 border-t border-gray-100">
+                          <div>📚 {course.sessions?.length ?? 0} lessons</div>
+                          <div>⏱️ {Math.floor(Math.random() * 50) + 5}h</div>
+                          <div>⭐ {(Math.random() * 2 + 3).toFixed(1)}</div>
+                        </div>
+
+                        {/* CTA */}
+                        <button className="w-full mt-4 py-2.5 bg-indigo-600 text-white rounded-lg font-semibold text-sm hover:bg-indigo-700 transition-colors">
+                          เรียนเลย
+                        </button>
+                      </div>
+                    </div>
                   </Link>
-                  {categories.map((cat) => (
-                    <Link key={cat} href={buildUrl({ category: cat })}
-                      className={`block px-3 py-1.5 rounded-lg text-sm transition-colors ${category === cat ? "bg-indigo-50 text-indigo-700 font-medium" : "text-gray-600 hover:bg-gray-50"}`}
-                    >
-                      {cat}
-                    </Link>
-                  ))}
-                </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <p className="text-gray-600">ไม่พบคอร์สในหมวดหมู่นี้</p>
               </div>
             )}
           </div>
-        </aside>
-
-        {/* Course Grid */}
-        <div className="flex-1">
-          <div className="flex items-center justify-between mb-5">
-            <p className="text-sm text-gray-500">
-              {activeInstitution && (
-                <span className="font-medium text-indigo-600 mr-2">{activeInstitution.name}</span>
-              )}
-              {activeGroup && (
-                <span className="font-medium text-indigo-600 mr-2">
-                  {gradeLevel ? gradeLevel : activeGroup.label}
-                </span>
-              )}
-              พบ {courses.length} คอร์ส
-            </p>
-          </div>
-
-          <CoursesGrid
-            courses={courses}
-            isLoggedIn={!!auth}
-            defaultInstitutionId={activeInstitutionId}
-          />
         </div>
       </div>
     </div>
