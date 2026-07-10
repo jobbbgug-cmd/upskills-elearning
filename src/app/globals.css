@@ -104,12 +104,12 @@ body {
 .menu-nav-active {
   background: rgba(var(--color-primary-rgb), 0.2) !important;
   color: var(--color-primary) !important;
-  fill: var(--color-primary) !important;
+  fill: none !important;
 }
 
 .menu-nav-active * {
   color: var(--color-primary) !important;
-  fill: var(--color-primary) !important;
+  fill: none !important;
 }
 
 .menu-nav-active span {
@@ -118,7 +118,7 @@ body {
 
 .menu-nav-active svg {
   color: var(--color-primary) !important;
-  fill: var(--color-primary) !important;
+  fill: none !important;
   stroke: var(--color-primary) !important;
   opacity: 0.7;
 }
@@ -200,6 +200,20 @@ body {
   color: var(--color-primary) !important;
   stroke: var(--color-primary) !important;
   opacity: 0.6;
+}
+
+.menu-text-primary:hover {
+  color: var(--color-primary) !important;
+}
+
+.menu-text-primary:hover * {
+  color: var(--color-primary) !important;
+}
+
+.menu-text-primary:hover svg {
+  color: var(--color-primary) !important;
+  stroke: var(--color-primary) !important;
+  opacity: 1;
 }
 
 /* Theme-aware badge */

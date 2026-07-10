@@ -108,8 +108,8 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
     return (
       <button
         onClick={() => toggleGroup(id)}
-        className={`w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg transition-colors ${
-          isOpen ? `${activeClass} font-medium` : "menu-text-primary hover:bg-gray-50"
+        className={`w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg transition-colors menu-hover ${
+          isOpen ? `${activeClass} font-medium` : "menu-text-primary"
         }`}
       >
         <span className="flex-1 text-left">

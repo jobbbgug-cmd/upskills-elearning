@@ -276,8 +276,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     return (
       <div key={id}>
         <button onClick={() => toggleGroup(id)}
-          className={`w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg transition-colors ${
-            hasActive ? "menu-section-active font-semibold" : "menu-text-primary hover:bg-gray-50"
+          className={`w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg transition-colors menu-hover ${
+            hasActive ? "menu-section-active font-semibold" : "menu-text-primary"
           }`}>
           <span>{icon}</span>
           <span className="flex-1 text-left">{label}</span>
