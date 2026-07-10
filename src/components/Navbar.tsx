@@ -3,11 +3,15 @@ import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { Menu, X, User, LogOut, LayoutDashboard, CalendarDays, ShieldCheck, BookOpen, ClipboardCheck, PenLine, Award, Radio, Receipt, MessageSquare, Star, ChevronDown, Palette } from "lucide-react";
+import { Menu, X, User, LogOut, LayoutDashboard, CalendarDays, ShieldCheck, BookOpen, ClipboardCheck, PenLine, Award, Radio, Receipt, MessageSquare, Star, ChevronDown } from "lucide-react";
 import NotificationBell from "@/components/NotificationBell";
 import { IUser, IBranding } from "@/types";
 import TrialRequestModal from "@/components/TrialRequestModal";
-import { THEMES, getTheme, setTheme, type Theme } from "@/lib/theme";
+
+interface Category {
+  name: string;
+  count: number;
+}
 
 export default function Navbar() {
   const [user, setUser]               = useState<IUser | null>(null);
@@ -17,8 +21,8 @@ export default function Navbar() {
   const [superAdminMenu, setSuperAdminMenu] = useState(false);
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
   const [pendingMembers, setPendingMembers] = useState(0);
-  const [currentTheme, setCurrentTheme] = useState<Theme>('default');
-  const [themeOpen, setThemeOpen] = useState(false);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [openNavDropdown, setOpenNavDropdown] = useState<string | null>(null);
   const router   = useRouter();
   const pathname = usePathname();
 
@@ -26,12 +30,14 @@ export default function Navbar() {
     setIsNavigating(false);
     setMenuOpen(false);
     setSuperAdminMenu(false);
-    setThemeOpen(false);
+    setOpenNavDropdown(null);
   }, [pathname]);
 
   useEffect(() => {
-    const theme = getTheme();
-    setCurrentTheme(theme);
+    fetch("/api/courses/categories")
+      .then((r) => r.json())
+      .then((data) => setCategories(Array.isArray(data) ? data : []))
+      .catch(() => {});
   }, []);
 
   const toggleGroup = (group: string) => {
@@ -118,9 +124,79 @@ export default function Navbar() {
               )}
             </Link>
             <div className="hidden md:flex items-center gap-6">
-              <Link href="/courses" className="text-sm font-medium text-gray-600 hover:text-indigo-600 transition-colors">
-                คอร์สทั้งหมด
+              {/* Online Courses */}
+              <div className="relative group">
+                <button className="flex items-center gap-1 text-sm font-medium text-gray-600 hover:text-indigo-600 py-3">
+                  คอร์สออนไลน์
+                  <ChevronDown className="w-4 h-4" />
+                </button>
+                <div className="absolute left-0 top-full hidden group-hover:block bg-white border border-gray-200 rounded-lg shadow-lg py-2 min-w-72 z-50">
+                  {categories.length > 0 ? (
+                    categories.map((cat) => (
+                      <Link
+                        key={cat.name}
+                        href={`/courses?category=${encodeURIComponent(cat.name)}`}
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
+                      >
+                        {cat.name} ({cat.count})
+                      </Link>
+                    ))
+                  ) : (
+                    <div className="px-4 py-2 text-sm text-gray-500">กำลังโหลด...</div>
+                  )}
+                </div>
+              </div>
+
+              {/* Onsite Courses */}
+              <div className="relative group">
+                <button className="flex items-center gap-1 text-sm font-medium text-gray-600 hover:text-indigo-600 py-3">
+                  หลักสูตร Onsite
+                  <ChevronDown className="w-4 h-4" />
+                </button>
+                <div className="absolute left-0 top-full hidden group-hover:block bg-white border border-gray-200 rounded-lg shadow-lg py-2 min-w-72 z-50">
+                  <Link href="/courses?type=onsite" className="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors">
+                    ทั้งหมด
+                  </Link>
+                  {categories.map((cat) => (
+                    <Link
+                      key={`onsite-${cat.name}`}
+                      href={`/courses?type=onsite&category=${encodeURIComponent(cat.name)}`}
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
+                    >
+                      {cat.name}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+
+              {/* Skill Pass */}
+              <Link href="/skill-pass" className="text-sm font-medium text-gray-600 hover:text-indigo-600 transition-colors">
+                Skill Pass
               </Link>
+
+              {/* Articles */}
+              <Link href="/articles" className="text-sm font-medium text-gray-600 hover:text-indigo-600 transition-colors">
+                บทความ
+              </Link>
+
+              {/* For Organizations */}
+              <div className="relative group">
+                <button className="flex items-center gap-1 text-sm font-medium text-gray-600 hover:text-indigo-600 py-3">
+                  สำหรับองค์กร
+                  <ChevronDown className="w-4 h-4" />
+                </button>
+                <div className="absolute left-0 top-full hidden group-hover:block bg-white border border-gray-200 rounded-lg shadow-lg py-2 min-w-64 z-50">
+                  <Link href="/corporate/training" className="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors">
+                    การอบรมภายใน
+                  </Link>
+                  <Link href="/corporate/bulk" className="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors">
+                    ซื้อเป็นชุด
+                  </Link>
+                  <Link href="/corporate/pricing" className="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors">
+                    ราคา
+                  </Link>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -129,10 +205,6 @@ export default function Navbar() {
             {user ? (
               <>
                 <span className="text-sm text-gray-600">สวัสดี, {user.name}</span>
-                <Link href="/dashboard" className="flex items-center gap-1.5 text-sm px-3 py-2 rounded-lg text-gray-600 hover:text-indigo-600 hover:bg-gray-50 transition-colors">
-                  <LayoutDashboard className="w-4 h-4" />
-                  Dashboard
-                </Link>
                 {user.role === "student" && (
                   <Link href="/dashboard/schedule" className="flex items-center gap-1.5 text-sm px-3 py-2 rounded-lg text-gray-600 hover:text-indigo-600 hover:bg-gray-50 transition-colors">
                     <CalendarDays className="w-4 h-4" />
@@ -319,42 +391,6 @@ export default function Navbar() {
                     จัดการหลังบ้าน
                   </Link>
                 )}
-                <Link href="/dashboard/profile" className="flex items-center gap-1.5 text-sm px-3 py-2 rounded-lg text-gray-500 hover:text-violet-600 hover:bg-violet-50 transition-colors">
-                  <User className="w-4 h-4" />
-                  โปรไฟล์
-                </Link>
-
-                {/* Theme Switcher */}
-                <div className="relative">
-                  <button onClick={() => setThemeOpen(!themeOpen)} className="flex items-center gap-1.5 text-sm px-3 py-2 rounded-lg text-gray-500 hover:text-violet-600 hover:bg-violet-50 transition-colors w-full text-left">
-                    <Palette className="w-4 h-4" />
-                    ธีมสี
-                    <ChevronDown className={`w-3.5 h-3.5 ml-auto transition-transform ${themeOpen ? 'rotate-180' : ''}`} />
-                  </button>
-                  {themeOpen && (
-                    <div className="absolute right-0 top-full mt-1 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
-                      {(Object.entries(THEMES) as [Theme, typeof THEMES[Theme]][]).map(([key, theme]) => (
-                        <button
-                          key={key}
-                          onClick={() => {
-                            setTheme(key);
-                            setCurrentTheme(key);
-                            setThemeOpen(false);
-                          }}
-                          className={`w-full flex items-center gap-2 px-3 py-2 text-sm text-left transition-colors ${
-                            currentTheme === key
-                              ? 'bg-violet-50 text-gray-900 font-medium'
-                              : 'text-gray-600 hover:bg-gray-50'
-                          }`}
-                        >
-                          <div className="w-3 h-3 rounded-full" style={{ backgroundColor: theme.primary }} />
-                          {theme.name}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
                 <button onClick={logout} className="flex items-center gap-1.5 text-sm px-3 py-2 rounded-lg text-gray-500 hover:text-red-600 hover:bg-red-50 transition-colors">
                   <LogOut className="w-4 h-4" />
                   ออกจากระบบ
@@ -385,10 +421,57 @@ export default function Navbar() {
         {/* Mobile menu */}
         {menuOpen && (
           <div className="md:hidden pb-4 space-y-1 border-t border-gray-100 pt-3">
-            <Link href="/courses" onClick={() => setMenuOpen(false)} className="block px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg">คอร์สทั้งหมด</Link>
+            <button onClick={() => setOpenNavDropdown(openNavDropdown === "online" ? null : "online")} className="w-full flex items-center justify-between px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg">
+              คอร์สออนไลน์
+              <ChevronDown className={`w-4 h-4 transition-transform ${openNavDropdown === "online" ? "rotate-180" : ""}`} />
+            </button>
+            {openNavDropdown === "online" && (
+              <div className="pl-3 space-y-1">
+                {categories.map((cat) => (
+                  <Link key={cat.name} href={`/courses?category=${encodeURIComponent(cat.name)}`} onClick={() => setMenuOpen(false)} className="block px-3 py-2 text-sm text-gray-600 hover:bg-indigo-50 rounded-lg">
+                    {cat.name}
+                  </Link>
+                ))}
+              </div>
+            )}
+            <button onClick={() => setOpenNavDropdown(openNavDropdown === "onsite" ? null : "onsite")} className="w-full flex items-center justify-between px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg">
+              หลักสูตร Onsite
+              <ChevronDown className={`w-4 h-4 transition-transform ${openNavDropdown === "onsite" ? "rotate-180" : ""}`} />
+            </button>
+            {openNavDropdown === "onsite" && (
+              <div className="pl-3 space-y-1">
+                <Link href="/courses?type=onsite" onClick={() => setMenuOpen(false)} className="block px-3 py-2 text-sm text-gray-600 hover:bg-indigo-50 rounded-lg">
+                  ทั้งหมด
+                </Link>
+                {categories.map((cat) => (
+                  <Link key={`onsite-${cat.name}`} href={`/courses?type=onsite&category=${encodeURIComponent(cat.name)}`} onClick={() => setMenuOpen(false)} className="block px-3 py-2 text-sm text-gray-600 hover:bg-indigo-50 rounded-lg">
+                    {cat.name}
+                  </Link>
+                ))}
+              </div>
+            )}
+            <Link href="/skill-pass" onClick={() => setMenuOpen(false)} className="block px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg">Skill Pass</Link>
+            <Link href="/articles" onClick={() => setMenuOpen(false)} className="block px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg">บทความ</Link>
+            <button onClick={() => setOpenNavDropdown(openNavDropdown === "corp" ? null : "corp")} className="w-full flex items-center justify-between px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg">
+              สำหรับองค์กร
+              <ChevronDown className={`w-4 h-4 transition-transform ${openNavDropdown === "corp" ? "rotate-180" : ""}`} />
+            </button>
+            {openNavDropdown === "corp" && (
+              <div className="pl-3 space-y-1">
+                <Link href="/corporate/training" onClick={() => setMenuOpen(false)} className="block px-3 py-2 text-sm text-gray-600 hover:bg-indigo-50 rounded-lg">
+                  การอบรมภายใน
+                </Link>
+                <Link href="/corporate/bulk" onClick={() => setMenuOpen(false)} className="block px-3 py-2 text-sm text-gray-600 hover:bg-indigo-50 rounded-lg">
+                  ซื้อเป็นชุด
+                </Link>
+                <Link href="/corporate/pricing" onClick={() => setMenuOpen(false)} className="block px-3 py-2 text-sm text-gray-600 hover:bg-indigo-50 rounded-lg">
+                  ราคา
+                </Link>
+              </div>
+            )}
             {user ? (
               <>
-                <Link href="/dashboard" onClick={() => setMenuOpen(false)} className="block px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg">Dashboard</Link>
+
                 {user.role === "student" && (
                   <Link href="/dashboard/schedule" onClick={() => setMenuOpen(false)} className="block px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg">ตารางเรียน</Link>
                 )}
