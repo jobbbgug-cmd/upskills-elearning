@@ -260,9 +260,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     return (
       <Link href={href} onClick={() => { close(); if (!active) setIsNavigating(true); }}
         className={`flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg transition-colors ${
-          active
-            ? "menu-nav-active font-medium"
-            : "text-gray-600 hover:bg-gray-50 menu-hover"
+          active ? "menu-nav-active font-medium" : "text-gray-600 hover:bg-gray-50"
         }`}>
         <span>{icon}</span>
         <span className="flex-1 text-left">{label}</span>

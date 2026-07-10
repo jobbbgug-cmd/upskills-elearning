@@ -102,39 +102,39 @@ body {
 
 /* Nav Item Active - Submenu selected */
 a.menu-nav-active {
-  background: var(--color-primary, #f97316) !important;
-  color: #ffffff !important;
+  background: rgba(var(--color-primary-rgb, 124,58,237), 0.15) !important;
+  color: var(--color-accent, #6d28d9) !important;
   fill: none !important;
 }
 
 a.menu-nav-active * {
-  color: #ffffff !important;
+  color: var(--color-accent, #6d28d9) !important;
   fill: none !important;
 }
 
 a.menu-nav-active span {
-  color: #ffffff !important;
+  color: var(--color-accent, #6d28d9) !important;
 }
 
 a.menu-nav-active svg {
-  color: #ffffff !important;
+  color: var(--color-accent, #6d28d9) !important;
   fill: none !important;
-  stroke: #ffffff !important;
+  stroke: var(--color-accent, #6d28d9) !important;
   opacity: 1 !important;
 }
 
-/* Nav Item Hover - Submenu hovered */
-.menu-nav-active:hover {
-  background: rgba(var(--color-primary-rgb), 0.15) !important;
-  color: var(--color-primary) !important;
+/* Nav Item Hover - Keep active styling on hover */
+a.menu-nav-active:hover {
+  background: rgba(var(--color-primary-rgb, 124,58,237), 0.15) !important;
+  color: var(--color-accent, #6d28d9) !important;
 }
 
-.menu-nav-active:hover * {
-  color: var(--color-primary) !important;
+a.menu-nav-active:hover * {
+  color: var(--color-accent, #6d28d9) !important;
 }
 
-.menu-nav-active:hover svg {
-  stroke: var(--color-primary) !important;
+a.menu-nav-active:hover svg {
+  stroke: var(--color-accent, #6d28d9) !important;
 }
 
 /* Fallback for backward compatibility */
