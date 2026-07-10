@@ -264,8 +264,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             ? "menu-nav-active font-medium"
             : "text-gray-600 hover:bg-gray-50 menu-hover"
         }`}>
-        {icon}
-        {label}
+        <span>{icon}</span>
+        <span className="flex-1 text-left">{label}</span>
       </Link>
     );
   };
@@ -277,7 +277,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <div key={id}>
         <button onClick={() => toggleGroup(id)}
           className={`w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg transition-colors menu-hover ${
-            hasActive ? "menu-section-active font-semibold" : "menu-text-primary"
+            hasActive ? "menu-section-active font-semibold" : "text-gray-700 hover:bg-gray-50"
           }`}>
           <span>{icon}</span>
           <span className="flex-1 text-left">{label}</span>

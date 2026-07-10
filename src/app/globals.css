@@ -101,26 +101,26 @@ body {
 }
 
 /* Nav Item Active - Submenu selected */
-.menu-nav-active {
-  background: rgba(var(--color-primary-rgb), 0.2) !important;
-  color: var(--color-primary) !important;
+a.menu-nav-active {
+  background: var(--color-primary, #f97316) !important;
+  color: #ffffff !important;
   fill: none !important;
 }
 
-.menu-nav-active * {
-  color: var(--color-primary) !important;
+a.menu-nav-active * {
+  color: #ffffff !important;
   fill: none !important;
 }
 
-.menu-nav-active span {
-  color: var(--color-primary) !important;
+a.menu-nav-active span {
+  color: #ffffff !important;
 }
 
-.menu-nav-active svg {
-  color: var(--color-primary) !important;
+a.menu-nav-active svg {
+  color: #ffffff !important;
   fill: none !important;
-  stroke: var(--color-primary) !important;
-  opacity: 0.7;
+  stroke: #ffffff !important;
+  opacity: 1 !important;
 }
 
 /* Nav Item Hover - Submenu hovered */
@@ -188,32 +188,28 @@ body {
   color: var(--color-primary) !important;
 }
 
-.menu-text-primary {
-  color: var(--color-primary) !important;
+/* Menu hover - change text to dark theme color */
+a.menu-hover:hover,
+button.menu-hover:hover {
+  color: var(--color-accent, #6d28d9) !important;
 }
 
-.menu-text-primary * {
-  color: var(--color-primary) !important;
+a.menu-hover:hover *,
+button.menu-hover:hover * {
+  color: var(--color-accent, #6d28d9) !important;
 }
 
-.menu-text-primary svg {
-  color: var(--color-primary) !important;
-  stroke: var(--color-primary) !important;
-  opacity: 0.6;
+a.menu-hover:hover span,
+button.menu-hover:hover span {
+  color: var(--color-accent, #6d28d9) !important;
 }
 
-.menu-text-primary:hover {
-  color: var(--color-primary) !important;
-}
-
-.menu-text-primary:hover * {
-  color: var(--color-primary) !important;
-}
-
-.menu-text-primary:hover svg {
-  color: var(--color-primary) !important;
-  stroke: var(--color-primary) !important;
-  opacity: 1;
+a.menu-hover:hover svg,
+button.menu-hover:hover svg {
+  color: var(--color-accent, #6d28d9) !important;
+  stroke: var(--color-accent, #6d28d9) !important;
+  fill: none !important;
+  opacity: 1 !important;
 }
 
 /* Theme-aware badge */
