@@ -10,11 +10,17 @@ export async function GET(req: NextRequest) {
     const gradeLevel = searchParams.get("gradeLevel");
     const category = searchParams.get("category");
     const institutionId = searchParams.get("institutionId");
+    const limit = searchParams.get("limit") ? parseInt(searchParams.get("limit")!) : null;
+    const sort = searchParams.get("sort") || "-createdAt";
+
     const query: Record<string, unknown> = { ...tenantFilter(institutionId), isActive: true };
     if (gradeLevel) query.gradeLevels = gradeLevel;
     if (category) query.category = category;
 
-    const courses = await Course.find(query).sort({ createdAt: -1 });
+    let courseQuery = Course.find(query).sort(sort);
+    if (limit) courseQuery = courseQuery.limit(limit);
+
+    const courses = await courseQuery.exec();
     return NextResponse.json({ courses });
   } catch (err) {
     console.error(err);

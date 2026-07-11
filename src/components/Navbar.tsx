@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { Menu, X, User, LogOut, LayoutDashboard, CalendarDays, ShieldCheck, BookOpen, ClipboardCheck, PenLine, Award, Radio, Receipt, MessageSquare, Star, ChevronDown } from "lucide-react";
 import NotificationBell from "@/components/NotificationBell";
+import CoursesDropdown from "@/components/CoursesDropdown";
 import { IUser, IBranding } from "@/types";
 import TrialRequestModal from "@/components/TrialRequestModal";
 
@@ -124,28 +125,8 @@ export default function Navbar() {
               )}
             </Link>
             <div className="hidden md:flex items-center gap-6">
-              {/* Online Courses */}
-              <div className="relative group">
-                <button className="flex items-center gap-1 text-sm font-medium text-gray-600 hover:text-indigo-600 py-3">
-                  คอร์สออนไลน์
-                  <ChevronDown className="w-4 h-4" />
-                </button>
-                <div className="absolute left-0 top-full hidden group-hover:block bg-white border border-gray-200 rounded-lg shadow-lg py-2 min-w-72 z-50">
-                  {categories.length > 0 ? (
-                    categories.map((cat) => (
-                      <Link
-                        key={cat.name}
-                        href={`/courses?category=${encodeURIComponent(cat.name)}`}
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
-                      >
-                        {cat.name} ({cat.count})
-                      </Link>
-                    ))
-                  ) : (
-                    <div className="px-4 py-2 text-sm text-gray-500">กำลังโหลด...</div>
-                  )}
-                </div>
-              </div>
+              {/* Online Courses - Mega Menu */}
+              <CoursesDropdown />
 
               {/* Onsite Courses */}
               <div className="relative group">

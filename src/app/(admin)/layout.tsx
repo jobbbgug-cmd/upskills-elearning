@@ -3,7 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, ListChecks, Users, LogOut, Images, UserCog, UserCheck, BookOpen, TrendingUp, CalendarDays, GraduationCap, Menu, X, Wallet, AlertTriangle, Palette, Shield, ShieldCheck, User, ChevronDown, ChevronRight, Home, Building2, School, ClipboardCheck, FileText, PenLine, Bell, BarChart2, Radio, Receipt, Globe, Monitor, Star, Tag, MessageSquare, LayoutGrid, Award, ShoppingCart, Package } from "lucide-react";
+import { LayoutDashboard, ListChecks, Users, LogOut, Images, UserCog, UserCheck, BookOpen, TrendingUp, CalendarDays, GraduationCap, Menu, X, Wallet, AlertTriangle, Palette, Shield, ShieldCheck, User, ChevronDown, ChevronRight, Home, Building2, School, ClipboardCheck, FileText, PenLine, Bell, BarChart2, Radio, Receipt, Globe, Monitor, Star, Tag, MessageSquare, LayoutGrid, Award, ShoppingCart, Package, Layers } from "lucide-react";
 import NotificationBell from "@/components/NotificationBell";
 import { PLAN_LABELS } from "@/lib/planLimits";
 import { THEMES, getTheme, setTheme, type Theme } from "@/lib/theme";
@@ -63,7 +63,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     setThemeOpen(false);
     const GP: Record<string, string[]> = {
       teaching:  ["/admin/students","/admin/attendance","/admin/homework","/admin/quiz","/admin/live","/admin/teacher-portal","/admin/forum"],
-      courses:   ["/admin/courses","/admin/content","/admin/schedule","/admin/teacher-schedule"],
+      courses:   ["/admin/courses","/admin/content","/admin/schedule","/admin/teacher-schedule","/admin/learning-paths"],
       members:   ["/admin/members","/admin/users"],
       commerce:  ["/admin/orders","/admin/products","/admin/coupons"],
       finance:   ["/admin/analytics","/admin/revenue","/admin/billing","/admin/certificates","/admin/bookings","/admin/finance"],
@@ -353,12 +353,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           )}
 
           {renderGroup("courses", "คอร์สและเนื้อหา", <BookOpen className="w-4 h-4" />,
-            ["/admin/courses","/admin/content","/admin/schedule","/admin/teacher-schedule"],
+            ["/admin/courses","/admin/content","/admin/schedule","/admin/teacher-schedule","/admin/categories"],
             <>
               {(isAdmin || role === "teacher") && navLink("/admin/courses",        <ListChecks className="w-4 h-4" />,   "จัดการคอร์ส")}
               {(isAdmin || role === "teacher") && navLink("/admin/content",        <BookOpen className="w-4 h-4" />,     "เนื้อหาการเรียน")}
               {(isAdmin || role === "teacher") && navLink("/admin/schedule",       <CalendarDays className="w-4 h-4" />, "ตารางเรียน")}
               {(isAdmin || role === "teacher") && navLink("/admin/teacher-schedule", <CalendarDays className="w-4 h-4" />, "ตารางสอน")}
+              {(isAdmin || role === "teacher") && navLink("/admin/learning-paths",  <Layers className="w-4 h-4" />,      "เส้นทางการเรียน")}
+              {(isAdmin || role === "teacher") && navLink("/admin/categories",      <Tag className="w-4 h-4" />,         "หมวดหมู่")}
             </>
           )}
 
