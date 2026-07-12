@@ -6,6 +6,7 @@ import { ICourse, GradeLevel } from "@/types";
 import Link from "next/link";
 import Image from "next/image";
 import { Search, ChevronDown } from "lucide-react";
+import CourseContent from "@/components/CourseContent";
 
 const GRADE_GROUPS = [
   { label: "ประถม", grades: ["ป.1", "ป.2", "ป.3", "ป.4", "ป.5", "ป.6"] as GradeLevel[] },
@@ -117,81 +118,8 @@ export default async function CoursesPage() {
 
           {/* Main Content */}
           <div className="lg:col-span-3">
-            {/* Tabs */}
-            <div className="mb-8 flex gap-6 border-b border-gray-200 pb-4">
-              {[
-                { id: "all", label: `ทั้งหมด (${courses.length})` },
-                { id: "path", label: "เส้นทางการเรียน (0)" },
-                { id: "course", label: `คอร์สเรียน (${courses.length})` },
-              ].map((tab) => (
-                <button
-                  key={tab.id}
-                  className="font-medium text-sm pb-2 transition-colors border-b-2 border-indigo-600 text-indigo-600"
-                >
-                  {tab.label}
-                </button>
-              ))}
-            </div>
-
-            {/* Courses Grid */}
-            {courses.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {courses.map((course) => (
-                  <Link key={course._id} href={`/courses/${course._id}`}>
-                    <div className="bg-white rounded-xl overflow-hidden hover:shadow-lg transition-shadow group">
-                      {/* Course Image */}
-                      <div className="relative h-48 bg-gradient-to-br from-indigo-100 to-purple-100 overflow-hidden">
-                        {course.coverImage ? (
-                          <Image
-                            src={course.coverImage}
-                            alt={course.title}
-                            fill
-                            className="object-cover group-hover:scale-105 transition-transform"
-                          />
-                        ) : (
-                          <div className="flex items-center justify-center h-full">
-                            <span className="text-5xl">📚</span>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Course Info */}
-                      <div className="p-5">
-                        <h3 className="font-bold text-gray-900 mb-3 line-clamp-2 group-hover:text-indigo-600">
-                          {course.title}
-                        </h3>
-
-                        <p className="text-sm text-gray-600 mb-4 line-clamp-2">{course.description}</p>
-
-                        {/* Instructor */}
-                        <div className="flex items-center gap-3 mb-4">
-                          <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-sm font-bold text-indigo-600">
-                            {course.instructor[0]}
-                          </div>
-                          <span className="text-xs text-gray-600">{course.instructor}</span>
-                        </div>
-
-                        {/* Stats */}
-                        <div className="flex items-center gap-4 text-xs text-gray-500 py-3 border-t border-gray-100">
-                          <div>📚 {course.sessions?.length ?? 0} lessons</div>
-                          <div>⏱️ {Math.floor(Math.random() * 50) + 5}h</div>
-                          <div>⭐ {(Math.random() * 2 + 3).toFixed(1)}</div>
-                        </div>
-
-                        {/* CTA */}
-                        <button className="w-full mt-4 py-2.5 bg-indigo-600 text-white rounded-lg font-semibold text-sm hover:bg-indigo-700 transition-colors">
-                          เรียนเลย
-                        </button>
-                      </div>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-12">
-                <p className="text-gray-600">ไม่พบคอร์สในหมวดหมู่นี้</p>
-              </div>
-            )}
+            {/* Tabs & Content */}
+            <CourseContent courses={courses} />
           </div>
         </div>
       </div>

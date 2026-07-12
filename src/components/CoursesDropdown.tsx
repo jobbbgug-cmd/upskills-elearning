@@ -79,10 +79,11 @@ export default function CoursesDropdown() {
       <div
         className="absolute left-0 top-full hidden group-hover:block bg-white border border-gray-200 rounded-lg shadow-2xl z-50"
         style={{ width: "800px", height: "500px" }}
+        onWheel={(e) => e.stopPropagation()}
       >
         <div className="flex h-full">
           {/* Left Sidebar Menu */}
-          <div className="w-48 border-r border-gray-200 py-4 bg-gray-50">
+          <div className="w-48 border-r border-gray-200 py-4 bg-gray-50 overflow-y-auto">
             <button
               onClick={() => {
                 setActiveSection("courses");
@@ -130,7 +131,7 @@ export default function CoursesDropdown() {
           </div>
 
           {/* Right Content Area */}
-          <div className="flex-1 py-6 px-6 overflow-y-auto">
+          <div className="flex-1 py-6 px-6 overflow-y-auto" onWheel={(e) => e.stopPropagation()}>
             {loading ? (
               <p className="text-gray-500 text-center py-12">กำลังโหลด...</p>
             ) : activeSection === "courses" ? (

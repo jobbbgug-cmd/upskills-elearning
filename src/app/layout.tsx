@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Kanit } from "next/font/google";
 import "./globals.css";
 import ThemeProvider from "@/components/ThemeProvider";
+import { CartProvider } from "@/context/CartContext";
 
 const kanit = Kanit({
   subsets: ["thai", "latin"],
@@ -36,7 +37,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="th" className={kanit.variable}>
       <body className="bg-gray-50 min-h-screen font-kanit">
-        <ThemeProvider>{children}</ThemeProvider>
+        <CartProvider>
+          <ThemeProvider>{children}</ThemeProvider>
+        </CartProvider>
       </body>
     </html>
   );

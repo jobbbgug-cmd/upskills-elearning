@@ -3,11 +3,13 @@ import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { Menu, X, User, LogOut, LayoutDashboard, CalendarDays, ShieldCheck, BookOpen, ClipboardCheck, PenLine, Award, Radio, Receipt, MessageSquare, Star, ChevronDown } from "lucide-react";
+import { Menu, X, User, LogOut, LayoutDashboard, CalendarDays, ShieldCheck, BookOpen, ClipboardCheck, PenLine, Award, Radio, Receipt, MessageSquare, Star, ChevronDown, ShoppingCart } from "lucide-react";
 import NotificationBell from "@/components/NotificationBell";
 import CoursesDropdown from "@/components/CoursesDropdown";
+import ShoppingCartModal from "@/components/ShoppingCart";
 import { IUser, IBranding } from "@/types";
 import TrialRequestModal from "@/components/TrialRequestModal";
+import { useCart } from "@/context/CartContext";
 
 interface Category {
   name: string;
@@ -24,6 +26,8 @@ export default function Navbar() {
   const [pendingMembers, setPendingMembers] = useState(0);
   const [categories, setCategories] = useState<Category[]>([]);
   const [openNavDropdown, setOpenNavDropdown] = useState<string | null>(null);
+  const [cartOpen, setCartOpen] = useState(false);
+  const { items } = useCart();
   const router   = useRouter();
   const pathname = usePathname();
 
@@ -359,6 +363,20 @@ export default function Navbar() {
                     รีวิว
                   </Link>
                 )}
+
+                {/* Shopping Cart */}
+                <button
+                  onClick={() => setCartOpen(true)}
+                  className="relative flex items-center gap-1.5 text-sm px-3 py-2 rounded-lg text-gray-600 hover:text-indigo-600 hover:bg-gray-50 transition-colors"
+                >
+                  <ShoppingCart className="w-4 h-4" />
+                  {items.length > 0 && (
+                    <span className="absolute -top-1 -right-1 w-5 h-5 bg-indigo-600 text-white text-xs rounded-full flex items-center justify-center font-bold">
+                      {items.length}
+                    </span>
+                  )}
+                </button>
+
                 {user && <NotificationBell />}
                 {(user.role === "student" || user.role === "parent") && (
                   <Link href="/student" className="flex items-center gap-1.5 text-sm font-medium px-3 py-2 rounded-lg text-emerald-600 hover:bg-emerald-50 transition-colors">
@@ -503,6 +521,9 @@ export default function Navbar() {
             )}
           </div>
         )}
+
+        {/* Shopping Cart Modal */}
+        <ShoppingCartModal isOpen={cartOpen} onClose={() => setCartOpen(false)} />
       </div>
     </nav>
   );
