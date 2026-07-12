@@ -12,19 +12,19 @@ const kanit = Kanit({
 
 export const metadata: Metadata = {
   title: {
-    default: "UPSkills - คอร์สเรียนออนไลน์ วิทยาศาสตร์ คณิตศาสตร์ ภาษาอังกฤษ",
+    default: "UPSkills - ระบบบริหารจัดการสถาบันการศึกษา ครบวงจร (All-in-One Education Management Platform)",
     template: "%s | UPSkills",
   },
-  description: "คอร์สเรียนออนไลน์สดกับครูผู้เชี่ยวชาญ วิทยาศาสตร์ คณิตศาสตร์ ภาษาอังกฤษ ป.1-ม.6 จองที่นั่งง่าย มีสื่อการสอนและคลิปประกอบ",
-  keywords: ["คอร์สเรียนออนไลน์", "ติวออนไลน์", "วิทยาศาสตร์", "คณิตศาสตร์", "ภาษาอังกฤษ", "ประถม", "มัธยม", "UPSkills"],
+  description: "UPSkills ระบบบริหารจัดการสถาบันการศึกษา ครบวงจร - จัดการคอร์สเรียน นักเรียน อาจารย์ และระบบการศึกษาแบบครบวงจร",
+  keywords: ["คอร์สเรียนออนไลน์", "ระบบจัดการสถาบันการศึกษา", "UPSkills", "Education Management", "Learning Management System"],
   metadataBase: new URL("https://upskills-elearning.vercel.app"),
   openGraph: {
     type: "website",
     locale: "th_TH",
     url: "https://upskills-elearning.vercel.app",
     siteName: "UPSkills",
-    title: "UPSkills - คอร์สเรียนออนไลน์ วิทยาศาสตร์ คณิตศาสตร์ ภาษาอังกฤษ",
-    description: "คอร์สเรียนออนไลน์สดกับครูผู้เชี่ยวชาญ วิทยาศาสตร์ คณิตศาสตร์ ภาษาอังกฤษ ป.1-ม.6",
+    title: "UPSkills - ระบบบริหารจัดการสถาบันการศึกษา ครบวงจร",
+    description: "UPSkills ระบบบริหารจัดการสถาบันการศึกษา ครบวงจร - All-in-One Education Management Platform",
   },
   icons: {
     icon: "/icon.png",
