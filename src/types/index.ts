@@ -80,6 +80,9 @@ export interface ICourse {
   sessions: ISession[];
   price: number;
   isActive: boolean;
+  enrollmentCount?: number;
+  duration?: number;
+  averageRating?: number;
   qrCodeImage?: string;
   bankAccount?: string;
   bankName?: string;

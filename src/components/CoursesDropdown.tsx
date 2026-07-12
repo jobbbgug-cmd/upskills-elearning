@@ -8,6 +8,10 @@ interface Course {
   _id: string;
   title: string;
   slug: string;
+  coverImage?: string;
+  instructor?: string;
+  duration?: number;
+  averageRating?: number;
 }
 
 interface Category {
