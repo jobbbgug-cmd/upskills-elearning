@@ -172,36 +172,103 @@ export default function CoursesDropdown() {
                 </div>
               </div>
             ) : activeSection === "new-courses" ? (
-              <div className="space-y-3">
+              <div>
+                <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-200">
+                  <h4 className="font-semibold text-gray-900 text-sm">คอร์สเรียนใหม่ UPSkills</h4>
+                  <Link href="/courses?sort=-createdAt" className="text-indigo-600 hover:text-indigo-700 text-xs font-medium">
+                    ดูคอร์สเรียนใหม่ทั้งหมด →
+                  </Link>
+                </div>
+                <div className="grid grid-cols-3 gap-3">
                 {latestCourses.length > 0 ? (
-                  latestCourses.map((course) => (
+                  latestCourses.slice(0, 3).map((course) => (
                     <Link
                       key={course._id}
-                      href={`/courses/${course.slug}`}
-                      className="block p-3 bg-gray-50 rounded-lg hover:bg-indigo-50 transition-colors"
+                      href={`/courses/${course.slug || course._id}`}
+                      className="rounded-lg overflow-hidden transition-all group hover:bg-gray-100 p-1"
                     >
-                      <p className="text-sm text-gray-900 font-medium line-clamp-2">{course.title}</p>
+                      {/* Card Inner */}
+                      <div className="rounded-lg overflow-hidden bg-white">
+                        {/* Image */}
+                        <div className="relative h-28 bg-gradient-to-br from-indigo-100 to-purple-100 overflow-hidden">
+                          {course.coverImage ? (
+                            <img
+                              src={course.coverImage}
+                              alt={course.title}
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                            />
+                          ) : (
+                            <div className="flex items-center justify-center h-full text-2xl">📚</div>
+                          )}
+                        </div>
+
+                        {/* Info */}
+                        <div className="p-2">
+                          <h4 className="font-semibold text-gray-900 text-xs mb-1 line-clamp-2">
+                            {course.title}
+                          </h4>
+                          <p className="text-xs text-gray-600 mb-2">{course.instructor}</p>
+                          <div className="flex items-center gap-2 text-xs text-gray-500">
+                            <span>⏱️ {course.duration || 0}h</span>
+                            <span>⭐ {(course.averageRating || 0).toFixed(1)}</span>
+                          </div>
+                        </div>
+                      </div>
                     </Link>
                   ))
                 ) : (
-                  <p className="text-xs text-gray-500">ยังไม่มีคอร์ส</p>
+                  <p className="text-xs text-gray-500 col-span-3 text-center py-4">ยังไม่มีคอร์ส</p>
                 )}
+                </div>
               </div>
             ) : activeSection === "learning-paths" ? (
-              <div className="space-y-3">
+              <div>
+                <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-200">
+                  <h4 className="font-semibold text-gray-900 text-sm">เส้นทางการเรียนใหม่ UPSkills</h4>
+                  <Link href="/learning-paths" className="text-indigo-600 hover:text-indigo-700 text-xs font-medium">
+                    ดูเส้นทางการเรียนทั้งหมด →
+                  </Link>
+                </div>
+                <div className="grid grid-cols-3 gap-3">
                 {learningPaths.length > 0 ? (
-                  learningPaths.map((path) => (
+                  learningPaths.slice(0, 3).map((path) => (
                     <Link
                       key={path._id}
                       href={`/learning-paths/${path._id}`}
-                      className="block p-3 bg-gray-50 rounded-lg hover:bg-indigo-50 transition-colors"
+                      className="rounded-lg overflow-hidden transition-all group hover:bg-gray-100 p-1"
                     >
-                      <p className="text-sm text-gray-900 font-medium line-clamp-2">{path.title}</p>
+                      {/* Card Inner */}
+                      <div className="rounded-lg overflow-hidden bg-white">
+                        {/* Image */}
+                        <div className="relative h-28 bg-gradient-to-br from-emerald-100 to-teal-100 overflow-hidden">
+                          {(path as any).coverImage ? (
+                            <img
+                              src={(path as any).coverImage}
+                              alt={path.title}
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                            />
+                          ) : (
+                            <div className="flex items-center justify-center h-full text-2xl">🎯</div>
+                          )}
+                        </div>
+
+                        {/* Info */}
+                        <div className="p-2">
+                          <h4 className="font-semibold text-gray-900 text-xs mb-1 line-clamp-2">
+                            {path.title}
+                          </h4>
+                          <p className="text-xs text-gray-600 mb-2">เส้นทางการเรียน</p>
+                          <div className="text-xs text-indigo-600 font-medium">
+                            ดูเส้นทาง →
+                          </div>
+                        </div>
+                      </div>
                     </Link>
                   ))
                 ) : (
-                  <p className="text-xs text-gray-500">ยังไม่มีเส้นทางการเรียน</p>
+                  <p className="text-xs text-gray-500 col-span-3 text-center py-4">ยังไม่มีเส้นทาง</p>
                 )}
+                </div>
               </div>
             ) : null}
           </div>

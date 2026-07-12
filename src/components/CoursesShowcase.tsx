@@ -7,10 +7,14 @@ import { ChevronLeft, ChevronRight, Bookmark } from "lucide-react";
 interface Course {
   _id: string;
   title: string;
+  slug: string;
   coverImage: string;
   instructor: string;
   category: string;
   gradeLevels?: string[];
+  enrollmentCount?: number;
+  duration?: number;
+  averageRating?: number;
 }
 
 const CATEGORIES = [
@@ -133,10 +137,10 @@ export default function CoursesShowcase() {
               {paginatedCourses.map((course) => (
                 <div
                   key={course._id}
-                  className="bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-lg transition-shadow group"
+                  className="bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-lg transition-shadow group flex flex-col h-full"
                 >
                   {/* Course Image */}
-                  <div className="relative h-48 bg-gradient-to-br from-indigo-100 to-purple-100 overflow-hidden">
+                  <div className="relative h-40 bg-gradient-to-br from-indigo-100 to-purple-100 overflow-hidden flex-shrink-0">
                     {course.coverImage ? (
                       <Image
                         src={course.coverImage}
@@ -146,7 +150,7 @@ export default function CoursesShowcase() {
                       />
                     ) : (
                       <div className="flex items-center justify-center h-full">
-                        <span className="text-4xl">📚</span>
+                        <span className="text-5xl">📚</span>
                       </div>
                     )}
                     <button className="absolute top-3 right-3 p-2 bg-white rounded-full shadow-md hover:bg-gray-100 transition-colors">
@@ -155,37 +159,38 @@ export default function CoursesShowcase() {
                   </div>
 
                   {/* Course Info */}
-                  <div className="p-4">
-                    <h3 className="font-bold text-gray-900 text-sm mb-3 line-clamp-2">
+                  <div className="p-4 flex flex-col flex-1">
+                    {/* Title */}
+                    <h3 className="font-bold text-gray-900 text-sm mb-3 line-clamp-2 min-h-[2.5rem]">
                       {course.title}
                     </h3>
 
                     {/* Instructor */}
                     <div className="flex items-center gap-2 mb-4">
-                      <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-sm font-bold text-indigo-600">
-                        {course.instructor[0]}
+                      <div className="w-7 h-7 rounded-full bg-indigo-100 flex items-center justify-center text-xs font-bold text-indigo-600 flex-shrink-0">
+                        {course.instructor.charAt(0).toUpperCase()}
                       </div>
-                      <span className="text-xs text-gray-600">{course.instructor}</span>
+                      <span className="text-xs text-gray-600 line-clamp-1">{course.instructor}</span>
                     </div>
 
                     {/* Stats */}
-                    <div className="flex items-center gap-4 text-xs text-gray-500 mb-4 py-3 border-t border-gray-100">
+                    <div className="flex items-center justify-between text-xs text-gray-500 mb-4 py-3 border-t border-gray-100">
                       <div className="flex items-center gap-1">
                         <span>👥</span>
-                        <span>{Math.floor(Math.random() * 100) + 20}</span>
+                        <span>{course.enrollmentCount || 0}</span>
                       </div>
                       <div className="flex items-center gap-1">
                         <span>⏱️</span>
-                        <span>{Math.floor(Math.random() * 50) + 5}h</span>
+                        <span>{course.duration || 0}h</span>
                       </div>
                       <div className="flex items-center gap-1">
                         <span>⭐</span>
-                        <span>{(Math.random() * 2 + 3).toFixed(1)}</span>
+                        <span>{(course.averageRating || 0).toFixed(1)}</span>
                       </div>
                     </div>
 
-                    {/* CTA */}
-                    <Link href={`/courses?category=${encodeURIComponent(course.category)}`}>
+                    {/* CTA - Push to bottom */}
+                    <Link href={`/courses/${course.slug || course._id}`} className="mt-auto">
                       <button className="w-full py-2.5 bg-violet-600 text-white rounded-xl font-semibold text-sm hover:bg-violet-700 transition-colors">
                         ดูคอร์สเรียนนี้
                       </button>

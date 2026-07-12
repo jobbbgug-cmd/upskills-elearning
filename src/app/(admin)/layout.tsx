@@ -340,10 +340,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           {isAdmin && navLink("/admin", <LayoutDashboard className="w-4 h-4" />, "ภาพรวม")}
 
           {renderGroup("teaching", "การเรียนการสอน", <GraduationCap className="w-4 h-4" />,
-            ["/admin/students","/admin/attendance","/admin/homework","/admin/quiz","/admin/live","/admin/teacher-portal","/admin/forum"],
+            ["/admin/students","/admin/homework","/admin/quiz","/admin/live","/admin/teacher-portal","/admin/forum"],
             <>
               {(isAdmin || role === "teacher") && navLink("/admin/students",      <School className="w-4 h-4" />,        "จัดการนักเรียน")}
-              {(isAdmin || role === "teacher") && navLink("/admin/attendance",    <ClipboardCheck className="w-4 h-4" />, "เช็คชื่อ")}
               {(isAdmin || role === "teacher") && navLink("/admin/homework",      <FileText className="w-4 h-4" />,       "การบ้าน")}
               {(isAdmin || role === "teacher") && navLink("/admin/quiz",          <PenLine className="w-4 h-4" />,        "ข้อสอบ")}
               {(isAdmin || role === "teacher") && navLink("/admin/live",          <Radio className="w-4 h-4" />,          "Live Class")}
@@ -392,22 +391,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           )}
 
           {renderGroup("finance", "รายได้และการเงิน", <TrendingUp className="w-4 h-4" />,
-            ["/admin/analytics","/admin/revenue","/admin/billing","/admin/certificates","/admin/bookings","/admin/finance"],
+            ["/admin/analytics","/admin/revenue","/admin/billing","/admin/certificates","/admin/finance"],
             <>
               {isAdmin                         && navLink("/admin/analytics", <BarChart2 className="w-4 h-4" />, "Analytics")}
               {(isAdmin || role === "teacher") && navLink("/admin/revenue",   <TrendingUp className="w-4 h-4" />, "รายได้")}
               {isAdmin                         && navLink("/admin/billing",   <Receipt className="w-4 h-4" />,    "Billing & ใบเสร็จ")}
               {isAdmin                         && navLink("/admin/certificates", <Award className="w-4 h-4" />,    "ใบรับรอง")}
-              {role === "super_admin"          && navLink("/admin/bookings",  <Users className="w-4 h-4" />,
-                <span className="flex items-center justify-between w-full gap-2">
-                  ตรวจสอบการชำระ
-                  {pendingBookings > 0 && (
-                    <span className="bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full min-w-[20px] text-center">
-                      {pendingBookings}
-                    </span>
-                  )}
-                </span>
-              )}
               {role === "super_admin" && navLink("/admin/finance", <Wallet className="w-4 h-4" />, "ข้อมูลทางการเงิน")}
             </>
           )}

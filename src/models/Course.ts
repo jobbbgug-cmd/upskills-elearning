@@ -39,6 +39,10 @@ export interface ICourseDocument extends Document {
   downloadFree?: { title: string; thumbnailUrl: string; fileUrl: string }[];
   downloadTeacherCard?: { title: string; thumbnailUrl: string; fileUrl: string }[];
   downloadAksorn?: { title: string; thumbnailUrl: string; fileUrl: string }[];
+  enrollmentCount?: number;
+  duration?: number;
+  averageRating?: number;
+  slug?: string;
   createdAt: Date;
 }
 
@@ -96,6 +100,10 @@ const CourseSchema = new Schema<ICourseDocument>(
     downloadFree: [DownloadItemSchema],
     downloadTeacherCard: [DownloadItemSchema],
     downloadAksorn: [DownloadItemSchema],
+    enrollmentCount: { type: Number, default: 0 },
+    duration: { type: Number, default: 0 },
+    averageRating: { type: Number, default: 0, min: 0, max: 5 },
+    slug: { type: String, default: "" },
   },
   { timestamps: true }
 );
