@@ -98,11 +98,11 @@ export default function Navbar() {
             style={{ animation: "nav-progress 0.8s ease infinite" }} />
         </div>
       )}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
+      <div className="w-full px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-center h-16">
 
           {/* Left: logo + nav links */}
-          <div className="flex items-center gap-8">
+          <div className="flex items-center gap-8 flex-1">
             <Link href="/">
               {branding?.logoUrl ? (
                 <Image
@@ -186,7 +186,7 @@ export default function Navbar() {
           </div>
 
           {/* Right: user actions */}
-          <div className="hidden md:flex items-center gap-3">
+          <div className="hidden md:flex items-center gap-3 flex-shrink-0">
             {/* Shopping Cart - Always visible */}
             <button
               onClick={() => setCartOpen(true)}
