@@ -65,9 +65,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   };
 
   const getTotalPrice = () => {
-    return items
-      .filter((item) => item.selected)
-      .reduce((sum, item) => sum + (item.course.price || 0), 0);
+    return items.reduce((sum, item) => sum + (item.course.price || 0), 0);
   };
 
   return (

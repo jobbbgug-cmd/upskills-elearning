@@ -187,6 +187,19 @@ export default function Navbar() {
 
           {/* Right: user actions */}
           <div className="hidden md:flex items-center gap-3">
+            {/* Shopping Cart - Always visible */}
+            <button
+              onClick={() => setCartOpen(true)}
+              className="relative flex items-center gap-1.5 text-sm px-3 py-2 rounded-lg text-gray-600 hover:text-indigo-600 hover:bg-gray-50 transition-colors"
+            >
+              <ShoppingCart className="w-4 h-4" />
+              {items.length > 0 && (
+                <span className="absolute -top-1 -right-1 w-5 h-5 bg-indigo-600 text-white text-xs rounded-full flex items-center justify-center font-bold">
+                  {items.length}
+                </span>
+              )}
+            </button>
+
             {user ? (
               <>
                 <span className="text-sm text-gray-600">สวัสดี, {user.name}</span>
@@ -363,19 +376,6 @@ export default function Navbar() {
                     รีวิว
                   </Link>
                 )}
-
-                {/* Shopping Cart */}
-                <button
-                  onClick={() => setCartOpen(true)}
-                  className="relative flex items-center gap-1.5 text-sm px-3 py-2 rounded-lg text-gray-600 hover:text-indigo-600 hover:bg-gray-50 transition-colors"
-                >
-                  <ShoppingCart className="w-4 h-4" />
-                  {items.length > 0 && (
-                    <span className="absolute -top-1 -right-1 w-5 h-5 bg-indigo-600 text-white text-xs rounded-full flex items-center justify-center font-bold">
-                      {items.length}
-                    </span>
-                  )}
-                </button>
 
                 {user && <NotificationBell />}
                 {(user.role === "student" || user.role === "parent") && (

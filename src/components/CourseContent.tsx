@@ -100,6 +100,7 @@ function CourseCard({ course }: { course: ICourse }) {
     if (isPurchased) {
       window.location.href = `/courses/${course._id}`;
     } else {
+      // Add to cart regardless of login status
       addToCart(course);
     }
   };
@@ -164,15 +165,25 @@ function CourseCard({ course }: { course: ICourse }) {
             </div>
           )}
 
-          {/* Button */}
+          {/* Buttons */}
           {!loading && (
-            <button
-              onClick={handleButtonClick}
-              className="w-full py-2.5 bg-indigo-600 text-white rounded-xl font-semibold text-sm hover:bg-indigo-700 transition-colors flex items-center justify-center gap-2"
-            >
-              <ShoppingCart className="w-4 h-4" />
-              {isPurchased ? "เริ่มเรียนคอร์สนี้" : "ซื้อคอร์สนี้"}
-            </button>
+            <div className="flex gap-2">
+              {/* Cart Icon Button */}
+              <button
+                onClick={handleButtonClick}
+                className="flex-shrink-0 w-12 h-12 rounded-lg border-2 border-indigo-600 text-indigo-600 hover:bg-indigo-50 transition-colors flex items-center justify-center"
+              >
+                <ShoppingCart className="w-5 h-5" />
+              </button>
+
+              {/* Main Action Button */}
+              <button
+                onClick={handleButtonClick}
+                className="flex-1 py-2.5 bg-indigo-600 text-white rounded-lg font-semibold text-sm hover:bg-indigo-700 transition-colors"
+              >
+                {isPurchased ? "เริ่มเรียนคอร์สนี้" : "ซื้อคอร์สนี้"}
+              </button>
+            </div>
           )}
         </div>
       </div>
