@@ -79,6 +79,7 @@ export default function CourseForm({ course, mode, courseType, teacherMode = fal
   const [error, setError]       = useState("");
   const [toast, setToast]       = useState<{ message: string; type: "success" | "error" } | null>(null);
   const [teachers, setTeachers] = useState<Teacher[]>([]);
+  const [categories, setCategories] = useState<{ name: string; _id: string }[]>([]);
   const closeToast = useCallback(() => setToast(null), []);
 
   useEffect(() => {
@@ -90,7 +91,11 @@ export default function CourseForm({ course, mode, courseType, teacherMode = fal
     fetch("/api/admin/content")
       .then((r) => r.json())
       .then((data) => { if (Array.isArray(data.contents)) setContentOptions(data.contents); });
-  }, [teacherMode]);
+    const catType = courseType || "online";
+    fetch(`/api/categories?type=${catType}`)
+      .then((r) => r.json())
+      .then((data) => { if (Array.isArray(data.categories)) setCategories(data.categories); });
+  }, [teacherMode, courseType]);
 
   const toggleGrade = (grade: GradeLevel) => {
     setForm((f) => ({
@@ -254,7 +259,22 @@ export default function CourseForm({ course, mode, courseType, teacherMode = fal
         </div>
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-1.5">หมวดหมู่ *</label>
-          <input required value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} className={inputClass} placeholder="เช่น คณิตศาสตร์, ภาษาอังกฤษ" />
+          <select required value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} className={`${inputClass} bg-white`}>
+            <option value="">— เลือกหมวดหมู่ —</option>
+            {categories.map((cat) => (
+              <option key={cat._id} value={cat.name}>
+                {cat.name}
+              </option>
+            ))}
+          </select>
+          {categories.length === 0 && (
+            <p className="text-xs text-gray-400 mt-1.5">
+              ยังไม่มีหมวดหมู่{" "}
+              <Link href="/admin/categories" target="_blank" className="text-indigo-600 underline">
+                สร้างหมวดหมู่ใหม่
+              </Link>
+            </p>
+          )}
         </div>
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-1.5">ราคา (บาท)</label>

@@ -258,7 +258,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const navLink = (href: string, icon: React.ReactNode, label: React.ReactNode) => {
     const active = pathname === href || (href !== "/admin" && pathname.startsWith(href));
     return (
-      <Link href={href} onClick={() => { close(); if (!active) setIsNavigating(true); }}
+      <Link href={href} onClick={() => {
+        close();
+        if (navRef.current) sessionStorage.setItem("admin-nav-scroll", "0");
+        if (!active) setIsNavigating(true);
+      }}
         className={`flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg transition-colors ${
           active ? "menu-nav-active font-medium" : "text-gray-600 hover:bg-gray-50"
         }`}>
@@ -359,7 +363,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               {(isAdmin || role === "teacher") && navLink("/admin/schedule",       <CalendarDays className="w-4 h-4" />, "ตารางเรียน")}
               {(isAdmin || role === "teacher") && navLink("/admin/teacher-schedule", <CalendarDays className="w-4 h-4" />, "ตารางสอน")}
               {(isAdmin || role === "teacher") && navLink("/admin/learning-paths",  <Layers className="w-4 h-4" />,      "เส้นทางการเรียน")}
-              {(isAdmin || role === "teacher") && navLink("/admin/categories",      <Tag className="w-4 h-4" />,         "หมวดหมู่")}
+              {(isAdmin || role === "teacher") && navLink("/admin/categories",      <Tag className="w-4 h-4" />,         "หมวดหมู่ Online")}
+              {(isAdmin || role === "teacher") && navLink("/admin/categories/onsite", <Tag className="w-4 h-4" />,       "หมวดหมู่ Onsite")}
             </>
           )}
 

@@ -6,16 +6,18 @@ export interface ICategoryDocument extends Document {
   description?: string;
   isActive: boolean;
   order: number;
+  type: "online" | "onsite";
   createdAt: Date;
 }
 
 const CategorySchema = new Schema<ICategoryDocument>(
   {
     institutionId: { type: Schema.Types.ObjectId, ref: "Institution", default: null },
-    name: { type: String, required: true, trim: true, unique: true },
+    name: { type: String, required: true, trim: true },
     description: { type: String, default: "" },
     isActive: { type: Boolean, default: true },
     order: { type: Number, default: 0 },
+    type: { type: String, enum: ["online", "onsite"], default: "online" },
   },
   { timestamps: true }
 );

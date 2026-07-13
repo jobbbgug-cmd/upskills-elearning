@@ -13,7 +13,7 @@ interface Category {
   type: "online" | "onsite";
 }
 
-export default function CategoriesPage() {
+export default function OnsiteCategoriesPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -27,7 +27,7 @@ export default function CategoriesPage() {
 
   const fetchCategories = async () => {
     try {
-      const res = await fetch("/api/categories?type=online");
+      const res = await fetch("/api/categories?type=onsite");
       const data = await res.json();
       setCategories(data.categories || []);
     } catch (error) {
@@ -53,7 +53,7 @@ export default function CategoriesPage() {
         const res = await fetch("/api/categories", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ...formData, type: "online" }),
+          body: JSON.stringify({ ...formData, type: "onsite" }),
         });
         if (!res.ok) throw new Error("Failed to create");
       }
@@ -117,7 +117,6 @@ export default function CategoriesPage() {
     const [draggedItem] = newCategories.splice(draggedIndex, 1);
     newCategories.splice(targetIndex, 0, draggedItem);
 
-    // Update order numbers
     const updatedCategories = newCategories.map((cat, idx) => ({
       ...cat,
       order: idx,
@@ -126,7 +125,6 @@ export default function CategoriesPage() {
     setCategories(updatedCategories);
     setDraggedId(null);
 
-    // Save order to backend
     try {
       await Promise.all(
         updatedCategories.map((cat) =>
@@ -139,7 +137,7 @@ export default function CategoriesPage() {
       );
     } catch (error) {
       console.error("Failed to save order:", error);
-      fetchCategories(); // Revert on error
+      fetchCategories();
     }
   };
 
@@ -147,18 +145,26 @@ export default function CategoriesPage() {
     <div>
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">หมวดหมู่</h1>
-          <p className="text-gray-500 text-sm mt-1">จัดการหมวดหมู่คอร์ส</p>
+          <h1 className="text-2xl font-bold text-gray-900">หมวดหมู่ Onsite</h1>
+          <p className="text-gray-500 text-sm mt-1">จัดการหมวดหมู่หลักสูตร Onsite</p>
         </div>
-        {!showForm && (
-          <button
-            onClick={() => setShowForm(true)}
-            className="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium text-sm"
+        <div className="flex gap-2">
+          <Link
+            href="/admin/categories"
+            className="px-4 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium text-sm"
           >
-            <Plus className="w-4 h-4" />
-            เพิ่มหมวดหมู่
-          </button>
-        )}
+            ← กลับไปหมวดหมู่ Online
+          </Link>
+          {!showForm && (
+            <button
+              onClick={() => setShowForm(true)}
+              className="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium text-sm"
+            >
+              <Plus className="w-4 h-4" />
+              เพิ่มหมวดหมู่
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Add/Edit Form */}
@@ -180,7 +186,7 @@ export default function CategoriesPage() {
                 type="text"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                placeholder="เช่น AI & Automation"
+                placeholder="เช่น บัญชี, IT Support"
                 className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 required
               />
@@ -224,7 +230,7 @@ export default function CategoriesPage() {
           </div>
         ) : categories.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-gray-500 mb-4">ยังไม่มีหมวดหมู่</p>
+            <p className="text-gray-500 mb-4">ยังไม่มีหมวดหมู่ Onsite</p>
             <button
               onClick={() => setShowForm(true)}
               className="text-indigo-600 hover:text-indigo-700 font-medium"
