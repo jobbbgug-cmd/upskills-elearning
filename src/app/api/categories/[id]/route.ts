@@ -10,15 +10,21 @@ export async function PUT(
     await connectDB();
     const { id } = await params;
     const body = await req.json();
-    const { name, description, isActive } = body;
+    const { name, description, isActive, order } = body;
 
     if (name && name.trim().length === 0) {
       return NextResponse.json({ error: "ชื่อหมวดหมู่ไม่ถูกต้อง" }, { status: 400 });
     }
 
+    const updateData: Record<string, unknown> = {};
+    if (name) updateData.name = name.trim();
+    if (description !== undefined) updateData.description = description;
+    if (isActive !== undefined) updateData.isActive = isActive;
+    if (order !== undefined) updateData.order = order;
+
     const category = await Category.findByIdAndUpdate(
       id,
-      { ...(name && { name: name.trim() }), description, isActive },
+      updateData,
       { new: true }
     );
 

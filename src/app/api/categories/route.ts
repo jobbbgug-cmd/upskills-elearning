@@ -14,7 +14,7 @@ export async function GET(req: NextRequest) {
       isActive: true,
     };
 
-    const categories = await Category.find(query).sort({ createdAt: -1 });
+    const categories = await Category.find(query).sort({ order: 1, createdAt: 1 });
     return NextResponse.json({ categories });
   } catch (err) {
     console.error(err);
@@ -37,9 +37,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "หมวดหมู่นี้มีอยู่แล้ว" }, { status: 400 });
     }
 
+    const maxOrder = await Category.findOne().sort({ order: -1 });
+    const nextOrder = (maxOrder?.order || -1) + 1;
+
     const category = await Category.create({
       name: name.trim(),
       description: description || "",
+      order: nextOrder,
     });
 
     return NextResponse.json({ category }, { status: 201 });

@@ -2,13 +2,14 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Plus, Edit2, Trash2, X } from "lucide-react";
+import { Plus, Edit2, Trash2, X, GripVertical } from "lucide-react";
 
 interface Category {
   _id: string;
   name: string;
   description?: string;
   isActive: boolean;
+  order: number;
 }
 
 export default function CategoriesPage() {
@@ -17,6 +18,7 @@ export default function CategoriesPage() {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formData, setFormData] = useState({ name: "", description: "" });
+  const [draggedId, setDraggedId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchCategories();
@@ -86,6 +88,58 @@ export default function CategoriesPage() {
     setFormData({ name: "", description: "" });
     setEditingId(null);
     setShowForm(false);
+  };
+
+  const handleDragStart = (e: React.DragEvent, id: string) => {
+    setDraggedId(id);
+    e.dataTransfer.effectAllowed = "move";
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+  };
+
+  const handleDrop = async (e: React.DragEvent, targetId: string) => {
+    e.preventDefault();
+    if (!draggedId || draggedId === targetId) {
+      setDraggedId(null);
+      return;
+    }
+
+    const draggedIndex = categories.findIndex((c) => c._id === draggedId);
+    const targetIndex = categories.findIndex((c) => c._id === targetId);
+
+    if (draggedIndex === -1 || targetIndex === -1) return;
+
+    const newCategories = [...categories];
+    const [draggedItem] = newCategories.splice(draggedIndex, 1);
+    newCategories.splice(targetIndex, 0, draggedItem);
+
+    // Update order numbers
+    const updatedCategories = newCategories.map((cat, idx) => ({
+      ...cat,
+      order: idx,
+    }));
+
+    setCategories(updatedCategories);
+    setDraggedId(null);
+
+    // Save order to backend
+    try {
+      await Promise.all(
+        updatedCategories.map((cat) =>
+          fetch(`/api/categories/${cat._id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ order: cat.order }),
+          })
+        )
+      );
+    } catch (error) {
+      console.error("Failed to save order:", error);
+      fetchCategories(); // Revert on error
+    }
   };
 
   return (
@@ -181,6 +235,7 @@ export default function CategoriesPage() {
           <table className="w-full">
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 w-8"></th>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700">ชื่อ</th>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700">คำอธิบาย</th>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700">สถานะ</th>
@@ -189,7 +244,19 @@ export default function CategoriesPage() {
             </thead>
             <tbody>
               {categories.map((cat) => (
-                <tr key={cat._id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                <tr
+                  key={cat._id}
+                  draggable
+                  onDragStart={(e) => handleDragStart(e, cat._id)}
+                  onDragOver={handleDragOver}
+                  onDrop={(e) => handleDrop(e, cat._id)}
+                  className={`border-b border-gray-100 transition-colors cursor-move ${
+                    draggedId === cat._id ? "bg-indigo-50 opacity-50" : "hover:bg-gray-50"
+                  }`}
+                >
+                  <td className="px-3 py-4">
+                    <GripVertical className="w-4 h-4 text-gray-400" />
+                  </td>
                   <td className="px-6 py-4">
                     <span className="font-medium text-gray-900">{cat.name}</span>
                   </td>
