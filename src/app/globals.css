@@ -260,6 +260,22 @@ button.menu-hover:hover svg {
   color: #d1d5db !important;
 }
 
+/* Theme-aware button */
+.theme-btn {
+  background-color: var(--color-primary) !important;
+  color: #ffffff !important;
+}
+
+.theme-btn:hover {
+  background-color: var(--color-hover) !important;
+  opacity: 0.9;
+}
+
+.theme-btn-active {
+  background-color: var(--color-primary) !important;
+  color: #ffffff !important;
+}
+
 /* Theme-aware link */
 .theme-link {
   color: var(--color-primary) !important;

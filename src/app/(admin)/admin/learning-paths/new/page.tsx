@@ -20,7 +20,7 @@ export default async function NewLearningPathPage() {
             <input
               type="text"
               placeholder="เช่น Python Fundamentals"
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 theme-focus-ring"
             />
           </div>
 
@@ -30,14 +30,14 @@ export default async function NewLearningPathPage() {
             <textarea
               placeholder="อธิบายเส้นทางการเรียนนี้"
               rows={4}
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 theme-focus-ring"
             />
           </div>
 
           {/* Difficulty */}
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-1.5">ระดับความยาก</label>
-            <select className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            <select className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 theme-focus-ring">
               <option value="beginner">ผู้เริ่มต้น</option>
               <option value="intermediate">ระดับกลาง</option>
               <option value="advanced">ขั้นสูง</option>
@@ -54,7 +54,7 @@ export default async function NewLearningPathPage() {
 
           {/* Buttons */}
           <div className="flex gap-4 pt-4">
-            <button className="px-6 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium text-sm">
+            <button className="px-6 py-2.5 theme-btn rounded-lg transition-colors font-medium text-sm">
               บันทึก
             </button>
             <button className="px-6 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium text-sm">

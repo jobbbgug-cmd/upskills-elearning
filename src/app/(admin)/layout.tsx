@@ -356,15 +356,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           )}
 
           {renderGroup("courses", "คอร์สและเนื้อหา", <BookOpen className="w-4 h-4" />,
-            ["/admin/courses","/admin/content","/admin/schedule","/admin/teacher-schedule","/admin/categories"],
+            ["/admin/courses","/admin/content","/admin/schedule","/admin/categories"],
             <>
               {(isAdmin || role === "teacher") && navLink("/admin/courses",        <ListChecks className="w-4 h-4" />,   "จัดการคอร์ส")}
               {(isAdmin || role === "teacher") && navLink("/admin/content",        <BookOpen className="w-4 h-4" />,     "เนื้อหาการเรียน")}
               {(isAdmin || role === "teacher") && navLink("/admin/schedule",       <CalendarDays className="w-4 h-4" />, "ตารางเรียน")}
-              {(isAdmin || role === "teacher") && navLink("/admin/teacher-schedule", <CalendarDays className="w-4 h-4" />, "ตารางสอน")}
               {(isAdmin || role === "teacher") && navLink("/admin/learning-paths",  <Layers className="w-4 h-4" />,      "เส้นทางการเรียน")}
-              {(isAdmin || role === "teacher") && navLink("/admin/categories",      <Tag className="w-4 h-4" />,         "หมวดหมู่ Online")}
-              {(isAdmin || role === "teacher") && navLink("/admin/categories/onsite", <Tag className="w-4 h-4" />,       "หมวดหมู่ Onsite")}
             </>
           )}
 
@@ -417,10 +414,49 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           )}
 
           {renderGroup("settings", "ตั้งค่าระบบ", <Shield className="w-4 h-4" />,
-            ["/admin/roles","/admin/branding"],
+            ["/admin/roles","/admin/branding","/admin/categories","/admin/teacher-schedule"],
             <>
               {role === "super_admin" && navLink("/admin/roles",    <Shield className="w-4 h-4" />,  "จัดการ Role")}
               {role === "admin"       && navLink("/admin/branding", <Palette className="w-4 h-4" />, "จัดการ Branding")}
+              {role === "super_admin" && (
+                <div>
+                  <button
+                    onClick={() => toggleGroup("categories")}
+                    className={`w-full flex items-center justify-between px-3 py-2.5 text-sm rounded-lg transition-colors menu-hover ${
+                      openGroups.has("categories") ? "menu-section-active font-medium" : "text-gray-700 hover:bg-gray-50"
+                    }`}
+                  >
+                    <span className="flex items-center gap-3">
+                      <Tag className="w-4 h-4" />
+                      หมวดหมู่
+                    </span>
+                    <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${openGroups.has("categories") ? "rotate-180" : ""}`} />
+                  </button>
+                  {openGroups.has("categories") && (
+                    <div className="ml-3 pl-3 border-l border-gray-100 mt-0.5 mb-1">
+                      <div className="flex gap-2 p-2 bg-gray-50 rounded-lg">
+                        <Link href="/admin/categories" onClick={() => { close(); setIsNavigating(true); }}
+                          className={`flex-1 px-3 py-1.5 text-xs font-medium rounded transition-colors text-center ${
+                            pathname === "/admin/categories" || pathname.startsWith("/admin/categories") && !pathname.includes("/onsite")
+                              ? "theme-btn-active text-white"
+                              : "bg-white text-gray-700 hover:bg-gray-100"
+                          }`}>
+                          Online
+                        </Link>
+                        <Link href="/admin/categories/onsite" onClick={() => { close(); setIsNavigating(true); }}
+                          className={`flex-1 px-3 py-1.5 text-xs font-medium rounded transition-colors text-center ${
+                            pathname === "/admin/categories/onsite"
+                              ? "theme-btn-active text-white"
+                              : "bg-white text-gray-700 hover:bg-gray-100"
+                          }`}>
+                          Onsite
+                        </Link>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+              {role === "super_admin" && navLink("/admin/teacher-schedule", <CalendarDays className="w-4 h-4" />, "ตารางสอน")}
             </>
           )}
         </nav>
