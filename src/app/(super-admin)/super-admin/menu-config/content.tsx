@@ -32,6 +32,90 @@ export default function MenuConfigContent() {
     fetchMenuConfig();
   }, [selectedRole]);
 
+  const getDefaultMenus = () => {
+    return [
+      {
+        id: "overview",
+        label: "ภาพรวม",
+        children: [],
+      },
+      {
+        id: "finance",
+        label: "รายได้และการเงิน",
+        children: [
+          { id: "revenue", label: "รายได้", path: "/admin/revenue" },
+          { id: "analytics", label: "Analytics", path: "/admin/analytics" },
+          { id: "commission", label: "Commission & Payout", path: "/admin/bookings" },
+          { id: "verification", label: "ตรวจสอบการชำระ", path: "/admin/bookings" },
+          { id: "finance-info", label: "ข้อมูลทางการเงิน", path: "/admin/finance" },
+        ],
+      },
+      {
+        id: "institution",
+        label: "สถาบัน",
+        children: [
+          { id: "institutions", label: "สถาบันทั้งหมด", path: "/admin/trials" },
+          { id: "trial-requests", label: "คำขอทดลองใช้งาน", path: "/admin/trials" },
+        ],
+      },
+      {
+        id: "members",
+        label: "จัดการสมาชิก",
+        children: [
+          { id: "approve-members", label: "อนุมัติสมาชิก", path: "/admin/members" },
+          { id: "manage-users", label: "จัดการผู้ใช้งาน", path: "/admin/users" },
+        ],
+      },
+      {
+        id: "platform-features",
+        label: "ฟีเจอร์แพลตฟอร์ม",
+        children: [
+          { id: "live-sessions", label: "Live Sessions", path: "/admin/live" },
+          { id: "reviews", label: "รีวิวคอร์ส", path: "/admin/reviews" },
+          { id: "forum", label: "Forum", path: "/admin/forum" },
+        ],
+      },
+      {
+        id: "commerce",
+        label: "ระบบขาย",
+        children: [
+          { id: "orders", label: "จัดการคำสั่งซื้อ", path: "/admin/orders" },
+          { id: "products", label: "จัดการสินค้า", path: "/admin/products" },
+          { id: "coupons", label: "คูปอง/โปรโมชั่น", path: "/admin/coupons" },
+        ],
+      },
+      {
+        id: "content",
+        label: "จัดการเนื้อหา",
+        children: [
+          { id: "courses", label: "จัดการคอร์ส", path: "/admin/courses" },
+          { id: "course-content", label: "เนื้อหาการเรียน", path: "/admin/content" },
+          { id: "student-schedule", label: "ตารางเรียน", path: "/admin/schedule" },
+          { id: "teacher-schedule", label: "ตารางสอน", path: "/admin/teacher-schedule" },
+          { id: "certificates", label: "ใบรับรอง", path: "/admin/certificates" },
+          {
+            id: "categories",
+            label: "หมวดหมู่",
+            children: [
+              { id: "categories-online", label: "หมวดหมู่ online", path: "/admin/categories" },
+              { id: "categories-onsite", label: "หมวดหมู่ onsite", path: "/admin/categories/onsite" },
+            ],
+          },
+        ],
+      },
+      {
+        id: "system",
+        label: "จัดการระบบ",
+        children: [
+          { id: "banners", label: "จัดการแบนเนอร์", path: "/admin/banners" },
+          { id: "roles", label: "จัดการ Role", path: "/super-admin/roles" },
+          { id: "activity-logs", label: "ประวัติการใช้งาน", path: "/admin/activity-logs" },
+          { id: "settings", label: "ตั้งค่าทั่วไป", path: "/admin/settings" },
+        ],
+      },
+    ];
+  };
+
   const fetchMenuConfig = async () => {
     setLoading(true);
     try {
@@ -41,7 +125,7 @@ export default function MenuConfigContent() {
         // Convert flat items array to grouped structure
         const groups: MenuGroup[] = [];
         let currentGroup: MenuGroup | null = null;
-        
+
         (data.items || []).forEach((item: MenuItem) => {
           if (!item.children || item.children.length === 0) {
             // This is a group
@@ -52,15 +136,17 @@ export default function MenuConfigContent() {
             currentGroup.children.push(item);
           }
         });
-        
-        setMenuGroups(groups);
+
+        setMenuGroups(groups.length > 0 ? groups : getDefaultMenus());
       } else {
-        setMenuGroups([]);
+        // No data yet, use defaults
+        setMenuGroups(getDefaultMenus());
       }
       setModified(false);
       setEditingId(null);
     } catch (error) {
       console.error("Error fetching menu config:", error);
+      setMenuGroups(getDefaultMenus());
     } finally {
       setLoading(false);
     }
