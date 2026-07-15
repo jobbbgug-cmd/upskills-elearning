@@ -569,7 +569,3 @@ export default function MenuConfigContent() {
     </div>
   );
 }
-
-function ChevronUp({ className }: { className: string }) {
-  return <ChevronDown className={`${className} rotate-180`} />;
-}
