@@ -19,6 +19,35 @@ interface MenuGroup {
 
 const ROLES = ["super_admin", "owner", "admin", "teacher", "parent", "student"];
 
+const AVAILABLE_ROUTES = [
+  { path: "/super-admin", label: "ภาพรวม" },
+  { path: "/super-admin/analytics", label: "Analytics" },
+  { path: "/super-admin/institutions", label: "สถาบันทั้งหมด" },
+  { path: "/super-admin/trials", label: "คำขอทดลองใช้งาน" },
+  { path: "/super-admin/payouts", label: "Commission & Payout" },
+  { path: "/super-admin/members", label: "อนุมัติสมาชิก" },
+  { path: "/super-admin/users", label: "จัดการผู้ใช้งาน" },
+  { path: "/super-admin/live", label: "Live Sessions" },
+  { path: "/super-admin/reviews", label: "รีวิวคอร์ส" },
+  { path: "/super-admin/forum", label: "Forum" },
+  { path: "/super-admin/products", label: "จัดการสินค้า" },
+  { path: "/super-admin/coupons", label: "คูปอง/โปรโมชั่น" },
+  { path: "/super-admin/courses", label: "จัดการคอร์ส" },
+  { path: "/super-admin/content", label: "เนื้อหาการเรียน" },
+  { path: "/super-admin/revenue", label: "รายได้" },
+  { path: "/super-admin/schedule", label: "ตารางเรียน" },
+  { path: "/super-admin/teacher-schedule", label: "ตารางสอน" },
+  { path: "/super-admin/certificates", label: "ใบรับรอง" },
+  { path: "/super-admin/bookings", label: "ตรวจสอบการชำระ" },
+  { path: "/super-admin/orders", label: "จัดการคำสั่งซื้อ" },
+  { path: "/super-admin/finance", label: "ข้อมูลทางการเงิน" },
+  { path: "/super-admin/banners", label: "จัดการแบนเนอร์" },
+  { path: "/super-admin/roles", label: "จัดการ Role" },
+  { path: "/super-admin/menu-config", label: "จัดการเมนู" },
+  { path: "/super-admin/logs", label: "ประวัติการใช้งาน" },
+  { path: "/super-admin/settings", label: "ตั้งค่าทั่วไป" },
+];
+
 export default function MenuConfigContent() {
   const [selectedRole, setSelectedRole] = useState<string>("super_admin");
   const [menuGroups, setMenuGroups] = useState<MenuGroup[]>([]);
@@ -27,6 +56,7 @@ export default function MenuConfigContent() {
   const [modified, setModified] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingText, setEditingText] = useState<string>("");
+  const [showAddItemModal, setShowAddItemModal] = useState<string | null>(null);
 
   useEffect(() => {
     fetchMenuConfig();
@@ -244,19 +274,23 @@ export default function MenuConfigContent() {
     setEditingId(null);
   };
 
-  const addMenuItem = (groupId: string) => {
+  const addMenuItem = (groupId: string, routePath: string) => {
+    const route = AVAILABLE_ROUTES.find(r => r.path === routePath);
+    if (!route) return;
+
     const newId = `item-${Date.now()}`;
     const updatedGroups = menuGroups.map(group => {
       if (group.id === groupId) {
         return {
           ...group,
-          children: [...group.children, { id: newId, label: "เมนูใหม่", path: "" }],
+          children: [...group.children, { id: newId, label: route.label, path: route.path }],
         };
       }
       return group;
     });
     setMenuGroups(updatedGroups);
     setModified(true);
+    setShowAddItemModal(null);
   };
 
   const deleteItem = (groupId: string, itemId?: string) => {
@@ -344,6 +378,24 @@ export default function MenuConfigContent() {
         >
           <RotateCcw className="w-5 h-5" />
           รีเซต
+        </button>
+        <button
+          onClick={() => {
+            const groupName = prompt("ป้อนชื่อหมวดหมู่ใหม่:");
+            if (groupName) {
+              const newGroup: MenuGroup = {
+                id: `group-${Date.now()}`,
+                label: groupName,
+                children: [],
+              };
+              setMenuGroups([...menuGroups, newGroup]);
+              setModified(true);
+            }
+          }}
+          className="inline-flex items-center gap-2 px-6 py-3 border border-green-300 text-green-700 font-semibold rounded-lg hover:bg-green-50"
+        >
+          <Plus className="w-5 h-5" />
+          เพิ่มหมวดหมู่ใหม่
         </button>
       </div>
 
@@ -467,7 +519,7 @@ export default function MenuConfigContent() {
                   </div>
                 ))}
                 <button
-                  onClick={() => addMenuItem(group.id)}
+                  onClick={() => setShowAddItemModal(group.id)}
                   className="w-full py-2 px-3 text-sm text-indigo-600 hover:bg-indigo-50 rounded border border-dashed border-gray-300 font-medium flex items-center gap-2 justify-center"
                 >
                   <Plus className="w-4 h-4" />
@@ -482,6 +534,36 @@ export default function MenuConfigContent() {
       {modified && (
         <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg text-yellow-900">
           <p className="font-semibold">⚠️ มีการเปลี่ยนแปลง - กดบันทึกเพื่อบันทึก</p>
+        </div>
+      )}
+
+      {/* Add Item Modal */}
+      {showAddItemModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-bold">เลือกหน้าที่ต้องการเพิ่ม</h3>
+              <button onClick={() => setShowAddItemModal(null)} className="text-gray-400 hover:text-gray-600">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="space-y-2 max-h-96 overflow-y-auto">
+              {AVAILABLE_ROUTES.map(route => (
+                <button
+                  key={route.path}
+                  onClick={() => {
+                    if (showAddItemModal) {
+                      addMenuItem(showAddItemModal, route.path);
+                    }
+                  }}
+                  className="w-full text-left px-4 py-3 rounded border border-gray-200 hover:bg-indigo-50 hover:border-indigo-300 transition-colors"
+                >
+                  <div className="font-medium text-gray-900">{route.label}</div>
+                  <div className="text-xs text-gray-500">{route.path}</div>
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
       )}
     </div>
