@@ -60,6 +60,8 @@ export default function MenuConfigContent() {
   const [editingText, setEditingText] = useState<string>("");
   const [showAddItemModal, setShowAddItemModal] = useState<string | null>(null);
   const [showAddSingleItemModal, setShowAddSingleItemModal] = useState(false);
+  const [draggedGroupId, setDraggedGroupId] = useState<string | null>(null);
+  const [dragOverGroupId, setDragOverGroupId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchMenuConfig();
@@ -71,6 +73,17 @@ export default function MenuConfigContent() {
       saveDefaultMenu();
     }
   }, [selectedRole, menuGroups.length, loading]);
+
+  useEffect(() => {
+    // Auto-save when modified (with debounce)
+    if (!modified || saving) return;
+
+    const timer = setTimeout(() => {
+      saveMenuConfig();
+    }, 1500); // Save after 1.5 seconds of inactivity
+
+    return () => clearTimeout(timer);
+  }, [modified, saving]);
 
   const isRouteUsed = (path: string): boolean => {
     for (const group of menuGroups) {
@@ -175,20 +188,32 @@ export default function MenuConfigContent() {
         const groups: MenuGroup[] = [];
         let currentGroup: MenuGroup | null = null;
 
-        (data.items || []).forEach((item: MenuItem) => {
-          if (!item.children || item.children.length === 0) {
-            // This is a group
-            currentGroup = { id: item.id, label: item.label, children: [] };
-            groups.push(currentGroup);
-          } else if (currentGroup) {
-            // This is a child item
-            currentGroup.children.push(item);
+        (data.items || []).forEach((item: any) => {
+          // Check if it's a single item (has path but no children or empty children)
+          if (item.path && (!item.children || item.children.length === 0)) {
+            groups.push({
+              id: item.id,
+              label: item.label,
+              path: item.path,
+              children: [],
+              isSingleItem: true,
+            });
+          } else {
+            // This is a group (may or may not have children)
+            groups.push({
+              id: item.id,
+              label: item.label,
+              children: item.children || [],
+              isSingleItem: false,
+            });
           }
         });
 
-        setMenuGroups(groups.length > 0 ? groups : getDefaultMenus());
+        console.log("Loaded menu groups:", groups);
+        // Keep empty array if no items (user deleted all)
+        setMenuGroups(groups);
       } else {
-        // No data yet, use defaults
+        // API error - no response, use defaults
         setMenuGroups(getDefaultMenus());
       }
       setModified(false);
@@ -232,13 +257,19 @@ export default function MenuConfigContent() {
     setSaving(true);
     try {
       // Convert groups back to flat items array
-      const items: MenuItem[] = [];
+      const items: any[] = [];
       menuGroups.forEach(group => {
-        items.push({
+        const item: any = {
           id: group.id,
           label: group.label,
-          children: group.children,
-        });
+        };
+        if (group.isSingleItem) {
+          item.path = group.path;
+          item.children = [];
+        } else {
+          item.children = group.children;
+        }
+        items.push(item);
       });
 
       const res = await fetch(`/api/admin/menu-config/${selectedRole}`, {
@@ -306,23 +337,43 @@ export default function MenuConfigContent() {
   };
 
   const deleteItem = (groupId: string, itemId?: string) => {
+    if (!confirm("ยืนยันการลบหรือไม่?")) return;
+
+    let deleted = false;
+
     if (itemId) {
       // Delete child item
       const updatedGroups = menuGroups.map(group => {
         if (group.id === groupId) {
+          const filtered = group.children.filter(child => child.id !== itemId);
+          if (filtered.length < group.children.length) {
+            deleted = true;
+          }
           return {
             ...group,
-            children: group.children.filter(child => child.id !== itemId),
+            children: filtered,
           };
         }
         return group;
       });
-      setMenuGroups(updatedGroups);
+      if (deleted) {
+        setMenuGroups(updatedGroups);
+      }
     } else {
       // Delete group
-      setMenuGroups(menuGroups.filter(g => g.id !== groupId));
+      const filtered = menuGroups.filter(g => g.id !== groupId);
+      if (filtered.length < menuGroups.length) {
+        deleted = true;
+        setMenuGroups(filtered);
+      }
     }
-    setModified(true);
+
+    if (deleted) {
+      setModified(true);
+      alert("ลบเรียบร้อยแล้ว");
+    } else {
+      alert("ไม่พบรายการที่ต้องการลบ");
+    }
   };
 
   const moveGroup = (fromIndex: number, toIndex: number) => {
@@ -477,7 +528,30 @@ export default function MenuConfigContent() {
 
             // Group rendering
             return (
-            <div key={group.id} className="border border-gray-200 rounded-lg overflow-hidden">
+            <div
+              key={group.id}
+              draggable
+              onDragStart={() => setDraggedGroupId(group.id)}
+              onDragEnd={() => setDraggedGroupId(null)}
+              onDragOver={(e) => {
+                e.preventDefault();
+                setDragOverGroupId(group.id);
+              }}
+              onDragLeave={() => setDragOverGroupId(null)}
+              onDrop={() => {
+                if (draggedGroupId && draggedGroupId !== group.id) {
+                  const fromIdx = menuGroups.findIndex(g => g.id === draggedGroupId);
+                  const toIdx = menuGroups.findIndex(g => g.id === group.id);
+                  if (fromIdx !== -1 && toIdx !== -1) {
+                    moveGroup(fromIdx, toIdx);
+                  }
+                }
+                setDragOverGroupId(null);
+              }}
+              className={`border border-gray-200 rounded-lg overflow-hidden transition-colors ${
+                dragOverGroupId === group.id ? "bg-blue-50 border-blue-300" : ""
+              }`}
+            >
               {/* Group Header */}
               <div className="bg-gradient-to-r from-indigo-50 to-blue-50 p-4 flex items-center gap-3 justify-between">
                 <div className="flex items-center gap-3 flex-1">
