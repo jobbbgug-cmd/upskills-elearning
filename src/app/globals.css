@@ -179,6 +179,52 @@ a.menu-nav-active:hover svg {
   stroke: #ffffff !important;
 }
 
+/* Ensure menu-accent overrides menu-hover */
+button.menu-accent,
+button.menu-accent:hover {
+  color: #ffffff !important;
+  background: var(--color-accent) !important;
+}
+
+button.menu-accent *,
+button.menu-accent:hover * {
+  color: #ffffff !important;
+}
+
+button.menu-accent span,
+button.menu-accent:hover span {
+  color: #ffffff !important;
+}
+
+button.menu-accent svg,
+button.menu-accent:hover svg {
+  color: #ffffff !important;
+  stroke: #ffffff !important;
+  opacity: 1 !important;
+}
+
+/* Force white text on menu-accent for all elements including Tailwind classes */
+button.menu-accent .text-gray-400,
+button.menu-accent:hover .text-gray-400,
+button.menu-accent svg.text-gray-400,
+button.menu-accent:hover svg.text-gray-400 {
+  color: #ffffff !important;
+  stroke: #ffffff !important;
+  --tw-text-opacity: 1 !important;
+}
+
+button.menu-accent > *,
+button.menu-accent:hover > * {
+  color: #ffffff !important;
+  --tw-text-opacity: 1 !important;
+}
+
+button.menu-accent svg,
+button.menu-accent:hover svg {
+  color: #ffffff !important;
+  stroke: #ffffff !important;
+}
+
 .menu-accent:hover {
   background: var(--color-hover) !important;
   color: #ffffff !important;
