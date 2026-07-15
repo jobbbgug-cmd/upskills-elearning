@@ -17,14 +17,14 @@ export interface IMenuConfig extends Document {
   createdAt: Date;
 }
 
-const menuItemSchema = new Schema({
+const menuItemSchema: any = new Schema({
   id: String,
   label: String,
   icon: String,
   path: String,
   order: Number,
   hidden: Boolean,
-  children: [this],
+  children: { type: [Schema.Types.Mixed], default: [] },
 }, { _id: false });
 
 const menuConfigSchema = new Schema<IMenuConfig>(

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Save, RotateCcw, Edit2, Trash2, Plus, GripVertical, ChevronDown, ChevronRight, X } from "lucide-react";
+import { Save, RotateCcw, Edit2, Trash2, Plus, GripVertical, ChevronDown, ChevronRight, ChevronUp, X } from "lucide-react";
 
 interface MenuItem {
   id: string;
@@ -31,6 +31,13 @@ export default function MenuConfigContent() {
   useEffect(() => {
     fetchMenuConfig();
   }, [selectedRole]);
+
+  useEffect(() => {
+    // Auto-save default menu for super_admin if empty
+    if (selectedRole === "super_admin" && menuGroups.length === 0 && !loading) {
+      saveDefaultMenu();
+    }
+  }, [selectedRole, menuGroups.length, loading]);
 
   const getDefaultMenus = () => {
     return [
@@ -149,6 +156,33 @@ export default function MenuConfigContent() {
       setMenuGroups(getDefaultMenus());
     } finally {
       setLoading(false);
+    }
+  };
+
+  const saveDefaultMenu = async () => {
+    try {
+      const defaultMenus = getDefaultMenus();
+      const items: MenuItem[] = [];
+      defaultMenus.forEach(group => {
+        items.push({
+          id: group.id,
+          label: group.label,
+          children: group.children,
+        });
+      });
+
+      const res = await fetch(`/api/admin/menu-config/${selectedRole}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ items }),
+      });
+
+      if (res.ok) {
+        setMenuGroups(defaultMenus);
+        setModified(false);
+      }
+    } catch (error) {
+      console.error("Error saving default menu:", error);
     }
   };
 
@@ -316,7 +350,16 @@ export default function MenuConfigContent() {
       {/* Menu Editor */}
       <div className="bg-white rounded-2xl border border-gray-200 p-6 space-y-4">
         {menuGroups.length === 0 ? (
-          <p className="text-gray-500 text-center py-8">ยังไม่มีเมนู</p>
+          <div className="text-center py-12">
+            <p className="text-gray-500 mb-6">ยังไม่มีเมนู</p>
+            <button
+              onClick={saveDefaultMenu}
+              className="inline-flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700"
+            >
+              <Plus className="w-5 h-5" />
+              สร้างเมนูเริ่มต้น
+            </button>
+          </div>
         ) : (
           menuGroups.map((group, groupIdx) => (
             <div key={group.id} className="border border-gray-200 rounded-lg overflow-hidden">

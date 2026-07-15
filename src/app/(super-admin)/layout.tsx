@@ -7,7 +7,7 @@ import {
   UserCog, Users, Wallet, Images, Shield, Home,
   UserCheck, BookOpen, FileText, TrendingUp, ChevronDown, FlaskConical, Settings,
   CalendarDays, GraduationCap, ClipboardList, BarChart2,
-  Radio, Star, MessageSquare, Tag, Palette, Award, ShoppingCart, Package,
+  Radio, Star, MessageSquare, Tag, Palette, Award, ShoppingCart, Package, Layout,
 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { THEMES, getTheme, setTheme, type Theme } from "@/lib/theme";
@@ -16,6 +16,15 @@ interface UserInfo {
   name: string;
   email: string;
   profileImage?: string;
+}
+
+interface MenuItem {
+  id: string;
+  label: string;
+  path?: string;
+  icon?: string;
+  children?: MenuItem[];
+  order?: number;
 }
 
 export default function SuperAdminLayout({ children }: { children: React.ReactNode }) {
@@ -27,6 +36,7 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
   const [currentTheme, setCurrentTheme] = useState<Theme>('default');
   const [themeOpen, setThemeOpen] = useState(false);
+  const [menuConfig, setMenuConfig] = useState<MenuItem[]>([]);
   const pathname = usePathname();
   const router   = useRouter();
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -63,6 +73,13 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
     fetch("/api/auth/me")
       .then((r) => r.ok ? r.json() : null)
       .then((d) => { if (d?.user) setUser({ name: d.user.name, email: d.user.email, profileImage: d.user.profileImage }); });
+  }, []);
+
+  useEffect(() => {
+    fetch("/api/admin/menu-config/super_admin")
+      .then((r) => r.ok ? r.json() : null)
+      .then((d) => { if (d && Array.isArray(d)) setMenuConfig(d); })
+      .catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -145,6 +162,26 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
     );
   };
 
+  const renderMenuItems = (items: MenuItem[]): React.ReactNode[] => {
+    return items.map((item, idx) => {
+      const badge = item.id === "members" ? pendingMembers : undefined;
+      return (
+        <div key={item.id}>
+          <div className={idx === 0 ? "pt-2 pb-1" : "pt-4 pb-1"}>{section(item.id, item.label, badge)}</div>
+          {expandedGroups.has(item.id) && (
+            <>
+              {item.children?.map((child) => (
+                <div key={child.id}>
+                  {nav(child.path || "#", <LayoutDashboard className="w-4 h-4" />, child.label, undefined, item.id)}
+                </div>
+              ))}
+            </>
+          )}
+        </div>
+      );
+    });
+  };
+
   return (
     <div className="h-screen flex bg-gray-50 overflow-hidden">
       {open && <div className="fixed inset-0 z-40 bg-black/40 lg:hidden" onClick={close} />}
@@ -168,71 +205,76 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
           onScroll={(e) => sessionStorage.setItem("superadmin-nav-scroll", String((e.currentTarget as HTMLElement).scrollTop))}
           className="flex-1 p-3 space-y-1 overflow-y-auto"
         >
-          {/* Platform */}
-          <div className="pt-2 pb-1">{section("platform", "แพลตฟอร์ม")}</div>
-
-          {expandedGroups.has("platform") && (
+          {menuConfig.length > 0 ? renderMenuItems(menuConfig) : (
             <>
-              {nav("/super-admin", <LayoutDashboard className="w-4 h-4" />, "ภาพรวม", undefined, "platform")}
-              {nav("/super-admin/analytics", <BarChart2 className="w-4 h-4" />, "Analytics", undefined, "platform")}
-              {nav("/super-admin/institutions", <Building2 className="w-4 h-4" />, "สถาบันทั้งหมด", undefined, "platform")}
-              {nav("/super-admin/trials", <FlaskConical className="w-4 h-4" />, "คำขอทดลองใช้งาน", undefined, "platform")}
-              {nav("/super-admin/payouts", <Receipt className="w-4 h-4" />, "Commission & Payout", undefined, "platform")}
-            </>
-          )}
+              {/* Platform */}
+              <div className="pt-2 pb-1">{section("platform", "แพลตฟอร์ม")}</div>
 
-          {/* Member management */}
-          <div className="pt-4 pb-1">{section("members", "จัดการสมาชิก", pendingMembers)}</div>
-          {expandedGroups.has("members") && (
-            <>
-              {nav("/super-admin/members", <UserCheck className="w-4 h-4" />, "อนุมัติสมาชิก", pendingMembers, "members")}
-              {nav("/super-admin/users", <UserCog className="w-4 h-4" />, "จัดการผู้ใช้งาน", undefined, "members")}
-            </>
-          )}
+              {expandedGroups.has("platform") && (
+                <>
+                  {nav("/super-admin", <LayoutDashboard className="w-4 h-4" />, "ภาพรวม", undefined, "platform")}
+                  {nav("/super-admin/analytics", <BarChart2 className="w-4 h-4" />, "Analytics", undefined, "platform")}
+                  {nav("/super-admin/institutions", <Building2 className="w-4 h-4" />, "สถาบันทั้งหมด", undefined, "platform")}
+                  {nav("/super-admin/trials", <FlaskConical className="w-4 h-4" />, "คำขอทดลองใช้งาน", undefined, "platform")}
+                  {nav("/super-admin/payouts", <Receipt className="w-4 h-4" />, "Commission & Payout", undefined, "platform")}
+                </>
+              )}
 
-          {/* Phase 5-6 features */}
-          <div className="pt-4 pb-1">{section("features", "ฟีเจอร์แพลตฟอร์ม", undefined, "accent")}</div>
-          {expandedGroups.has("features") && (
-            <>
-              {nav("/super-admin/live", <Radio className="w-4 h-4" />, "Live Sessions", undefined, "features")}
-              {nav("/super-admin/reviews", <Star className="w-4 h-4" />, "รีวิวคอร์ส", undefined, "features", "primary")}
-              {nav("/super-admin/forum", <MessageSquare className="w-4 h-4" />, "Forum", undefined, "features")}
-            </>
-          )}
+              {/* Member management */}
+              <div className="pt-4 pb-1">{section("members", "จัดการสมาชิก", pendingMembers)}</div>
+              {expandedGroups.has("members") && (
+                <>
+                  {nav("/super-admin/members", <UserCheck className="w-4 h-4" />, "อนุมัติสมาชิก", pendingMembers, "members")}
+                  {nav("/super-admin/users", <UserCog className="w-4 h-4" />, "จัดการผู้ใช้งาน", undefined, "members")}
+                </>
+              )}
 
-          {/* E-commerce */}
-          <div className="pt-4 pb-1">{section("commerce", "ระบบขาย")}</div>
-          {expandedGroups.has("commerce") && (
-            <>
-              {nav("/super-admin/products", <Package className="w-4 h-4" />, "จัดการสินค้า", undefined, "commerce")}
-              {nav("/super-admin/coupons", <Tag className="w-4 h-4" />, "คูปอง/โปรโมชั่น", undefined, "commerce")}
-            </>
-          )}
+              {/* Phase 5-6 features */}
+              <div className="pt-4 pb-1">{section("features", "ฟีเจอร์แพลตฟอร์ม", undefined, "accent")}</div>
+              {expandedGroups.has("features") && (
+                <>
+                  {nav("/super-admin/live", <Radio className="w-4 h-4" />, "Live Sessions", undefined, "features")}
+                  {nav("/super-admin/reviews", <Star className="w-4 h-4" />, "รีวิวคอร์ส", undefined, "features", "primary")}
+                  {nav("/super-admin/forum", <MessageSquare className="w-4 h-4" />, "Forum", undefined, "features")}
+                </>
+              )}
 
-          {/* Content management */}
-          <div className="pt-4 pb-1">{section("content", "จัดการเนื้อหา")}</div>
-          {expandedGroups.has("content") && (
-            <>
-              {nav("/super-admin/courses", <BookOpen className="w-4 h-4" />, "จัดการคอร์ส", undefined, "content")}
-              {nav("/super-admin/content", <FileText className="w-4 h-4" />, "เนื้อหาการเรียน", undefined, "content")}
-              {nav("/super-admin/revenue", <TrendingUp className="w-4 h-4" />, "รายได้", undefined, "content")}
-              {nav("/super-admin/schedule", <CalendarDays className="w-4 h-4" />, "ตารางเรียน", undefined, "content")}
-              {nav("/super-admin/teacher-schedule", <CalendarDays className="w-4 h-4" />, "ตารางสอน", undefined, "content")}
-            </>
-          )}
+              {/* E-commerce */}
+              <div className="pt-4 pb-1">{section("commerce", "ระบบขาย")}</div>
+              {expandedGroups.has("commerce") && (
+                <>
+                  {nav("/super-admin/products", <Package className="w-4 h-4" />, "จัดการสินค้า", undefined, "commerce")}
+                  {nav("/super-admin/coupons", <Tag className="w-4 h-4" />, "คูปอง/โปรโมชั่น", undefined, "commerce")}
+                </>
+              )}
 
-          {/* System */}
-          <div className="pt-4 pb-1">{section("system", "จัดการระบบ")}</div>
-          {expandedGroups.has("system") && (
-            <>
-              {nav("/super-admin/bookings", <Users className="w-4 h-4" />, "ตรวจสอบการชำระ", undefined, "system")}
-              {nav("/super-admin/orders", <ShoppingCart className="w-4 h-4" />, "จัดการคำสั่งซื้อ", undefined, "system")}
-              {nav("/super-admin/certificates", <Award className="w-4 h-4" />, "ใบรับรอง", undefined, "system")}
-              {nav("/super-admin/finance", <Wallet className="w-4 h-4" />, "ข้อมูลทางการเงิน", undefined, "system")}
-              {nav("/super-admin/banners", <Images className="w-4 h-4" />, "จัดการแบนเนอร์", undefined, "system")}
-              {nav("/super-admin/roles", <Shield className="w-4 h-4" />, "จัดการ Role", undefined, "system")}
-              {nav("/super-admin/logs", <ClipboardList className="w-4 h-4" />, "ประวัติการใช้งาน", undefined, "system")}
-              {nav("/super-admin/settings", <Settings className="w-4 h-4" />, "ตั้งค่าทั่วไป", undefined, "system")}
+              {/* Content management */}
+              <div className="pt-4 pb-1">{section("content", "จัดการเนื้อหา")}</div>
+              {expandedGroups.has("content") && (
+                <>
+                  {nav("/super-admin/courses", <BookOpen className="w-4 h-4" />, "จัดการคอร์ส", undefined, "content")}
+                  {nav("/super-admin/content", <FileText className="w-4 h-4" />, "เนื้อหาการเรียน", undefined, "content")}
+                  {nav("/super-admin/revenue", <TrendingUp className="w-4 h-4" />, "รายได้", undefined, "content")}
+                  {nav("/super-admin/schedule", <CalendarDays className="w-4 h-4" />, "ตารางเรียน", undefined, "content")}
+                  {nav("/super-admin/teacher-schedule", <CalendarDays className="w-4 h-4" />, "ตารางสอน", undefined, "content")}
+                </>
+              )}
+
+              {/* System */}
+              <div className="pt-4 pb-1">{section("system", "จัดการระบบ")}</div>
+              {expandedGroups.has("system") && (
+                <>
+                  {nav("/super-admin/bookings", <Users className="w-4 h-4" />, "ตรวจสอบการชำระ", undefined, "system")}
+                  {nav("/super-admin/orders", <ShoppingCart className="w-4 h-4" />, "จัดการคำสั่งซื้อ", undefined, "system")}
+                  {nav("/super-admin/certificates", <Award className="w-4 h-4" />, "ใบรับรอง", undefined, "system")}
+                  {nav("/super-admin/finance", <Wallet className="w-4 h-4" />, "ข้อมูลทางการเงิน", undefined, "system")}
+                  {nav("/super-admin/banners", <Images className="w-4 h-4" />, "จัดการแบนเนอร์", undefined, "system")}
+                  {nav("/super-admin/roles", <Shield className="w-4 h-4" />, "จัดการ Role", undefined, "system")}
+                  {nav("/super-admin/menu-config", <Layout className="w-4 h-4" />, "จัดการเมนู", undefined, "system")}
+                  {nav("/super-admin/logs", <ClipboardList className="w-4 h-4" />, "ประวัติการใช้งาน", undefined, "system")}
+                  {nav("/super-admin/settings", <Settings className="w-4 h-4" />, "ตั้งค่าทั่วไป", undefined, "system")}
+                </>
+              )}
             </>
           )}
         </nav>
