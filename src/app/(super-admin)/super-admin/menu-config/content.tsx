@@ -87,7 +87,12 @@ export default function MenuConfigContent() {
 
   const isRouteUsed = (path: string): boolean => {
     for (const group of menuGroups) {
-      if (group.path === path || group.children.some(child => child.path === path)) {
+      // Check if single item uses this path
+      if (group.isSingleItem && group.path === path) {
+        return true;
+      }
+      // Check if child item uses this path
+      if (group.children.some(child => child.path === path)) {
         return true;
       }
     }
