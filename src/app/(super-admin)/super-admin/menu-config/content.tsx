@@ -15,6 +15,8 @@ interface MenuGroup {
   id: string;
   label: string;
   children: MenuItem[];
+  isSingleItem?: boolean;
+  path?: string;
 }
 
 const ROLES = ["super_admin", "owner", "admin", "teacher", "parent", "student"];
@@ -57,6 +59,7 @@ export default function MenuConfigContent() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingText, setEditingText] = useState<string>("");
   const [showAddItemModal, setShowAddItemModal] = useState<string | null>(null);
+  const [showAddSingleItemModal, setShowAddSingleItemModal] = useState(false);
 
   useEffect(() => {
     fetchMenuConfig();
@@ -68,6 +71,15 @@ export default function MenuConfigContent() {
       saveDefaultMenu();
     }
   }, [selectedRole, menuGroups.length, loading]);
+
+  const isRouteUsed = (path: string): boolean => {
+    for (const group of menuGroups) {
+      if (group.path === path || group.children.some(child => child.path === path)) {
+        return true;
+      }
+    }
+    return false;
+  };
 
   const getDefaultMenus = () => {
     return [
@@ -397,6 +409,13 @@ export default function MenuConfigContent() {
           <Plus className="w-5 h-5" />
           เพิ่มหมวดหมู่ใหม่
         </button>
+        <button
+          onClick={() => setShowAddSingleItemModal(true)}
+          className="inline-flex items-center gap-2 px-6 py-3 border border-blue-300 text-blue-700 font-semibold rounded-lg hover:bg-blue-50"
+        >
+          <Plus className="w-5 h-5" />
+          เพิ่มรายการเดี่ยว
+        </button>
       </div>
 
       {/* Menu Editor */}
@@ -413,7 +432,51 @@ export default function MenuConfigContent() {
             </button>
           </div>
         ) : (
-          menuGroups.map((group, groupIdx) => (
+          menuGroups.map((group, groupIdx) => {
+            // Single item rendering
+            if (group.isSingleItem) {
+              return (
+                <div key={group.id} className="border border-gray-200 rounded-lg overflow-hidden">
+                  <div className="bg-white p-4 flex items-center gap-3 justify-between">
+                    <div className="flex items-center gap-3 flex-1">
+                      <GripVertical className="w-4 h-4 text-gray-400 cursor-move" />
+                      {editingId === group.id ? (
+                        <input
+                          autoFocus
+                          value={editingText}
+                          onChange={(e) => setEditingText(e.target.value)}
+                          onBlur={() => handleEditSave(group.id)}
+                          onKeyDown={(e) => e.key === "Enter" && handleEditSave(group.id)}
+                          className="flex-1 px-3 py-2 border border-gray-300 rounded text-sm"
+                        />
+                      ) : (
+                        <div className="flex-1">
+                          <span className="font-medium text-gray-900">{group.label}</span>
+                          <div className="text-xs text-gray-500">{group.path}</div>
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => handleEditStart(group.id, group.label)}
+                        className="p-2 text-indigo-600 hover:bg-indigo-50 rounded"
+                      >
+                        <Edit2 className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => deleteItem(group.id)}
+                        className="p-2 text-red-600 hover:bg-red-50 rounded"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              );
+            }
+
+            // Group rendering
+            return (
             <div key={group.id} className="border border-gray-200 rounded-lg overflow-hidden">
               {/* Group Header */}
               <div className="bg-gradient-to-r from-indigo-50 to-blue-50 p-4 flex items-center gap-3 justify-between">
@@ -527,13 +590,62 @@ export default function MenuConfigContent() {
                 </button>
               </div>
             </div>
-          ))
+            );
+          })
         )}
       </div>
 
       {modified && (
         <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg text-yellow-900">
           <p className="font-semibold">⚠️ มีการเปลี่ยนแปลง - กดบันทึกเพื่อบันทึก</p>
+        </div>
+      )}
+
+      {/* Add Single Item Modal */}
+      {showAddSingleItemModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-bold">เลือกหน้าที่ต้องการเพิ่ม</h3>
+              <button onClick={() => setShowAddSingleItemModal(false)} className="text-gray-400 hover:text-gray-600">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="space-y-2 max-h-96 overflow-y-auto">
+              {AVAILABLE_ROUTES.map(route => {
+                const used = isRouteUsed(route.path);
+                return (
+                  <button
+                    key={route.path}
+                    onClick={() => {
+                      if (!used) {
+                        const newItem: MenuGroup = {
+                          id: `single-${Date.now()}`,
+                          label: route.label,
+                          path: route.path,
+                          children: [],
+                          isSingleItem: true,
+                        };
+                        setMenuGroups([...menuGroups, newItem]);
+                        setModified(true);
+                        setShowAddSingleItemModal(false);
+                      }
+                    }}
+                    disabled={used}
+                    className={`w-full text-left px-4 py-3 rounded border transition-colors ${
+                      used
+                        ? "border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed"
+                        : "border-gray-200 hover:bg-blue-50 hover:border-blue-300"
+                    }`}
+                  >
+                    <div className="font-medium">{route.label}</div>
+                    <div className="text-xs">{route.path}</div>
+                    {used && <div className="text-xs mt-1">✓ ใช้แล้ว</div>}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
         </div>
       )}
 
@@ -548,20 +660,29 @@ export default function MenuConfigContent() {
               </button>
             </div>
             <div className="space-y-2 max-h-96 overflow-y-auto">
-              {AVAILABLE_ROUTES.map(route => (
-                <button
-                  key={route.path}
-                  onClick={() => {
-                    if (showAddItemModal) {
-                      addMenuItem(showAddItemModal, route.path);
-                    }
-                  }}
-                  className="w-full text-left px-4 py-3 rounded border border-gray-200 hover:bg-indigo-50 hover:border-indigo-300 transition-colors"
-                >
-                  <div className="font-medium text-gray-900">{route.label}</div>
-                  <div className="text-xs text-gray-500">{route.path}</div>
-                </button>
-              ))}
+              {AVAILABLE_ROUTES.map(route => {
+                const used = isRouteUsed(route.path);
+                return (
+                  <button
+                    key={route.path}
+                    onClick={() => {
+                      if (showAddItemModal && !used) {
+                        addMenuItem(showAddItemModal, route.path);
+                      }
+                    }}
+                    disabled={used}
+                    className={`w-full text-left px-4 py-3 rounded border transition-colors ${
+                      used
+                        ? "border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed"
+                        : "border-gray-200 hover:bg-indigo-50 hover:border-indigo-300"
+                    }`}
+                  >
+                    <div className="font-medium">{route.label}</div>
+                    <div className="text-xs">{route.path}</div>
+                    {used && <div className="text-xs mt-1">✓ ใช้แล้ว</div>}
+                  </button>
+                );
+              })}
             </div>
           </div>
         </div>

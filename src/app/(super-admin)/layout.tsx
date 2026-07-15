@@ -78,7 +78,11 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
   useEffect(() => {
     fetch("/api/admin/menu-config/super_admin")
       .then((r) => r.ok ? r.json() : null)
-      .then((d) => { if (d && Array.isArray(d)) setMenuConfig(d); })
+      .then((d) => {
+        if (d?.items && Array.isArray(d.items) && d.items.length > 0) {
+          setMenuConfig(d.items);
+        }
+      })
       .catch(() => {});
   }, []);
 
@@ -162,6 +166,35 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
     );
   };
 
+  const getMenuIcon = (label: string) => {
+    if (label.includes("Analytics")) return <BarChart2 className="w-4 h-4" />;
+    if (label.includes("สถาบัน")) return <Building2 className="w-4 h-4" />;
+    if (label.includes("ทดลองใช้")) return <FlaskConical className="w-4 h-4" />;
+    if (label.includes("Commission")) return <Receipt className="w-4 h-4" />;
+    if (label.includes("อนุมัติ")) return <UserCheck className="w-4 h-4" />;
+    if (label.includes("ผู้ใช้")) return <UserCog className="w-4 h-4" />;
+    if (label.includes("Live")) return <Radio className="w-4 h-4" />;
+    if (label.includes("รีวิว")) return <Star className="w-4 h-4" />;
+    if (label.includes("Forum")) return <MessageSquare className="w-4 h-4" />;
+    if (label.includes("สินค้า")) return <Package className="w-4 h-4" />;
+    if (label.includes("คูปอง")) return <Tag className="w-4 h-4" />;
+    if (label.includes("คอร์ส")) return <BookOpen className="w-4 h-4" />;
+    if (label.includes("เนื้อหา")) return <FileText className="w-4 h-4" />;
+    if (label.includes("รายได้")) return <TrendingUp className="w-4 h-4" />;
+    if (label.includes("ตารางเรียน")) return <CalendarDays className="w-4 h-4" />;
+    if (label.includes("ตารางสอน")) return <CalendarDays className="w-4 h-4" />;
+    if (label.includes("ใบรับรอง")) return <Award className="w-4 h-4" />;
+    if (label.includes("ตรวจสอบ")) return <Users className="w-4 h-4" />;
+    if (label.includes("คำสั่งซื้อ")) return <ShoppingCart className="w-4 h-4" />;
+    if (label.includes("การเงิน")) return <Wallet className="w-4 h-4" />;
+    if (label.includes("แบนเนอร์")) return <Images className="w-4 h-4" />;
+    if (label.includes("Role")) return <Shield className="w-4 h-4" />;
+    if (label.includes("เมนู")) return <Layout className="w-4 h-4" />;
+    if (label.includes("ประวัติ")) return <ClipboardList className="w-4 h-4" />;
+    if (label.includes("ตั้งค่า")) return <Settings className="w-4 h-4" />;
+    return <LayoutDashboard className="w-4 h-4" />;
+  };
+
   const renderMenuItems = (items: MenuItem[]): React.ReactNode[] => {
     return items.map((item, idx) => {
       const badge = item.id === "members" ? pendingMembers : undefined;
@@ -172,7 +205,7 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
             <>
               {item.children?.map((child) => (
                 <div key={child.id}>
-                  {nav(child.path || "#", <LayoutDashboard className="w-4 h-4" />, child.label, undefined, item.id)}
+                  {nav(child.path || "#", getMenuIcon(child.label), child.label, undefined, item.id)}
                 </div>
               ))}
             </>
