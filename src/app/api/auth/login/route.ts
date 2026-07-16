@@ -34,14 +34,12 @@ export async function POST(req: NextRequest) {
 
     const institutionId = user.institutionId?.toString() ?? undefined;
 
-    const isOwner = user.role === "owner";
     const token = signToken({
       userId: user._id.toString(),
       email: user.email,
       name: user.name,
-      role: isOwner ? "admin" : (user.role as import("@/lib/auth").JwtPayload["role"]),
+      role: user.role as import("@/lib/auth").JwtPayload["role"],
       institutionId,
-      isOwner,
     });
 
     const res = NextResponse.json({

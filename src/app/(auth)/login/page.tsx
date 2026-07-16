@@ -152,8 +152,12 @@ export default function LoginPage() {
       } else {
         const role = data.user.role;
         let redirectPath = "/dashboard";
-        if (["admin", "owner"].includes(role)) redirectPath = "/admin";
-        if (["super_admin"].includes(role)) redirectPath = "/super-admin";
+        if (role === "owner") redirectPath = "/owner";
+        if (role === "admin") redirectPath = "/admin";
+        if (role === "super_admin") redirectPath = "/super-admin";
+        if (role === "teacher") redirectPath = "/teacher";
+        if (role === "parent") redirectPath = "/parent";
+        if (role === "student") redirectPath = "/student";
         router.push(redirectPath);
         router.refresh();
       }
