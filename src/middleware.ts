@@ -21,8 +21,12 @@ export async function middleware(req: NextRequest) {
 
     if (user && (pathname === "/login" || pathname === "/register")) {
       if (user.role === "super_admin") return NextResponse.redirect(new URL("/super-admin", req.url));
-      const dest = user.role === "admin" || user.role === "teacher" || user.role === "owner" ? "/admin" : "/dashboard";
-      return NextResponse.redirect(new URL(dest, req.url));
+      if (user.role === "admin") return NextResponse.redirect(new URL("/admin", req.url));
+      if (user.role === "owner") return NextResponse.redirect(new URL("/owner", req.url));
+      if (user.role === "teacher") return NextResponse.redirect(new URL("/teacher", req.url));
+      if (user.role === "parent") return NextResponse.redirect(new URL("/parent", req.url));
+      if (user.role === "student") return NextResponse.redirect(new URL("/student", req.url));
+      return NextResponse.redirect(new URL("/dashboard", req.url));
     }
 
     if ((pathname.startsWith("/dashboard") || pathname.startsWith("/student")) && !user) {
@@ -34,10 +38,31 @@ export async function middleware(req: NextRequest) {
       return NextResponse.redirect(new URL("/super-admin", req.url));
     }
 
+    // Admin-only pages
     if (
       pathname.startsWith("/admin") &&
       (!user || (user.role !== "admin" && user.role !== "teacher" && user.role !== "owner"))
     ) {
+      return NextResponse.redirect(new URL("/login", req.url));
+    }
+
+    // Owner-only pages
+    if (pathname.startsWith("/owner") && (!user || user.role !== "owner")) {
+      return NextResponse.redirect(new URL("/login", req.url));
+    }
+
+    // Teacher-only pages
+    if (pathname.startsWith("/teacher") && (!user || user.role !== "teacher")) {
+      return NextResponse.redirect(new URL("/login", req.url));
+    }
+
+    // Parent-only pages
+    if (pathname.startsWith("/parent") && (!user || user.role !== "parent")) {
+      return NextResponse.redirect(new URL("/login", req.url));
+    }
+
+    // Student-only pages
+    if (pathname.startsWith("/student") && (!user || user.role !== "student")) {
       return NextResponse.redirect(new URL("/login", req.url));
     }
 
@@ -64,7 +89,7 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/login", "/register", "/dashboard/:path*", "/student/:path*", "/admin/:path*", "/super-admin/:path*", "/api/:path*"],
+  matcher: ["/login", "/register", "/dashboard/:path*", "/student/:path*", "/admin/:path*", "/owner/:path*", "/teacher/:path*", "/parent/:path*", "/super-admin/:path*", "/api/:path*"],
 };
 
 export const runtime = "nodejs";
