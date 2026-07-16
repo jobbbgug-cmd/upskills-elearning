@@ -23,10 +23,10 @@ export async function GET(req: NextRequest) {
   let commissionRate = 0;
 
   if (auth.institutionId) {
-    if (auth.isOwner && branchId === "all") {
+    if (auth.role === "owner" && branchId === "all") {
       const children = await Institution.find({ parentId: auth.institutionId }).select("_id").lean() as { _id: mongoose.Types.ObjectId }[];
       institutionIds = [new mongoose.Types.ObjectId(auth.institutionId), ...children.map((c) => c._id)];
-    } else if (auth.isOwner && branchId && branchId !== auth.institutionId) {
+    } else if (auth.role === "owner" && branchId && branchId !== auth.institutionId) {
       institutionIds = [new mongoose.Types.ObjectId(branchId)];
     } else {
       institutionIds = [new mongoose.Types.ObjectId(auth.institutionId)];
