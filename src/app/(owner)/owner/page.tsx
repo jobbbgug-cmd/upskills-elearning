@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import { withTimeout } from "@/lib/query-timeout";
 import { getAuthUser } from "@/lib/auth";
 import { connectDB } from "@/lib/mongodb";
 import Course from "@/models/Course";
@@ -120,7 +121,12 @@ export default async function OwnerPage({ searchParams }: { searchParams: Promis
     displayName = inst?.name ?? "";
   }
 
-  const stats = await getStats(auth.role, auth.userId, statsInstitutionId, allBranchIds);
+  const defaultStats = { totalCourses: 0, activeCourses: 0, totalContent: 0, pendingBookings: 0, confirmedBookings: 0, totalStudents: 0, pendingUsers: 0, revenue: 0, pendingRevenue: 0, commissionRate: 0 };
+  const stats = await withTimeout(
+    getStats(auth.role, auth.userId, statsInstitutionId, allBranchIds),
+    10000,
+    defaultStats
+  );
 
   const today = new Date().toLocaleDateString("th-TH", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
 
