@@ -614,6 +614,34 @@ export default function MenuConfigContent() {
                       )}
                     </div>
                     <div className="flex gap-2">
+                      {groupIdx > 0 && (
+                        <button
+                          onClick={() => {
+                            const newGroups = [...menuGroups];
+                            [newGroups[groupIdx], newGroups[groupIdx - 1]] = [newGroups[groupIdx - 1], newGroups[groupIdx]];
+                            setMenuGroups(newGroups);
+                            setModified(true);
+                          }}
+                          className="p-2 text-gray-600 hover:bg-gray-200 rounded"
+                          title="ขึ้น"
+                        >
+                          <ChevronUp className="w-3 h-3" />
+                        </button>
+                      )}
+                      {groupIdx < menuGroups.length - 1 && (
+                        <button
+                          onClick={() => {
+                            const newGroups = [...menuGroups];
+                            [newGroups[groupIdx], newGroups[groupIdx + 1]] = [newGroups[groupIdx + 1], newGroups[groupIdx]];
+                            setMenuGroups(newGroups);
+                            setModified(true);
+                          }}
+                          className="p-2 text-gray-600 hover:bg-gray-200 rounded"
+                          title="ลง"
+                        >
+                          <ChevronDown className="w-3 h-3" />
+                        </button>
+                      )}
                       <button
                         onClick={() => handleEditStart(group.id, group.label)}
                         className="p-2 text-indigo-600 hover:bg-indigo-50 rounded"
