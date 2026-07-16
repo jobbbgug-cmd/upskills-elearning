@@ -22,7 +22,7 @@ export async function middleware(req: NextRequest) {
     if (user && (pathname === "/login" || pathname === "/register")) {
       if (user.role === "super_admin") return NextResponse.redirect(new URL("/super-admin", req.url));
       if (user.role === "admin") return NextResponse.redirect(new URL("/admin", req.url));
-      if (user.role === "owner") return NextResponse.redirect(new URL("/owner", req.url));
+      if (user.role === "owner") return NextResponse.redirect(new URL("/admin", req.url));
       if (user.role === "teacher") return NextResponse.redirect(new URL("/teacher", req.url));
       if (user.role === "parent") return NextResponse.redirect(new URL("/parent", req.url));
       if (user.role === "student") return NextResponse.redirect(new URL("/student", req.url));
