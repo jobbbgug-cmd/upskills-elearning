@@ -23,8 +23,8 @@ async function getStats(role: string, userId: string, institutionId?: string, al
     ? { institutionId: { $in: allBranchIds } }
     : institutionId ? { institutionId } : {};
 
-  const courseFilter = role === "teacher"
-    ? { ...tenantClause, instructorId: userId }
+  const courseFilter = (role === "teacher" || role === "owner")
+    ? { ...tenantClause, ...(role === "teacher" ? { instructorId: userId } : {}) }
     : tenantClause;
 
   const courses = await Course.find(courseFilter).select("_id price isActive").lean();
@@ -68,9 +68,9 @@ async function getStats(role: string, userId: string, institutionId?: string, al
   return { totalCourses: courses.length, activeCourses, totalContent, pendingBookings, confirmedBookings, totalStudents, pendingUsers, revenue, pendingRevenue, commissionRate };
 }
 
-export default async function AdminPage({ searchParams }: { searchParams: Promise<{ branchId?: string }> }) {
+export default async function OwnerPage({ searchParams }: { searchParams: Promise<{ branchId?: string }> }) {
   const auth = await getAuthUser();
-  if (!auth || (auth.role !== "admin" && auth.role !== "teacher")) redirect("/login");
+  if (!auth || (auth.role !== "owner" && auth.role !== "admin" && auth.role !== "teacher")) redirect("/login");
 
   const { branchId } = await searchParams;
   const isAdmin = auth.role === "admin";
