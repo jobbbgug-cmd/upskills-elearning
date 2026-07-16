@@ -120,7 +120,11 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
     displayName = inst?.name ?? "";
   }
 
-  const stats = await getStats(auth.role, auth.userId, statsInstitutionId, allBranchIds);
+  const defaultStats = { totalCourses: 0, activeCourses: 0, totalContent: 0, pendingBookings: 0, confirmedBookings: 0, totalStudents: 0, pendingUsers: 0, revenue: 0, pendingRevenue: 0, commissionRate: 0 };
+  const stats = await Promise.race([
+    getStats(auth.role, auth.userId, statsInstitutionId, allBranchIds),
+    new Promise<typeof defaultStats>((resolve) => setTimeout(() => resolve(defaultStats), 10000)),
+  ]);
 
   const today = new Date().toLocaleDateString("th-TH", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
 
