@@ -410,12 +410,6 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
                   <div className="text-sm font-medium text-gray-800">{user?.name || getRoleLabel(user?.role)}</div>
                   <div className="text-xs theme-link">{getRoleLabel(user?.role)}</div>
                 </div>
-                <Link href={`/${user?.role}/profile`} onClick={() => setUserDropdown(false)}
-                  className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
-                  <ShieldCheck className="w-4 h-4" />
-                  โปรไฟล์ของฉัน
-                </Link>
-
                 {/* Theme Switcher */}
                 <div className="relative">
                   <button onClick={() => setThemeOpen(!themeOpen)} className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors text-left">
