@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getAuthUser } from "@/lib/auth";
+import { withTimeout } from "@/lib/query-timeout";
 import { connectDB } from "@/lib/mongodb";
 import Institution from "@/models/Institution";
 import User from "@/models/User";
@@ -63,11 +64,13 @@ async function getStats() {
   return { totalInstitutions, activeInstitutions, totalUsers, totalCourses, totalConfirmed, totalPending, totalRevenue, totalCommission, planCounts, recent };
 }
 
+const defaultStats = { totalInstitutions: 0, activeInstitutions: 0, totalUsers: 0, totalCourses: 0, totalConfirmed: 0, totalPending: 0, totalRevenue: 0, totalCommission: 0, planCounts: {}, recent: [] };
+
 export default async function SuperAdminPage() {
   const auth = await getAuthUser();
   if (!auth || auth.role !== "super_admin") redirect("/login");
 
-  const s = await getStats();
+  const s = await withTimeout(getStats(), 10000, defaultStats);
 
   return (
     <div className="space-y-6">
