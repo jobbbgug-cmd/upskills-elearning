@@ -71,7 +71,7 @@ async function getStats(role: string, userId: string, institutionId?: string, al
 
 export default async function OwnerPage({ searchParams }: { searchParams: Promise<{ branchId?: string }> }) {
   const auth = await getAuthUser();
-  if (!auth || (auth.role !== "owner" && auth.role !== "admin" && auth.role !== "teacher")) redirect("/login");
+  if (!auth || (auth.role !== "owner" && auth.role !== "admin" && auth.role !== "teacher" && auth.role !== "owner")) redirect("/login");
 
   const { branchId } = await searchParams;
   const isAdmin = auth.role === "admin";

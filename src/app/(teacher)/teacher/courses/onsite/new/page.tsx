@@ -4,7 +4,7 @@ import CourseForm from "@/components/CourseForm";
 
 export default async function NewOnsiteCoursePassPage() {
   const auth = await getAuthUser();
-  if (!auth || (auth.role !== "admin" && auth.role !== "teacher")) redirect("/login");
+  if (!auth || (auth.role !== "admin" && auth.role !== "teacher" && auth.role !== "owner")) redirect("/login");
 
   return (
     <div>

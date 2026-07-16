@@ -18,7 +18,7 @@ async function getContent(id: string): Promise<ICourseContent | null> {
 
 export default async function EditContentPage({ params }: { params: Promise<{ id: string }> }) {
   const auth = await getAuthUser();
-  if (!auth || (auth.role !== "admin" && auth.role !== "teacher")) redirect("/login");
+  if (!auth || (auth.role !== "admin" && auth.role !== "teacher" && auth.role !== "owner")) redirect("/login");
 
   const { id } = await params;
   const content = await getContent(id);
