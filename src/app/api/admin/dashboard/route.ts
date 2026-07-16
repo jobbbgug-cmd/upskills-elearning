@@ -11,7 +11,7 @@ const MONTH_TH = ["ม.ค.","ก.พ.","มี.ค.","เม.ย.","พ.ค.","
 
 export async function GET(req: NextRequest) {
   const auth = await getAuthUser();
-  if (!auth || (auth.role !== "admin" && auth.role !== "super_admin")) {
+  if (!auth || (auth.role !== "admin" && auth.role !== "super_admin" && auth.role !== "owner")) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
