@@ -24,7 +24,7 @@ export async function resolveInstitutionId(
     const cookieStore = await cookies();
     const token = cookieStore.get("token")?.value;
     const payload = token ? verifyToken(token) : null;
-    if (payload?.isOwner) {
+    if (payload?.role === "owner") {
       const activeBranchId = cookieStore.get("activeBranchId")?.value;
       if (activeBranchId) return activeBranchId;
     }
