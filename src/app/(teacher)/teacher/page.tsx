@@ -83,7 +83,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
   let selectedBranchId = branchId ?? auth.institutionId ?? "";
   let displayName = "";
 
-  if (auth.isOwner && auth.institutionId) {
+  if (auth.role === "owner" && auth.institutionId) {
     await connectDB();
     const [parent, children] = await Promise.all([
       Institution.findById(auth.institutionId).select("_id name").lean() as unknown as Promise<{ _id: mongoose.Types.ObjectId; name: string } | null>,
@@ -142,7 +142,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
           <p className="text-sm text-gray-400 mt-0.5">{today}</p>
         </div>
         <div className="flex items-center gap-3 flex-wrap">
-          {auth.isOwner && branches.length > 1 && (
+          {auth.role === "owner" && branches.length > 1 && (
             <BranchFilter branches={branches} selected={selectedBranchId} />
           )}
           {displayName && (
