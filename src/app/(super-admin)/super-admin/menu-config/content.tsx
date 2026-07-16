@@ -131,15 +131,15 @@ const ROLE_ROUTES: Record<string, Array<{ path: string; label: string }>> = {
     { path: "/parent/reviews", label: "รีวิว" },
   ],
   student: [
-    { path: "/student", label: "ภาพรวม" },
-    { path: "/student/my-courses", label: "คอร์สของฉัน" },
-    { path: "/student/learning", label: "การเรียน" },
     { path: "/student/assignments", label: "การบ้าน" },
+    { path: "/student/attendance", label: "เช็คชื่อ" },
     { path: "/student/exams", label: "ข้อสอบ" },
+    { path: "/student/live", label: "Live Class" },
     { path: "/student/schedule", label: "ตารางเรียน" },
-    { path: "/student/forum", label: "Forum" },
     { path: "/student/certificates", label: "ใบรับรอง" },
-    { path: "/student/profile", label: "โปรไฟล์" },
+    { path: "/student/billing", label: "ใบเสร็จ" },
+    { path: "/student/forum", label: "Forum" },
+    { path: "/student/reviews", label: "รีวิว" },
   ],
 };
 
