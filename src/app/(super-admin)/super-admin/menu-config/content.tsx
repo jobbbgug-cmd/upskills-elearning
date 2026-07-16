@@ -21,34 +21,122 @@ interface MenuGroup {
 
 const ROLES = ["super_admin", "owner", "admin", "teacher", "parent", "student"];
 
-const AVAILABLE_ROUTES = [
-  { path: "/super-admin", label: "ภาพรวม" },
-  { path: "/super-admin/analytics", label: "Analytics" },
-  { path: "/super-admin/institutions", label: "สถาบันทั้งหมด" },
-  { path: "/super-admin/trials", label: "คำขอทดลองใช้งาน" },
-  { path: "/super-admin/payouts", label: "Commission & Payout" },
-  { path: "/super-admin/members", label: "อนุมัติสมาชิก" },
-  { path: "/super-admin/users", label: "จัดการผู้ใช้งาน" },
-  { path: "/super-admin/live", label: "Live Sessions" },
-  { path: "/super-admin/reviews", label: "รีวิวคอร์ส" },
-  { path: "/super-admin/forum", label: "Forum" },
-  { path: "/super-admin/products", label: "จัดการสินค้า" },
-  { path: "/super-admin/coupons", label: "คูปอง/โปรโมชั่น" },
-  { path: "/super-admin/courses", label: "จัดการคอร์ส" },
-  { path: "/super-admin/content", label: "เนื้อหาการเรียน" },
-  { path: "/super-admin/revenue", label: "รายได้" },
-  { path: "/super-admin/schedule", label: "ตารางเรียน" },
-  { path: "/super-admin/teacher-schedule", label: "ตารางสอน" },
-  { path: "/super-admin/certificates", label: "ใบรับรอง" },
-  { path: "/super-admin/bookings", label: "ตรวจสอบการชำระ" },
-  { path: "/super-admin/orders", label: "จัดการคำสั่งซื้อ" },
-  { path: "/super-admin/finance", label: "ข้อมูลทางการเงิน" },
-  { path: "/super-admin/banners", label: "จัดการแบนเนอร์" },
-  { path: "/super-admin/roles", label: "จัดการ Role" },
-  { path: "/super-admin/menu-config", label: "จัดการเมนู" },
-  { path: "/super-admin/logs", label: "ประวัติการใช้งาน" },
-  { path: "/super-admin/settings", label: "ตั้งค่าทั่วไป" },
-];
+const ROLE_ROUTES: Record<string, Array<{ path: string; label: string }>> = {
+  super_admin: [
+    { path: "/super-admin", label: "ภาพรวม" },
+    { path: "/super-admin/institutions", label: "สถาบันทั้งหมด" },
+    { path: "/super-admin/trials", label: "คำขอทดลองใช้งาน" },
+    { path: "/super-admin/members", label: "อนุมัติสมาชิก" },
+    { path: "/super-admin/users", label: "จัดการผู้ใช้งาน" },
+    { path: "/super-admin/payouts", label: "Commission & Payout" },
+    { path: "/super-admin/bookings", label: "ตรวจสอบการชำระ" },
+    { path: "/super-admin/finance", label: "ข้อมูลทางการเงิน" },
+    { path: "/super-admin/analytics", label: "Analytics" },
+    { path: "/super-admin/courses", label: "จัดการคอร์ส" },
+    { path: "/super-admin/content", label: "เนื้อหาการเรียน" },
+    { path: "/super-admin/schedule", label: "ตารางเรียน" },
+    { path: "/super-admin/teacher-schedule", label: "ตารางสอน" },
+    { path: "/super-admin/certificates", label: "ใบรับรอง" },
+    { path: "/super-admin/orders", label: "จัดการคำสั่งซื้อ" },
+    { path: "/super-admin/products", label: "จัดการสินค้า" },
+    { path: "/super-admin/coupons", label: "คูปอง/โปรโมชั่น" },
+    { path: "/super-admin/reviews", label: "รีวิวคอร์ส" },
+    { path: "/super-admin/live", label: "Live Sessions" },
+    { path: "/super-admin/forum", label: "Forum" },
+    { path: "/super-admin/banners", label: "จัดการแบนเนอร์" },
+    { path: "/super-admin/roles", label: "จัดการ Role" },
+    { path: "/super-admin/menu-config", label: "จัดการเมนู" },
+    { path: "/super-admin/logs", label: "ประวัติการใช้งาน" },
+    { path: "/super-admin/settings", label: "ตั้งค่าทั่วไป" },
+  ],
+  owner: [
+    { path: "/owner", label: "ภาพรวม" },
+    { path: "/owner/students", label: "จัดการนักเรียน" },
+    { path: "/owner/assignments", label: "การบ้าน" },
+    { path: "/owner/exams", label: "ข้อสอบ" },
+    { path: "/owner/live", label: "Live Class" },
+    { path: "/owner/teacher-portal", label: "Teacher Portal" },
+    { path: "/owner/forum", label: "Forum" },
+    { path: "/owner/courses", label: "จัดการคอร์ส" },
+    { path: "/owner/content", label: "เนื้อหาการเรียน" },
+    { path: "/owner/schedule", label: "ตารางเรียน" },
+    { path: "/owner/teacher-schedule", label: "ตารางสอน" },
+    { path: "/owner/certificates", label: "ใบรับรอง" },
+    { path: "/owner/approve-members", label: "อนุมัติสมาชิก" },
+    { path: "/owner/users", label: "จัดการผู้ใช้" },
+    { path: "/owner/orders", label: "จัดการคำสั่งซื้อ" },
+    { path: "/owner/products", label: "จัดการสินค้า" },
+    { path: "/owner/coupons", label: "คูปอง/โปรโมชั่น" },
+    { path: "/owner/analytics", label: "Analytics" },
+    { path: "/owner/revenue", label: "รายได้" },
+    { path: "/owner/billing", label: "Billing & ใบเสร็จ" },
+    { path: "/owner/landing-page", label: "Landing Page" },
+    { path: "/owner/reviews", label: "รีวิวคอร์ส" },
+    { path: "/owner/notifications", label: "แจ้งเตือน" },
+    { path: "/owner/banners", label: "จัดการแบรนเนอร์" },
+    { path: "/owner/branding", label: "จัดการ Branding" },
+  ],
+  admin: [
+    { path: "/admin", label: "ภาพรวม" },
+    { path: "/admin/students", label: "จัดการนักเรียน" },
+    { path: "/admin/courses", label: "จัดการคอร์ส" },
+    { path: "/admin/content", label: "เนื้อหาการเรียน" },
+    { path: "/admin/schedule", label: "ตารางเรียน" },
+    { path: "/admin/teacher-schedule", label: "ตารางสอน" },
+    { path: "/admin/certificates", label: "ใบรับรอง" },
+    { path: "/admin/members", label: "อนุมัติสมาชิก" },
+    { path: "/admin/users", label: "จัดการผู้ใช้" },
+    { path: "/admin/orders", label: "จัดการคำสั่งซื้อ" },
+    { path: "/admin/products", label: "จัดการสินค้า" },
+    { path: "/admin/coupons", label: "คูปอง/โปรโมชั่น" },
+    { path: "/admin/analytics", label: "Analytics" },
+    { path: "/admin/revenue", label: "รายได้" },
+    { path: "/admin/bookings", label: "ตรวจสอบการชำระ" },
+    { path: "/admin/reviews", label: "รีวิวคอร์ส" },
+    { path: "/admin/live", label: "Live Sessions" },
+    { path: "/admin/forum", label: "Forum" },
+    { path: "/admin/banners", label: "จัดการแบนเนอร์" },
+    { path: "/admin/settings", label: "ตั้งค่าทั่วไป" },
+  ],
+  teacher: [
+    { path: "/teacher", label: "ภาพรวม" },
+    { path: "/teacher/my-courses", label: "คอร์สของฉัน" },
+    { path: "/teacher/students", label: "นักเรียนของฉัน" },
+    { path: "/teacher/assignments", label: "การบ้าน" },
+    { path: "/teacher/exams", label: "ข้อสอบ" },
+    { path: "/teacher/live", label: "Live Class" },
+    { path: "/teacher/content", label: "เนื้อหาการเรียน" },
+    { path: "/teacher/schedule", label: "ตารางสอน" },
+    { path: "/teacher/forum", label: "Forum" },
+    { path: "/teacher/reviews", label: "รีวิวคอร์ส" },
+    { path: "/teacher/earnings", label: "รายได้ของฉัน" },
+    { path: "/teacher/profile", label: "โปรไฟล์" },
+  ],
+  parent: [
+    { path: "/parent", label: "ภาพรวม" },
+    { path: "/parent/my-children", label: "บุตรหลาน" },
+    { path: "/parent/courses", label: "คอร์สของบุตรหลาน" },
+    { path: "/parent/progress", label: "ความก้าวหน้า" },
+    { path: "/parent/schedule", label: "ตารางเรียน" },
+    { path: "/parent/forum", label: "Forum" },
+    { path: "/parent/notifications", label: "แจ้งเตือน" },
+    { path: "/parent/billing", label: "ใบเสร็จ" },
+    { path: "/parent/profile", label: "โปรไฟล์" },
+  ],
+  student: [
+    { path: "/student", label: "ภาพรวม" },
+    { path: "/student/my-courses", label: "คอร์สของฉัน" },
+    { path: "/student/learning", label: "การเรียน" },
+    { path: "/student/assignments", label: "การบ้าน" },
+    { path: "/student/exams", label: "ข้อสอบ" },
+    { path: "/student/schedule", label: "ตารางเรียน" },
+    { path: "/student/forum", label: "Forum" },
+    { path: "/student/certificates", label: "ใบรับรอง" },
+    { path: "/student/profile", label: "โปรไฟล์" },
+  ],
+};
+
+const getAvailableRoutes = (role: string) => ROLE_ROUTES[role] || [];
 
 export default function MenuConfigContent() {
   const [selectedRole, setSelectedRole] = useState<string>("super_admin");
@@ -326,7 +414,7 @@ export default function MenuConfigContent() {
   };
 
   const addMenuItem = (groupId: string, routePath: string) => {
-    const route = AVAILABLE_ROUTES.find(r => r.path === routePath);
+    const route = getAvailableRoutes(selectedRole).find(r => r.path === routePath);
     if (!route) return;
 
     const newId = `item-${Date.now()}`;
@@ -704,7 +792,7 @@ export default function MenuConfigContent() {
               </button>
             </div>
             <div className="space-y-2 max-h-96 overflow-y-auto">
-              {AVAILABLE_ROUTES.map(route => {
+              {getAvailableRoutes(selectedRole).map(route => {
                 const used = isRouteUsed(route.path);
                 return (
                   <button
@@ -752,7 +840,7 @@ export default function MenuConfigContent() {
               </button>
             </div>
             <div className="space-y-2 max-h-96 overflow-y-auto">
-              {AVAILABLE_ROUTES.map(route => {
+              {getAvailableRoutes(selectedRole).map(route => {
                 const used = isRouteUsed(route.path);
                 return (
                   <button
