@@ -72,20 +72,27 @@ export default async function HomePage() {
               <Link href="/courses" className="bg-white text-indigo-700 font-semibold px-8 py-3.5 rounded-xl hover:bg-indigo-50 transition-colors shadow-lg">
                 ดูคอร์สทั้งหมด
               </Link>
-              {user ? (
-                <Link href={
-                  user.role === "super_admin" ? "/super-admin" :
-                  user.role === "admin" ? "/admin" :
-                  user.role === "owner" ? "/owner" :
-                  user.role === "teacher" ? "/teacher" :
-                  user.role === "parent" ? "/parent" :
-                  user.role === "student" ? "/student" :
-                  "/dashboard"
-                }
-                  className="bg-indigo-500 text-white font-semibold px-8 py-3.5 rounded-xl hover:bg-indigo-400 transition-colors border border-indigo-400">
+              {user && user.role === "owner" && (
+                <Link href="/owner" className="bg-indigo-500 text-white font-semibold px-8 py-3.5 rounded-xl hover:bg-indigo-400 transition-colors border border-indigo-400">
                   จัดการหลังบ้าน
                 </Link>
-              ) : (
+              )}
+              {user && user.role === "admin" && (
+                <Link href="/admin" className="bg-indigo-500 text-white font-semibold px-8 py-3.5 rounded-xl hover:bg-indigo-400 transition-colors border border-indigo-400">
+                  จัดการหลังบ้าน
+                </Link>
+              )}
+              {user && user.role === "super_admin" && (
+                <Link href="/super-admin" className="bg-indigo-500 text-white font-semibold px-8 py-3.5 rounded-xl hover:bg-indigo-400 transition-colors border border-indigo-400">
+                  จัดการหลังบ้าน
+                </Link>
+              )}
+              {user && (user.role === "teacher" || user.role === "parent" || user.role === "student") && (
+                <Link href={user.role === "teacher" ? "/teacher" : user.role === "parent" ? "/parent" : "/student"} className="bg-indigo-500 text-white font-semibold px-8 py-3.5 rounded-xl hover:bg-indigo-400 transition-colors border border-indigo-400">
+                  จัดการหลังบ้าน
+                </Link>
+              )}
+              {!user && (
                 <Link href="/register" className="bg-indigo-500 text-white font-semibold px-8 py-3.5 rounded-xl hover:bg-indigo-400 transition-colors border border-indigo-400">
                   สมัครสมาชิกฟรี
                 </Link>

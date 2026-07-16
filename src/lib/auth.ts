@@ -29,6 +29,9 @@ export function verifyToken(token: string): JwtPayload | null {
 export async function getAuthUser(): Promise<JwtPayload | null> {
   const cookieStore = await cookies();
   const token = cookieStore.get("token")?.value;
+  console.log("[getAuthUser] token exists:", !!token);
   if (!token) return null;
-  return verifyToken(token);
+  const verified = verifyToken(token);
+  console.log("[getAuthUser] verified:", verified);
+  return verified;
 }
