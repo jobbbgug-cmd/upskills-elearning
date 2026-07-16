@@ -6,8 +6,9 @@ export interface IMenuItem {
   icon?: string;
   path?: string;
   children?: IMenuItem[];
-  order: number;
+  order?: number;
   hidden?: boolean;
+  isSingleItem?: boolean;
 }
 
 export interface IMenuConfig extends Document {
@@ -24,6 +25,7 @@ const menuItemSchema: any = new Schema({
   path: String,
   order: Number,
   hidden: Boolean,
+  isSingleItem: Boolean,
   children: { type: [Schema.Types.Mixed], default: [] },
 }, { _id: false });
 

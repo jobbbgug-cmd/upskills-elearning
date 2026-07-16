@@ -74,16 +74,6 @@ export default function MenuConfigContent() {
     }
   }, [selectedRole, menuGroups.length, loading]);
 
-  useEffect(() => {
-    // Auto-save when modified (with debounce)
-    if (!modified || saving) return;
-
-    const timer = setTimeout(() => {
-      saveMenuConfig();
-    }, 1500); // Save after 1.5 seconds of inactivity
-
-    return () => clearTimeout(timer);
-  }, [modified, saving]);
 
   const isRouteUsed = (path: string): boolean => {
     for (const group of menuGroups) {
@@ -104,7 +94,9 @@ export default function MenuConfigContent() {
       {
         id: "overview",
         label: "ภาพรวม",
+        path: "/super-admin",
         children: [],
+        isSingleItem: true,
       },
       {
         id: "finance",
@@ -176,6 +168,7 @@ export default function MenuConfigContent() {
         children: [
           { id: "banners", label: "จัดการแบนเนอร์", path: "/admin/banners" },
           { id: "roles", label: "จัดการ Role", path: "/super-admin/roles" },
+          { id: "menu-config", label: "จัดการเมนู", path: "/super-admin/menu-config" },
           { id: "activity-logs", label: "ประวัติการใช้งาน", path: "/admin/activity-logs" },
           { id: "settings", label: "ตั้งค่าทั่วไป", path: "/admin/settings" },
         ],
@@ -194,8 +187,10 @@ export default function MenuConfigContent() {
         let currentGroup: MenuGroup | null = null;
 
         (data.items || []).forEach((item: any) => {
-          // Check if it's a single item (has path but no children or empty children)
-          if (item.path && (!item.children || item.children.length === 0)) {
+          // Check isSingleItem flag first, then fallback to path detection
+          const isSingle = item.isSingleItem || (item.path && (!item.children || item.children.length === 0));
+
+          if (isSingle) {
             groups.push({
               id: item.id,
               label: item.label,
@@ -234,13 +229,20 @@ export default function MenuConfigContent() {
   const saveDefaultMenu = async () => {
     try {
       const defaultMenus = getDefaultMenus();
-      const items: MenuItem[] = [];
+      const items: any[] = [];
       defaultMenus.forEach(group => {
-        items.push({
+        const item: any = {
           id: group.id,
           label: group.label,
-          children: group.children,
-        });
+        };
+        if (group.isSingleItem) {
+          item.path = group.path;
+          item.isSingleItem = true;
+          item.children = [];
+        } else {
+          item.children = group.children;
+        }
+        items.push(item);
       });
 
       const res = await fetch(`/api/admin/menu-config/${selectedRole}`, {
@@ -271,6 +273,7 @@ export default function MenuConfigContent() {
         if (group.isSingleItem) {
           item.path = group.path;
           item.children = [];
+          item.isSingleItem = true;
         } else {
           item.children = group.children;
         }
@@ -342,9 +345,14 @@ export default function MenuConfigContent() {
   };
 
   const deleteItem = (groupId: string, itemId?: string) => {
-    if (!confirm("ยืนยันการลบหรือไม่?")) return;
+    console.log("deleteItem called:", { groupId, itemId });
+    if (!confirm("ยืนยันการลบหรือไม่?")) {
+      console.log("Delete cancelled by user");
+      return;
+    }
 
     let deleted = false;
+    console.log("Before delete - menuGroups:", menuGroups);
 
     if (itemId) {
       // Delete child item
@@ -362,21 +370,26 @@ export default function MenuConfigContent() {
         return group;
       });
       if (deleted) {
+        console.log("Updating menuGroups - delete child item");
         setMenuGroups(updatedGroups);
       }
     } else {
       // Delete group
       const filtered = menuGroups.filter(g => g.id !== groupId);
+      console.log("Filtered groups:", filtered);
       if (filtered.length < menuGroups.length) {
         deleted = true;
+        console.log("Updating menuGroups - delete group");
         setMenuGroups(filtered);
       }
     }
 
     if (deleted) {
+      console.log("Delete successful");
       setModified(true);
       alert("ลบเรียบร้อยแล้ว");
     } else {
+      console.log("Delete failed - item not found");
       alert("ไม่พบรายการที่ต้องการลบ");
     }
   };

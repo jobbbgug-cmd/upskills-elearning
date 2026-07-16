@@ -79,11 +79,21 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
     fetch("/api/admin/menu-config/super_admin")
       .then((r) => r.ok ? r.json() : null)
       .then((d) => {
+        console.log("Fetched menu config:", d);
         if (d?.items && Array.isArray(d.items) && d.items.length > 0) {
-          setMenuConfig(d.items);
+          // Convert items to MenuGroup format
+          const groups: MenuItem[] = d.items.map((item: any) => ({
+            id: item.id,
+            label: item.label,
+            path: item.path,
+            children: item.children || [],
+            isSingleItem: item.isSingleItem,
+          }));
+          console.log("Converted groups:", groups);
+          setMenuConfig(groups);
         }
       })
-      .catch(() => {});
+      .catch((err) => console.error("Error fetching menu config:", err));
   }, []);
 
   useEffect(() => {
@@ -197,6 +207,16 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
 
   const renderMenuItems = (items: MenuItem[]): React.ReactNode[] => {
     return items.map((item, idx) => {
+      // Single item rendering
+      if (item.isSingleItem) {
+        return (
+          <div key={item.id} className={idx === 0 ? "pt-2 pb-1" : "pt-4 pb-1"}>
+            {nav(item.path || "#", getMenuIcon(item.label), item.label, undefined, "")}
+          </div>
+        );
+      }
+
+      // Group rendering
       const badge = item.id === "members" ? pendingMembers : undefined;
       return (
         <div key={item.id}>
