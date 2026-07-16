@@ -1,29 +1,24 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthUser } from "@/lib/auth";
-import { connectDB } from "@/lib/mongodb";
-import Institution from "@/models/Institution";
 
 export async function POST(req: NextRequest) {
-  const auth = await getAuthUser();
-  if (!auth || !auth.isOwner)
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  try {
+    const user = await getAuthUser();
+    if (!user || user.role !== "owner") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
-  const { branchId } = await req.json();
+    const { branchId } = await req.json();
+    if (!branchId) {
+      return NextResponse.json({ error: "branchId required" }, { status: 400 });
+    }
 
-  const res = NextResponse.json({ ok: true });
+    const res = NextResponse.json({ success: true });
+    res.cookies.set("selectedBranchId", branchId, { httpOnly: false, path: "/" });
 
-  if (!branchId || branchId === auth.institutionId) {
-    // Switching to parent/HQ — clear activeBranchId so resolveInstitutionId uses parent
-    res.cookies.set("activeBranchId", "", { maxAge: 0, path: "/" });
     return res;
+  } catch (err) {
+    console.error(err);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
-
-  // Validate the branch is a child of this owner's institution
-  await connectDB();
-  const branch = await Institution.findOne({ _id: branchId, parentId: auth.institutionId }).lean();
-  if (!branch)
-    return NextResponse.json({ error: "ไม่พบสาขา" }, { status: 404 });
-
-  res.cookies.set("activeBranchId", branchId, { httpOnly: true, maxAge: 60 * 60 * 24 * 7, path: "/" });
-  return res;
 }
