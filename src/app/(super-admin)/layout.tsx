@@ -25,6 +25,7 @@ interface MenuItem {
   icon?: string;
   children?: MenuItem[];
   order?: number;
+  isSingleItem?: boolean;
 }
 
 export default function SuperAdminLayout({ children }: { children: React.ReactNode }) {
