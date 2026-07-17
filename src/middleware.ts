@@ -14,9 +14,9 @@ async function getUser(token: string) {
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
-  // Redirect /super-admin to /super-admin
+  // Redirect /super-admin to /super-admin/super-admin
   if (pathname === "/super-admin") {
-    return NextResponse.redirect(new URL("/super-admin", req.url));
+    return NextResponse.redirect(new URL("/super-admin/super-admin", req.url));
   }
 
   // Auth checks only needed for page routes (API routes do their own auth)
