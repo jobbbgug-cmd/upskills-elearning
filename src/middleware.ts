@@ -14,8 +14,8 @@ function getUser(token: string) {
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
-  // Redirect /super-admin to /super-admin/super-admin
-  if (pathname === "/super-admin") {
+  // Redirect /super-admin root to /super-admin-dashboard
+  if (pathname === "/super-admin" || pathname === "/super-admin/") {
     return NextResponse.redirect(new URL("/super-admin-dashboard", req.url));
   }
 
