@@ -84,7 +84,7 @@ export default async function SuperAdminPage() {
         <StatBox icon={Building2} label="สถาบันทั้งหมด" value={s.totalInstitutions} sub={`ใช้งานอยู่ ${s.activeInstitutions}`} href="/super-admin/institutions" />
         <StatBox icon={Users} label="ผู้ใช้ทั้งหมด" value={s.totalUsers} sub="ทุกสถาบัน" href="/super-admin/institutions" />
         <StatBox icon={BookOpen} label="คอร์สทั้งหมด" value={s.totalCourses} sub="ทุกสถาบัน" href="/super-admin/institutions" />
-        <StatBox icon={TrendingUp} label="รายได้รวม" value={s.totalRevenue} sub={`${s.totalConfirmed} bookings`} href="/super-admin/institutions" isMoney />
+        <StatBox icon={TrendingUp} label="รายได้รวม" value={s.totalRevenue} sub={`${s.totalConfirmed} bookings`} href="/super-admin/revenue" isMoney />
       </div>
 
       {/* Revenue/booking split */}
