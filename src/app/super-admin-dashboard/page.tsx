@@ -12,14 +12,7 @@ import { PLAN_LABELS } from "@/lib/planLimits";
 
 async function getStats() {
   await connectDB();
-  const [
-    totalInstitutions,
-    activeInstitutions,
-    totalUsers,
-    totalCourses,
-    totalConfirmed,
-    totalPending,
-  ] = await Promise.all([
+  const [totalInstitutions, activeInstitutions, totalUsers, totalCourses, totalConfirmed, totalPending] = await Promise.all([
     Institution.countDocuments(),
     Institution.countDocuments({ isActive: true }),
     User.countDocuments({ role: { $ne: "super_admin" } }),
@@ -34,11 +27,7 @@ async function getStats() {
     { $unwind: "$course" },
     { $lookup: { from: "institutions", localField: "institutionId", foreignField: "_id", as: "institution" } },
     { $unwind: { path: "$institution", preserveNullAndEmptyArrays: true } },
-    { $group: {
-      _id: null,
-      total: { $sum: "$course.price" },
-      commission: { $sum: { $multiply: ["$course.price", { $divide: [{ $ifNull: ["$institution.commissionRate", 0] }, 100] }] } },
-    }},
+    { $group: { _id: null, total: { $sum: "$course.price" }, commission: { $sum: { $multiply: ["$course.price", { $divide: [{ $ifNull: ["$institution.commissionRate", 0] }, 100] }] } } } },
   ]);
   const totalRevenue = revPipeline[0]?.total ?? 0;
   const totalCommission = Math.round((revPipeline[0]?.commission ?? 0) * 100) / 100;
@@ -47,19 +36,9 @@ async function getStats() {
   const planCounts: Record<string, number> = {};
   byPlan.forEach((p) => { planCounts[p._id] = p.count; });
 
-  const recent = (await Institution.find()
-    .sort({ createdAt: -1 })
-    .limit(5)
-    .select("slug name plan isActive planExpiresAt createdAt")
-    .lean()) as unknown as Array<{
-      _id: { toString(): string };
-      slug: string;
-      name: string;
-      plan: string;
-      isActive: boolean;
-      planExpiresAt: Date | null;
-      createdAt: Date;
-    }>;
+  const recent = (await Institution.find().sort({ createdAt: -1 }).limit(5).select("slug name plan isActive planExpiresAt createdAt").lean()) as unknown as Array<{
+    _id: { toString(): string }; slug: string; name: string; plan: string; isActive: boolean; planExpiresAt: Date | null; createdAt: Date;
+  }>;
 
   return { totalInstitutions, activeInstitutions, totalUsers, totalCourses, totalConfirmed, totalPending, totalRevenue, totalCommission, planCounts, recent };
 }
@@ -79,7 +58,6 @@ export default async function SuperAdminPage() {
         <p className="text-gray-500 text-sm mt-1">ยินดีต้อนรับ, {auth.name} — Super Admin</p>
       </div>
 
-      {/* Key stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatBox icon={Building2} label="สถาบันทั้งหมด" value={s.totalInstitutions} sub={`ใช้งานอยู่ ${s.activeInstitutions}`} href="/super-admin/institutions" />
         <StatBox icon={Users} label="ผู้ใช้ทั้งหมด" value={s.totalUsers} sub="ทุกสถาบัน" href="/super-admin/institutions" />
@@ -87,7 +65,6 @@ export default async function SuperAdminPage() {
         <StatBox icon={TrendingUp} label="รายได้รวม" value={s.totalRevenue} sub={`${s.totalConfirmed} bookings`} href="/super-admin/revenue" isMoney />
       </div>
 
-      {/* Revenue/booking split */}
       <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
         <div className="bg-white rounded-2xl border border-l-4 border-gray-100 p-5" style={{ borderLeftColor: 'var(--color-primary)' }}>
           <div className="flex items-center gap-2 mb-3">
@@ -129,7 +106,6 @@ export default async function SuperAdminPage() {
         </div>
       </div>
 
-      {/* Recent institutions */}
       <div className="bg-white rounded-2xl border border-gray-100 p-5">
         <div className="flex items-center justify-between mb-4">
           <h2 className="font-semibold text-gray-900">สถาบันล่าสุด</h2>
@@ -148,12 +124,8 @@ export default async function SuperAdminPage() {
                 </div>
                 <div className="flex items-center gap-2">
                   <PlanBadge plan={inst.plan} />
-                  {!inst.isActive && (
-                    <span className="text-xs bg-red-50 text-red-600 border border-red-200 px-2 py-0.5 rounded-full">ระงับ</span>
-                  )}
-                  {expired && (
-                    <span className="text-xs bg-orange-50 text-orange-600 border border-orange-200 px-2 py-0.5 rounded-full">หมดอายุ</span>
-                  )}
+                  {!inst.isActive && <span className="text-xs bg-red-50 text-red-600 border border-red-200 px-2 py-0.5 rounded-full">ระงับ</span>}
+                  {expired && <span className="text-xs bg-orange-50 text-orange-600 border border-orange-200 px-2 py-0.5 rounded-full">หมดอายุ</span>}
                 </div>
               </div>
             );
@@ -165,8 +137,7 @@ export default async function SuperAdminPage() {
 }
 
 function StatBox({ icon: Icon, label, value, sub, href, isMoney = false }: {
-  icon: React.ComponentType<{ className?: string }>;
-  label: string; value: number; sub: string; href: string; isMoney?: boolean;
+  icon: React.ComponentType<{ className?: string }>; label: string; value: number; sub: string; href: string; isMoney?: boolean;
 }) {
   return (
     <Link href={href} className="bg-white rounded-2xl border border-l-4 border-gray-100 p-5 hover:shadow-md transition-all group" style={{ borderLeftColor: 'var(--color-primary)' }}>

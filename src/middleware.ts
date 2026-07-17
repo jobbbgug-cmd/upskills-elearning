@@ -16,7 +16,7 @@ export async function middleware(req: NextRequest) {
 
   // Redirect /super-admin to /super-admin/super-admin
   if (pathname === "/super-admin") {
-    return NextResponse.redirect(new URL("/super-admin/super-admin", req.url));
+    return NextResponse.redirect(new URL("/super-admin-dashboard", req.url));
   }
 
   // Auth checks only needed for page routes (API routes do their own auth)
@@ -94,7 +94,7 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/login", "/register", "/dashboard/:path*", "/student/:path*", "/admin/:path*", "/owner/:path*", "/teacher/:path*", "/parent/:path*", "/super-admin/:path*", "/api/:path*"],
+  matcher: ["/login", "/register", "/dashboard/:path*", "/student/:path*", "/admin/:path*", "/owner/:path*", "/teacher/:path*", "/parent/:path*", "/super-admin/:path*", "/super-admin-dashboard/:path*", "/api/:path*"],
 };
 
 export const runtime = "nodejs";
