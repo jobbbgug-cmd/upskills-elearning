@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { jwtVerify } from "jose";
+import jwt from "jsonwebtoken";
 
-async function getUser(token: string) {
+function getUser(token: string) {
   try {
-    const secret = new TextEncoder().encode(process.env.JWT_SECRET!);
-    const { payload } = await jwtVerify(token, secret);
-    return payload as { userId: string; email: string; name: string; role: string; institutionId?: string };
+    const secret = process.env.JWT_SECRET!;
+    const payload = jwt.verify(token, secret) as { userId: string; email: string; name: string; role: string; institutionId?: string };
+    return payload;
   } catch {
     return null;
   }
@@ -14,15 +14,12 @@ async function getUser(token: string) {
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
-  // Redirect /super-admin to /super-admin/super-admin
-  if (pathname === "/super-admin") {
-    return NextResponse.redirect(new URL("/super-admin/super-admin", req.url));
-  }
+  // Super admin dashboard is at /super-admin (root of route group)
 
   // Auth checks only needed for page routes (API routes do their own auth)
   if (!pathname.startsWith("/api/")) {
     const token = req.cookies.get("token")?.value;
-    const user = token ? await getUser(token) : null;
+    const user = token ? getUser(token) : null;
 
     if (user && (pathname === "/login" || pathname === "/register")) {
       if (user.role === "super_admin") return NextResponse.redirect(new URL("/super-admin", req.url));
