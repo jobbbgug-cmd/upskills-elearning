@@ -35,9 +35,14 @@ export async function middleware(req: NextRequest) {
       return NextResponse.redirect(new URL("/super-admin", req.url));
     }
 
+    // Block owner from /admin/* — they have their own /owner/* pages
+    if (pathname.startsWith("/admin") && user?.role === "owner") {
+      return NextResponse.redirect(new URL("/owner/dashboard", req.url));
+    }
+
     if (
       pathname.startsWith("/admin") &&
-      (!user || (user.role !== "admin" && user.role !== "teacher" && user.role !== "owner"))
+      (!user || (user.role !== "admin" && user.role !== "teacher"))
     ) {
       return NextResponse.redirect(new URL("/login", req.url));
     }
