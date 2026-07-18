@@ -5,7 +5,7 @@ import Institution from "@/models/Institution";
 
 export async function GET() {
   const auth = await getAuthUser();
-  if (!auth || !auth.isOwner)
+  if (!auth || !["admin", "owner", "super_admin"].includes(auth.role))
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   await connectDB();

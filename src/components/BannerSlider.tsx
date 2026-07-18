@@ -9,9 +9,10 @@ import BannerRegisterModal from "@/components/BannerRegisterModal";
 interface Props {
   banners: IBanner[];
   institutionNames?: Record<string, string>;
+  user?: { role: string } | null;
 }
 
-export default function BannerSlider({ banners, institutionNames = {} }: Props) {
+export default function BannerSlider({ banners, institutionNames = {}, user = null }: Props) {
   const [current, setCurrent] = useState(0);
   const [registerBanner, setRegisterBanner] = useState<IBanner | null>(null);
   const next = useCallback(() => setCurrent((c) => (c + 1) % banners.length), [banners.length]);
@@ -74,23 +75,34 @@ export default function BannerSlider({ banners, institutionNames = {} }: Props) 
                       {b.subtitle}
                     </p>
                   )}
-                  {b.buttonType === "register" ? (
-                    <button
-                      onClick={() => setRegisterBanner(b)}
-                      className="inline-block px-10 py-4 rounded-2xl font-semibold text-white text-base shadow-lg transition-opacity hover:opacity-90"
-                      style={{ background: "linear-gradient(90deg,#059669,#10b981)" }}
-                    >
-                      {b.linkText || "สมัครสมาชิก"}
-                    </button>
-                  ) : b.linkUrl ? (
-                    <Link
-                      href={b.linkUrl}
-                      className="inline-block px-10 py-4 rounded-2xl font-semibold text-white text-base shadow-lg transition-opacity hover:opacity-90"
-                      style={{ background: "linear-gradient(90deg,#7c3aed,#a855f7)" }}
-                    >
-                      {b.linkText || "ดูรายละเอียด"}
-                    </Link>
-                  ) : null}
+                  <div className="flex gap-4 flex-wrap">
+                    {b.buttonType === "register" ? (
+                      <button
+                        onClick={() => setRegisterBanner(b)}
+                        className="inline-block px-10 py-4 rounded-2xl font-semibold text-white text-base shadow-lg transition-opacity hover:opacity-90"
+                        style={{ background: "linear-gradient(90deg,#059669,#10b981)" }}
+                      >
+                        {b.linkText || "สมัครสมาชิก"}
+                      </button>
+                    ) : b.linkUrl ? (
+                      <Link
+                        href={b.linkUrl}
+                        className="inline-block px-10 py-4 rounded-2xl font-semibold text-white text-base shadow-lg transition-opacity hover:opacity-90"
+                        style={{ background: "linear-gradient(90deg,#7c3aed,#a855f7)" }}
+                      >
+                        {b.linkText || "ดูรายละเอียด"}
+                      </Link>
+                    ) : null}
+                    {user && (
+                      <Link
+                        href={user.role === "admin" || user.role === "super_admin" ? "/admin" : user.role === "owner" ? "/owner/dashboard" : "/dashboard"}
+                        className="inline-block px-10 py-4 rounded-2xl font-semibold text-white text-base shadow-lg transition-opacity hover:opacity-90"
+                        style={{ background: "linear-gradient(90deg,#3b82f6,#1d4ed8)" }}
+                      >
+                        จัดการหลังบ้าน
+                      </Link>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>

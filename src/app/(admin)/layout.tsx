@@ -119,8 +119,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     return () => { controller.abort(); clearInterval(interval); };
   }, []);
 
-  const isOwner = role === "owner";
-  const isAdmin = role === "admin" || role === "super_admin" || isOwner;
+  const isAdmin = role === "admin" 
   const close = () => setSidebarOpen(false);
 
   const switchBranch = async (branchId: string) => {
@@ -141,9 +140,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   };
 
   const ROLE_LABELS: Record<string, string> = {
-    super_admin: "Super Admin",
     admin: "Admin",
-    owner: "เจ้าของสถาบัน",
     teacher: "Teacher",
     student: "Student",
   };
