@@ -8,7 +8,7 @@ interface PendingUser {
   _id: string;
   name: string;
   email: string;
-  role: "student" | "teacher" | "admin" | "super_admin";
+  role: "student" | "teacher" | "admin" | "super_admin" | "owner";
   gradeLevel?: string;
   status: "pending" | "approved" | "rejected";
   contactChannel?: string;

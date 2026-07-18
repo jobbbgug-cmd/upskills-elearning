@@ -20,7 +20,7 @@ async function getCourses(role: string, userId: string, institutionId?: string) 
 
 export default async function AdminCoursesPage() {
   const auth = await getAuthUser();
-  if (!auth || (auth.role !== "admin" && auth.role !== "teacher")) redirect("/login");
+  if (!auth || (auth.role !== "admin" && auth.role !== "teacher" && auth.role !== "owner")) redirect("/login");
 
   const courses = await getCourses(auth.role, auth.userId, auth.institutionId);
 

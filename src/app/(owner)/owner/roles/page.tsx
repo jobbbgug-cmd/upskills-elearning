@@ -8,7 +8,7 @@ import {
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import LoadingSpinner from "@/components/LoadingSpinner";
 
-type Role = "student" | "teacher" | "admin" | "super_admin";
+type Role = "student" | "teacher" | "admin" | "super_admin" | "owner";
 type SortKey = "name" | "email" | "role" | "status" | "createdAt";
 type SortDir = "asc" | "desc";
 

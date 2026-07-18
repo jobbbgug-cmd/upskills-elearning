@@ -3,7 +3,7 @@ import { getAuthUser } from "@/lib/auth";
 
 export default async function NewLearningPathPage() {
   const auth = await getAuthUser();
-  if (!auth || (auth.role !== "admin" && auth.role !== "teacher")) redirect("/login");
+  if (!auth || (auth.role !== "admin" && auth.role !== "teacher" && auth.role !== "owner")) redirect("/login");
 
   return (
     <div>

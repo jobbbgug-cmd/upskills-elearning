@@ -18,7 +18,7 @@ async function getContents(institutionId?: string): Promise<ICourseContent[]> {
 
 export default async function ContentListPage() {
   const auth = await getAuthUser();
-  if (!auth || (auth.role !== "admin" && auth.role !== "teacher")) redirect("/login");
+  if (!auth || (auth.role !== "admin" && auth.role !== "teacher" && auth.role !== "owner")) redirect("/login");
 
   const contents = await getContents(auth.institutionId);
 
