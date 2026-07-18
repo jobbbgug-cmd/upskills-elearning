@@ -21,7 +21,8 @@ export async function middleware(req: NextRequest) {
 
     if (user && (pathname === "/login" || pathname === "/register")) {
       if (user.role === "super_admin") return NextResponse.redirect(new URL("/super-admin", req.url));
-      const dest = user.role === "admin" || user.role === "teacher" || user.role === "owner" ? "/admin" : "/dashboard";
+      if (user.role === "owner") return NextResponse.redirect(new URL("/owner/dashboard", req.url));
+      const dest = user.role === "admin" || user.role === "teacher" ? "/admin" : "/dashboard";
       return NextResponse.redirect(new URL(dest, req.url));
     }
 
@@ -58,13 +59,18 @@ export async function middleware(req: NextRequest) {
     if (pathname.startsWith("/super-admin") && (!user || user.role !== "super_admin")) {
       return NextResponse.redirect(new URL("/login", req.url));
     }
+
+    // Owner-only pages
+    if (pathname.startsWith("/owner") && (!user || user.role !== "owner")) {
+      return NextResponse.redirect(new URL("/login", req.url));
+    }
   }
 
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/login", "/register", "/dashboard/:path*", "/student/:path*", "/admin/:path*", "/super-admin/:path*", "/api/:path*"],
+  matcher: ["/login", "/register", "/dashboard/:path*", "/student/:path*", "/admin/:path*", "/owner/:path*", "/super-admin/:path*", "/api/:path*"],
 };
 
 export const runtime = "nodejs";
