@@ -24,6 +24,7 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
   const [user, setUser]               = useState<UserInfo | null>(null);
   const [isNavigating, setIsNavigating] = useState(false);
   const [pendingMembers, setPendingMembers] = useState(0);
+  const [pendingTrials, setPendingTrials] = useState(0);
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
   const [currentTheme, setCurrentTheme] = useState<Theme>('default');
   const [themeOpen, setThemeOpen] = useState(false);
@@ -73,6 +74,18 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
         // Test/demo: show badge
         setPendingMembers(1);
       });
+  }, []);
+
+  useEffect(() => {
+    fetch("/api/super-admin/trial-requests")
+      .then((r) => r.ok ? r.json() : [])
+      .then((data) => {
+        const pendingCount = Array.isArray(data)
+          ? data.filter((item: any) => item.status === "pending").length
+          : 0;
+        setPendingTrials(pendingCount);
+      })
+      .catch(() => setPendingTrials(0));
   }, []);
 
   useEffect(() => {
@@ -168,16 +181,25 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
           onScroll={(e) => sessionStorage.setItem("superadmin-nav-scroll", String((e.currentTarget as HTMLElement).scrollTop))}
           className="flex-1 p-3 space-y-1 overflow-y-auto"
         >
+          {nav("/super-admin", <LayoutDashboard className="w-4 h-4" />, "ภาพรวม", undefined, "platform")}
           {/* Platform */}
-          <div className="pt-2 pb-1">{section("platform", "แพลตฟอร์ม")}</div>
+          <div className="pt-2 pb-1">{section("finance", "รายได้และการเงิน")}</div>
 
-          {expandedGroups.has("platform") && (
+          {expandedGroups.has("finance") && (
             <>
-              {nav("/super-admin", <LayoutDashboard className="w-4 h-4" />, "ภาพรวม", undefined, "platform")}
+              {nav("/super-admin/revenue", <TrendingUp className="w-4 h-4" />, "รายได้", undefined, "content")}
               {nav("/super-admin/analytics", <BarChart2 className="w-4 h-4" />, "Analytics", undefined, "platform")}
-              {nav("/super-admin/institutions", <Building2 className="w-4 h-4" />, "สถาบันทั้งหมด", undefined, "platform")}
-              {nav("/super-admin/trials", <FlaskConical className="w-4 h-4" />, "คำขอทดลองใช้งาน", undefined, "platform")}
               {nav("/super-admin/payouts", <Receipt className="w-4 h-4" />, "Commission & Payout", undefined, "platform")}
+              {nav("/super-admin/bookings", <Users className="w-4 h-4" />, "ตรวจสอบการชำระ", undefined, "system")}
+              {nav("/super-admin/finance", <Wallet className="w-4 h-4" />, "ข้อมูลทางการเงิน", undefined, "system")}
+            </>
+          )}
+          {/* institution */}
+          <div className="pt-4 pb-1">{section("institution", "สถาบัน")}</div>
+          {expandedGroups.has("institution") && (
+            <>
+              {nav("/super-admin/institutions", <Building2 className="w-4 h-4" />, "สถาบันทั้งหมด", undefined, "platform")}
+              {nav("/super-admin/trials", <FlaskConical className="w-4 h-4" />, "คำขอทดลองใช้งาน", pendingTrials, "platform")}
             </>
           )}
 
@@ -191,7 +213,7 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
           )}
 
           {/* Phase 5-6 features */}
-          <div className="pt-4 pb-1">{section("features", "ฟีเจอร์แพลตฟอร์ม", undefined, "accent")}</div>
+          <div className="pt-4 pb-1">{section("features", "ฟีเจอร์แพลตฟอร์ม")}</div>
           {expandedGroups.has("features") && (
             <>
               {nav("/super-admin/live", <Radio className="w-4 h-4" />, "Live Sessions", undefined, "features")}
@@ -204,6 +226,7 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
           <div className="pt-4 pb-1">{section("commerce", "ระบบขาย")}</div>
           {expandedGroups.has("commerce") && (
             <>
+              {nav("/super-admin/orders", <ShoppingCart className="w-4 h-4" />, "จัดการคำสั่งซื้อ", undefined, "system")}
               {nav("/super-admin/products", <Package className="w-4 h-4" />, "จัดการสินค้า", undefined, "commerce")}
               {nav("/super-admin/coupons", <Tag className="w-4 h-4" />, "คูปอง/โปรโมชั่น", undefined, "commerce")}
             </>
@@ -215,9 +238,10 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
             <>
               {nav("/super-admin/courses", <BookOpen className="w-4 h-4" />, "จัดการคอร์ส", undefined, "content")}
               {nav("/super-admin/content", <FileText className="w-4 h-4" />, "เนื้อหาการเรียน", undefined, "content")}
-              {nav("/super-admin/revenue", <TrendingUp className="w-4 h-4" />, "รายได้", undefined, "content")}
               {nav("/super-admin/schedule", <CalendarDays className="w-4 h-4" />, "ตารางเรียน", undefined, "content")}
               {nav("/super-admin/teacher-schedule", <CalendarDays className="w-4 h-4" />, "ตารางสอน", undefined, "content")}
+              {nav("/super-admin/certificates", <Award className="w-4 h-4" />, "ใบรับรอง", undefined, "system")}
+              {nav("/super-admin/categories", <Tag className="w-4 h-4" />, "หมวดหมู่", undefined, "system")}
             </>
           )}
 
@@ -225,10 +249,6 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
           <div className="pt-4 pb-1">{section("system", "จัดการระบบ")}</div>
           {expandedGroups.has("system") && (
             <>
-              {nav("/super-admin/bookings", <Users className="w-4 h-4" />, "ตรวจสอบการชำระ", undefined, "system")}
-              {nav("/super-admin/orders", <ShoppingCart className="w-4 h-4" />, "จัดการคำสั่งซื้อ", undefined, "system")}
-              {nav("/super-admin/certificates", <Award className="w-4 h-4" />, "ใบรับรอง", undefined, "system")}
-              {nav("/super-admin/finance", <Wallet className="w-4 h-4" />, "ข้อมูลทางการเงิน", undefined, "system")}
               {nav("/super-admin/banners", <Images className="w-4 h-4" />, "จัดการแบนเนอร์", undefined, "system")}
               {nav("/super-admin/roles", <Shield className="w-4 h-4" />, "จัดการ Role", undefined, "system")}
               {nav("/super-admin/logs", <ClipboardList className="w-4 h-4" />, "ประวัติการใช้งาน", undefined, "system")}
