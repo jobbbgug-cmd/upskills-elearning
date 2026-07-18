@@ -55,7 +55,7 @@ export default function OwnerLayout({ children }: { children: React.ReactNode })
     setThemeOpen(false);
     const GP: Record<string, string[]> = {
       teaching:  ["/owner/students","/owner/attendance","/owner/homework","/owner/quiz","/owner/live","/owner/teacher-portal","/owner/forum"],
-      courses:   ["/owner/courses","/owner/content","/owner/schedule","/owner/teacher-schedule","/owner/certificates"],
+      courses:   ["/owner/courses","/owner/content","/owner/teacher-schedule","/owner/certificates"],
       members:   ["/owner/members","/owner/users"],
       commerce:  ["/owner/orders","/owner/products","/owner/coupons"],
       finance:   ["/owner/analytics","/owner/revenue","/owner/billing"],
@@ -217,11 +217,10 @@ export default function OwnerLayout({ children }: { children: React.ReactNode })
           )}
 
           {renderGroup("courses", "คอร์สและเนื้อหา", <BookOpen className="w-4 h-4" />,
-            ["/owner/courses","/owner/content","/owner/schedule","/owner/teacher-schedule","/owner/certificates"],
+            ["/owner/courses","/owner/content","/owner/teacher-schedule","/owner/certificates"],
             <>
               {navLink("/owner/courses",        <ListChecks className="w-4 h-4" />,   "จัดการคอร์ส")}
               {navLink("/owner/content",        <BookOpen className="w-4 h-4" />,     "เนื้อหาการเรียน")}
-              {navLink("/owner/schedule",       <CalendarDays className="w-4 h-4" />, "ตารางเรียน")}
               {navLink("/owner/teacher-schedule", <CalendarDays className="w-4 h-4" />, "ตารางสอน")}
               {navLink("/owner/certificates", <Award className="w-4 h-4" />,    "ใบรับรอง")}
             </>
