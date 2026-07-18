@@ -360,32 +360,27 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               {(isAdmin || role === "teacher") && navLink("/admin/schedule",       <CalendarDays className="w-4 h-4" />, "ตารางเรียน")}
               {(isAdmin || role === "teacher") && navLink("/admin/teacher-schedule", <CalendarDays className="w-4 h-4" />, "ตารางสอน")}
               {(isAdmin || role === "teacher") && navLink("/admin/learning-paths",  <Layers className="w-4 h-4" />,      "เส้นทางการเรียน")}
-              {(isAdmin || role === "teacher") && navLink("/admin/categories",      <Tag className="w-4 h-4" />,         "หมวดหมู่")}
+              {isAdmin                         && navLink("/admin/certificates", <Award className="w-4 h-4" />,    "ใบรับรอง")}
             </>
           )}
 
-          {renderGroup("members", "สมาชิก", <Users className="w-4 h-4" />, 
+          {renderGroup("members", "สมาชิก", <Users className="w-4 h-4" />,
             ["/admin/members","/admin/users"],
             <>
               {isAdmin && navLink("/admin/members", <UserCheck className="w-4 h-4" />,
-                <span className="flex items-center justify-between w-full gap-2">
+                <div className="flex items-center justify-between w-full gap-2">
                   อนุมัติสมาชิก
-                  {pendingCount > 0 && (
-                    <span className="bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full min-w-[20px] text-center">
-                      {pendingCount}
-                    </span>
-                  )}
-                </span>
+                  {pendingCount > 0 && <span className="bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full min-w-[20px] text-center">{pendingCount}</span>}
+                </div>
               )}
               {isAdmin && navLink("/admin/users", <UserCog className="w-4 h-4" />, "จัดการผู้ใช้")}
-            </>,
-            pendingCount
+            </>
           )}
 
           {renderGroup("commerce", "ระบบขาย", <ShoppingCart className="w-4 h-4" />,
             ["/admin/orders","/admin/products","/admin/coupons"],
             <>
-              {isAdmin && navLink("/admin/orders", <ShoppingCart className="w-4 h-4" />, "รายการขาย")}
+              {isAdmin && navLink("/admin/orders", <ShoppingCart className="w-4 h-4" />, "จัดการคำสั่งซื้อ")}
               {isAdmin && navLink("/admin/products", <Package className="w-4 h-4" />, "จัดการสินค้า")}
               {isAdmin && navLink("/admin/coupons", <Tag className="w-4 h-4" />, "คูปอง/โปรโมชั่น")}
             </>
@@ -394,21 +389,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           {renderGroup("finance", "รายได้และการเงิน", <TrendingUp className="w-4 h-4" />,
             ["/admin/analytics","/admin/revenue","/admin/billing","/admin/certificates","/admin/bookings","/admin/finance"],
             <>
-              {isAdmin                         && navLink("/admin/analytics", <BarChart2 className="w-4 h-4" />, "Analytics")}
               {(isAdmin || role === "teacher") && navLink("/admin/revenue",   <TrendingUp className="w-4 h-4" />, "รายได้")}
+              {isAdmin                         && navLink("/admin/analytics", <BarChart2 className="w-4 h-4" />, "Analytics")}
               {isAdmin                         && navLink("/admin/billing",   <Receipt className="w-4 h-4" />,    "Billing & ใบเสร็จ")}
-              {isAdmin                         && navLink("/admin/certificates", <Award className="w-4 h-4" />,    "ใบรับรอง")}
-              {role === "super_admin"          && navLink("/admin/bookings",  <Users className="w-4 h-4" />,
-                <span className="flex items-center justify-between w-full gap-2">
-                  ตรวจสอบการชำระ
-                  {pendingBookings > 0 && (
-                    <span className="bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full min-w-[20px] text-center">
-                      {pendingBookings}
-                    </span>
-                  )}
-                </span>
-              )}
-              {role === "super_admin" && navLink("/admin/finance", <Wallet className="w-4 h-4" />, "ข้อมูลทางการเงิน")}
             </>
           )}
 
@@ -417,7 +400,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <>
               {isAdmin && navLink("/admin/landing",       <Globe className="w-4 h-4" />,   "Landing Page")}
               {isAdmin && navLink("/admin/reviews",       <Star className="w-4 h-4" />,    "รีวิวคอร์ส")}
-              {isAdmin && navLink("/admin/notifications", <Bell className="w-4 h-4" />,    "แจ้งเตือน & ใบรับรอง")}
+              {isAdmin && navLink("/admin/notifications", <Bell className="w-4 h-4" />,    "แจ้งเตือน")}
               {isAdmin && navLink("/admin/banners",       <Images className="w-4 h-4" />,  "จัดการแบนเนอร์")}
             </>
           )}
@@ -425,7 +408,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           {renderGroup("settings", "ตั้งค่าระบบ", <Shield className="w-4 h-4" />,
             ["/admin/roles","/admin/branding"],
             <>
-              {role === "super_admin" && navLink("/admin/roles",    <Shield className="w-4 h-4" />,  "จัดการ Role")}
               {role === "admin"       && navLink("/admin/branding", <Palette className="w-4 h-4" />, "จัดการ Branding")}
             </>
           )}
