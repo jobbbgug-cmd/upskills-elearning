@@ -366,8 +366,8 @@ export default function Navbar() {
                     ศูนย์การเรียน
                   </Link>
                 )}
-                {(user.role === "admin" || user.role === "teacher") && (
-                  <Link href="/admin" className="flex items-center gap-1.5 text-sm font-medium px-3 py-2 rounded-lg text-indigo-600 hover:bg-indigo-50 transition-colors">
+                {(user.role === "admin" || user.role === "teacher" || user.role === "owner") && (
+                  <Link href={user.role === "owner" ? "/owner/dashboard" : "/admin"} className="flex items-center gap-1.5 text-sm font-medium px-3 py-2 rounded-lg text-indigo-600 hover:bg-indigo-50 transition-colors">
                     <User className="w-4 h-4" />
                     จัดการหลังบ้าน
                   </Link>
