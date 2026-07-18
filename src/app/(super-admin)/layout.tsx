@@ -25,6 +25,7 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
   const [isNavigating, setIsNavigating] = useState(false);
   const [pendingMembers, setPendingMembers] = useState(0);
   const [pendingTrials, setPendingTrials] = useState(0);
+  const [pendingBookings, setPendingBookings] = useState(0);
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
   const [currentTheme, setCurrentTheme] = useState<Theme>('default');
   const [themeOpen, setThemeOpen] = useState(false);
@@ -86,6 +87,18 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
         setPendingTrials(pendingCount);
       })
       .catch(() => setPendingTrials(0));
+  }, []);
+
+  useEffect(() => {
+    fetch("/api/super-admin/bookings")
+      .then((r) => r.ok ? r.json() : [])
+      .then((data) => {
+        const pendingCount = Array.isArray(data)
+          ? data.filter((item: any) => item.status === "pending").length
+          : 0;
+        setPendingBookings(pendingCount);
+      })
+      .catch(() => setPendingBookings(0));
   }, []);
 
   useEffect(() => {
@@ -190,7 +203,7 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
               {nav("/super-admin/revenue", <TrendingUp className="w-4 h-4" />, "รายได้", undefined, "content")}
               {nav("/super-admin/analytics", <BarChart2 className="w-4 h-4" />, "Analytics", undefined, "platform")}
               {nav("/super-admin/payouts", <Receipt className="w-4 h-4" />, "Commission & Payout", undefined, "platform")}
-              {nav("/super-admin/bookings", <Users className="w-4 h-4" />, "ตรวจสอบการชำระ", undefined, "system")}
+              {nav("/super-admin/bookings", <Users className="w-4 h-4" />, "ตรวจสอบการชำระ", pendingBookings, "system")}
               {nav("/super-admin/finance", <Wallet className="w-4 h-4" />, "ข้อมูลทางการเงิน", undefined, "system")}
             </>
           )}
