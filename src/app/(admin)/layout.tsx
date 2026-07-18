@@ -469,7 +469,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </Link>
           <div className="ml-auto flex items-center gap-2">
             {/* Branch switcher — owner only */}
-            {isOwner && branches.length > 0 && (
+            {role === "owner" && branches.length > 0 && (
               <div className="flex items-center gap-2">
                 <Building2 className="w-4 h-4 text-violet-500 shrink-0" />
                 <select
