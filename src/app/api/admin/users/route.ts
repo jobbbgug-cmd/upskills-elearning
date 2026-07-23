@@ -49,7 +49,7 @@ export async function GET(req: NextRequest) {
       // Get parent institution
       const currentInst = await Institution.findById(instId).select("parentId").lean() as any;
       if (currentInst?.parentId) {
-        const parentFilter = { institutionId: currentInst.parentId };
+        const parentFilter: Record<string, any> = { institutionId: currentInst.parentId };
         if (roleParam) parentFilter.role = roleParam;
         const parentUsers = await User.find(parentFilter).select("-password").sort({ createdAt: -1 }).lean();
         allUsers.push(...parentUsers);
