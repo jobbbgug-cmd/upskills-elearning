@@ -26,6 +26,7 @@ const ROLE_DEF = {
   student:     { label: "นักเรียน",    badge: "bg-blue-100 text-blue-700",    border: "border-blue-300",   icon: User,         desc: "ดูคอร์ส · จองที่นั่ง · อัปโหลดสลิป",      path: "/dashboard" },
   teacher:     { label: "ครู",          badge: "bg-green-100 text-green-700",  border: "border-green-300",  icon: GraduationCap,desc: "ดูคอร์ส · ตารางสอน (Admin panel)",         path: "/owner" },
   admin:       { label: "Admin",        badge: "bg-purple-100 text-purple-700",border: "border-purple-300", icon: Shield,       desc: "จัดการคอร์ส · อนุมัติ · รายได้ · Branding",path: "/owner/*" },
+  owner:       { label: "Owner",        badge: "bg-violet-100 text-violet-700",border: "border-violet-300", icon: ShieldCheck,  desc: "เจ้าของสถาบัน · ทุกสิทธิ",                path: "/owner/*" },
   super_admin: { label: "Super Admin",  badge: "bg-rose-100 text-rose-700",    border: "border-rose-300",   icon: ShieldCheck,  desc: "จัดการทุกสถาบัน · Commission · Payout",    path: "/super-admin/*" },
 } as const;
 
