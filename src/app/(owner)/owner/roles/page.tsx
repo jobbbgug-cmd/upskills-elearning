@@ -83,8 +83,8 @@ export default function RolesPage() {
   useEffect(() => { load(); }, []);
 
   const counts = useMemo(() => {
-    const c = { student: 0, teacher: 0, admin: 0, super_admin: 0 };
-    users.forEach((u) => { if (u.role in c) c[u.role]++; });
+    const c = { student: 0, teacher: 0, admin: 0, owner: 0, super_admin: 0 };
+    users.forEach((u) => { if (u.role in c) c[u.role as keyof typeof c]++; });
     return c;
   }, [users]);
 
