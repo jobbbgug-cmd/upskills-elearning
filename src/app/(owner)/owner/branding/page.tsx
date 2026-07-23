@@ -42,8 +42,9 @@ export default function BrandingPage() {
           tagline: d.tagline ?? "",
           whiteLabelMode: d.whiteLabelMode ?? false,
         });
-        setLoading(false);
-      });
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, []);
 
   const uploadImage = async (file: File, field: "logo" | "favicon") => {
@@ -146,7 +147,7 @@ export default function BrandingPage() {
             {form.logoUrl ? (
               <Image src={form.logoUrl} alt="logo" width={120} height={48} className="object-contain w-full h-full" />
             ) : (
-              <span className="text-xs text-gray-500 font-medium text-center leading-tight">{form.name || "ยังไม่มีโลโก้"}</span>
+              <span className="text-xs text-gray-400 font-medium text-center leading-tight">{form.name ? form.name : "ไม่มีโลโก้"}</span>
             )}
           </div>
           <div className="flex-1">
