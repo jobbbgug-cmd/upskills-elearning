@@ -31,6 +31,7 @@ export default function OwnerLayout({ children }: { children: React.ReactNode })
   const [branchSelectorOpen, setBranchSelectorOpen] = useState(false);
   const [pendingCount, setPendingCount] = useState(0);
   const [institutionName, setInstitutionName] = useState<string>("");
+  const [logoUrl, setLogoUrl] = useState<string>("/logo.png");
   const dropdownRef = useRef<HTMLDivElement>(null);
   const branchSelectorRef = useRef<HTMLDivElement>(null);
   const navRef = useRef<HTMLElement>(null);
@@ -104,6 +105,13 @@ export default function OwnerLayout({ children }: { children: React.ReactNode })
       .then((r) => r.ok ? r.json() : null)
       .then((data) => { if (data?.name) setInstitutionName(data.name); })
       .catch(() => setInstitutionName(""));
+  }, []);
+
+  useEffect(() => {
+    fetch("/api/owner/branding")
+      .then((r) => r.ok ? r.json() : null)
+      .then((data) => { if (data?.logoUrl) setLogoUrl(data.logoUrl); })
+      .catch(() => setLogoUrl("/logo.png"));
   }, []);
 
   const switchBranch = async (branchId: string) => {
@@ -189,7 +197,7 @@ export default function OwnerLayout({ children }: { children: React.ReactNode })
 
         <div className="p-5 border-b border-gray-100 flex items-center justify-between">
           <Link href="/" onClick={close}>
-            <Image src="/logo.png" alt="UPSkills" width={150} height={50} className="object-contain" />
+            <Image src={logoUrl} alt="UPSkills" width={150} height={50} className="object-contain w-[150px] h-[50px]" />
           </Link>
           <button onClick={close} className="lg:hidden p-1 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100">
             <X className="w-5 h-5" />
@@ -300,7 +308,7 @@ export default function OwnerLayout({ children }: { children: React.ReactNode })
             <Menu className="w-5 h-5" />
           </button>
           <Link href="/" className="lg:hidden">
-            <Image src="/logo.png" alt="UPSkills" width={100} height={34} className="object-contain" />
+            <Image src={logoUrl} alt="UPSkills" width={100} height={34} className="object-contain w-[100px] h-[34px]" />
           </Link>
           <span className="hidden lg:block text-sm font-semibold theme-link">Owner Dashboard</span>
 
