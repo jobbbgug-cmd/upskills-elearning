@@ -60,7 +60,7 @@ export async function GET(req: NextRequest) {
       const childInstIds = childInstitutions.map(i => i._id);
 
       if (childInstIds.length > 0) {
-        const childFilter = { institutionId: { $in: childInstIds } };
+        const childFilter: Record<string, any> = { institutionId: { $in: childInstIds } };
         if (roleParam) childFilter.role = roleParam;
         const childUsers = await User.find(childFilter).select("-password").sort({ createdAt: -1 }).lean();
         allUsers.push(...childUsers);
