@@ -47,7 +47,7 @@ export async function GET(req: NextRequest) {
       const allUsers = [...institutionUsers];
 
       // Get parent institution
-      const currentInst = await Institution.findById(instId).lean();
+      const currentInst = await Institution.findById(instId).select("parentId").lean();
       if (currentInst?.parentId) {
         const parentFilter = { institutionId: currentInst.parentId };
         if (roleParam) parentFilter.role = roleParam;
