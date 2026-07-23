@@ -83,7 +83,11 @@ export default function AdminUsersPage() {
       fetch("/api/auth/me"),
       fetch("/api/admin/users?role=student&unassigned=true")
     ]);
-    if (usersRes.ok) setUsers(await usersRes.json());
+    if (usersRes.ok) {
+      const usersData = await usersRes.json();
+      console.log("Admin Users - loaded users:", usersData.length, usersData.map((u: any) => u.email));
+      setUsers(usersData);
+    }
     if (meRes.ok) { const d = await meRes.json(); setMyRole(d.user?.role ?? ""); }
     if (studentsRes.ok) setStudents(await studentsRes.json());
     setLoading(false);
@@ -97,7 +101,7 @@ export default function AdminUsersPage() {
     return () => { document.body.style.overflow = ""; };
   }, [editUser, createOpen]);
 
-  // super_admin-only role — hide from regular admin
+  // show roles based on myRole — admin doesn't see owner or super_admin roles
   const visibleRoles = myRole === "super_admin" ? ROLES : ROLES.filter((r) => r.value !== "super_admin" && r.value !== "owner");
 
   const openEdit = (u: UserItem) => {
@@ -223,8 +227,8 @@ export default function AdminUsersPage() {
     setCreating(false);
   };
 
-  // Hide super_admin users from non-super_admin admins
-  const visibleUsers = myRole === "super_admin" ? users : users.filter((u) => u.role !== "super_admin");
+  // Hide super_admin and owner users from non-super_admin admins
+  const visibleUsers = myRole === "super_admin" ? users : users.filter((u) => u.role !== "super_admin" && u.role !== "owner");
 
   const filtered = visibleUsers.filter((u) => {
     const matchRole   = filterRole === "all" || u.role === filterRole;

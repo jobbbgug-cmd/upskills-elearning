@@ -3,7 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { Menu, X, User, LogOut, LayoutDashboard, CalendarDays, ShieldCheck, BookOpen, ClipboardCheck, PenLine, Award, Radio, Receipt, MessageSquare, Star, ChevronDown } from "lucide-react";
+import { Menu, X, User, LogOut, LayoutDashboard, CalendarDays, ShieldCheck, BookOpen, ClipboardCheck, PenLine, Award, Radio, Receipt, MessageSquare, Star, ChevronDown, Building2 } from "lucide-react";
 import NotificationBell from "@/components/NotificationBell";
 import CoursesDropdown from "@/components/CoursesDropdown";
 import { IUser, IBranding } from "@/types";
@@ -14,9 +14,16 @@ interface Category {
   count: number;
 }
 
+interface Branch {
+  _id: string;
+  name: string;
+}
+
 export default function Navbar() {
   const [user, setUser]               = useState<IUser | null>(null);
   const [branding, setBranding]       = useState<IBranding | null>(null);
+  const [branches, setBranches]       = useState<Branch[]>([]);
+  const [activeBranchId, setActiveBranchId] = useState<string>("");
   const [menuOpen, setMenuOpen]       = useState(false);
   const [isNavigating, setIsNavigating] = useState(false);
   const [superAdminMenu, setSuperAdminMenu] = useState(false);
@@ -73,6 +80,29 @@ export default function Navbar() {
       })
       .catch(() => {});
   }, []);
+
+  useEffect(() => {
+    if (user?.role === "owner" || user?.role === "admin") {
+      fetch("/api/owner/branches")
+        .then(r => r.json())
+        .then(data => {
+          setBranches(Array.isArray(data) ? data : []);
+          // Get activeBranchId from cookie
+          const match = document.cookie.match(/(?:^|; )activeBranchId=([^;]*)/);
+          if (match) setActiveBranchId(decodeURIComponent(match[1]));
+          else if (Array.isArray(data) && data.length > 0) setActiveBranchId(data[0]._id);
+        })
+        .catch(() => {});
+    }
+  }, [user]);
+
+  const changeBranch = (branchId: string) => {
+    setActiveBranchId(branchId);
+    const expires = new Date();
+    expires.setFullYear(expires.getFullYear() + 1);
+    document.cookie = `activeBranchId=${branchId};path=/;expires=${expires.toUTCString()}`;
+    router.refresh();
+  };
 
   const logout = async () => {
     await fetch("/api/auth/me", { method: "DELETE" });
@@ -185,6 +215,23 @@ export default function Navbar() {
           <div className="hidden md:flex items-center gap-3">
             {user ? (
               <>
+                {(user.role === "owner" || user.role === "admin") && branches.length > 0 && (
+                  <div className="relative">
+                    <button className="flex items-center gap-2 text-sm px-3 py-2 rounded-lg bg-gray-50 text-gray-700 hover:bg-gray-100 transition-colors border border-gray-200">
+                      <Building2 className="w-4 h-4" />
+                      {branches.find(b => b._id === activeBranchId)?.name || "เลือก"}
+                      <ChevronDown className="w-4 h-4" />
+                    </button>
+                    <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+                      {branches.map(b => (
+                        <button key={b._id} onClick={() => changeBranch(b._id)}
+                          className={`w-full text-left px-4 py-2 text-sm transition-colors ${activeBranchId === b._id ? "bg-indigo-50 text-indigo-600 font-medium" : "text-gray-700 hover:bg-gray-50"}`}>
+                          {b.name}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
                 <span className="text-sm text-gray-600">สวัสดี, {user.name}</span>
                 {user.role === "student" && (
                   <Link href="/dashboard/schedule" className="flex items-center gap-1.5 text-sm px-3 py-2 rounded-lg text-gray-600 hover:text-indigo-600 hover:bg-gray-50 transition-colors">

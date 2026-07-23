@@ -13,6 +13,7 @@ export async function GET(req: NextRequest) {
 
     await connectDB();
     const institutionId = await resolveInstitutionId(req, auth.institutionId);
+    console.log("Owner Students API - institutionId:", institutionId, "authInstitutionId:", auth.institutionId);
 
     const { searchParams } = new URL(req.url);
     const search = searchParams.get("search") ?? "";
@@ -20,9 +21,15 @@ export async function GET(req: NextRequest) {
     const grade  = searchParams.get("grade") ?? "";
 
     const filter: Record<string, unknown> = {
-      ...tenantFilter(institutionId),
       role: "student",
     };
+
+    // Add institutionId filter if it's provided
+    if (institutionId) {
+      filter.institutionId = institutionId;
+    }
+
+    console.log("Owner Students API - institutionId:", institutionId, "filter:", filter);
     if (search) filter.$or = [
       { name:  { $regex: search, $options: "i" } },
       { email: { $regex: search, $options: "i" } },
@@ -35,6 +42,12 @@ export async function GET(req: NextRequest) {
       .select("-password -documents")
       .sort({ createdAt: -1 })
       .lean();
+
+    console.log("Owner Students API - found students:", students.length);
+    if (students.length === 0) {
+      const allStudents = await User.find({ role: "student" }).select("_id name institutionId").lean();
+      console.log("All students in DB:", allStudents.map(s => ({ name: s.name, institutionId: s.institutionId })));
+    }
 
     return NextResponse.json(JSON.parse(JSON.stringify(students)));
   } catch {

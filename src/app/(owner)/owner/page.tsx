@@ -223,7 +223,8 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
             { href: "/owner/members",  icon: UserCheck,    label: "อนุมัติสมาชิก",    desc: "ตรวจสอบและอนุมัตินักเรียนใหม่", color: "bg-teal-50 text-teal-500 group-hover:bg-teal-100" },
             { href: "/owner/revenue",  icon: TrendingUp,   label: "รายงานรายได้",     desc: "ดูรายงานรายได้และสถิติ",          color: "bg-rose-50 text-rose-500 group-hover:bg-rose-100" },
             { href: "/owner/content",  icon: FileText,     label: "เนื้อหาการเรียน", desc: "จัดการคลิป PPT ไฟล์ดาวน์โหลด",  color: "bg-purple-50 text-purple-500 group-hover:bg-purple-100" },
-            { href: "/owner/schedule", icon: BarChart2,    label: "ตารางสอน",         desc: "ดูตารางการสอนรายเดือน",           color: "bg-amber-50 text-amber-500 group-hover:bg-amber-100" },
+            { href: "
+              ", icon: BarChart2,    label: "ตารางสอน",         desc: "ดูตารางการสอนรายเดือน",           color: "bg-amber-50 text-amber-500 group-hover:bg-amber-100" },
           ].map(({ href, icon: Icon, label, desc, color }) => (
             <Link key={href} href={href}
               className="bg-white rounded-2xl border border-gray-100 p-4 hover:border-indigo-200 hover:shadow-sm transition-all group flex items-start gap-3">

@@ -97,8 +97,8 @@ export default function AdminUsersPage() {
     return () => { document.body.style.overflow = ""; };
   }, [editUser, createOpen]);
 
-  // super_admin-only role — hide from regular admin
-  const visibleRoles = myRole === "super_admin" ? ROLES : ROLES.filter((r) => r.value !== "super_admin" && r.value !== "owner");
+  // show roles based on myRole — owner can see owner role, super_admin sees all, admin sees all except super_admin
+  const visibleRoles = myRole === "super_admin" ? ROLES : myRole === "owner" ? ROLES.filter((r) => r.value !== "super_admin") : ROLES.filter((r) => r.value !== "super_admin" && r.value !== "owner");
 
   const openEdit = (u: UserItem) => {
     setEditUser(u);
@@ -223,10 +223,15 @@ export default function AdminUsersPage() {
     setCreating(false);
   };
 
-  // Hide super_admin users from non-super_admin admins
+  // Hide super_admin users from non-super_admin, and sort owner users first
   const visibleUsers = myRole === "super_admin" ? users : users.filter((u) => u.role !== "super_admin");
+  const sortedUsers = visibleUsers.sort((a, b) => {
+    if (a.role === "owner" && b.role !== "owner") return -1;
+    if (a.role !== "owner" && b.role === "owner") return 1;
+    return 0;
+  });
 
-  const filtered = visibleUsers.filter((u) => {
+  const filtered = sortedUsers.filter((u) => {
     const matchRole   = filterRole === "all" || u.role === filterRole;
     const matchSearch = u.name.toLowerCase().includes(search.toLowerCase()) || u.email.toLowerCase().includes(search.toLowerCase());
     return matchRole && matchSearch;

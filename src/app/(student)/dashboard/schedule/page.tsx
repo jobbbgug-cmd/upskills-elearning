@@ -1,8 +1,7 @@
 "use client";
 import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
-import { ChevronLeft, ChevronRight, Clock, Video, User, X, BookOpen } from "lucide-react";
-import MeetButton from "@/components/MeetButton";
+import { ChevronLeft, ChevronRight, Clock, Video, User, X } from "lucide-react";
 import LoadingSpinner from "@/components/LoadingSpinner";
 
 interface SessionEvent {
@@ -23,7 +22,6 @@ type Cell = { day: number; month: "prev" | "curr" | "next" };
 
 export default function StudentSchedulePage() {
   const [role, setRole] = useState("");
-  const [activeTab, setActiveTab] = useState<"student" | "teacher">("student");
   const [students, setStudents] = useState<Student[]>([]);
   const [selectedStudentId, setSelectedStudentId] = useState("all");
   const [events, setEvents] = useState<SessionEvent[]>([]);
@@ -52,24 +50,14 @@ export default function StudentSchedulePage() {
   useEffect(() => {
     if (loadingInit) return;
 
-    // For teacher tab, always load teacher schedule
-    if (activeTab === "teacher") {
-      setLoadingEvents(true);
-      setSelectedDate(null);
-      fetch("/api/schedule/teacher").then(r => r.json()).then(d => { setEvents(d.events ?? []); setLoadingEvents(false); });
-      return;
-    }
-
-    // For student tab
     if (role === "admin" && selectedStudentId === "all") { setEvents([]); return; }
     setLoadingEvents(true);
     setSelectedDate(null);
     const url = role === "admin" && selectedStudentId !== "all"
       ? `/api/schedule/student?userId=${selectedStudentId}` : "/api/schedule/student";
     fetch(url).then(r => r.json()).then(d => { setEvents(d.events ?? []); setLoadingEvents(false); });
-  }, [loadingInit, role, selectedStudentId, activeTab]);
+  }, [loadingInit, role, selectedStudentId]);
 
-  // Build course→color map
   const courseColor = useMemo(() => {
     const m = new Map<string, string>(); let i = 0;
     events.forEach(e => { if (!m.has(e.courseId)) m.set(e.courseId, COURSE_COLORS[i++ % COURSE_COLORS.length]); });
@@ -109,69 +97,30 @@ export default function StudentSchedulePage() {
   if (loadingInit) return <LoadingSpinner />;
 
   return (
-    <div className="flex gap-6">
-      {/* Left Sidebar Menu */}
-      <div className="w-56 shrink-0">
-        <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden sticky top-6">
-          <div className="p-4 border-b border-gray-100">
-            <h3 className="font-semibold text-gray-900 text-sm">ตารางการเรียน</h3>
-          </div>
-          <div className="p-1 space-y-1">
-            {[
-              { key: "student", label: "ตารางเรียน", icon: "👨‍🎓", color: "indigo" },
-              { key: "teacher", label: "ตารางสอน", icon: "👨‍🏫", color: "green" },
-            ].map((t) => {
-              const colorClasses = {
-                indigo: "bg-indigo-50 text-indigo-700 border border-indigo-200",
-                green: "bg-green-50 text-green-700 border border-green-200",
-              };
-              return (
-                <button
-                  key={t.key}
-                  onClick={() => setActiveTab(t.key as typeof activeTab)}
-                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
-                    activeTab === t.key
-                      ? colorClasses[t.color as keyof typeof colorClasses]
-                      : "text-gray-600 hover:bg-gray-50"
-                  }`}
-                >
-                  <span className="text-lg">{t.icon}</span>
-                  {t.label}
-                </button>
-              );
-            })}
-          </div>
+    <div className="space-y-5">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">ตารางเรียน</h1>
+          <p className="text-sm text-gray-500 mt-0.5">
+            {role === "admin" && selectedStudent
+              ? `ของ ${selectedStudent.name}${selectedStudent.gradeLevel ? ` · ${selectedStudent.gradeLevel}` : ""}`
+              : "คอร์สที่จองและยืนยันแล้วทั้งหมด"}
+          </p>
         </div>
+        {role === "admin" && students.length > 0 && (
+          <div className="flex items-center gap-2">
+            <User className="w-4 h-4 text-gray-400 shrink-0" />
+            <select value={selectedStudentId} onChange={e => setSelectedStudentId(e.target.value)}
+              className="text-sm border border-gray-200 rounded-xl px-3 py-2 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-300 min-w-[200px]">
+              <option value="all">เลือกนักเรียน...</option>
+              {students.map(s => <option key={s._id} value={s._id}>{s.name}{s.gradeLevel ? ` (${s.gradeLevel})` : ""}</option>)}
+            </select>
+          </div>
+        )}
       </div>
 
-      {/* Main Content */}
-      <div className="flex-1 space-y-5">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">
-              {activeTab === "teacher" ? "ตารางสอน" : "ตารางเรียน"}
-            </h1>
-            <p className="text-sm text-gray-500 mt-0.5">
-              {activeTab === "teacher" ? "ตารางการสอนของครูทั้งหมด" :
-               role === "admin" && selectedStudent
-                ? `ของ ${selectedStudent.name}${selectedStudent.gradeLevel ? ` · ${selectedStudent.gradeLevel}` : ""}`
-                : "คอร์สที่จองและยืนยันแล้วทั้งหมด"}
-            </p>
-          </div>
-          {role === "admin" && students.length > 0 && activeTab === "student" && (
-            <div className="flex items-center gap-2">
-              <User className="w-4 h-4 text-gray-400 shrink-0" />
-              <select value={selectedStudentId} onChange={e => setSelectedStudentId(e.target.value)}
-                className="text-sm border border-gray-200 rounded-xl px-3 py-2 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-300 min-w-[200px]">
-                <option value="all">เลือกนักเรียน...</option>
-                {students.map(s => <option key={s._id} value={s._id}>{s.name}{s.gradeLevel ? ` (${s.gradeLevel})` : ""}</option>)}
-              </select>
-            </div>
-          )}
-        </div>
-
-      {role === "admin" && activeTab === "student" && selectedStudentId === "all" ? (
+      {role === "admin" && selectedStudentId === "all" ? (
         <div className="bg-white rounded-2xl border border-gray-100 p-16 text-center">
           <User className="w-10 h-10 mx-auto mb-3 text-gray-300" />
           <p className="text-sm text-gray-500 font-medium">เลือกนักเรียนเพื่อดูตารางเรียน</p>
@@ -183,6 +132,7 @@ export default function StudentSchedulePage() {
         <>
           {/* Calendar */}
           <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
+            {/* Month nav */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
               <button onClick={prevMonth} className="p-2 rounded-xl hover:bg-gray-100 transition-colors">
                 <ChevronLeft className="w-4 h-4 text-gray-600" />
@@ -198,12 +148,18 @@ export default function StudentSchedulePage() {
                 <ChevronRight className="w-4 h-4 text-gray-600" />
               </button>
             </div>
+
+            {/* Day name headers */}
             <div className="grid grid-cols-7 border-b border-gray-100 bg-gray-50/50">
               {DAYS_SHORT.map((d, i) => (
                 <div key={d} className={`py-2.5 text-center text-xs font-semibold uppercase tracking-wide
-                  ${i === 0 ? "text-rose-400" : i === 6 ? "text-blue-400" : "text-gray-400"}`}>{d}</div>
+                  ${i === 0 ? "text-rose-400" : i === 6 ? "text-blue-400" : "text-gray-400"}`}>
+                  {d}
+                </div>
               ))}
             </div>
+
+            {/* Grid cells */}
             <div className="grid grid-cols-7 divide-x divide-y divide-gray-100">
               {calCells.map((cell, i) => {
                 const dateStr = cellDateStr(cell);
@@ -225,11 +181,13 @@ export default function StudentSchedulePage() {
                     </div>
                     <div className="space-y-0.5">
                       {dayEvs.slice(0, 3).map(ev => (
-                        <div key={ev.bookingId} className={`px-1.5 py-0.5 rounded text-xs truncate leading-snug ${courseColor.get(ev.courseId) ?? COURSE_COLORS[0]}`}>
+                        <div key={ev.bookingId} className={`px-1.5 py-0.5 rounded text-xs truncate leading-snug ${courseColor.get(ev.courseId)}`}>
                           <span className="font-semibold">{ev.startTime}</span> <span className="hidden sm:inline">{ev.courseTitle}</span>
                         </div>
                       ))}
-                      {dayEvs.length > 3 && <div className="text-xs text-indigo-400 px-1 font-medium">+{dayEvs.length - 3} อื่นๆ</div>}
+                      {dayEvs.length > 3 && (
+                        <div className="text-xs text-indigo-400 px-1 font-medium">+{dayEvs.length - 3} อื่นๆ</div>
+                      )}
                     </div>
                   </div>
                 );
@@ -237,7 +195,7 @@ export default function StudentSchedulePage() {
             </div>
           </div>
 
-          {/* Detail panel */}
+          {/* Day detail panel */}
           {selectedDate && (
             <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
               <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 bg-gray-50/50">
@@ -253,31 +211,24 @@ export default function StudentSchedulePage() {
               ) : (
                 <div className="p-4 space-y-3">
                   {selectedEvents.map(ev => {
-                    const isPast = selectedDate < today;
                     const color = courseColor.get(ev.courseId) ?? COURSE_COLORS[0];
                     return (
-                      <div key={ev.bookingId} className="flex gap-3 p-4 rounded-xl border border-gray-100 bg-gray-50">
-                        <div className={`w-1 rounded-full shrink-0 ${color.split(" ")[0].replace("bg-", "bg-").replace("-100", "-400")}`} />
+                      <div key={ev.bookingId} className={`flex gap-3 p-4 rounded-xl border ${color.replace("text-", "border-").replace("bg-", "bg-").slice(0, -7)}50 border-current`}>
                         <div className="flex-1 min-w-0">
-                          <p className="font-semibold text-sm text-gray-900">{ev.courseTitle}</p>
-                          <div className="flex items-center gap-3 mt-1.5 text-xs text-gray-500">
+                          <div className="flex items-start justify-between gap-2">
+                            <div>
+                              <p className={`font-semibold text-sm ${color}`}>{ev.courseTitle}</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center flex-wrap gap-3 mt-2 text-xs text-gray-500">
                             <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{ev.startTime} - {ev.endTime} น.</span>
                           </div>
-                          <div className="flex flex-wrap gap-2 mt-2.5">
-                            {ev.zoomLink && !isPast && role !== "admin" && (
-                              <MeetButton sessionDate={selectedDate} startTime={ev.startTime} endTime={ev.endTime} meetLink={ev.zoomLink} />
-                            )}
-                            <Link href={`/learn/${ev.courseId}`}
-                              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 text-indigo-700 rounded-lg text-xs font-medium hover:bg-indigo-100 transition-colors">
-                              <BookOpen className="w-3.5 h-3.5" />เข้าคอร์สเรียน
-                            </Link>
-                            {ev.zoomLink && !isPast && role === "admin" && (
-                              <a href={ev.zoomLink} target="_blank" rel="noopener noreferrer"
-                                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-700 rounded-lg text-xs font-medium hover:bg-blue-100 transition-colors">
-                                <Video className="w-3.5 h-3.5" />ลิงก์เรียน
-                              </a>
-                            )}
-                          </div>
+                          {ev.zoomLink && (
+                            <a href={ev.zoomLink} target="_blank" rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1.5 mt-2.5 px-3 py-1.5 bg-blue-50 text-blue-700 rounded-lg text-xs font-medium hover:bg-blue-100 transition-colors">
+                              <Video className="w-3.5 h-3.5" />ลิงก์เรียน
+                            </a>
+                          )}
                         </div>
                       </div>
                     );
@@ -288,7 +239,6 @@ export default function StudentSchedulePage() {
           )}
         </>
       )}
-      </div>
     </div>
   );
 }

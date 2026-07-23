@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
+import { ObjectId } from "mongodb";
 import { connectDB } from "@/lib/mongodb";
 import { getAuthUser } from "@/lib/auth";
 import { resolveInstitutionId, tenantFilter } from "@/lib/tenant";
 import User from "@/models/User";
+import Institution from "@/models/Institution";
 
 export async function GET(req: NextRequest) {
   try {
@@ -36,8 +38,38 @@ export async function GET(req: NextRequest) {
       filter._id = { $nin: assignedStudentIds };
     }
 
-    const users = await User.find(filter).select("-password").sort({ createdAt: -1 }).lean();
-    return NextResponse.json(JSON.parse(JSON.stringify(users)));
+    // Get users from admin's institution
+    const institutionUsers = await User.find(filter).select("-password").sort({ createdAt: -1 }).lean();
+
+    // For admin role, also include users from parent and child institutions
+    if (auth.role === "admin" && institutionId) {
+      const instId = institutionId instanceof ObjectId ? institutionId : new ObjectId(institutionId.toString());
+      const allUsers = [...institutionUsers];
+
+      // Get parent institution
+      const currentInst = await Institution.findById(instId).lean();
+      if (currentInst?.parentId) {
+        const parentFilter = { institutionId: currentInst.parentId };
+        if (roleParam) parentFilter.role = roleParam;
+        const parentUsers = await User.find(parentFilter).select("-password").sort({ createdAt: -1 }).lean();
+        allUsers.push(...parentUsers);
+      }
+
+      // Get child institutions
+      const childInstitutions = await Institution.find({ parentId: instId }).select("_id").lean();
+      const childInstIds = childInstitutions.map(i => i._id);
+
+      if (childInstIds.length > 0) {
+        const childFilter = { institutionId: { $in: childInstIds } };
+        if (roleParam) childFilter.role = roleParam;
+        const childUsers = await User.find(childFilter).select("-password").sort({ createdAt: -1 }).lean();
+        allUsers.push(...childUsers);
+      }
+
+      return NextResponse.json(JSON.parse(JSON.stringify(allUsers)));
+    }
+
+    return NextResponse.json(JSON.parse(JSON.stringify(institutionUsers)));
   } catch {
     return NextResponse.json({ error: "เกิดข้อผิดพลาด" }, { status: 500 });
   }

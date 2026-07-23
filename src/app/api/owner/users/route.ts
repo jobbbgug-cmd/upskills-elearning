@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
+import { ObjectId } from "mongodb";
 import { connectDB } from "@/lib/mongodb";
 import { getAuthUser } from "@/lib/auth";
 import { resolveInstitutionId, tenantFilter } from "@/lib/tenant";
 import User from "@/models/User";
+import Institution from "@/models/Institution";
 
 export async function GET(req: NextRequest) {
   try {
@@ -13,32 +15,57 @@ export async function GET(req: NextRequest) {
     const institutionId = await resolveInstitutionId(req, auth.institutionId);
 
     const filter: Record<string, unknown> = {};
-
-    // Only add institutionId filter if it's provided
     if (institutionId) {
       filter.institutionId = institutionId;
     }
 
-    // Add role filter if requested
     const roleParam = req.nextUrl.searchParams.get("role");
     if (roleParam) {
       filter.role = roleParam;
     }
 
-    // If unassigned=true and role=student, exclude students already assigned to parents
     const unassignedParam = req.nextUrl.searchParams.get("unassigned");
     if (unassignedParam === "true" && roleParam === "student") {
-      // Find all parents with assigned students
       const parentsWithStudents = await User.find({ role: "parent", studentId: { $exists: true, $ne: "" } }).select("studentId").lean();
       const assignedStudentIds = parentsWithStudents.map((p) => p.studentId);
-
-      // Exclude those students from results
       filter._id = { $nin: assignedStudentIds };
+    }
+
+    // For owner role, include owner user + institution users + child institution users
+    if (auth.role === "owner" && institutionId) {
+      const ownerUser = await User.findById(auth.userId).select("-password").lean();
+
+      // Get users from owner's institution
+      const institutionUsers = await User.find(filter).select("-password").sort({ createdAt: -1 }).lean();
+
+      // Get child institutions
+      const instId = institutionId instanceof ObjectId ? institutionId : new ObjectId(institutionId.toString());
+      const childInstitutions = await Institution.find({ parentId: instId }).select("_id").lean();
+      const childInstIds = childInstitutions.map(i => i._id);
+
+      // Get users from child institutions
+      let childUsers: any[] = [];
+      if (childInstIds.length > 0) {
+        const childFilter = { institutionId: { $in: childInstIds } };
+        if (roleParam) childFilter.role = roleParam;
+        childUsers = await User.find(childFilter).select("-password").sort({ createdAt: -1 }).lean();
+      }
+
+      // Combine: owner first, then institution users, then child users
+      const allUsers = [];
+      if (ownerUser && ownerUser.role === "owner") {
+        allUsers.push(ownerUser);
+      }
+      allUsers.push(...institutionUsers.filter(u => u._id.toString() !== auth.userId));
+      allUsers.push(...childUsers);
+
+      return NextResponse.json(JSON.parse(JSON.stringify(allUsers)));
     }
 
     const users = await User.find(filter).select("-password").sort({ createdAt: -1 }).lean();
     return NextResponse.json(JSON.parse(JSON.stringify(users)));
-  } catch {
+  } catch (err) {
+    console.error(err);
     return NextResponse.json({ error: "เกิดข้อผิดพลาด" }, { status: 500 });
   }
 }
