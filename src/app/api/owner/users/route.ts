@@ -39,7 +39,7 @@ export async function GET(req: NextRequest) {
       const institutionUsers = await User.find(filter).select("-password").sort({ createdAt: -1 }).lean();
 
       // Get child institutions
-      const instId = institutionId instanceof ObjectId ? institutionId : new ObjectId(institutionId.toString());
+      const instId = typeof institutionId === "string" ? new ObjectId(institutionId) : institutionId;
       const childInstitutions = await Institution.find({ parentId: instId }).select("_id").lean();
       const childInstIds = childInstitutions.map(i => i._id);
 

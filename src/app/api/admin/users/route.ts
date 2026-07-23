@@ -43,7 +43,7 @@ export async function GET(req: NextRequest) {
 
     // For admin role, also include users from parent and child institutions
     if (auth.role === "admin" && institutionId) {
-      const instId = institutionId instanceof ObjectId ? institutionId : new ObjectId(institutionId.toString());
+      const instId = typeof institutionId === "string" ? new ObjectId(institutionId) : institutionId;
       const allUsers = [...institutionUsers];
 
       // Get parent institution
