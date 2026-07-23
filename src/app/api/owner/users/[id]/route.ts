@@ -5,8 +5,9 @@ import { getAuthUser } from "@/lib/auth";
 import { resolveInstitutionId } from "@/lib/tenant";
 import User from "@/models/User";
 
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     const auth = await getAuthUser();
     if (!auth || !["admin", "owner", "super_admin"].includes(auth.role)) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -16,7 +17,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     const institutionId = await resolveInstitutionId(req, auth.institutionId);
     const { name, email, role, password, gradeLevel, profileImage, studentId, studentName } = await req.json();
 
-    const user = await User.findById(params.id);
+    const user = await User.findById(id);
     if (!user) return NextResponse.json({ error: "ไม่พบผู้ใช้" }, { status: 404 });
 
     // Verify user belongs to same institution
@@ -34,15 +35,16 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     if (studentId !== undefined) updates.studentId = studentId;
     if (studentName !== undefined) updates.studentName = studentName;
 
-    const updated = await User.findByIdAndUpdate(params.id, updates, { new: true }).select("-password").lean();
+    const updated = await User.findByIdAndUpdate(id, updates, { new: true }).select("-password").lean();
     return NextResponse.json(JSON.parse(JSON.stringify(updated)));
   } catch {
     return NextResponse.json({ error: "เกิดข้อผิดพลาด" }, { status: 500 });
   }
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     const auth = await getAuthUser();
     if (!auth || !["admin", "owner", "super_admin"].includes(auth.role)) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -51,7 +53,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
     await connectDB();
     const institutionId = await resolveInstitutionId(req, auth.institutionId);
 
-    const user = await User.findById(params.id);
+    const user = await User.findById(id);
     if (!user) return NextResponse.json({ error: "ไม่พบผู้ใช้" }, { status: 404 });
 
     // Verify user belongs to same institution
@@ -64,7 +66,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
       return NextResponse.json({ error: "ไม่สามารถลบ owner ได้" }, { status: 403 });
     }
 
-    await User.findByIdAndDelete(params.id);
+    await User.findByIdAndDelete(id);
     return NextResponse.json({ message: "ลบสำเร็จ" });
   } catch {
     return NextResponse.json({ error: "เกิดข้อผิดพลาด" }, { status: 500 });
