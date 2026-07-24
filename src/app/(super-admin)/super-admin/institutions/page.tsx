@@ -454,20 +454,30 @@ function SuccessModal({ admin, onClose }: { admin: CreatedAdmin; onClose: () => 
     <Modal title="สร้างสถาบันสำเร็จ!" onClose={onClose}>
       <div className="space-y-5">
         {/* Success Banner */}
-        <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl p-5">
-          <div className="flex items-start gap-3">
-            <div className="flex-shrink-0 mt-0.5">
-              <CheckCircle2 className="w-5 h-5 text-green-600" />
-            </div>
-            <div className="flex-1 min-w-0">
+        <div className="bg-green-50 border border-green-200 rounded-xl p-4 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3 flex-1 min-w-0">
+            <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0" />
+            <div className="min-w-0">
               <p className="font-semibold text-green-900 text-sm">สร้างสถาบันสำเร็จ</p>
-              <p className="text-sm text-green-800 mt-1">
-                <span className="font-bold">{admin.institutionName}</span>
-              </p>
-              <p className="text-xs text-green-700 mt-1">
-                {admin.role === "owner" ? "พร้อมเจ้าของสถาบัน (Owner)" : "พร้อมผู้ดูแลระบบ (Admin)"}
-              </p>
+              <p className="text-sm text-green-800 font-bold truncate">{admin.institutionName}</p>
             </div>
+          </div>
+          <div className={`flex-shrink-0 px-3 py-2 rounded-lg border-2 font-semibold text-xs leading-tight text-center ${
+            admin.role === "owner"
+              ? "border-red-500 bg-red-50 text-red-600"
+              : "border-blue-500 bg-blue-50 text-blue-600"
+          }`}>
+            {admin.role === "owner" ? (
+              <>
+                <div>พร้อมเจ้าของ</div>
+                <div>สถาบัน (Owner)</div>
+              </>
+            ) : (
+              <>
+                <div>พร้อมผู้ดูแล</div>
+                <div>ระบบ (Admin)</div>
+              </>
+            )}
           </div>
         </div>
 
