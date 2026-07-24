@@ -425,7 +425,7 @@ export default function InstitutionsPage() {
             <div className="flex gap-3 pt-2">
               <button
                 onClick={createInstitution}
-                disabled={saving || !newForm.slug || !newForm.name || !newForm.ownerName || !newForm.ownerEmail || !newForm.ownerPassword}
+                disabled={saving || !newForm.slug || !newForm.branchNames[0]?.trim() || !newForm.ownerName || !newForm.ownerEmail || !newForm.ownerPassword}
                 className="flex-1 text-white text-sm font-medium py-2 rounded-lg transition-colors disabled:opacity-50 theme-button">
                 {saving ? "กำลังสร้าง..." : "สร้างสถาบัน"}
               </button>
