@@ -9,16 +9,11 @@ function buildWelcomeText(admin: CreatedAdmin): string {
   const roleLabel = admin.role === "owner" ? "บัญชีเจ้าของสถาบัน (Owner)" : "บัญชีผู้ดูแลระบบ (Admin)";
   return `เรียน คุณลูกค้า
 
-ขอขอบคุณที่ไว้วางใจใช้บริการจากทีมงาน UPSkill
-
+ขอขอบคุณที่ไว้วางใจใช้บริการจากทีมงาน UPSkills
 ทางทีมงานขอแจ้งข้อมูลสำหรับเข้าสู่ระบบ โดยมีรายละเอียดดังต่อไปนี้
-
 ${roleLabel}
-
 ชื่อผู้ใช้: ${admin.name}
-
 อีเมล: ${admin.email}
-
 รหัสผ่าน: ${admin.password}
 
 เพื่อความปลอดภัยของข้อมูล ขอแนะนำให้ท่านเปลี่ยนรหัสผ่านทันทีหลังจากเข้าสู่ระบบครั้งแรก
@@ -27,12 +22,9 @@ ${roleLabel}
 
 ขอแสดงความนับถือ
 
-ทีมงาน UPSkill
-
+ทีมงาน UPSkills
 โทรศัพท์: 094-801-8302
-
 อีเมล: upskillsth@gmail.com
-
 Line ID: job0948018302`;
 }
 
