@@ -38,36 +38,8 @@ export async function GET(req: NextRequest) {
       filter._id = { $nin: assignedStudentIds };
     }
 
-    // Get users from admin's institution
+    // Get users from admin's institution only
     const institutionUsers = await User.find(filter).select("-password").sort({ createdAt: -1 }).lean();
-
-    // For admin role, also include users from parent and child institutions
-    if (auth.role === "admin" && institutionId) {
-      const instId = typeof institutionId === "string" ? new ObjectId(institutionId) : institutionId;
-      const allUsers = [...institutionUsers];
-
-      // Get parent institution
-      const currentInst = await Institution.findById(instId).select("parentId").lean() as any;
-      if (currentInst?.parentId) {
-        const parentFilter: Record<string, any> = { institutionId: currentInst.parentId };
-        if (roleParam) parentFilter.role = roleParam;
-        const parentUsers = await User.find(parentFilter).select("-password").sort({ createdAt: -1 }).lean();
-        allUsers.push(...parentUsers);
-      }
-
-      // Get child institutions
-      const childInstitutions = await Institution.find({ parentId: instId }).select("_id").lean();
-      const childInstIds = childInstitutions.map(i => i._id);
-
-      if (childInstIds.length > 0) {
-        const childFilter: Record<string, any> = { institutionId: { $in: childInstIds } };
-        if (roleParam) childFilter.role = roleParam;
-        const childUsers = await User.find(childFilter).select("-password").sort({ createdAt: -1 }).lean();
-        allUsers.push(...childUsers);
-      }
-
-      return NextResponse.json(JSON.parse(JSON.stringify(allUsers)));
-    }
 
     return NextResponse.json(JSON.parse(JSON.stringify(institutionUsers)));
   } catch {

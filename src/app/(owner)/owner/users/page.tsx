@@ -17,6 +17,7 @@ interface UserItem {
   createdAt: string;
   studentId?: string;
   studentName?: string;
+  institutionId?: string;
 }
 
 const ROLES = [
@@ -49,8 +50,14 @@ interface StudentOption {
   gradeLevel?: string;
 }
 
+interface Institution {
+  _id: string;
+  name: string;
+}
+
 export default function AdminUsersPage() {
   const [users, setUsers]           = useState<UserItem[]>([]);
+  const [institutions, setInstitutions] = useState<Institution[]>([]);
   const [students, setStudents]     = useState<StudentOption[]>([]);
   const [loading, setLoading]       = useState(true);
   const [search, setSearch]         = useState("");
@@ -78,14 +85,16 @@ export default function AdminUsersPage() {
 
   const load = async () => {
     setLoading(true);
-    const [usersRes, meRes, studentsRes] = await Promise.all([
+    const [usersRes, meRes, studentsRes, instRes] = await Promise.all([
       fetch("/api/owner/users"),
       fetch("/api/auth/me"),
-      fetch("/api/owner/users?role=student&unassigned=true")
+      fetch("/api/owner/users?role=student&unassigned=true"),
+      fetch("/api/admin/institutions")
     ]);
     if (usersRes.ok) setUsers(await usersRes.json());
     if (meRes.ok) { const d = await meRes.json(); setMyRole(d.user?.role ?? ""); }
     if (studentsRes.ok) setStudents(await studentsRes.json());
+    if (instRes.ok) setInstitutions(await instRes.json());
     setLoading(false);
   };
 
@@ -339,10 +348,10 @@ export default function AdminUsersPage() {
             <thead>
               <tr className="border-b border-gray-100 bg-gray-50">
                 <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wide">ผู้ใช้</th>
+                <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wide">สถาบัน</th>
                 <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wide">ระดับชั้น</th>
                 <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wide">วันที่สมัคร</th>
                 <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wide">Role</th>
-                <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wide">เปลี่ยน Role</th>
                 <th className="px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wide text-right">จัดการ</th>
               </tr>
             </thead>
@@ -368,6 +377,9 @@ export default function AdminUsersPage() {
                       </div>
                     </td>
                     <td className="px-5 py-4 text-sm text-gray-500">
+                      {u.institutionId ? institutions.find((i) => i._id === u.institutionId)?.name || "—" : "—"}
+                    </td>
+                    <td className="px-5 py-4 text-sm text-gray-500">
                       {(u.role === "student" || u.role === "parent")
                         ? (u.gradeLevel || "—")
                         : <span className="text-indigo-600 font-medium">ทุกระดับชั้น</span>}
@@ -379,20 +391,6 @@ export default function AdminUsersPage() {
                       <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${info.badge}`}>
                         <Icon className="w-3 h-3" />{info.label}
                       </span>
-                    </td>
-                    <td className="px-5 py-4">
-                      {u.role === "owner" ? (
-                        <span className="text-xs text-gray-400 italic">—</span>
-                      ) : (
-                        <div className="relative inline-block">
-                          <select value={u.role} onChange={(e) => changeRole(u._id, e.target.value as UserItem["role"])}
-                            disabled={updating === u._id}
-                            className={`appearance-none pl-3 pr-8 py-1.5 rounded-lg text-sm font-medium border transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-50 ${info.color}`}>
-                            {visibleRoles.map((r) => <option key={r.value} value={r.value}>{r.label}</option>)}
-                          </select>
-                          <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 pointer-events-none text-gray-500" />
-                        </div>
-                      )}
                     </td>
                     <td className="px-5 py-4 text-right">
                       <div className="flex items-center justify-end gap-1">
@@ -411,9 +409,6 @@ export default function AdminUsersPage() {
                             className="p-1.5 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors" title="ลบ">
                             <Trash2 className="w-4 h-4" />
                           </button>
-                        )}
-                        {u.role === "owner" && (
-                          <span className="text-xs text-gray-300 px-2">จัดการโดย Super Admin</span>
                         )}
                       </div>
                     </td>

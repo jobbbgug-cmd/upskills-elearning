@@ -14,26 +14,11 @@ export async function GET(req: NextRequest) {
     await connectDB();
     const institutionId = await resolveInstitutionId(req, auth.institutionId);
 
-    // Get pending users from institution
+    // Get pending users from institution only (no child institutions for owner)
     const pendingUsers = await User.find({ ...tenantFilter(institutionId), status: "pending" })
       .select("-password")
       .sort({ createdAt: 1 })
       .lean();
-
-    // For owner role, also include pending users from child institutions
-    if (auth.role === "owner" && institutionId) {
-      const instId = typeof institutionId === "string" ? new ObjectId(institutionId) : institutionId;
-      const childInstitutions = await Institution.find({ parentId: instId }).select("_id").lean();
-      const childInstIds = childInstitutions.map(i => i._id);
-
-      if (childInstIds.length > 0) {
-        const childPendingUsers = await User.find({ institutionId: { $in: childInstIds }, status: "pending" })
-          .select("-password")
-          .sort({ createdAt: 1 })
-          .lean();
-        pendingUsers.push(...childPendingUsers);
-      }
-    }
 
     return NextResponse.json(JSON.parse(JSON.stringify(pendingUsers)));
   } catch {

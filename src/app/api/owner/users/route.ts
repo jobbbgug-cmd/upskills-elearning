@@ -31,35 +31,10 @@ export async function GET(req: NextRequest) {
       filter._id = { $nin: assignedStudentIds };
     }
 
-    // For owner role, include owner user + institution users + child institution users
+    // For owner role, include only owner's institution users (no child institutions)
     if (auth.role === "owner" && institutionId) {
-      const ownerUser = await User.findById(auth.userId).select("-password").lean();
-
-      // Get users from owner's institution
       const institutionUsers = await User.find(filter).select("-password").sort({ createdAt: -1 }).lean();
-
-      // Get child institutions
-      const instId = typeof institutionId === "string" ? new ObjectId(institutionId) : institutionId;
-      const childInstitutions = await Institution.find({ parentId: instId }).select("_id").lean();
-      const childInstIds = childInstitutions.map(i => i._id);
-
-      // Get users from child institutions
-      let childUsers: any[] = [];
-      if (childInstIds.length > 0) {
-        const childFilter: Record<string, any> = { institutionId: { $in: childInstIds } };
-        if (roleParam) childFilter.role = roleParam;
-        childUsers = await User.find(childFilter).select("-password").sort({ createdAt: -1 }).lean();
-      }
-
-      // Combine: owner first, then institution users, then child users
-      const allUsers = [];
-      if (ownerUser && ownerUser.role === "owner") {
-        allUsers.push(ownerUser);
-      }
-      allUsers.push(...institutionUsers.filter(u => u._id.toString() !== auth.userId));
-      allUsers.push(...childUsers);
-
-      return NextResponse.json(JSON.parse(JSON.stringify(allUsers)));
+      return NextResponse.json(JSON.parse(JSON.stringify(institutionUsers)));
     }
 
     const users = await User.find(filter).select("-password").sort({ createdAt: -1 }).lean();

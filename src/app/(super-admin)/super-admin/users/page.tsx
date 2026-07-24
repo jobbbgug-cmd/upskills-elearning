@@ -87,9 +87,9 @@ export default function SuperAdminUsersPage() {
     setLoading(true);
     const qs = institutionId && institutionId !== "all" ? `?institutionId=${institutionId}` : "";
     const [usersRes, instRes, studentsRes] = await Promise.all([
-      fetch(`/api/admin/users${qs}`),
+      fetch(`/api/super-admin/users${qs}`),
       fetch("/api/admin/institutions"),
-      fetch("/api/admin/users?role=student&unassigned=true"),
+      fetch("/api/super-admin/users?role=student&unassigned=true"),
     ]);
     if (usersRes.ok) setUsers(await usersRes.json());
     if (instRes.ok) setInstitutions(await instRes.json());
@@ -150,7 +150,7 @@ export default function SuperAdminUsersPage() {
     };
     if (editForm.password) body.password = editForm.password;
 
-    const res = await fetch(`/api/admin/users/${editUser._id}`, {
+    const res = await fetch(`/api/super-admin/users/${editUser._id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
@@ -166,7 +166,7 @@ export default function SuperAdminUsersPage() {
 
   const changeRole = async (id: string, role: UserItem["role"]) => {
     setUpdating(id);
-    const res = await fetch(`/api/admin/users/${id}`, {
+    const res = await fetch(`/api/super-admin/users/${id}`, {
       method: "PUT", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ role }),
     });
@@ -175,7 +175,7 @@ export default function SuperAdminUsersPage() {
   };
 
   const deleteUser = async (id: string) => {
-    const res = await fetch(`/api/admin/users/${id}`, { method: "DELETE" });
+    const res = await fetch(`/api/super-admin/users/${id}`, { method: "DELETE" });
     if (res.ok) setUsers((prev) => prev.filter((u) => u._id !== id));
   };
 
@@ -208,7 +208,7 @@ export default function SuperAdminUsersPage() {
     }
     setCreating(true); setCreateError("");
     const qs = createForm.institutionId ? `?institutionId=${createForm.institutionId}` : "";
-    const res = await fetch(`/api/admin/users${qs}`, {
+    const res = await fetch(`/api/super-admin/users${qs}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -364,7 +364,6 @@ export default function SuperAdminUsersPage() {
                 <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wide">ระดับชั้น</th>
                 <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wide">วันที่สมัคร</th>
                 <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wide">Role</th>
-                <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wide">เปลี่ยน Role</th>
                 <th className="px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wide text-right">จัดการ</th>
               </tr>
             </thead>
@@ -408,16 +407,6 @@ export default function SuperAdminUsersPage() {
                       <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${info.badge}`}>
                         <Icon className="w-3 h-3" />{info.label}
                       </span>
-                    </td>
-                    <td className="px-5 py-4">
-                      <div className="relative inline-block">
-                        <select value={u.role} onChange={(e) => changeRole(u._id, e.target.value as UserItem["role"])}
-                          disabled={updating === u._id}
-                          className={`appearance-none pl-3 pr-8 py-1.5 rounded-lg text-sm font-medium border transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-violet-500 disabled:opacity-50 ${info.color}`}>
-                          {ROLES.map((r) => <option key={r.value} value={r.value}>{r.label}</option>)}
-                        </select>
-                        <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 pointer-events-none text-gray-500" />
-                      </div>
                     </td>
                     <td className="px-5 py-4 text-right">
                       <div className="flex items-center justify-end gap-1">

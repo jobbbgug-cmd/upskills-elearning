@@ -8,7 +8,7 @@ import User from "@/models/User";
 export async function GET() {
   try {
     const auth = await getAuthUser();
-    if (!auth || auth.role !== "admin" && auth.role !== "super_admin") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (!auth || (auth.role !== "admin" && auth.role !== "super_admin" && auth.role !== "owner")) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     await connectDB();
     const institutions = await Institution.find().sort({ createdAt: 1 }).lean();
     return NextResponse.json(JSON.parse(JSON.stringify(institutions)));
