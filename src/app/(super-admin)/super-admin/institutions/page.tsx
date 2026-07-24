@@ -72,6 +72,8 @@ export default function InstitutionsPage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [deleteConfirm, setDeleteConfirm] = useState<{ open: boolean; id: string; name: string }>({ open: false, id: "", name: "" });
+  const [selectedInst, setSelectedInst] = useState<string | null>(null);
+  const [branches, setBranches] = useState<InstitutionStats[]>([]);
 
   const load = async () => {
     const res = await fetch("/api/super-admin/institutions");
@@ -162,6 +164,17 @@ export default function InstitutionsPage() {
     setInstitutions((prev) => prev.filter((i) => i._id !== id));
   };
 
+  const toggleBranches = async (instId: string) => {
+    if (selectedInst === instId) {
+      setSelectedInst(null);
+      setBranches([]);
+    } else {
+      setSelectedInst(instId);
+      const res = await fetch(`/api/super-admin/institutions?parentId=${instId}`);
+      if (res.ok) setBranches(await res.json());
+    }
+  };
+
   if (loading) return <LoadingSpinner />;
 
   return (
@@ -206,11 +219,12 @@ export default function InstitutionsPage() {
           };
 
           return (
-            <div key={inst._id} className={`bg-white rounded-xl border overflow-hidden transition-all hover:shadow-sm ${!inst.isActive ? "border-red-100" : "border-gray-100"}`}>
-              <div className={`h-0.5 w-full ${inst.plan === "trial" ? "" : `bg-gradient-to-r ${planColor[inst.plan] ?? planColor.trial}`}`}
-                style={inst.plan === "trial" ? { background: `linear-gradient(to right, rgba(var(--color-primary-rgb), 0.6), var(--color-primary))` } : undefined} />
+            <div key={inst._id}>
+              <div className={`bg-white rounded-xl border overflow-hidden transition-all hover:shadow-sm cursor-pointer ${selectedInst === inst._id ? "border-violet-300 bg-violet-50" : !inst.isActive ? "border-red-100" : "border-gray-100"}`} onClick={() => toggleBranches(inst._id)}>
+                <div className={`h-0.5 w-full ${inst.plan === "trial" ? "" : `bg-gradient-to-r ${planColor[inst.plan] ?? planColor.trial}`}`}
+                  style={inst.plan === "trial" ? { background: `linear-gradient(to right, rgba(var(--color-primary-rgb), 0.6), var(--color-primary))` } : undefined} />
 
-              <div className="px-4 py-3 flex items-center gap-3">
+                <div className="px-4 py-3 flex items-center gap-3">
                 {/* Avatar */}
                 <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${inst.plan === "trial" ? "" : `bg-gradient-to-br ${planColor[inst.plan] ?? planColor.trial}`}`}
                   style={inst.plan === "trial" ? { background: `linear-gradient(to bottom right, rgba(var(--color-primary-rgb), 0.8), var(--color-primary))` } : undefined}>
@@ -245,7 +259,7 @@ export default function InstitutionsPage() {
                 </div>
 
                 {/* Actions */}
-                <div className="flex items-center gap-1 shrink-0">
+                <div className="flex items-center gap-1 shrink-0" onClick={(e) => e.stopPropagation()}>
                   <button onClick={() => openEdit(inst)} className="p-1.5 text-gray-400 hover:text-violet-600 hover:bg-violet-50 rounded-lg transition-colors" title="แก้ไข">
                     <Edit3 className="w-4 h-4" />
                   </button>
@@ -254,6 +268,21 @@ export default function InstitutionsPage() {
                   </button>
                 </div>
               </div>
+
+              {/* Branches */}
+              {selectedInst === inst._id && branches.length > 0 && (
+                <div className="bg-gray-50 border-t border-gray-100 px-4 py-3">
+                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">สาขา</p>
+                  <div className="space-y-2">
+                    {branches.map((branch) => (
+                      <div key={branch._id} className="bg-white border border-gray-200 rounded-lg px-3 py-2">
+                        <p className="text-sm font-medium text-gray-900">{branch.name}</p>
+                        <p className="text-xs text-gray-500 mt-0.5">{branch.slug}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           );
         })}
