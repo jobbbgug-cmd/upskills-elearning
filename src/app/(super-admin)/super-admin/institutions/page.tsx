@@ -269,20 +269,21 @@ export default function InstitutionsPage() {
                   </div>
                 </div>
 
-              {/* Branches */}
-              {selectedInst === inst._id && branches.length > 0 && (
-                <div className="bg-gray-50 border-t border-gray-100 px-4 py-3">
-                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">สาขา</p>
-                  <div className="space-y-2">
-                    {branches.map((branch) => (
-                      <div key={branch._id} className="bg-white border border-gray-200 rounded-lg px-3 py-2">
-                        <p className="text-sm font-medium text-gray-900">{branch.name}</p>
-                        <p className="text-xs text-gray-500 mt-0.5">{branch.slug}</p>
-                      </div>
-                    ))}
+                {/* Branches */}
+                {selectedInst === inst._id && branches.length > 0 && (
+                  <div className="bg-gray-50 border-t border-gray-100 px-4 py-3">
+                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">สาขา</p>
+                    <div className="space-y-2">
+                      {branches.map((branch) => (
+                        <div key={branch._id} className="bg-white border border-gray-200 rounded-lg px-3 py-2">
+                          <p className="text-sm font-medium text-gray-900">{branch.name}</p>
+                          <p className="text-xs text-gray-500 mt-0.5">{branch.slug}</p>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
             </div>
           );
         })}
