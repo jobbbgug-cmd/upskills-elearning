@@ -177,6 +177,8 @@ export default function InstitutionsPage() {
 
   if (loading) return <LoadingSpinner />;
 
+  const fmtB = (n: number) => { const r = Math.round(n * 100) / 100; const p = r.toString().split("."); p[0] = p[0].replace(/\B(?=(\d{3})+(?!\d))/g, ","); return p.join("."); };
+
   return (
     <div className="space-y-6">
       <ConfirmDialog
@@ -203,7 +205,6 @@ export default function InstitutionsPage() {
 
       <div className="flex flex-col gap-2">
         {institutions.map((inst) => {
-          const fmtB = (n: number) => { const r = Math.round(n * 100) / 100; const p = r.toString().split("."); p[0] = p[0].replace(/\B(?=(\d{3})+(?!\d))/g, ","); return p.join("."); };
           const commissionAmount = inst.commissionRate > 0 ? fmtB(inst.stats.revenue * inst.commissionRate / 100) : null;
           const expired = inst.planExpiresAt && new Date(inst.planExpiresAt) < new Date();
           const daysLeft = inst.planExpiresAt
@@ -274,12 +275,31 @@ export default function InstitutionsPage() {
                   <div className="bg-white border-t border-gray-100 px-4 py-4">
                     <p className="text-xs font-semibold text-gray-600 uppercase tracking-widest mb-3">สาขา</p>
                     <div className="space-y-2">
-                      {branches.map((branch) => (
-                        <div key={branch._id} className="bg-gray-50 border-2 border-red-400 rounded-xl px-4 py-3">
-                          <p className="text-sm font-semibold text-gray-900">{branch.name}</p>
-                          <p className="text-xs text-gray-500 mt-1 font-mono">{branch.slug}</p>
-                        </div>
-                      ))}
+                      {branches.map((branch) => {
+                        const branchLimits = PLAN_LIMITS[branch.plan as keyof typeof PLAN_LIMITS] ?? PLAN_LIMITS.trial;
+                        const branchCommission = branch.commissionRate > 0 ? fmtB(branch.stats.revenue * branch.commissionRate / 100) : null;
+                        return (
+                          <div key={branch._id} className="bg-gray-50 border-2 border-red-400 rounded-xl p-3">
+                            <div className="flex items-center justify-between gap-3">
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-semibold text-gray-900">{branch.name}</p>
+                                <p className="text-xs text-gray-500 mt-1 font-mono">{branch.slug}</p>
+                                <div className="flex items-center gap-2 mt-2 text-xs text-gray-500">
+                                  <span><Users className="w-3 h-3 inline mr-0.5" />{branch.stats.users}{branchLimits.maxStudents > 0 ? `/${branchLimits.maxStudents}` : ""}</span>
+                                  <span><BookOpen className="w-3 h-3 inline mr-0.5" />{branch.stats.courses}{branchLimits.maxCourses > 0 ? `/${branchLimits.maxCourses}` : ""}</span>
+                                  <span>{branch.stats.bookings} การจอง</span>
+                                </div>
+                              </div>
+                              <div className="text-right shrink-0">
+                                <p className="text-sm font-bold text-gray-900">฿{fmtB(branch.stats.revenue)}</p>
+                                {branchCommission && (
+                                  <p className="text-xs text-gray-600 mt-0.5">คอม {branch.commissionRate}% = ฿{branchCommission}</p>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 )}
