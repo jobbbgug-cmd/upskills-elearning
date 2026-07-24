@@ -295,11 +295,21 @@ export default function InstitutionsPage() {
                                   <span className="text-gray-400">ทดลองใช้</span>
                                 </div>
                               </div>
-                              <div className="text-right shrink-0">
-                                <p className="text-sm font-bold text-gray-900">฿{fmtB(branch.stats.revenue)}</p>
-                                {branchCommission && (
-                                  <p className="text-xs text-gray-600 mt-0.5">คอม {branch.commissionRate}% = ฿{branchCommission}</p>
-                                )}
+                              <div className="text-right shrink-0 flex items-center gap-2">
+                                <div>
+                                  <p className="text-sm font-bold text-gray-900">฿{fmtB(branch.stats.revenue)}</p>
+                                  {branchCommission && (
+                                    <p className="text-xs text-gray-600 mt-0.5">คอม {branch.commissionRate}% = ฿{branchCommission}</p>
+                                  )}
+                                </div>
+                                <div className="flex items-center gap-1 shrink-0">
+                                  <button onClick={() => openEdit(branch)} className="p-1.5 text-gray-400 hover:text-violet-600 hover:bg-violet-50 rounded-lg transition-colors" title="แก้ไข">
+                                    <Edit3 className="w-4 h-4" />
+                                  </button>
+                                  <button onClick={() => setDeleteConfirm({ open: true, id: branch._id, name: branch.name })} className="p-1.5 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors" title="ลบสาขา">
+                                    <Trash2 className="w-4 h-4" />
+                                  </button>
+                                </div>
                               </div>
                             </div>
                           </div>
