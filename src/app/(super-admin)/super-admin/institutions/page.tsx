@@ -209,10 +209,7 @@ export default function InstitutionsPage() {
         <div>
           <h1 className="text-2xl font-bold text-gray-900">สถาบันทั้งหมด</h1>
           <p className="text-gray-500 text-sm mt-1">
-            {institutions.length} สถาบัน
-            {Object.values(branchCounts).reduce((a, b) => a + b, 0) > 0 &&
-              ` (${Object.values(branchCounts).reduce((a, b) => a + b, 0)} สาขา)`
-            }
+            {institutions.length + Object.values(branchCounts).reduce((a, b) => a + b, 0)} สถาบัน
           </p>
         </div>
         <button
