@@ -56,8 +56,8 @@ interface CreatedAdmin {
   role: "admin" | "owner";
 }
 
-const PLANS = ["trial", "starter", "pro", "enterprise"] as const;
-const PLAN_COMMISSION: Record<string, number> = { trial: 10, starter: 8, pro: 5, enterprise: 3 };
+const PLANS = ["trial", "starter", "growth", "pro", "enterprise"] as const;
+const PLAN_COMMISSION: Record<string, number> = { trial: 12, starter: 10, growth: 8, pro: 5, enterprise: 3 };
 
 function genPassword(len = 12) {
   const chars = "abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789!@#$";
