@@ -215,7 +215,7 @@ export default function Navbar() {
           <div className="hidden md:flex items-center gap-3">
             {user ? (
               <>
-                {(user.role === "owner" || user.role === "admin") && branches.length > 0 && (
+                {(user.role === "owner" || user.role === "admin") && branches.length > 0 && pathname !== "/" && !pathname.startsWith("/courses") && !pathname.startsWith("/learning-paths") && !pathname.startsWith("/skill-pass") && (
                   <div className="relative">
                     <button className="flex items-center gap-2 text-sm px-3 py-2 rounded-lg bg-gray-50 text-gray-700 hover:bg-gray-100 transition-colors border border-gray-200">
                       <Building2 className="w-4 h-4" />
