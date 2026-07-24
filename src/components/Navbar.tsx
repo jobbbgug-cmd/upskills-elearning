@@ -76,10 +76,10 @@ export default function Navbar() {
         const qs = u?.institutionId ? `?institutionId=${u.institutionId}` : "";
         return fetch(`/api/branding${qs}`)
           .then((r) => r.json())
-          .then((bd) => setBranding(bd || { logoUrl: "/logo.png" }))
-          .catch(() => setBranding({ logoUrl: "/logo.png" }));
+          .then((bd) => setBranding(bd || { name: "", logoUrl: "/logo.png", faviconUrl: "", primaryColor: "", tagline: "", whiteLabelMode: false, isDefault: true }))
+          .catch(() => setBranding({ name: "", logoUrl: "/logo.png", faviconUrl: "", primaryColor: "", tagline: "", whiteLabelMode: false, isDefault: true }));
       })
-      .catch(() => setBranding({ logoUrl: "/logo.png" }));
+      .catch(() => setBranding({ name: "", logoUrl: "/logo.png", faviconUrl: "", primaryColor: "", tagline: "", whiteLabelMode: false, isDefault: true }));
   }, []);
 
   useEffect(() => {
