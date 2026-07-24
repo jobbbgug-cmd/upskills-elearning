@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
     if (!auth || auth.role !== "admin" && auth.role !== "super_admin") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     await connectDB();
 
-    const { ownerName, ownerEmail, ownerPassword, branchCount, ...institutionFields } = await req.json();
+    const { ownerName, ownerEmail, ownerPassword, branchCount, branchNames, ...institutionFields } = await req.json();
 
     // Owner is required
     if (!ownerName || !ownerEmail || !ownerPassword)
@@ -34,8 +34,9 @@ export async function POST(req: NextRequest) {
     const existing = await User.findOne({ email: ownerEmail });
     if (existing) return NextResponse.json({ error: "อีเมลนี้ถูกใช้งานแล้ว" }, { status: 400 });
 
-    // Create parent institution
-    const institution = await Institution.create({ ...institutionFields, parentId: null });
+    // Create parent institution with branchNames[0] or name
+    const parentName = (branchNames && branchNames.length > 0 ? branchNames[0] : null) || institutionFields.name;
+    const institution = await Institution.create({ ...institutionFields, name: parentName, parentId: null });
     const institutionId = (institution._id as { toString(): string }).toString();
 
     // Create branch institutions — parent counts as branch 1, so loop from 2
@@ -43,9 +44,10 @@ export async function POST(req: NextRequest) {
     const count = Math.max(1, Math.min(10, Number(branchCount) || 1));
     const branches = [];
     for (let i = 2; i <= count; i++) {
+      const branchName = (branchNames && branchNames[i - 1] ? branchNames[i - 1] : `${institutionFields.name} สาขา ${i}`);
       const branch = await Institution.create({
         ...institutionFields,
-        name: `${institutionFields.name} สาขา ${i}`,
+        name: branchName,
         slug: `${institutionFields.slug}-branch-${i}`,
         parentId: institutionId,
       });

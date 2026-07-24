@@ -72,7 +72,7 @@ export default function InstitutionsPage() {
   const [createdAdmin, setCreatedAdmin] = useState<CreatedAdmin | null>(null);
   const [form, setForm] = useState({ name: "", plan: "trial", planExpiresAt: "", isActive: true, commissionRate: 0 });
   const [newForm, setNewForm] = useState({
-    slug: "", name: "", plan: "trial", commissionRate: PLAN_COMMISSION["trial"],
+    slug: "", branchNames: [""], plan: "trial", commissionRate: PLAN_COMMISSION["trial"],
     branchCount: 1,
     ownerName: "", ownerEmail: "", ownerPassword: "",
   });
@@ -130,7 +130,8 @@ export default function InstitutionsPage() {
     setError("");
     const payload = {
       slug: newForm.slug,
-      name: newForm.name,
+      name: newForm.branchNames[0] || "",
+      branchNames: newForm.branchNames,
       plan: newForm.plan,
       commissionRate: Number(newForm.commissionRate),
       branchCount: newForm.branchCount,
@@ -147,14 +148,14 @@ export default function InstitutionsPage() {
     if (res.ok) {
       const data = await res.json();
       setCreating(false);
-      setNewForm({ slug: "", name: "", plan: "trial", commissionRate: PLAN_COMMISSION["trial"], branchCount: 1, ownerName: "", ownerEmail: "", ownerPassword: "" });
+      setNewForm({ slug: "", branchNames: [""], plan: "trial", commissionRate: PLAN_COMMISSION["trial"], branchCount: 1, ownerName: "", ownerEmail: "", ownerPassword: "" });
       load();
       if (data.ownerUser) {
         setCreatedAdmin({
           name: data.ownerUser.name,
           email: data.ownerUser.email,
           password: newForm.ownerPassword,
-          institutionName: newForm.name,
+          institutionName: newForm.branchNames[0] || "",
           role: data.ownerUser.role === "owner" ? "owner" : "admin",
         });
       }
@@ -322,10 +323,39 @@ export default function InstitutionsPage() {
         <Modal title="เพิ่มสถาบันใหม่" onClose={() => { setCreating(false); setError(""); }}>
           <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-1">
             {/* Institution fields */}
-            <Field label="ชื่อสถาบัน *">
-              <input type="text" value={newForm.name} onChange={(e) => setNewForm({ ...newForm, name: e.target.value })}
-                placeholder="โรงเรียน ABC" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-300" />
+            <Field label="จำนวนสาขา *">
+              <input
+                type="number"
+                min={1} max={10}
+                value={newForm.branchCount}
+                onChange={(e) => {
+                  const count = Math.max(1, Math.min(10, Number(e.target.value) || 1));
+                  const names = Array.from({ length: count }, (_, i) => newForm.branchNames[i] || "");
+                  setNewForm({ ...newForm, branchCount: count, branchNames: names });
+                }}
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-300"
+              />
+              <p className="text-xs text-gray-400 mt-1">ระบบจะสร้างสาขา 1, 2, 3, ... ให้อัตโนมัติ</p>
             </Field>
+            {newForm.branchCount === 1 ? (
+              <Field label="ชื่อสถาบัน *">
+                <input type="text" value={newForm.branchNames[0] || ""} onChange={(e) => setNewForm({ ...newForm, branchNames: [e.target.value] })}
+                  placeholder="โรงเรียน ABC" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-300" />
+              </Field>
+            ) : (
+              <>
+                {newForm.branchNames.map((name, i) => (
+                  <Field key={i} label={`ชื่อสถาบัน${i + 1} *`}>
+                    <input type="text" value={name} onChange={(e) => {
+                      const updated = [...newForm.branchNames];
+                      updated[i] = e.target.value;
+                      setNewForm({ ...newForm, branchNames: updated });
+                    }}
+                      placeholder={`โรงเรียน ABC ${i + 1}`} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-300" />
+                  </Field>
+                ))}
+              </>
+            )}
             <Field label="Slug (ตัวพิมพ์เล็ก ไม่มีช่องว่าง) *">
               <input type="text" value={newForm.slug} onChange={(e) => setNewForm({ ...newForm, slug: e.target.value.toLowerCase().replace(/\s+/g, "-") })}
                 placeholder="abc-school" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-300" />
@@ -348,16 +378,6 @@ export default function InstitutionsPage() {
                 }}
                 className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-300"
               />
-            </Field>
-            <Field label="จำนวนสาขา *">
-              <input
-                type="number"
-                min={1} max={10}
-                value={newForm.branchCount}
-                onChange={(e) => setNewForm({ ...newForm, branchCount: Math.max(1, Math.min(10, Number(e.target.value) || 1)) })}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-300"
-              />
-              <p className="text-xs text-gray-400 mt-1">ระบบจะสร้างสาขา 1, 2, 3, ... ให้อัตโนมัติ</p>
             </Field>
 
             {/* Divider */}
