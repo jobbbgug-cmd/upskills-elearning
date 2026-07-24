@@ -278,9 +278,13 @@ export default function InstitutionsPage() {
                       {branches.map((branch) => {
                         const branchLimits = PLAN_LIMITS[branch.plan as keyof typeof PLAN_LIMITS] ?? PLAN_LIMITS.trial;
                         const branchCommission = branch.commissionRate > 0 ? fmtB(branch.stats.revenue * branch.commissionRate / 100) : null;
+                        const initials = branch.name.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase();
                         return (
                           <div key={branch._id} className="bg-gray-50 border-2 border-red-400 rounded-xl p-3">
                             <div className="flex items-center justify-between gap-3">
+                              <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 bg-gradient-to-br from-red-400 to-red-500">
+                                <span className="text-white text-xs font-bold">{initials}</span>
+                              </div>
                               <div className="flex-1 min-w-0">
                                 <p className="text-sm font-semibold text-gray-900">{branch.name}</p>
                                 <div className="flex items-center gap-2 mt-1 text-xs text-gray-500 flex-wrap">
