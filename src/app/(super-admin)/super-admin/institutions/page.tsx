@@ -74,10 +74,25 @@ export default function InstitutionsPage() {
   const [deleteConfirm, setDeleteConfirm] = useState<{ open: boolean; id: string; name: string }>({ open: false, id: "", name: "" });
   const [selectedInst, setSelectedInst] = useState<string | null>(null);
   const [branches, setBranches] = useState<InstitutionStats[]>([]);
+  const [branchCounts, setBranchCounts] = useState<Record<string, number>>({});
 
   const load = async () => {
     const res = await fetch("/api/super-admin/institutions");
-    if (res.ok) setInstitutions(await res.json());
+    if (res.ok) {
+      const insts = await res.json();
+      setInstitutions(insts);
+
+      // Load branch counts for each institution
+      const counts: Record<string, number> = {};
+      for (const inst of insts) {
+        const branchRes = await fetch(`/api/super-admin/institutions?parentId=${inst._id}`);
+        if (branchRes.ok) {
+          const branchList = await branchRes.json();
+          counts[inst._id] = branchList.length;
+        }
+      }
+      setBranchCounts(counts);
+    }
     setLoading(false);
   };
 
@@ -237,6 +252,9 @@ export default function InstitutionsPage() {
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-semibold text-gray-900 text-sm">{inst.name}</span>
                       <PlanBadge plan={inst.plan} />
+                      {(branchCounts[inst._id] ?? 0) > 0 && (
+                        <span className="text-xs bg-violet-50 text-violet-600 border border-violet-200 px-2 py-0.5 rounded-full">{branchCounts[inst._id]} สาขา</span>
+                      )}
                       {!inst.isActive && <span className="text-xs bg-red-50 text-red-600 border border-red-200 px-2 py-0.5 rounded-full">ระงับ</span>}
                       {expired && <span className="text-xs bg-orange-50 text-orange-600 border border-orange-200 px-2 py-0.5 rounded-full">หมดอายุ</span>}
                       {inst.planExpiresAt && !expired && daysLeft! <= 7 && (
