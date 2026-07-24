@@ -286,13 +286,15 @@ export default function InstitutionsPage() {
                                 <span className="text-white text-xs font-bold">{initials}</span>
                               </div>
                               <div className="flex-1 min-w-0">
-                                <p className="text-sm font-semibold text-gray-900">{branch.name}</p>
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <span className="text-sm font-semibold text-gray-900">{branch.name}</span>
+                                  <PlanBadge plan={branch.plan} />
+                                </div>
                                 <div className="flex items-center gap-2 mt-1 text-xs text-gray-500 flex-wrap">
                                   <span className="font-mono">{branch.slug}</span>
                                   <span><Users className="w-3 h-3 inline mr-0.5" />{branch.stats.users}{branchLimits.maxStudents > 0 ? `/${branchLimits.maxStudents}` : ""}</span>
                                   <span><BookOpen className="w-3 h-3 inline mr-0.5" />{branch.stats.courses}{branchLimits.maxCourses > 0 ? `/${branchLimits.maxCourses}` : ""}</span>
                                   <span>{branch.stats.bookings} การจอง</span>
-                                  <span className="text-gray-400">ทดลองใช้</span>
                                 </div>
                               </div>
                               <div className="text-right shrink-0 flex items-center gap-2">
