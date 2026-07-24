@@ -464,7 +464,7 @@ function SuccessModal({ admin, onClose }: { admin: CreatedAdmin; onClose: () => 
           </div>
           <div className={`flex-shrink-0 px-3 py-2 rounded-lg border-2 font-semibold text-xs leading-tight text-center ${
             admin.role === "owner"
-              ? "border-red-500 bg-red-50 text-red-600"
+              ? "border-green-500 bg-green-50 text-green-600"
               : "border-blue-500 bg-blue-50 text-blue-600"
           }`}>
             {admin.role === "owner" ? (
