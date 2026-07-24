@@ -280,9 +280,9 @@ export default function InstitutionsPage() {
                         const branchCommission = branch.commissionRate > 0 ? fmtB(branch.stats.revenue * branch.commissionRate / 100) : null;
                         const initials = branch.name.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase();
                         return (
-                          <div key={branch._id} className="bg-gray-50 border-2 border-red-400 rounded-xl p-3">
+                          <div key={branch._id} className="bg-gray-50 border-2 border-violet-300 rounded-xl p-3">
                             <div className="flex items-center justify-between gap-3">
-                              <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 bg-gradient-to-br from-red-400 to-red-500">
+                              <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 bg-gradient-to-br from-violet-400 to-violet-600">
                                 <span className="text-white text-xs font-bold">{initials}</span>
                               </div>
                               <div className="flex-1 min-w-0">
@@ -297,9 +297,9 @@ export default function InstitutionsPage() {
                               </div>
                               <div className="text-right shrink-0 flex items-center gap-2">
                                 <div>
-                                  <p className="text-sm font-bold text-gray-900">฿{fmtB(branch.stats.revenue)}</p>
+                                  <p className="text-sm font-bold theme-link">฿{fmtB(branch.stats.revenue)}</p>
                                   {branchCommission && (
-                                    <p className="text-xs text-gray-600 mt-0.5">คอม {branch.commissionRate}% = ฿{branchCommission}</p>
+                                    <p className="text-xs theme-link mt-0.5">คอม {branch.commissionRate}% = ฿{branchCommission}</p>
                                   )}
                                 </div>
                                 <div className="flex items-center gap-1 shrink-0">
