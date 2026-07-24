@@ -195,7 +195,7 @@ export default function OwnerLayout({ children }: { children: React.ReactNode })
       <aside className={`fixed inset-y-0 left-0 z-50 w-60 bg-white border-r border-gray-200 flex flex-col shrink-0 transition-transform duration-200
         ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0 lg:static lg:transform-none`}>
 
-        <div className="p-5 border-b border-gray-100 flex items-center justify-between">
+        <div className="px-5 py-[5.6px] border-b border-gray-100 flex items-center justify-between">
           <Link href="/" onClick={close}>
             <Image src={logoUrl} alt="UPSkills" width={150} height={50} className="object-contain w-[150px] h-[50px]" />
           </Link>

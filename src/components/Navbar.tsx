@@ -76,9 +76,10 @@ export default function Navbar() {
         const qs = u?.institutionId ? `?institutionId=${u.institutionId}` : "";
         return fetch(`/api/branding${qs}`)
           .then((r) => r.json())
-          .then((bd) => setBranding(bd));
+          .then((bd) => setBranding(bd || { logoUrl: "/logo.png" }))
+          .catch(() => setBranding({ logoUrl: "/logo.png" }));
       })
-      .catch(() => {});
+      .catch(() => setBranding({ logoUrl: "/logo.png" }));
   }, []);
 
   useEffect(() => {
@@ -139,17 +140,13 @@ export default function Navbar() {
                   className="object-contain h-8 w-auto"
                   priority
                 />
-              ) : branding && !branding.isDefault && branding.name ? (
-                <span className="font-bold text-lg text-indigo-700">
-                  {branding.name}
-                </span>
               ) : (
                 <Image
                   src="/logo.png"
                   alt="UPSkills"
-                  width={120}
-                  height={40}
-                  className="object-contain"
+                  width={135}
+                  height={35}
+                  className="object-contain h-8 w-auto"
                   priority
                 />
               )}

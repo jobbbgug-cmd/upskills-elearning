@@ -143,11 +143,11 @@ export default function BrandingPage() {
           <Upload className="w-4 h-4 theme-link" /> โลโก้
         </h2>
         <div className="flex items-center gap-4">
-          <div className="w-32 h-14 rounded-xl border border-gray-200 bg-gray-50 flex items-center justify-center overflow-hidden px-2">
+          <div className="w-32 h-14 rounded-xl border border-gray-200 bg-gray-50 flex items-center justify-center overflow-hidden">
             {form.logoUrl ? (
-              <Image src={form.logoUrl} alt="logo" width={120} height={48} className="object-contain w-full h-full" />
+              <Image src={form.logoUrl} alt="logo" width={120} height={48} className="object-contain object-center w-full h-full" />
             ) : (
-              <span className="text-xs text-gray-400 font-medium text-center leading-tight">{form.name ? form.name : "ไม่มีโลโก้"}</span>
+              <span className="text-xs text-gray-400 font-medium text-center leading-tight px-1">{form.name ? form.name : "ไม่มีโลโก้"}</span>
             )}
           </div>
           <div className="flex-1">
