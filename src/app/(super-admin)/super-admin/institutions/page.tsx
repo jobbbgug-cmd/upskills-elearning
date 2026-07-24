@@ -225,49 +225,49 @@ export default function InstitutionsPage() {
                   style={inst.plan === "trial" ? { background: `linear-gradient(to right, rgba(var(--color-primary-rgb), 0.6), var(--color-primary))` } : undefined} />
 
                 <div className="px-4 py-3 flex items-center gap-3">
-                {/* Avatar */}
-                <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${inst.plan === "trial" ? "" : `bg-gradient-to-br ${planColor[inst.plan] ?? planColor.trial}`}`}
-                  style={inst.plan === "trial" ? { background: `linear-gradient(to bottom right, rgba(var(--color-primary-rgb), 0.8), var(--color-primary))` } : undefined}>
-                  <span className="text-white text-xs font-bold">{initials}</span>
-                </div>
+                  {/* Avatar */}
+                  <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${inst.plan === "trial" ? "" : `bg-gradient-to-br ${planColor[inst.plan] ?? planColor.trial}`}`}
+                    style={inst.plan === "trial" ? { background: `linear-gradient(to bottom right, rgba(var(--color-primary-rgb), 0.8), var(--color-primary))` } : undefined}>
+                    <span className="text-white text-xs font-bold">{initials}</span>
+                  </div>
 
-                {/* Name + badges */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="font-semibold text-gray-900 text-sm">{inst.name}</span>
-                    <PlanBadge plan={inst.plan} />
-                    {!inst.isActive && <span className="text-xs bg-red-50 text-red-600 border border-red-200 px-2 py-0.5 rounded-full">ระงับ</span>}
-                    {expired && <span className="text-xs bg-orange-50 text-orange-600 border border-orange-200 px-2 py-0.5 rounded-full">หมดอายุ</span>}
-                    {inst.planExpiresAt && !expired && daysLeft! <= 7 && (
-                      <span className="text-xs bg-orange-50 text-orange-500 border border-orange-200 px-2 py-0.5 rounded-full">⏱ {daysLeft} วัน</span>
+                  {/* Name + badges */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-semibold text-gray-900 text-sm">{inst.name}</span>
+                      <PlanBadge plan={inst.plan} />
+                      {!inst.isActive && <span className="text-xs bg-red-50 text-red-600 border border-red-200 px-2 py-0.5 rounded-full">ระงับ</span>}
+                      {expired && <span className="text-xs bg-orange-50 text-orange-600 border border-orange-200 px-2 py-0.5 rounded-full">หมดอายุ</span>}
+                      {inst.planExpiresAt && !expired && daysLeft! <= 7 && (
+                        <span className="text-xs bg-orange-50 text-orange-500 border border-orange-200 px-2 py-0.5 rounded-full">⏱ {daysLeft} วัน</span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-3 mt-0.5 text-xs text-gray-400">
+                      <span className="font-mono">{inst.slug}</span>
+                      <span><Users className="w-3 h-3 inline mr-0.5" />{inst.stats.users}{limits.maxStudents > 0 ? `/${limits.maxStudents}` : ""}</span>
+                      <span><BookOpen className="w-3 h-3 inline mr-0.5" />{inst.stats.courses}{limits.maxCourses > 0 ? `/${limits.maxCourses}` : ""}</span>
+                      <span>{inst.stats.bookings} การจอง</span>
+                    </div>
+                  </div>
+
+                  {/* Revenue + commission */}
+                  <div className="text-right shrink-0">
+                    <p className="text-base font-extrabold theme-link">฿{fmtB(inst.stats.revenue)}</p>
+                    {commissionAmount && (
+                      <p className="text-xs theme-link">คอม {inst.commissionRate}% = ฿{commissionAmount}</p>
                     )}
                   </div>
-                  <div className="flex items-center gap-3 mt-0.5 text-xs text-gray-400">
-                    <span className="font-mono">{inst.slug}</span>
-                    <span><Users className="w-3 h-3 inline mr-0.5" />{inst.stats.users}{limits.maxStudents > 0 ? `/${limits.maxStudents}` : ""}</span>
-                    <span><BookOpen className="w-3 h-3 inline mr-0.5" />{inst.stats.courses}{limits.maxCourses > 0 ? `/${limits.maxCourses}` : ""}</span>
-                    <span>{inst.stats.bookings} การจอง</span>
+
+                  {/* Actions */}
+                  <div className="flex items-center gap-1 shrink-0" onClick={(e) => e.stopPropagation()}>
+                    <button onClick={() => openEdit(inst)} className="p-1.5 text-gray-400 hover:text-violet-600 hover:bg-violet-50 rounded-lg transition-colors" title="แก้ไข">
+                      <Edit3 className="w-4 h-4" />
+                    </button>
+                    <button onClick={() => setDeleteConfirm({ open: true, id: inst._id, name: inst.name })} className="p-1.5 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors" title="ลบสถาบัน">
+                      <Trash2 className="w-4 h-4" />
+                    </button>
                   </div>
                 </div>
-
-                {/* Revenue + commission */}
-                <div className="text-right shrink-0">
-                  <p className="text-base font-extrabold theme-link">฿{fmtB(inst.stats.revenue)}</p>
-                  {commissionAmount && (
-                    <p className="text-xs theme-link">คอม {inst.commissionRate}% = ฿{commissionAmount}</p>
-                  )}
-                </div>
-
-                {/* Actions */}
-                <div className="flex items-center gap-1 shrink-0" onClick={(e) => e.stopPropagation()}>
-                  <button onClick={() => openEdit(inst)} className="p-1.5 text-gray-400 hover:text-violet-600 hover:bg-violet-50 rounded-lg transition-colors" title="แก้ไข">
-                    <Edit3 className="w-4 h-4" />
-                  </button>
-                  <button onClick={() => setDeleteConfirm({ open: true, id: inst._id, name: inst.name })} className="p-1.5 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors" title="ลบสถาบัน">
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
 
               {/* Branches */}
               {selectedInst === inst._id && branches.length > 0 && (
