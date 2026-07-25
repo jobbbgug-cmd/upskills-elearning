@@ -35,7 +35,7 @@ export default function CoursesDropdown() {
     const fetchData = async () => {
       try {
         const [categoriesRes, coursesRes, pathsRes] = await Promise.all([
-          fetch("/api/categories"),
+          fetch("/api/categories?type=online"),
           fetch("/api/courses?limit=100"),
           fetch("/api/learning-paths"),
         ]);

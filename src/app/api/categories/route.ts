@@ -8,13 +8,18 @@ export async function GET(req: NextRequest) {
     await connectDB();
     const { searchParams } = new URL(req.url);
     const institutionId = searchParams.get("institutionId");
+    const type = searchParams.get("type");
 
     const query: Record<string, unknown> = {
       ...tenantFilter(institutionId),
       isActive: true,
     };
 
-    const categories = await Category.find(query).sort({ createdAt: -1 });
+    if (type && ["online", "onsite"].includes(type)) {
+      query.type = type;
+    }
+
+    const categories = await Category.find(query).sort({ order: 1, createdAt: -1 });
     return NextResponse.json({ categories });
   } catch (err) {
     console.error(err);
