@@ -78,7 +78,7 @@ export default function AdminUsersPage() {
 
   // Create user modal
   const [createOpen, setCreateOpen]     = useState(false);
-  const [createForm, setCreateForm]     = useState({ name: "", email: "", role: "student" as UserItem["role"], gradeLevel: "", password: "", studentId: "", studentName: "" });
+  const [createForm, setCreateForm]     = useState({ name: "", email: "", role: "student" as UserItem["role"], gradeLevel: "", password: "", studentId: "", studentName: "", institutionId: "" });
   const [createError, setCreateError]   = useState("");
   const [creating, setCreating]         = useState(false);
   const [createShowPass, setCreateShowPass] = useState(false);
@@ -265,6 +265,7 @@ export default function AdminUsersPage() {
         gradeLevel: (createForm.role === "student" || createForm.role === "parent") ? createForm.gradeLevel : "ทุกระดับชั้น",
         studentId: createForm.role === "parent" ? createForm.studentId : "",
         studentName: createForm.role === "parent" ? createForm.studentName : "",
+        institutionId: createForm.institutionId,
         status: "approved",
       }),
     });
@@ -497,6 +498,15 @@ export default function AdminUsersPage() {
                   }}
                   className={inputCls}>
                   {visibleRoles.map((r) => <option key={r.value} value={r.value}>{r.label}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">สถาบัน <span className="text-red-500">*</span></label>
+                <select value={createForm.institutionId} onChange={(e) => setCreateForm({ ...createForm, institutionId: e.target.value })} className={inputCls}>
+                  <option value="">— เลือกสถาบัน —</option>
+                  {institutions.map((inst) => (
+                    <option key={inst._id} value={inst._id}>{inst.name}</option>
+                  ))}
                 </select>
               </div>
               {createForm.role === "student" && (
