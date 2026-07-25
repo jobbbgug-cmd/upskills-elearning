@@ -96,8 +96,8 @@ export default function SuperAdminCategoriesPage() {
         </button>
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 p-4">
-        <div className="flex items-center gap-2 px-3 py-2 bg-gray-50 rounded-lg">
+      <div className="space-y-4">
+        <div className="flex items-center gap-2 px-3 py-2 bg-white rounded-lg border border-gray-200">
           <Search className="w-4 h-4 text-gray-400" />
           <input
             type="text"
@@ -111,43 +111,78 @@ export default function SuperAdminCategoriesPage() {
           </button>
         </div>
 
-        <div className="mt-4">
-          {filteredCategories.length === 0 ? (
-            <div className="text-center py-8">
-              <Tag className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-              <p className="text-gray-500">ไม่พบหมวดหมู่</p>
-            </div>
-          ) : (
-            <div className="space-y-2">
-              {filteredCategories.map((cat) => (
-                <div key={cat._id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <p className="text-sm font-semibold text-gray-900">{cat.name}</p>
-                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                        cat.type === "online"
-                          ? "bg-blue-50 text-blue-600 border border-blue-200"
-                          : "bg-green-50 text-green-600 border border-green-200"
-                      }`}>
-                        {cat.type === "online" ? "Online" : "Onsite"}
-                      </span>
+        <div className="grid grid-cols-2 gap-4">
+          {/* Online Column */}
+          <div className="bg-white rounded-xl border border-red-300 p-4">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">
+              <span className="text-red-600">หมวดหมู่ online</span>
+            </h2>
+            {filteredCategories.filter((c) => c.type === "online").length === 0 ? (
+              <div className="text-center py-8">
+                <Tag className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                <p className="text-gray-500">ไม่พบหมวดหมู่ Online</p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {filteredCategories
+                  .filter((c) => c.type === "online")
+                  .map((cat) => (
+                    <div key={cat._id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-gray-900">{cat.name}</p>
+                        {cat.description && (
+                          <p className="text-xs text-gray-600 mt-1">{cat.description}</p>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-1 shrink-0 ml-4">
+                        <button className="p-1.5 text-gray-400 hover:text-violet-600 hover:bg-violet-50 rounded-lg transition-colors" title="แก้ไข">
+                          <Edit3 className="w-4 h-4" />
+                        </button>
+                        <button className="p-1.5 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors" title="ลบ">
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
                     </div>
-                    {cat.description && (
-                      <p className="text-xs text-gray-600 mt-1">{cat.description}</p>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-1 shrink-0 ml-4">
-                    <button className="p-1.5 text-gray-400 hover:text-violet-600 hover:bg-violet-50 rounded-lg transition-colors" title="แก้ไข">
-                      <Edit3 className="w-4 h-4" />
-                    </button>
-                    <button className="p-1.5 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors" title="ลบ">
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+                  ))}
+              </div>
+            )}
+          </div>
+
+          {/* Onsite Column */}
+          <div className="bg-white rounded-xl border border-red-300 p-4">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">
+              <span className="text-red-600">หมวดหมู่ onsite</span>
+            </h2>
+            {filteredCategories.filter((c) => c.type === "onsite").length === 0 ? (
+              <div className="text-center py-8">
+                <Tag className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                <p className="text-gray-500">ไม่พบหมวดหมู่ Onsite</p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {filteredCategories
+                  .filter((c) => c.type === "onsite")
+                  .map((cat) => (
+                    <div key={cat._id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-gray-900">{cat.name}</p>
+                        {cat.description && (
+                          <p className="text-xs text-gray-600 mt-1">{cat.description}</p>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-1 shrink-0 ml-4">
+                        <button className="p-1.5 text-gray-400 hover:text-violet-600 hover:bg-violet-50 rounded-lg transition-colors" title="แก้ไข">
+                          <Edit3 className="w-4 h-4" />
+                        </button>
+                        <button className="p-1.5 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors" title="ลบ">
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
