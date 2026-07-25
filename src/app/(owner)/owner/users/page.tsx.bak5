@@ -116,7 +116,7 @@ export default function AdminUsersPage() {
           } else {
             // For others: show their institution name
             const inst = ownerInsts.find((i: any) => i._id === u.institutionId);
-            instName = inst ? inst.name : "";
+            instName = inst ? (inst.parentId ? `${inst.parentName},${inst.name}` : inst.name) : "";
           }
           
           return { ...u, institutionName: instName };
