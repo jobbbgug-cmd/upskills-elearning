@@ -18,6 +18,7 @@ interface UserItem {
   studentId?: string;
   studentName?: string;
   institutionId?: string;
+  institutionName?: string;
 }
 
 const ROLES = [
@@ -85,13 +86,31 @@ export default function AdminUsersPage() {
 
   const load = async () => {
     setLoading(true);
-    const [usersRes, meRes, studentsRes, instRes] = await Promise.all([
+    const [usersRes, meRes, studentsRes, instRes, ownerInstRes] = await Promise.all([
       fetch("/api/owner/users"),
       fetch("/api/auth/me"),
       fetch("/api/owner/users?role=student&unassigned=true"),
-      fetch("/api/admin/institutions")
+      fetch("/api/admin/institutions"),
+      fetch("/api/owner/institutions")
     ]);
-    if (usersRes.ok) setUsers(await usersRes.json());
+    
+    if (usersRes.ok) {
+      const usersData = await usersRes.json();
+      // Enrich users with institutionName
+      if (ownerInstRes.ok) {
+        const ownerInsts = await ownerInstRes.json();
+        const enrichedUsers = usersData.map((u: any) => {
+          const inst = ownerInsts.find((i: any) => i._id === u.institutionId);
+          return {
+            ...u,
+            institutionName: inst ? `${inst.parentName || inst.name}${inst.name !== inst.parentName && inst.parentId ? `,${inst.name}` : ""}` : ""
+          };
+        });
+        setUsers(enrichedUsers);
+      } else {
+        setUsers(usersData);
+      }
+    }
     if (meRes.ok) { const d = await meRes.json(); setMyRole(d.user?.role ?? ""); }
     if (studentsRes.ok) setStudents(await studentsRes.json());
     if (instRes.ok) setInstitutions(await instRes.json());
@@ -377,7 +396,7 @@ export default function AdminUsersPage() {
                       </div>
                     </td>
                     <td className="px-5 py-4 text-sm text-gray-500">
-                      {u.institutionId ? institutions.find((i) => i._id === u.institutionId)?.name || "—" : "—"}
+                      {u.institutionName || "—"}
                     </td>
                     <td className="px-5 py-4 text-sm text-gray-500">
                       {(u.role === "student" || u.role === "parent")

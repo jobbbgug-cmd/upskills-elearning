@@ -1,21 +1,35 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
 import { getAuthUser } from "@/lib/auth";
-import { resolveInstitutionId } from "@/lib/tenant";
 import Institution from "@/models/Institution";
 
 export async function GET(req: NextRequest) {
   try {
     const auth = await getAuthUser();
-    if (!auth || !["admin", "owner", "super_admin"].includes(auth.role)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (!auth || auth.role !== "owner") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     await connectDB();
 
-    const institutionId = await resolveInstitutionId(req, auth.institutionId);
-    if (!institutionId) return NextResponse.json({ error: "Institution not found" }, { status: 404 });
+    // Get owner's parent institution
+    const parent = await Institution.findById(auth.institutionId).lean();
+    if (!parent) {
+      return NextResponse.json([]);
+    }
 
-    const institution = await Institution.findById(institutionId).lean();
-    return NextResponse.json(JSON.parse(JSON.stringify(institution)));
-  } catch {
+    // Get owner's branches (children institutions)
+    const branches = await Institution.find({ parentId: auth.institutionId }).lean();
+
+    // Format response: each institution has parentName for display
+    const institutions = [
+      { ...parent, parentName: parent.name },
+      ...branches.map(b => ({ ...b, parentName: parent.name }))
+    ];
+
+    return NextResponse.json(JSON.parse(JSON.stringify(institutions)));
+  } catch (err) {
+    console.error(err);
     return NextResponse.json({ error: "เกิดข้อผิดพลาด" }, { status: 500 });
   }
 }
