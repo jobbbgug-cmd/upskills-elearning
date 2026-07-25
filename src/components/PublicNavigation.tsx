@@ -9,14 +9,21 @@ interface Category {
 }
 
 export default function PublicNavigation() {
-  const [categories, setCategories] = useState<Category[]>([]);
+  const [onlineCategories, setOnlineCategories] = useState<Category[]>([]);
+  const [onsiteCategories, setOnsiteCategories] = useState<Category[]>([]);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch("/api/courses/categories")
-      .then((r) => r.json())
-      .then((data) => setCategories(Array.isArray(data) ? data : []))
-      .catch(() => {});
+    Promise.all([
+      fetch("/api/categories?type=online")
+        .then((r) => r.json())
+        .then((data) => setOnlineCategories(data.categories || []))
+        .catch(() => setOnlineCategories([])),
+      fetch("/api/categories?type=onsite")
+        .then((r) => r.json())
+        .then((data) => setOnsiteCategories(data.categories || []))
+        .catch(() => setOnsiteCategories([])),
+    ]);
   }, []);
 
   return (
@@ -30,8 +37,8 @@ export default function PublicNavigation() {
               <ChevronDown className="w-4 h-4" />
             </button>
             <div className="absolute left-0 top-full hidden group-hover:block bg-white border border-gray-200 rounded-lg shadow-lg py-2 min-w-72 z-50">
-              {categories.length > 0 ? (
-                categories.map((cat) => (
+              {onlineCategories.length > 0 ? (
+                onlineCategories.map((cat) => (
                   <Link
                     key={cat.name}
                     href={`/courses?category=${encodeURIComponent(cat.name)}`}
@@ -53,18 +60,19 @@ export default function PublicNavigation() {
               <ChevronDown className="w-4 h-4" />
             </button>
             <div className="absolute left-0 top-full hidden group-hover:block bg-white border border-gray-200 rounded-lg shadow-lg py-2 min-w-72 z-50">
-              <Link href="/courses?type=onsite" className="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors">
-                ทั้งหมด
-              </Link>
-              {categories.map((cat) => (
-                <Link
-                  key={`onsite-${cat.name}`}
-                  href={`/courses?type=onsite&category=${encodeURIComponent(cat.name)}`}
-                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
-                >
-                  {cat.name}
-                </Link>
-              ))}
+              {onsiteCategories.length > 0 ? (
+                onsiteCategories.map((cat) => (
+                  <Link
+                    key={`onsite-${cat.name}`}
+                    href={`/courses?type=onsite&category=${encodeURIComponent(cat.name)}`}
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
+                  >
+                    {cat.name} ({cat.count})
+                  </Link>
+                ))
+              ) : (
+                <div className="px-4 py-2 text-sm text-gray-500">กำลังโหลด...</div>
+              )}
             </div>
           </div>
 

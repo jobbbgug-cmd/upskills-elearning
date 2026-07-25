@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
 import { tenantFilter } from "@/lib/tenant";
 import Category from "@/models/Category";
+import Course from "@/models/Course";
 
 export async function GET(req: NextRequest) {
   try {
@@ -20,7 +21,25 @@ export async function GET(req: NextRequest) {
     }
 
     const categories = await Category.find(query).sort({ order: 1, createdAt: -1 });
-    return NextResponse.json({ categories });
+
+    // Get course counts for each category
+    const courseCounts: Record<string, number> = {};
+    const courseAgg = await Course.aggregate([
+      { $match: { isActive: true } },
+      { $group: { _id: "$category", count: { $sum: 1 } } },
+    ]);
+    courseAgg.forEach((item) => {
+      courseCounts[item._id || ""] = item.count;
+    });
+
+    const categoriesWithCount = categories.map((cat: any) => ({
+      _id: cat._id,
+      name: cat.name,
+      type: cat.type,
+      count: courseCounts[cat.name] || 0,
+    }));
+
+    return NextResponse.json({ categories: categoriesWithCount });
   } catch (err) {
     console.error(err);
     return NextResponse.json({ error: "เกิดข้อผิดพลาด" }, { status: 500 });
