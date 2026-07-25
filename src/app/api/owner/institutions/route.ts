@@ -25,7 +25,7 @@ export async function GET(req: NextRequest) {
     // Format response: each institution has parentName for display
     const institutions = [
       { ...parent, parentName: parent.name },
-      ...branches.map(b => ({ ...b, parentName: parent.name }))
+      ...branches.map((b: any) => ({ ...b, parentName: parent.name }))
     ];
 
     return NextResponse.json(JSON.parse(JSON.stringify(institutions)));
