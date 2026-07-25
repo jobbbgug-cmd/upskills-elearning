@@ -121,6 +121,7 @@ export default function OwnerLayout({ children }: { children: React.ReactNode })
   }, []);
 
   const switchBranch = async (branchId: string) => {
+    console.log("🔄 switchBranch called with:", branchId);
     setSwitchingBranch(true);
     try {
       const res = await fetch("/api/owner/switch-branch", {
