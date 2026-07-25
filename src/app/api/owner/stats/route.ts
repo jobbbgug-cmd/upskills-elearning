@@ -17,19 +17,24 @@ export async function GET(req: NextRequest) {
     const institutionId = await resolveInstitutionId(req, auth.institutionId);
 
     // Get stats for owner's institution
-    const [totalUsers, totalCourses, totalBookings, activeBookings] = await Promise.all([
-      User.countDocuments({ institutionId }),
+    const [totalStudents, totalCourses, totalBookings] = await Promise.all([
+      User.countDocuments({ institutionId, role: "student" }),
       Course.countDocuments({ institutionId }),
       Booking.countDocuments({ institutionId }),
-      Booking.countDocuments({ institutionId, status: "confirmed" }),
     ]);
 
+    // Calculate total revenue (sum of booking amounts)
+    const bookingStats = await Booking.aggregate([
+      { $match: { institutionId: institutionId ? require("mongodb").ObjectId(institutionId) : null } },
+      { $group: { _id: null, total: { $sum: "$amount" } } },
+    ]);
+    const totalRevenue = bookingStats[0]?.total || 0;
+
     return NextResponse.json({
-      totalUsers,
+      totalRevenue,
+      totalStudents,
       totalCourses,
       totalBookings,
-      activeBookings,
-      institutionId,
     });
   } catch (err) {
     console.error(err);
