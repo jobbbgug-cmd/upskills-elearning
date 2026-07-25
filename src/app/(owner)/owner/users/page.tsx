@@ -97,6 +97,7 @@ export default function AdminUsersPage() {
     if (usersRes.ok) {
       const usersData = await usersRes.json();
       console.log("👥 Users loaded:", usersData.length);
+      console.log("Users data sample:", usersData.slice(0, 2));
       
       // Enrich users with institutionName
       if (ownerInstRes.ok) {
