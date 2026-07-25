@@ -333,7 +333,7 @@ export default function OwnerLayout({ children }: { children: React.ReactNode })
                 <button
                   onClick={() => setBranchSelectorOpen(true)}
                   disabled={switchingBranch}
-                  className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 theme-bg-light rounded-lg max-w-[160px] hover:opacity-80 transition-opacity disabled:opacity-50 cursor-pointer">
+                  className="flex items-center gap-1.5 px-2.5 py-1 theme-bg-light rounded-lg max-w-[160px] hover:opacity-80 transition-opacity disabled:opacity-50 cursor-pointer">
                   <Building2 className="w-3.5 h-3.5 theme-link shrink-0" />
                   <span className="text-sm theme-link font-medium truncate">{institutionName}</span>
                   <ChevronDown className="w-3.5 h-3.5 theme-link shrink-0 ml-auto" />
