@@ -272,22 +272,46 @@ export default function Navbar() {
                           ภาพรวม
                         </Link>
 
-                        {/* แพลตฟอร์ม */}
+                        {/* รายได้และการเงิน */}
                         <div className="border-t border-gray-100 mt-1">
-                          <button onClick={() => toggleGroup("platform")} className="w-full flex items-center justify-between px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
-                            <span>แพลตฟอร์ม</span>
-                            <ChevronDown className={`w-4 h-4 transition-transform ${expandedGroups.has("platform") ? "rotate-180" : ""}`} />
+                          <button onClick={() => toggleGroup("finance")} className="w-full flex items-center justify-between px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                            <span>รายได้และการเงิน</span>
+                            <ChevronDown className={`w-4 h-4 transition-transform ${expandedGroups.has("finance") ? "rotate-180" : ""}`} />
                           </button>
-                          {expandedGroups.has("platform") && (
+                          {expandedGroups.has("finance") && (
                             <>
+                              <Link href="/super-admin/revenue" onClick={() => setSuperAdminMenu(false)} className="flex items-center gap-2 px-8 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
+                                รายได้
+                              </Link>
                               <Link href="/super-admin/analytics" onClick={() => setSuperAdminMenu(false)} className="flex items-center gap-2 px-8 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
                                 Analytics
                               </Link>
+                              <Link href="/super-admin/commission" onClick={() => setSuperAdminMenu(false)} className="flex items-center gap-2 px-8 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
+                                Commission & Payout
+                              </Link>
+                              <Link href="/super-admin/payments" onClick={() => setSuperAdminMenu(false)} className="flex items-center gap-2 px-8 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
+                                ตรวจสอบการชำระ
+                              </Link>
+                              <Link href="/super-admin/finance" onClick={() => setSuperAdminMenu(false)} className="flex items-center gap-2 px-8 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
+                                ข้อมูลทางการเงิน
+                              </Link>
+                            </>
+                          )}
+                        </div>
+
+                        {/* สถาบัน */}
+                        <div className="border-t border-gray-100 mt-1">
+                          <button onClick={() => toggleGroup("institutions")} className="w-full flex items-center justify-between px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                            <span>สถาบัน</span>
+                            <ChevronDown className={`w-4 h-4 transition-transform ${expandedGroups.has("institutions") ? "rotate-180" : ""}`} />
+                          </button>
+                          {expandedGroups.has("institutions") && (
+                            <>
                               <Link href="/super-admin/institutions" onClick={() => setSuperAdminMenu(false)} className="flex items-center gap-2 px-8 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
-                                สถาบัน
+                                สถาบันทั้งหมด
                               </Link>
                               <Link href="/super-admin/trials" onClick={() => setSuperAdminMenu(false)} className="flex items-center gap-2 px-8 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
-                                ทดลองใช้งาน
+                                คำขอทดลองใช้งาน
                               </Link>
                             </>
                           )}
@@ -333,8 +357,26 @@ export default function Navbar() {
                               <Link href="/super-admin/forum" onClick={() => setSuperAdminMenu(false)} className="flex items-center gap-2 px-8 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
                                 Forum
                               </Link>
+                            </>
+                          )}
+                        </div>
+
+                        {/* ระบบขาย */}
+                        <div className="border-t border-gray-100 mt-1">
+                          <button onClick={() => toggleGroup("sales")} className="w-full flex items-center justify-between px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                            <span>ระบบขาย</span>
+                            <ChevronDown className={`w-4 h-4 transition-transform ${expandedGroups.has("sales") ? "rotate-180" : ""}`} />
+                          </button>
+                          {expandedGroups.has("sales") && (
+                            <>
+                              <Link href="/super-admin/orders" onClick={() => setSuperAdminMenu(false)} className="flex items-center gap-2 px-8 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
+                                จัดการคำสั่งซื้อ
+                              </Link>
+                              <Link href="/super-admin/products" onClick={() => setSuperAdminMenu(false)} className="flex items-center gap-2 px-8 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
+                                จัดการสินค้า
+                              </Link>
                               <Link href="/super-admin/coupons" onClick={() => setSuperAdminMenu(false)} className="flex items-center gap-2 px-8 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
-                                คูปองส่วนลด
+                                คูปอง/โปรโมชั่น
                               </Link>
                             </>
                           )}
@@ -378,14 +420,14 @@ export default function Navbar() {
                           </button>
                           {expandedGroups.has("system") && (
                             <>
-                              <Link href="/super-admin/finance" onClick={() => setSuperAdminMenu(false)} className="flex items-center gap-2 px-8 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
-                                ข้อมูลทางการเงิน
-                              </Link>
                               <Link href="/super-admin/banners" onClick={() => setSuperAdminMenu(false)} className="flex items-center gap-2 px-8 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
                                 จัดการแบนเนอร์
                               </Link>
                               <Link href="/super-admin/roles" onClick={() => setSuperAdminMenu(false)} className="flex items-center gap-2 px-8 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
                                 จัดการ Role
+                              </Link>
+                              <Link href="/super-admin/menu" onClick={() => setSuperAdminMenu(false)} className="flex items-center gap-2 px-8 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
+                                จัดการเมนู
                               </Link>
                               <Link href="/super-admin/logs" onClick={() => setSuperAdminMenu(false)} className="flex items-center gap-2 px-8 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
                                 ประวัติการใช้งาน
