@@ -174,11 +174,25 @@ export default function SuperAdminCategoriesPage() {
         body: JSON.stringify({ order: currentCat.order }),
       });
 
-      if (res1.ok && res2.ok) {
-        await load();
+      const data1 = await res1.json();
+      const data2 = await res2.json();
+      
+      if (!res1.ok) {
+        console.error("❌ Move failed (res1):", data1.error || res1.statusText);
+        setError(data1.error || "ไม่สามารถปรับตำแหน่ง");
+        return;
       }
+      if (!res2.ok) {
+        console.error("❌ Move failed (res2):", data2.error || res2.statusText);
+        setError(data2.error || "ไม่สามารถปรับตำแหน่ง");
+        return;
+      }
+      
+      console.log("✅ Move successful, reloading...");
+      await load();
     } catch (err: any) {
       console.error("Move category error:", err);
+      setError(err.message || "เกิดข้อผิดพลาด");
     }
   };
 
