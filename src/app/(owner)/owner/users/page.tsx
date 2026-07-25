@@ -96,18 +96,26 @@ export default function AdminUsersPage() {
     
     if (usersRes.ok) {
       const usersData = await usersRes.json();
+      console.log("👥 Users loaded:", usersData.length);
+      
       // Enrich users with institutionName
       if (ownerInstRes.ok) {
         const ownerInsts = await ownerInstRes.json();
+        console.log("🏢 Owner institutions:", ownerInsts);
+        
         const enrichedUsers = usersData.map((u: any) => {
           const inst = ownerInsts.find((i: any) => i._id === u.institutionId);
+          const instName = inst ? `${inst.parentName || inst.name}${inst.name !== inst.parentName && inst.parentId ? `,${inst.name}` : ""}` : "";
+          console.log(`  User ${u.name}: institutionId=${u.institutionId}, instName=${instName}`);
           return {
             ...u,
-            institutionName: inst ? `${inst.parentName || inst.name}${inst.name !== inst.parentName && inst.parentId ? `,${inst.name}` : ""}` : ""
+            institutionName: instName
           };
         });
+        console.log("✅ Enriched users:", enrichedUsers);
         setUsers(enrichedUsers);
       } else {
+        console.error("❌ Failed to load owner institutions");
         setUsers(usersData);
       }
     }
