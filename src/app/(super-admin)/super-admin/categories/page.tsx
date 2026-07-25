@@ -149,6 +149,7 @@ export default function SuperAdminCategoriesPage() {
   };
 
   const moveCategory = async (catId: string, direction: "up" | "down", type: "online" | "onsite") => {
+    setError("");
     const sameType = categories.filter((c) => c.type === type).sort((a, b) => a.order - b.order);
     const currentIndex = sameType.findIndex((c) => c._id === catId);
 
