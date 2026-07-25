@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { ObjectId } from "mongodb";
 import { connectDB } from "@/lib/mongodb";
 import { getAuthUser } from "@/lib/auth";
 import { resolveInstitutionId } from "@/lib/tenant";
@@ -25,7 +26,7 @@ export async function GET(req: NextRequest) {
 
     // Calculate total revenue (sum of booking amounts)
     const bookingStats = await Booking.aggregate([
-      { $match: { institutionId: institutionId ? require("mongodb").ObjectId(institutionId) : null } },
+      { $match: { institutionId: institutionId ? new ObjectId(institutionId) : null } },
       { $group: { _id: null, total: { $sum: "$amount" } } },
     ]);
     const totalRevenue = bookingStats[0]?.total || 0;
