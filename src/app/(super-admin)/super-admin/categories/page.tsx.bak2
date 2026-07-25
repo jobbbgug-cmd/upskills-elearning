@@ -32,16 +32,12 @@ export default function SuperAdminCategoriesPage() {
       const res = await fetch("/api/super-admin/categories", {
         credentials: "include",
       });
-      const data = await res.json();
       if (res.ok) {
+        const data = await res.json();
         setCategories(data.categories || []);
-      } else {
-        console.error("API error:", data);
-        setError(data.error || "ไม่สามารถโหลดหมวดหมู่");
       }
     } catch (err) {
-      console.error("Fetch error:", err);
-      setError("เกิดข้อผิดพลาดในการโหลดข้อมูล");
+      console.error(err);
     }
     setLoading(false);
   };
