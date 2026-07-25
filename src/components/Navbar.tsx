@@ -42,9 +42,9 @@ export default function Navbar() {
   }, [pathname]);
 
   useEffect(() => {
-    fetch("/api/courses/categories")
+    fetch("/api/categories?type=onsite")
       .then((r) => r.json())
-      .then((data) => setCategories(Array.isArray(data) ? data : []))
+      .then((data) => setCategories((data.categories || []).map((cat: any) => ({ name: cat.name, count: cat.count || 0 }))))
       .catch(() => {});
   }, []);
 
@@ -162,16 +162,13 @@ export default function Navbar() {
                   <ChevronDown className="w-4 h-4" />
                 </button>
                 <div className="absolute left-0 top-full hidden group-hover:block bg-white border border-gray-200 rounded-lg shadow-lg py-2 min-w-72 z-50">
-                  <Link href="/courses?type=onsite" className="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors">
-                    ทั้งหมด
-                  </Link>
                   {categories.map((cat) => (
                     <Link
                       key={`onsite-${cat.name}`}
                       href={`/courses?type=onsite&category=${encodeURIComponent(cat.name)}`}
                       className="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
                     >
-                      {cat.name}
+                      {cat.name} ({cat.count})
                     </Link>
                   ))}
                 </div>
@@ -465,9 +462,6 @@ export default function Navbar() {
             </button>
             {openNavDropdown === "onsite" && (
               <div className="pl-3 space-y-1">
-                <Link href="/courses?type=onsite" onClick={() => setMenuOpen(false)} className="block px-3 py-2 text-sm text-gray-600 hover:bg-indigo-50 rounded-lg">
-                  ทั้งหมด
-                </Link>
                 {categories.map((cat) => (
                   <Link key={`onsite-${cat.name}`} href={`/courses?type=onsite&category=${encodeURIComponent(cat.name)}`} onClick={() => setMenuOpen(false)} className="block px-3 py-2 text-sm text-gray-600 hover:bg-indigo-50 rounded-lg">
                     {cat.name}
