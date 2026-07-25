@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
       filter.type = typeParam;
     }
 
-    const categories = await Category.find(filter).sort({ name: 1 }).lean();
+    const categories = await Category.find(filter).sort({ order: 1, name: 1 }).lean();
 
     // Add default type for categories that don't have it (migration)
     const categoriesWithType = categories.map((cat: any) => ({

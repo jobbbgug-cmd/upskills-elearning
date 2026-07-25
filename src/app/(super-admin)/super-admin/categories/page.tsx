@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { Tag, Plus, Edit3, Trash2, Search, RefreshCw } from "lucide-react";
+import { Tag, Plus, Edit3, Trash2, Search, RefreshCw, Power, ChevronUp, ChevronDown } from "lucide-react";
 import LoadingSpinner from "@/components/LoadingSpinner";
 
 interface Category {
@@ -9,6 +9,7 @@ interface Category {
   description?: string;
   type: "online" | "onsite";
   isActive: boolean;
+  order: number;
   createdAt: string;
 }
 
@@ -23,11 +24,14 @@ export default function SuperAdminCategoriesPage() {
   const [editData, setEditData] = useState({ name: "", description: "" });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [successMsg, setSuccessMsg] = useState("");
 
   const load = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/super-admin/categories");
+      const res = await fetch("/api/super-admin/categories", {
+        credentials: "include",
+      });
       if (res.ok) {
         setCategories(await res.json());
       }
@@ -114,6 +118,73 @@ export default function SuperAdminCategoriesPage() {
     setSaving(false);
   };
 
+  const toggleActive = async (catId: string, currentStatus: boolean) => {
+    try {
+      const res = await fetch(`/api/super-admin/categories/${catId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          isActive: !currentStatus,
+        }),
+      });
+
+      if (res.ok) {
+        const cat = await res.json();
+        setCategories(
+          categories.map((c) => (c._id === catId ? cat : c))
+        );
+        setSuccessMsg(!currentStatus ? "เปิดสำเร็จ" : "ปิดสำเร็จ");
+        setTimeout(() => setSuccessMsg(""), 2000);
+      }
+    } catch (err: any) {
+      console.error(err);
+    }
+  };
+
+  const moveCategory = async (catId: string, direction: "up" | "down", type: "online" | "onsite") => {
+    const sameType = categories.filter((c) => c.type === type).sort((a, b) => a.order - b.order);
+    const currentIndex = sameType.findIndex((c) => c._id === catId);
+
+    if (direction === "up" && currentIndex === 0) return;
+    if (direction === "down" && currentIndex === sameType.length - 1) return;
+
+    const newIndex = direction === "up" ? currentIndex - 1 : currentIndex + 1;
+    const currentCat = sameType[currentIndex];
+    const targetCat = sameType[newIndex];
+
+    try {
+      // Swap orders
+      const res1 = await fetch(`/api/super-admin/categories/${currentCat._id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ order: targetCat.order }),
+      });
+
+      const res2 = await fetch(`/api/super-admin/categories/${targetCat._id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ order: currentCat.order }),
+      });
+
+      if (res1.ok && res2.ok) {
+        // Reload categories
+        await load();
+        setSuccessMsg("เปลี่ยนลำดับสำเร็จ");
+        setTimeout(() => setSuccessMsg(""), 2000);
+      } else {
+        const err1 = await res1.text();
+        const err2 = await res2.text();
+        console.error("Failed to update order:", res1.status, res2.status, err1, err2);
+        setError("ไม่สามารถเปลี่ยนลำดับได้");
+      }
+    } catch (err: any) {
+      console.error("Move category error:", err);
+      setError(err.message || "เกิดข้อผิดพลาด");
+    }
+  };
+
   const filteredCategories = categories.filter(
     (cat) =>
       cat.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -183,7 +254,7 @@ export default function SuperAdminCategoriesPage() {
               <div className="space-y-2">
                 {filteredCategories
                   .filter((c) => c.type === "online")
-                  .map((cat) => (
+                  .map((cat, idx, arr) => (
                     <div key={cat._id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-semibold text-gray-900">{cat.name}</p>
@@ -192,6 +263,33 @@ export default function SuperAdminCategoriesPage() {
                         )}
                       </div>
                       <div className="flex items-center gap-1 shrink-0 ml-4">
+                        <button
+                          onClick={() => moveCategory(cat._id, "up", "online")}
+                          disabled={idx === 0}
+                          className="p-1.5 text-gray-400 hover:text-violet-600 hover:bg-violet-50 disabled:opacity-30 rounded-lg transition-colors"
+                          title="ขึ้น"
+                        >
+                          <ChevronUp className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => moveCategory(cat._id, "down", "online")}
+                          disabled={idx === arr.length - 1}
+                          className="p-1.5 text-gray-400 hover:text-violet-600 hover:bg-violet-50 disabled:opacity-30 rounded-lg transition-colors"
+                          title="ลง"
+                        >
+                          <ChevronDown className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => toggleActive(cat._id, cat.isActive)}
+                          className={`p-1.5 rounded-lg transition-colors ${
+                            cat.isActive
+                              ? "text-violet-600 bg-violet-50 hover:text-violet-700"
+                              : "text-gray-400 hover:text-violet-600 hover:bg-violet-50"
+                          }`}
+                          title={cat.isActive ? "ปิด" : "เปิด"}
+                        >
+                          <Power className="w-4 h-4" />
+                        </button>
                         <button
                           onClick={() => {
                             setEditing(cat);
@@ -240,7 +338,7 @@ export default function SuperAdminCategoriesPage() {
               <div className="space-y-2">
                 {filteredCategories
                   .filter((c) => c.type === "onsite")
-                  .map((cat) => (
+                  .map((cat, idx, arr) => (
                     <div key={cat._id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-semibold text-gray-900">{cat.name}</p>
@@ -249,6 +347,33 @@ export default function SuperAdminCategoriesPage() {
                         )}
                       </div>
                       <div className="flex items-center gap-1 shrink-0 ml-4">
+                        <button
+                          onClick={() => moveCategory(cat._id, "up", "onsite")}
+                          disabled={idx === 0}
+                          className="p-1.5 text-gray-400 hover:text-violet-600 hover:bg-violet-50 disabled:opacity-30 rounded-lg transition-colors"
+                          title="ขึ้น"
+                        >
+                          <ChevronUp className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => moveCategory(cat._id, "down", "onsite")}
+                          disabled={idx === arr.length - 1}
+                          className="p-1.5 text-gray-400 hover:text-violet-600 hover:bg-violet-50 disabled:opacity-30 rounded-lg transition-colors"
+                          title="ลง"
+                        >
+                          <ChevronDown className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => toggleActive(cat._id, cat.isActive)}
+                          className={`p-1.5 rounded-lg transition-colors ${
+                            cat.isActive
+                              ? "text-violet-600 bg-violet-50 hover:text-violet-700"
+                              : "text-gray-400 hover:text-violet-600 hover:bg-violet-50"
+                          }`}
+                          title={cat.isActive ? "ปิด" : "เปิด"}
+                        >
+                          <Power className="w-4 h-4" />
+                        </button>
                         <button
                           onClick={() => {
                             setEditing(cat);
@@ -377,6 +502,30 @@ export default function SuperAdminCategoriesPage() {
                 </button>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Success popup */}
+      {successMsg && (
+        <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50 animate-in fade-in slide-in-from-bottom-4 duration-300">
+          <div className={`px-6 py-4 rounded-xl shadow-lg flex items-center gap-3 ${
+            successMsg === "ปิดสำเร็จ"
+              ? "bg-red-50 border border-red-200"
+              : "bg-green-50 border border-green-200"
+          }`}>
+            <div className={`w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 ${
+              successMsg === "ปิดสำเร็จ"
+                ? "bg-red-500"
+                : "bg-green-500"
+            }`}>
+              <span className="text-white text-sm font-bold">✓</span>
+            </div>
+            <p className={`font-medium text-sm ${
+              successMsg === "ปิดสำเร็จ"
+                ? "text-red-700"
+                : "text-green-700"
+            }`}>{successMsg}</p>
           </div>
         </div>
       )}

@@ -6,6 +6,7 @@ export interface ICategoryDocument extends Document {
   description?: string;
   type: "online" | "onsite";
   isActive: boolean;
+  order: number;
   createdAt: Date;
 }
 
@@ -16,6 +17,7 @@ const CategorySchema = new Schema<ICategoryDocument>(
     description: { type: String, default: "" },
     type: { type: String, enum: ["online", "onsite"], required: true, default: "online" },
     isActive: { type: Boolean, default: true },
+    order: { type: Number, default: 0 },
   },
   { timestamps: true }
 );

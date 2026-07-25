@@ -16,18 +16,29 @@ export async function PUT(
     const { id } = await params;
     await connectDB();
 
-    const { name, description } = await req.json();
+    const body = await req.json();
+    const { name, description, isActive, order } = body;
 
-    if (!name?.trim()) {
-      return NextResponse.json({ error: "ชื่อหมวดหมู่ไม่ว่าง" }, { status: 400 });
+    const updateData: any = {};
+    if (name !== undefined) {
+      if (!name?.trim()) {
+        return NextResponse.json({ error: "ชื่อหมวดหมู่ไม่ว่าง" }, { status: 400 });
+      }
+      updateData.name = name.trim();
+    }
+    if (description !== undefined) {
+      updateData.description = description?.trim() || "";
+    }
+    if (isActive !== undefined) {
+      updateData.isActive = isActive;
+    }
+    if (order !== undefined) {
+      updateData.order = order;
     }
 
     const category = await Category.findByIdAndUpdate(
       id,
-      {
-        name: name.trim(),
-        description: description?.trim() || "",
-      },
+      updateData,
       { new: true }
     ).lean();
 
