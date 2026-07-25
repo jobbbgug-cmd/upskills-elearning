@@ -26,7 +26,7 @@ export async function GET(req: NextRequest) {
       type: cat.type || "onsite", // Default to onsite for old categories
     }));
 
-    return NextResponse.json(JSON.parse(JSON.stringify(categoriesWithType)));
+    return NextResponse.json({ categories: JSON.parse(JSON.stringify(categoriesWithType)) });
   } catch (err) {
     console.error(err);
     return NextResponse.json({ error: "เกิดข้อผิดพลาด" }, { status: 500 });
