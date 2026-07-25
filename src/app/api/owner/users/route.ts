@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
     await connectDB();
     const institutionId = await resolveInstitutionId(req, auth.institutionId);
 
-    const { name, email, password, phone, role, status, gradeLevel, nickname } = await req.json();
+    const { name, email, password, phone, role, status, gradeLevel, nickname, institutionId: reqInstitutionId } = await req.json();
 
     if (!name?.trim()) return NextResponse.json({ error: "กรุณาระบุชื่อ" }, { status: 400 });
     if (!email?.trim()) return NextResponse.json({ error: "กรุณาระบุอีเมล" }, { status: 400 });
@@ -65,8 +65,11 @@ export async function POST(req: NextRequest) {
 
     const hashed = await bcrypt.hash(password, 10);
 
+    // Use institutionId from request if provided, otherwise use resolved one
+    const finalInstitutionId = reqInstitutionId || institutionId;
+
     const user = await User.create({
-      institutionId: institutionId ?? undefined,
+      institutionId: finalInstitutionId ?? undefined,
       name: name.trim(),
       email: email.trim().toLowerCase(),
       password: hashed,
