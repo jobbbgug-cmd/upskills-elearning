@@ -41,7 +41,7 @@ export async function PUT(
       id,
       updateData,
       { new: true }
-    ).lean();
+    ).lean() as any;
     console.log(`✅ Updated category:`, category?.name, `order: ${category?.order}`);
 
     if (!category) {
