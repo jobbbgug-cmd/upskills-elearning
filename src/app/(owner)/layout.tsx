@@ -81,14 +81,25 @@ export default function OwnerLayout({ children }: { children: React.ReactNode })
     const loadBranches = async () => {
       try {
         console.log("📍 Loading branches...");
-        const res = await fetch("/api/owner/branches");
-        const data = await res.json();
-        console.log("✅ Branches response:", res.ok ? data : data.error);
-        
-        if (res.ok && Array.isArray(data)) {
-          setBranches(data);
-          console.log("📍 Branches set:", data.length);
-          if (data.length > 0) setActiveBranchId(data[0]._id);
+        const [branchesRes, activeBranchRes] = await Promise.all([
+          fetch("/api/owner/branches"),
+          fetch("/api/owner/active-branch"),
+        ]);
+
+        const branchesData = await branchesRes.json();
+        const activeBranchData = await activeBranchRes.json();
+
+        console.log("✅ Branches response:", branchesRes.ok ? branchesData : branchesData.error);
+        console.log("✅ Active branch:", activeBranchData.activeBranchId);
+
+        if (branchesRes.ok && Array.isArray(branchesData)) {
+          setBranches(branchesData);
+          console.log("📍 Branches set:", branchesData.length);
+          if (activeBranchData.activeBranchId) {
+            setActiveBranchId(activeBranchData.activeBranchId);
+          } else if (branchesData.length > 0) {
+            setActiveBranchId(branchesData[0]._id);
+          }
         } else {
           console.error("❌ Invalid branches response");
         }
@@ -336,7 +347,7 @@ export default function OwnerLayout({ children }: { children: React.ReactNode })
                   disabled={switchingBranch}
                   className="flex items-center gap-1.5 px-2.5 py-1 theme-bg-light rounded-lg max-w-[160px] hover:opacity-80 transition-opacity disabled:opacity-50 cursor-pointer">
                   <Building2 className="w-3.5 h-3.5 theme-link shrink-0" />
-                  <span className="text-sm theme-link font-medium truncate">{institutionName}</span>
+                  <span className="text-sm theme-link font-medium truncate">{branches.find(b => b._id === activeBranchId)?.name || institutionName}</span>
                   <ChevronDown className="w-3.5 h-3.5 theme-link shrink-0 ml-auto" />
                 </button>
 

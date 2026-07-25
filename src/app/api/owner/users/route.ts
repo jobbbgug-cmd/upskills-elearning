@@ -12,11 +12,25 @@ export async function GET(req: NextRequest) {
     const auth = await getAuthUser();
     if (!auth || !["admin", "owner", "super_admin"].includes(auth.role)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     await connectDB();
-    const institutionId = await resolveInstitutionId(req, auth.institutionId);
 
     const filter: Record<string, unknown> = {};
-    if (institutionId) {
-      filter.institutionId = institutionId;
+
+    if (auth.role === "owner") {
+      // Owner sees: users from active branch + all owner users
+      const institutionId = await resolveInstitutionId(req, auth.institutionId);
+      const owners = await User.find({ role: "owner" }).select("_id").lean();
+      const ownerIds = owners.map(o => o._id);
+
+      filter.$or = [
+        { institutionId },  // Users from active branch
+        { _id: { $in: ownerIds } }  // All owner users
+      ];
+    } else {
+      // Admin/super_admin uses active branch
+      const institutionId = await resolveInstitutionId(req, auth.institutionId);
+      if (institutionId) {
+        filter.institutionId = institutionId;
+      }
     }
 
     const roleParam = req.nextUrl.searchParams.get("role");
@@ -29,12 +43,6 @@ export async function GET(req: NextRequest) {
       const parentsWithStudents = await User.find({ role: "parent", studentId: { $exists: true, $ne: "" } }).select("studentId").lean();
       const assignedStudentIds = parentsWithStudents.map((p) => p.studentId);
       filter._id = { $nin: assignedStudentIds };
-    }
-
-    // For owner role, include only owner's institution users (no child institutions)
-    if (auth.role === "owner" && institutionId) {
-      const institutionUsers = await User.find(filter).select("-password").sort({ createdAt: -1 }).lean();
-      return NextResponse.json(JSON.parse(JSON.stringify(institutionUsers)));
     }
 
     const users = await User.find(filter).select("-password").sort({ createdAt: -1 }).lean();
@@ -53,7 +61,7 @@ export async function POST(req: NextRequest) {
     await connectDB();
     const institutionId = await resolveInstitutionId(req, auth.institutionId);
 
-    const { name, email, password, phone, role, status, gradeLevel, nickname, institutionId: reqInstitutionId } = await req.json();
+    const { name, email, password, phone, role, status, gradeLevel, nickname } = await req.json();
 
     if (!name?.trim()) return NextResponse.json({ error: "กรุณาระบุชื่อ" }, { status: 400 });
     if (!email?.trim()) return NextResponse.json({ error: "กรุณาระบุอีเมล" }, { status: 400 });
@@ -65,8 +73,8 @@ export async function POST(req: NextRequest) {
 
     const hashed = await bcrypt.hash(password, 10);
 
-    // Use institutionId from request if provided, otherwise use resolved one
-    const finalInstitutionId = reqInstitutionId || institutionId;
+    // Always use active institution
+    const finalInstitutionId = institutionId;
 
     const user = await User.create({
       institutionId: finalInstitutionId ?? undefined,

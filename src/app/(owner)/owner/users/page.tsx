@@ -100,25 +100,19 @@ export default function AdminUsersPage() {
       // Enrich users
       if (Array.isArray(usersData) && Array.isArray(ownerInsts)) {
         const enrichedUsers = usersData.map((u: any) => {
+          const inst = ownerInsts.find((i: any) => i._id === u.institutionId);
           let instName = "";
-          
-          if (u.role === "owner") {
-            // For owner: show parent + all branches
-            const parentInst = ownerInsts.find((i: any) => i._id === u.institutionId);
-            if (parentInst) {
-              const branches = ownerInsts.filter((i: any) => i.parentId === u.institutionId);
-              if (branches.length > 0) {
-                instName = `${parentInst.name},${branches.map((b: any) => b.name).join(",")}`;
-              } else {
-                instName = parentInst.name;
-              }
+
+          if (inst) {
+            if (u.role === "owner") {
+              // Owner - show "All branches"
+              instName = "All branches";
+            } else {
+              // Others - show just the institution name
+              instName = inst.name;
             }
-          } else {
-            // For others: show their institution name
-            const inst = ownerInsts.find((i: any) => i._id === u.institutionId);
-            instName = inst ? inst.name : "";
           }
-          
+
           return { ...u, institutionName: instName };
         });
         console.log("✅ Enriched users:", enrichedUsers.length);
@@ -235,7 +229,7 @@ export default function AdminUsersPage() {
   };
 
   const openCreate = () => {
-    setCreateForm({ name: "", email: "", role: "student", gradeLevel: "", password: "", studentId: "", studentName: "" });
+    setCreateForm({ name: "", email: "", role: "student", gradeLevel: "", password: "", studentId: "", studentName: "", institutionId: "" });
     setCreateError("");
     setCreateShowPass(false);
     setCreateCopied(false);
@@ -498,15 +492,6 @@ export default function AdminUsersPage() {
                   }}
                   className={inputCls}>
                   {visibleRoles.map((r) => <option key={r.value} value={r.value}>{r.label}</option>)}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">สถาบัน <span className="text-red-500">*</span></label>
-                <select value={createForm.institutionId} onChange={(e) => setCreateForm({ ...createForm, institutionId: e.target.value })} className={inputCls}>
-                  <option value="">— เลือกสถาบัน —</option>
-                  {institutions.map((inst) => (
-                    <option key={inst._id} value={inst._id}>{inst.name}</option>
-                  ))}
                 </select>
               </div>
               {createForm.role === "student" && (
