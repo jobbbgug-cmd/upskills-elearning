@@ -17,7 +17,8 @@ export default function SuperAdminCategoriesPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [creating, setCreating] = useState(false);
-  const [newCategory, setNewCategory] = useState({ name: "", description: "", type: "online" as const });
+  const [creatingType, setCreatingType] = useState<"online" | "onsite">("online");
+  const [newCategory, setNewCategory] = useState({ name: "", description: "" });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
@@ -51,14 +52,18 @@ export default function SuperAdminCategoriesPage() {
       const res = await fetch("/api/super-admin/categories", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newCategory),
+        body: JSON.stringify({
+          name: newCategory.name,
+          description: newCategory.description,
+          type: creatingType,
+        }),
       });
 
       if (res.ok) {
         const cat = await res.json();
         setCategories([...categories, cat]);
         setCreating(false);
-        setNewCategory({ name: "", description: "", type: "online" });
+        setNewCategory({ name: "", description: "" });
       } else {
         const data = await res.json();
         setError(data.error || "เกิดข้อผิดพลาด");
@@ -114,9 +119,22 @@ export default function SuperAdminCategoriesPage() {
         <div className="grid grid-cols-2 gap-4">
           {/* Online Column */}
           <div className="bg-white rounded-xl border border-red-300 p-4">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">
-              <span className="text-red-600">หมวดหมู่ online</span>
-            </h2>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-gray-900">
+                <span className="text-red-600">หมวดหมู่ online</span>
+              </h2>
+              <button
+                onClick={() => {
+                  setCreatingType("online");
+                  setCreating(true);
+                  setError("");
+                  setNewCategory({ name: "", description: "" });
+                }}
+                className="flex items-center gap-1 px-3 py-1.5 text-white text-sm font-medium rounded-lg transition-colors theme-button"
+              >
+                <Plus className="w-4 h-4" /> เพิ่ม
+              </button>
+            </div>
             {filteredCategories.filter((c) => c.type === "online").length === 0 ? (
               <div className="text-center py-8">
                 <Tag className="w-12 h-12 text-gray-300 mx-auto mb-3" />
@@ -150,9 +168,22 @@ export default function SuperAdminCategoriesPage() {
 
           {/* Onsite Column */}
           <div className="bg-white rounded-xl border border-red-300 p-4">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">
-              <span className="text-red-600">หมวดหมู่ onsite</span>
-            </h2>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-gray-900">
+                <span className="text-red-600">หมวดหมู่ onsite</span>
+              </h2>
+              <button
+                onClick={() => {
+                  setCreatingType("onsite");
+                  setCreating(true);
+                  setError("");
+                  setNewCategory({ name: "", description: "" });
+                }}
+                className="flex items-center gap-1 px-3 py-1.5 text-white text-sm font-medium rounded-lg transition-colors theme-button"
+              >
+                <Plus className="w-4 h-4" /> เพิ่ม
+              </button>
+            </div>
             {filteredCategories.filter((c) => c.type === "onsite").length === 0 ? (
               <div className="text-center py-8">
                 <Tag className="w-12 h-12 text-gray-300 mx-auto mb-3" />
@@ -191,7 +222,9 @@ export default function SuperAdminCategoriesPage() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-xl shadow-xl max-w-sm w-full mx-4">
             <div className="px-6 py-4 border-b border-gray-200">
-              <h2 className="text-lg font-semibold text-gray-900">เพิ่มหมวดหมู่ใหม่</h2>
+              <h2 className="text-lg font-semibold text-gray-900">
+                เพิ่มหมวดหมู่ {creatingType === "online" ? "Online" : "Onsite"}
+              </h2>
             </div>
 
             <div className="px-6 py-4 space-y-4">
@@ -215,18 +248,6 @@ export default function SuperAdminCategoriesPage() {
                   className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm mt-1 focus:outline-none focus:ring-2 focus:ring-violet-300"
                   rows={3}
                 />
-              </div>
-
-              <div>
-                <label className="text-sm font-medium text-gray-700">ประเภท *</label>
-                <select
-                  value={newCategory.type}
-                  onChange={(e) => setNewCategory({ ...newCategory, type: e.target.value as "online" | "onsite" })}
-                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm mt-1 focus:outline-none focus:ring-2 focus:ring-violet-300"
-                >
-                  <option value="online">Online</option>
-                  <option value="onsite">Onsite</option>
-                </select>
               </div>
 
               {error && <p className="text-red-500 text-sm">{error}</p>}
