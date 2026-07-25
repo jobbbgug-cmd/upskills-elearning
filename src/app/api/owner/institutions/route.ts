@@ -15,12 +15,12 @@ export async function GET(req: NextRequest) {
     console.log("📍 Owner institutionId:", auth.institutionId);
     
     // Get owner's parent institution
-    const parent = await Institution.findById(auth.institutionId).lean();
+    const parent = await Institution.findById(auth.institutionId).lean() as any;
     console.log("📍 Parent found:", parent?.name);
-    
+
     // Get owner's branches (children institutions)
-    const branches = await Institution.find({ parentId: auth.institutionId }).lean();
-    console.log("📍 Branches found:", branches.length, branches.map(b => b.name));
+    const branches = await Institution.find({ parentId: auth.institutionId }).lean() as any;
+    console.log("📍 Branches found:", branches.length, branches.map((b: any) => b.name));
 
     // Format response: each institution has parentName for display
     const institutions = [
