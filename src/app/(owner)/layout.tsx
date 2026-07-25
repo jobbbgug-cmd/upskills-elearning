@@ -101,7 +101,7 @@ export default function OwnerLayout({ children }: { children: React.ReactNode })
   }, []);
 
   useEffect(() => {
-    fetch("/api/owner/institutions")
+    fetch("/api/owner/institution")
       .then((r) => r.ok ? r.json() : null)
       .then((data) => { if (data?.name) setInstitutionName(data.name); })
       .catch(() => setInstitutionName(""));
