@@ -80,14 +80,20 @@ export default function OwnerLayout({ children }: { children: React.ReactNode })
   useEffect(() => {
     const loadBranches = async () => {
       try {
+        console.log("📍 Loading branches...");
         const res = await fetch("/api/owner/branches");
-        if (res.ok) {
-          const data: BranchOption[] = await res.json();
+        const data = await res.json();
+        console.log("✅ Branches response:", res.ok ? data : data.error);
+        
+        if (res.ok && Array.isArray(data)) {
           setBranches(data);
+          console.log("📍 Branches set:", data.length);
           if (data.length > 0) setActiveBranchId(data[0]._id);
+        } else {
+          console.error("❌ Invalid branches response");
         }
       } catch (err) {
-        console.error("Failed to load branches:", err);
+        console.error("❌ Failed to load branches:", err);
       }
     };
     loadBranches();
