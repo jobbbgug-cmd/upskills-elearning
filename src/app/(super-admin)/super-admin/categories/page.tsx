@@ -19,6 +19,8 @@ export default function SuperAdminCategoriesPage() {
   const [creating, setCreating] = useState(false);
   const [creatingType, setCreatingType] = useState<"online" | "onsite">("online");
   const [newCategory, setNewCategory] = useState({ name: "", description: "" });
+  const [editing, setEditing] = useState<Category | null>(null);
+  const [editData, setEditData] = useState({ name: "", description: "" });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
@@ -64,6 +66,43 @@ export default function SuperAdminCategoriesPage() {
         setCategories([...categories, cat]);
         setCreating(false);
         setNewCategory({ name: "", description: "" });
+      } else {
+        const data = await res.json();
+        setError(data.error || "เกิดข้อผิดพลาด");
+      }
+    } catch (err: any) {
+      setError(err.message || "เกิดข้อผิดพลาด");
+    }
+
+    setSaving(false);
+  };
+
+  const updateCategory = async () => {
+    if (!editing) return;
+    if (!editData.name.trim()) {
+      setError("ชื่อหมวดหมู่ไม่ว่าง");
+      return;
+    }
+
+    setSaving(true);
+    setError("");
+
+    try {
+      const res = await fetch(`/api/super-admin/categories/${editing._id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: editData.name,
+          description: editData.description,
+        }),
+      });
+
+      if (res.ok) {
+        const cat = await res.json();
+        setCategories(
+          categories.map((c) => (c._id === editing._id ? cat : c))
+        );
+        setEditing(null);
       } else {
         const data = await res.json();
         setError(data.error || "เกิดข้อผิดพลาด");
@@ -153,7 +192,15 @@ export default function SuperAdminCategoriesPage() {
                         )}
                       </div>
                       <div className="flex items-center gap-1 shrink-0 ml-4">
-                        <button className="p-1.5 text-gray-400 hover:text-violet-600 hover:bg-violet-50 rounded-lg transition-colors" title="แก้ไข">
+                        <button
+                          onClick={() => {
+                            setEditing(cat);
+                            setEditData({ name: cat.name, description: cat.description || "" });
+                            setError("");
+                          }}
+                          className="p-1.5 text-gray-400 hover:text-violet-600 hover:bg-violet-50 rounded-lg transition-colors"
+                          title="แก้ไข"
+                        >
                           <Edit3 className="w-4 h-4" />
                         </button>
                         <button className="p-1.5 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors" title="ลบ">
@@ -202,7 +249,15 @@ export default function SuperAdminCategoriesPage() {
                         )}
                       </div>
                       <div className="flex items-center gap-1 shrink-0 ml-4">
-                        <button className="p-1.5 text-gray-400 hover:text-violet-600 hover:bg-violet-50 rounded-lg transition-colors" title="แก้ไข">
+                        <button
+                          onClick={() => {
+                            setEditing(cat);
+                            setEditData({ name: cat.name, description: cat.description || "" });
+                            setError("");
+                          }}
+                          className="p-1.5 text-gray-400 hover:text-violet-600 hover:bg-violet-50 rounded-lg transition-colors"
+                          title="แก้ไข"
+                        >
                           <Edit3 className="w-4 h-4" />
                         </button>
                         <button className="p-1.5 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors" title="ลบ">
@@ -217,6 +272,7 @@ export default function SuperAdminCategoriesPage() {
         </div>
       </div>
 
+      {/* Create modal */}
       {/* Create modal */}
       {creating && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -262,6 +318,59 @@ export default function SuperAdminCategoriesPage() {
                 </button>
                 <button
                   onClick={() => setCreating(false)}
+                  className="flex-1 border border-gray-200 text-gray-600 text-sm py-2 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  ยกเลิก
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit modal */}
+      {editing && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl shadow-xl max-w-sm w-full mx-4">
+            <div className="px-6 py-4 border-b border-gray-200">
+              <h2 className="text-lg font-semibold text-gray-900">แก้ไขหมวดหมู่</h2>
+            </div>
+
+            <div className="px-6 py-4 space-y-4">
+              <div>
+                <label className="text-sm font-medium text-gray-700">ชื่อหมวดหมู่ *</label>
+                <input
+                  type="text"
+                  value={editData.name}
+                  onChange={(e) => setEditData({ ...editData, name: e.target.value })}
+                  placeholder="เช่น โปรแกรมมิ่ง"
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm mt-1 focus:outline-none focus:ring-2 focus:ring-violet-300"
+                />
+              </div>
+
+              <div>
+                <label className="text-sm font-medium text-gray-700">คำอธิบาย</label>
+                <textarea
+                  value={editData.description}
+                  onChange={(e) => setEditData({ ...editData, description: e.target.value })}
+                  placeholder="คำอธิบายหมวดหมู่"
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm mt-1 focus:outline-none focus:ring-2 focus:ring-violet-300"
+                  rows={3}
+                />
+              </div>
+
+              {error && <p className="text-red-500 text-sm">{error}</p>}
+
+              <div className="flex gap-3 pt-2">
+                <button
+                  onClick={updateCategory}
+                  disabled={saving}
+                  className="flex-1 text-white text-sm font-medium py-2 rounded-lg transition-colors theme-button disabled:opacity-50"
+                >
+                  {saving ? "กำลังบันทึก..." : "บันทึก"}
+                </button>
+                <button
+                  onClick={() => setEditing(null)}
                   className="flex-1 border border-gray-200 text-gray-600 text-sm py-2 rounded-lg hover:bg-gray-50 transition-colors"
                 >
                   ยกเลิก
