@@ -86,43 +86,43 @@ export default function AdminUsersPage() {
 
   const load = async () => {
     setLoading(true);
-    const [usersRes, meRes, studentsRes, instRes, ownerInstRes] = await Promise.all([
-      fetch("/api/owner/users"),
-      fetch("/api/auth/me"),
-      fetch("/api/owner/users?role=student&unassigned=true"),
-      fetch("/api/admin/institutions"),
-      fetch("/api/owner/institutions")
-    ]);
-    
-    if (usersRes.ok) {
+    try {
+      // Fetch users
+      const usersRes = await fetch("/api/owner/users");
       const usersData = await usersRes.json();
-      console.log("👥 Users loaded:", usersData.length);
-      console.log("Users data sample:", usersData.slice(0, 2));
+      console.log("✅ /api/owner/users response:", Array.isArray(usersData) ? `${usersData.length} users` : usersData);
       
-      // Enrich users with institutionName
-      if (ownerInstRes.ok) {
-        const ownerInsts = await ownerInstRes.json();
-        console.log("🏢 Owner institutions:", ownerInsts);
-        
+      // Fetch institutions
+      const instRes = await fetch("/api/owner/institutions");
+      const ownerInsts = await instRes.json();
+      console.log("✅ /api/owner/institutions response:", Array.isArray(ownerInsts) ? `${ownerInsts.length} institutions` : ownerInsts);
+      
+      // Enrich users
+      if (Array.isArray(usersData) && Array.isArray(ownerInsts)) {
         const enrichedUsers = usersData.map((u: any) => {
           const inst = ownerInsts.find((i: any) => i._id === u.institutionId);
-          const instName = inst ? `${inst.parentName || inst.name}${inst.name !== inst.parentName && inst.parentId ? `,${inst.name}` : ""}` : "";
-          console.log(`  User ${u.name}: institutionId=${u.institutionId}, instName=${instName}`);
-          return {
-            ...u,
-            institutionName: instName
-          };
+          const instName = inst ? (inst.parentId ? `${inst.parentName},${inst.name}` : inst.name) : "";
+          return { ...u, institutionName: instName };
         });
-        console.log("✅ Enriched users:", enrichedUsers);
+        console.log("✅ Enriched users:", enrichedUsers.length);
         setUsers(enrichedUsers);
       } else {
-        console.error("❌ Failed to load owner institutions");
         setUsers(usersData);
       }
+      
+      // Fetch other data
+      const [meRes, studentsRes, adminInstRes] = await Promise.all([
+        fetch("/api/auth/me"),
+        fetch("/api/owner/users?role=student&unassigned=true"),
+        fetch("/api/admin/institutions")
+      ]);
+      
+      if (meRes.ok) { const d = await meRes.json(); setMyRole(d.user?.role ?? ""); }
+      if (studentsRes.ok) setStudents(await studentsRes.json());
+      if (adminInstRes.ok) setInstitutions(await adminInstRes.json());
+    } catch (err) {
+      console.error("❌ Load error:", err);
     }
-    if (meRes.ok) { const d = await meRes.json(); setMyRole(d.user?.role ?? ""); }
-    if (studentsRes.ok) setStudents(await studentsRes.json());
-    if (instRes.ok) setInstitutions(await instRes.json());
     setLoading(false);
   };
 
