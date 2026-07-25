@@ -502,7 +502,7 @@ export default function AdminUsersPage() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">สถาบัน <span className="text-red-500">*</span></label>
-                <select value={createForm.institutionId} onChange={(e) => setCreateForm({ ...createForm, institutionId: e.target.value })} className={inputCls} size={3}>
+                <select value={createForm.institutionId} onChange={(e) => setCreateForm({ ...createForm, institutionId: e.target.value })} className={inputCls}>
                   <option value="">— เลือกสถาบัน —</option>
                   {institutions.map((inst) => (
                     <option key={inst._id} value={inst._id}>{inst.name}</option>
