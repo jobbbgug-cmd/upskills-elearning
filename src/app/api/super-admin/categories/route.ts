@@ -19,7 +19,14 @@ export async function GET(req: NextRequest) {
     }
 
     const categories = await Category.find(filter).sort({ name: 1 }).lean();
-    return NextResponse.json(JSON.parse(JSON.stringify(categories)));
+
+    // Add default type for categories that don't have it (migration)
+    const categoriesWithType = categories.map((cat: any) => ({
+      ...cat,
+      type: cat.type || "onsite", // Default to onsite for old categories
+    }));
+
+    return NextResponse.json(JSON.parse(JSON.stringify(categoriesWithType)));
   } catch (err) {
     console.error(err);
     return NextResponse.json({ error: "เกิดข้อผิดพลาด" }, { status: 500 });
