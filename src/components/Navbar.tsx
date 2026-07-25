@@ -351,17 +351,20 @@ export default function Navbar() {
                               <Link href="/super-admin/courses" onClick={() => setSuperAdminMenu(false)} className="flex items-center gap-2 px-8 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
                                 จัดการคอร์ส
                               </Link>
-                              <Link href="/super-admin/categories" onClick={() => setSuperAdminMenu(false)} className="flex items-center gap-2 px-8 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
-                                หมวดหมู่
-                              </Link>
                               <Link href="/super-admin/content" onClick={() => setSuperAdminMenu(false)} className="flex items-center gap-2 px-8 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
                                 เนื้อหาการเรียน
                               </Link>
-                              <Link href="/super-admin/revenue" onClick={() => setSuperAdminMenu(false)} className="flex items-center gap-2 px-8 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
-                                รายได้
+                              <Link href="/dashboard/schedule" onClick={() => setSuperAdminMenu(false)} className="flex items-center gap-2 px-8 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
+                                ตารางเรียน
                               </Link>
                               <Link href="/super-admin/schedule" onClick={() => setSuperAdminMenu(false)} className="flex items-center gap-2 px-8 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
                                 ตารางสอน
+                              </Link>
+                              <Link href="/super-admin/certificates" onClick={() => setSuperAdminMenu(false)} className="flex items-center gap-2 px-8 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
+                                ใบรับรอง
+                              </Link>
+                              <Link href="/super-admin/categories" onClick={() => setSuperAdminMenu(false)} className="flex items-center gap-2 px-8 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
+                                หมวดหมู่
                               </Link>
                             </>
                           )}
