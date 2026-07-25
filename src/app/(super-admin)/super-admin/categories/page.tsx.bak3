@@ -225,10 +225,10 @@ export default function SuperAdminCategoriesPage() {
 
         <div className="grid grid-cols-2 gap-4">
           {/* Online Column */}
-          <div className="bg-white rounded-xl border border-violet-300 p-4">
+          <div className="bg-white rounded-xl border border-red-300 p-4">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold text-gray-900">
-                <span className="text-violet-600">หมวดหมู่ online</span>
+                <span className="text-red-600">หมวดหมู่ online</span>
               </h2>
               <button
                 onClick={() => {
@@ -310,10 +310,10 @@ export default function SuperAdminCategoriesPage() {
           </div>
 
           {/* Onsite Column */}
-          <div className="bg-white rounded-xl border border-violet-300 p-4">
+          <div className="bg-white rounded-xl border border-red-300 p-4">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold text-gray-900">
-                <span className="text-violet-600">หมวดหมู่ onsite</span>
+                <span className="text-red-600">หมวดหมู่ onsite</span>
               </h2>
               <button
                 onClick={() => {
