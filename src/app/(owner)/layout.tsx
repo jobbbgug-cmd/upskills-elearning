@@ -116,16 +116,25 @@ export default function OwnerLayout({ children }: { children: React.ReactNode })
 
   const switchBranch = async (branchId: string) => {
     setSwitchingBranch(true);
-    setActiveBranchId(branchId);
     try {
-      await fetch("/api/owner/switch-branch", {
+      const res = await fetch("/api/owner/switch-branch", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ branchId }),
       });
+      
+      if (!res.ok) {
+        const data = await res.json();
+        console.error("❌ Switch branch failed:", data.error || res.statusText);
+        setSwitchingBranch(false);
+        return;
+      }
+      
+      console.log("✅ Branch switched, reloading...");
       window.location.reload();
-    } catch (err) {
-      console.error("Failed to switch branch:", err);
+    } catch (err: any) {
+      console.error("❌ Switch branch error:", err.message);
       setSwitchingBranch(false);
     }
   };
