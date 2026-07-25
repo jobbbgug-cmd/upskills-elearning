@@ -36,11 +36,13 @@ export async function PUT(
       updateData.order = order;
     }
 
+    console.log(`📝 Updating category ${id}`, updateData);
     const category = await Category.findByIdAndUpdate(
       id,
       updateData,
       { new: true }
     ).lean();
+    console.log(`✅ Updated category:`, category?.name, `order: ${category?.order}`);
 
     if (!category) {
       return NextResponse.json({ error: "ไม่พบหมวดหมู่" }, { status: 404 });
