@@ -148,6 +148,29 @@ export default function SuperAdminCategoriesPage() {
     }
   };
 
+  const deleteCategory = async (catId: string) => {
+    if (!confirm("ยืนยันการลบหมวดหมู่นี้?")) return;
+    
+    try {
+      const res = await fetch(`/api/super-admin/categories/${catId}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+
+      if (res.ok) {
+        setCategories(categories.filter(c => c._id !== catId));
+        setSuccessMsg("ลบสำเร็จ");
+        setTimeout(() => setSuccessMsg(""), 2000);
+      } else {
+        const data = await res.json();
+        setError(data.error || "ไม่สามารถลบหมวดหมู่");
+      }
+    } catch (err: any) {
+      console.error("Delete error:", err);
+      setError(err.message || "เกิดข้อผิดพลาด");
+    }
+  };
+
   const moveCategory = async (catId: string, direction: "up" | "down", type: "online" | "onsite") => {
     setError("");
     const sameType = categories.filter((c) => c.type === type).sort((a, b) => a.order - b.order);
@@ -314,7 +337,11 @@ export default function SuperAdminCategoriesPage() {
                         >
                           <Edit3 className="w-4 h-4" />
                         </button>
-                        <button className="p-1.5 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors" title="ลบ">
+                        <button
+                          onClick={() => deleteCategory(cat._id)}
+                          className="p-1.5 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                          title="ลบ"
+                        >
                           <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
@@ -399,7 +426,11 @@ export default function SuperAdminCategoriesPage() {
                         >
                           <Edit3 className="w-4 h-4" />
                         </button>
-                        <button className="p-1.5 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors" title="ลบ">
+                        <button
+                          onClick={() => deleteCategory(cat._id)}
+                          className="p-1.5 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                          title="ลบ"
+                        >
                           <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
