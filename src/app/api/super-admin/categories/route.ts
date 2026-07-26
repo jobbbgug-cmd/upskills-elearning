@@ -48,8 +48,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "ชื่อหมวดหมู่ไม่ว่าง" }, { status: 400 });
     }
 
-    if (!type || !["online", "onsite"].includes(type)) {
-      return NextResponse.json({ error: "เลือกประเภท (online/onsite)" }, { status: 400 });
+    if (!type || !["online", "onsite", "live online"].includes(type)) {
+      return NextResponse.json({ error: "เลือกประเภท (online/onsite/live online)" }, { status: 400 });
     }
 
     const existing = await Category.findOne({ name: name.trim() });

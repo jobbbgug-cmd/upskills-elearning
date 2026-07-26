@@ -7,7 +7,7 @@ interface Category {
   _id: string;
   name: string;
   description?: string;
-  type: "online" | "onsite";
+  type: "online" | "onsite" | "live online";
   isActive: boolean;
   order: number;
   createdAt: string;
@@ -18,7 +18,7 @@ export default function SuperAdminCategoriesPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [creating, setCreating] = useState(false);
-  const [creatingType, setCreatingType] = useState<"online" | "onsite">("online");
+  const [creatingType, setCreatingType] = useState<"online" | "onsite" | "live online">("online");
   const [newCategory, setNewCategory] = useState({ name: "", description: "" });
   const [editing, setEditing] = useState<Category | null>(null);
   const [editData, setEditData] = useState({ name: "", description: "" });
@@ -171,7 +171,7 @@ export default function SuperAdminCategoriesPage() {
     }
   };
 
-  const moveCategory = async (catId: string, direction: "up" | "down", type: "online" | "onsite") => {
+  const moveCategory = async (catId: string, direction: "up" | "down", type: "online" | "onsite" | "live online") => {
     setError("");
     const sameType = categories.filter((c) => c.type === type).sort((a, b) => a.order - b.order);
     const currentIndex = sameType.findIndex((c) => c._id === catId);
@@ -261,7 +261,7 @@ export default function SuperAdminCategoriesPage() {
           </button>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-3 gap-4">
           {/* Online Column */}
           <div className="bg-white rounded-xl border border-violet-300 p-4">
             <div className="flex items-center justify-between mb-4">
@@ -439,6 +439,95 @@ export default function SuperAdminCategoriesPage() {
               </div>
             )}
           </div>
+
+          {/* Live Online Column */}
+          <div className="bg-white rounded-xl border border-violet-300 p-4">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-gray-900">
+                <span className="text-violet-600">หมวดหมู่ live online</span>
+              </h2>
+              <button
+                onClick={() => {
+                  setCreatingType("live online");
+                  setCreating(true);
+                  setError("");
+                  setNewCategory({ name: "", description: "" });
+                }}
+                className="flex items-center gap-1 px-3 py-1.5 text-white text-sm font-medium rounded-lg transition-colors theme-button"
+              >
+                <Plus className="w-4 h-4" /> เพิ่ม
+              </button>
+            </div>
+            {filteredCategories.filter((c) => c.type === "live online").length === 0 ? (
+              <div className="text-center py-8">
+                <Tag className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                <p className="text-gray-500">ไม่พบหมวดหมู่ Live Online</p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {filteredCategories
+                  .filter((c) => c.type === "live online")
+                  .sort((a, b) => a.order - b.order)
+                  .map((cat, idx, arr) => (
+                    <div key={cat._id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-gray-900">{cat.name}</p>
+                        {cat.description && (
+                          <p className="text-xs text-gray-600 mt-1">{cat.description}</p>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-1 shrink-0 ml-4">
+                        <button
+                          onClick={() => moveCategory(cat._id, "up", "live online")}
+                          disabled={idx === 0}
+                          className="p-1.5 text-gray-400 hover:text-violet-600 hover:bg-violet-50 disabled:opacity-30 rounded-lg transition-colors"
+                          title="ขึ้น"
+                        >
+                          <ChevronUp className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => moveCategory(cat._id, "down", "live online")}
+                          disabled={idx === arr.length - 1}
+                          className="p-1.5 text-gray-400 hover:text-violet-600 hover:bg-violet-50 disabled:opacity-30 rounded-lg transition-colors"
+                          title="ลง"
+                        >
+                          <ChevronDown className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => toggleActive(cat._id, cat.isActive)}
+                          className={`p-1.5 rounded-lg transition-colors ${
+                            cat.isActive
+                              ? "text-violet-600 bg-violet-50 hover:text-violet-700"
+                              : "text-gray-400 hover:text-violet-600 hover:bg-violet-50"
+                          }`}
+                          title={cat.isActive ? "ปิด" : "เปิด"}
+                        >
+                          <Power className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => {
+                            setEditing(cat);
+                            setEditData({ name: cat.name, description: cat.description || "" });
+                            setError("");
+                          }}
+                          className="p-1.5 text-gray-400 hover:text-violet-600 hover:bg-violet-50 rounded-lg transition-colors"
+                          title="แก้ไข"
+                        >
+                          <Edit3 className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => deleteCategory(cat._id)}
+                          className="p-1.5 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                          title="ลบ"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -449,7 +538,7 @@ export default function SuperAdminCategoriesPage() {
           <div className="bg-white rounded-xl shadow-xl max-w-sm w-full mx-4">
             <div className="px-6 py-4 border-b border-gray-200">
               <h2 className="text-lg font-semibold text-gray-900">
-                เพิ่มหมวดหมู่ {creatingType === "online" ? "Online" : "Onsite"}
+                เพิ่มหมวดหมู่ {creatingType === "online" ? "Online" : creatingType === "onsite" ? "Onsite" : "Live Online"}
               </h2>
             </div>
 
