@@ -52,7 +52,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "เลือกประเภท (online/onsite/live online)" }, { status: 400 });
     }
 
-    const existing = await Category.findOne({ name: name.trim() });
+    const existing = await Category.findOne({ name: name.trim(), type });
     if (existing) {
       return NextResponse.json({ error: "หมวดหมู่นี้มีอยู่แล้ว" }, { status: 400 });
     }
@@ -60,7 +60,7 @@ export async function POST(req: NextRequest) {
     const category = await Category.create({
       name: name.trim(),
       description: description?.trim() || "",
-      type,
+      type: type as any,
       isActive: true,
     });
 
