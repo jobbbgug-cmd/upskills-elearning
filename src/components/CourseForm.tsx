@@ -34,7 +34,7 @@ interface Session {
 interface CourseFormProps {
   course?: ICourse;
   mode: "create" | "edit";
-  courseType?: "online" | "onsite";
+  courseType?: "online" | "onsite" | "live online";
   teacherMode?: boolean;
   teacherName?: string;
 }
@@ -58,7 +58,7 @@ export default function CourseForm({ course, mode, courseType, teacherMode = fal
     linkFullbook: course?.linkFullbook ?? "",
     linkDownload: course?.linkDownload ?? "",
     ebookPdfUrl: course?.ebookPdfUrl ?? "",
-    courseType: courseType ?? "online",
+    courseType: (courseType ?? "online") as "online" | "onsite" | "live online",
   });
 
   const [contentId, setContentId] = useState<string>(course?.contentId ?? "");
@@ -93,7 +93,7 @@ export default function CourseForm({ course, mode, courseType, teacherMode = fal
       .then((data) => { if (Array.isArray(data.contents)) setContentOptions(data.contents); });
     
     // Fetch categories by type
-    const categoryType = courseType === "online" ? "online" : "onsite";
+    const categoryType = courseType === "online" ? "online" : courseType === "live online" ? "live online" : "onsite";
     fetch(`/api/super-admin/categories?type=${categoryType}`, { credentials: "include" })
       .then((r) => r.json())
       .then((data) => { 
@@ -195,9 +195,9 @@ export default function CourseForm({ course, mode, courseType, teacherMode = fal
       {form.courseType && (
         <div className="mb-6 p-3 bg-indigo-50 border border-indigo-200 rounded-xl flex items-center gap-2">
           <span className="text-xs font-semibold text-indigo-700 px-2 py-1 bg-indigo-100 rounded-lg">
-            {form.courseType === "online" ? "🌐 คอร์สออนไลน์" : "🏢 หลักสูตร Onsite"}
+            {form.courseType === "online" ? "🌐 คอร์สออนไลน์" : form.courseType === "live online" ? "🎬 คอร์สเรียน Live" : "🏢 หลักสูตร Onsite"}
           </span>
-          <span className="text-sm text-indigo-600">{form.courseType === "online" ? "สอนออนไลน์สด" : "สอนในสถาบัน"}</span>
+          <span className="text-sm text-indigo-600">{form.courseType === "online" ? "สอนออนไลน์สด" : form.courseType === "live online" ? "สอนแบบ Live" : "สอนในสถาบัน"}</span>
         </div>
       )}
     <form onSubmit={handleSubmit} className="space-y-8">
