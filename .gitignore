@@ -26,3 +26,4 @@ yarn-error.log*
 *.pem
 .vercel
 tsconfig.tsbuildinfo
+src/app/\(admin\)/
