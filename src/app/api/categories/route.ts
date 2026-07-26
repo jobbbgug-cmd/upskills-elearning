@@ -16,7 +16,7 @@ export async function GET(req: NextRequest) {
       isActive: true,
     };
 
-    if (type && ["online", "onsite"].includes(type)) {
+    if (type && ["online", "onsite", "live online"].includes(type)) {
       query.type = type;
     }
 
