@@ -20,44 +20,58 @@ interface LearningPath {
   title: string;
 }
 
-type MenuSection = "courses" | "new-courses" | "learning-paths";
+type MenuSection = "courses" | "courses live" | "new-courses" | "learning-paths";
 
 export default function CoursesDropdown() {
   const [activeSection, setActiveSection] = useState<MenuSection>("courses");
   const [categories, setCategories] = useState<string[]>([]);
+  const [liveOnlineCategories, setLiveOnlineCategories] = useState<string[]>([]);
   const [latestCourses, setLatestCourses] = useState<Course[]>([]);
   const [learningPaths, setLearningPaths] = useState<LearningPath[]>([]);
   const [categoryCoursesMap, setCategoryCoursesMap] = useState<Record<string, Course[]>>({});
+  const [liveOnlineCourseMap, setLiveOnlineCourseMap] = useState<Record<string, Course[]>>({});
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [categoriesRes, coursesRes, pathsRes] = await Promise.all([
+        const [categoriesRes, liveOnlineCategoriesRes, coursesRes, pathsRes] = await Promise.all([
           fetch("/api/categories?type=online"),
+          fetch("/api/categories?type=live online"),
           fetch("/api/courses?limit=100"),
           fetch("/api/learning-paths"),
         ]);
 
         const categoriesData = await categoriesRes.json();
+        const liveOnlineCategoriesData = await liveOnlineCategoriesRes.json();
         const coursesData = await coursesRes.json();
         const pathsData = await pathsRes.json();
 
         const catList = (categoriesData.categories || []).map((cat: Category) => cat.name);
+        const liveOnlineCatList = (liveOnlineCategoriesData.categories || []).map((cat: Category) => cat.name);
+
         setCategories(catList);
+        setLiveOnlineCategories(liveOnlineCatList);
         if (catList.length > 0) setSelectedCategory(catList[0]);
 
         const allCourses = coursesData.courses || [];
         setLatestCourses(allCourses.slice(0, 3));
         setLearningPaths(pathsData.paths || []);
 
-        // Group courses by category
+        // Group courses by category for online
         const courseMap: Record<string, Course[]> = {};
         catList.forEach((cat: string) => {
           courseMap[cat] = allCourses.filter((c: Course & { category?: string }) => c.category === cat).slice(0, 5);
         });
         setCategoryCoursesMap(courseMap);
+
+        // Group courses by category for live online
+        const liveOnlineCourseMapData: Record<string, Course[]> = {};
+        liveOnlineCatList.forEach((cat: string) => {
+          liveOnlineCourseMapData[cat] = allCourses.filter((c: Course & { category?: string }) => c.category === cat).slice(0, 5);
+        });
+        setLiveOnlineCourseMap(liveOnlineCourseMapData);
       } catch (error) {
         console.error("Failed to fetch dropdown data:", error);
       } finally {
@@ -101,6 +115,24 @@ export default function CoursesDropdown() {
             </button>
 
             <button
+              onClick={() => {
+                setActiveSection("courses live");
+                setSelectedCategory(null);
+              }}
+              className={`w-full text-left px-4 py-3 text-sm font-medium transition-colors ${
+                activeSection === "courses live"
+                  ? "bg-indigo-50 text-indigo-600 border-r-2 border-indigo-600"
+                  : "text-gray-700 hover:bg-gray-100"
+              }`}
+            >
+              <span className="flex items-center justify-between">
+                คอร์สเรียน Live
+                {activeSection === "courses live" && <ChevronRight className="w-4 h-4" />}
+              </span>
+            </button>
+
+
+            <button
               onClick={() => setActiveSection("new-courses")}
               className={`w-full text-left px-4 py-3 text-sm font-medium transition-colors ${
                 activeSection === "new-courses"
@@ -133,6 +165,44 @@ export default function CoursesDropdown() {
           <div className="flex-1 py-6 px-6 overflow-y-auto">
             {loading ? (
               <p className="text-gray-500 text-center py-12">กำลังโหลด...</p>
+            ) : activeSection === "courses live" ? (
+              <div className="flex gap-4 h-full">
+                {/* Left: Live Online Categories List */}
+                <div className="w-40 border-r border-gray-200 pr-4 space-y-2 overflow-y-auto">
+                  {liveOnlineCategories.map((cat) => (
+                    <button
+                      key={cat}
+                      onClick={() => setSelectedCategory(cat)}
+                      className={`w-full text-left px-3 py-2 text-sm rounded-lg transition-colors ${
+                        selectedCategory === cat
+                          ? "bg-indigo-50 text-indigo-600 font-medium"
+                          : "text-gray-700 hover:bg-gray-50"
+                      }`}
+                    >
+                      {cat}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Right: Live Online Courses in Selected Category */}
+                <div className="flex-1 space-y-3 overflow-y-auto">
+                  {selectedCategory && (liveOnlineCourseMap[selectedCategory] || []).length > 0 ? (
+                    (liveOnlineCourseMap[selectedCategory] || []).map((course) => (
+                      <Link
+                        key={course._id}
+                        href={`/courses/${course.slug}?type=live online`}
+                        className="block p-3 bg-gray-50 rounded-lg hover:bg-indigo-50 transition-colors"
+                      >
+                        <p className="text-sm text-gray-900 font-medium line-clamp-2">{course.title}</p>
+                      </Link>
+                    ))
+                  ) : selectedCategory ? (
+                    <p className="text-xs text-gray-500">ไม่มีคอร์สในหมวดนี้</p>
+                  ) : (
+                    <p className="text-xs text-gray-500">เลือกหมวดหมู่เพื่อดูคอร์ส</p>
+                  )}
+                </div>
+              </div>
             ) : activeSection === "courses" ? (
               <div className="flex gap-4 h-full">
                 {/* Left: Categories List */}
