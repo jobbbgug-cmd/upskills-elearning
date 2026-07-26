@@ -53,7 +53,7 @@ export default function NewCoursePage() {
             </p>
             <ul className="space-y-2 text-sm text-gray-600">
               <li className="flex items-center gap-2">
-                <span className="text-purple-500">✓</span> สอนสดแบบ Live
+                <span className="text-purple-500">✓</span> สอนสดผ่าน Jitsi Meet
               </li>
               <li className="flex items-center gap-2">
                 <span className="text-purple-500">✓</span> โต้ตอบกับนักเรียนแบบสด
