@@ -276,7 +276,13 @@ export default function CourseForm({ course, mode, courseType, teacherMode = fal
         </div>
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-1.5">ราคา (บาท)</label>
-          <input type="number" min={0} value={form.price} onChange={(e) => setForm({ ...form, price: Number(e.target.value) })} className={inputClass} />
+          <input
+            type="number"
+            min={0}
+            value={form.price === 0 ? "" : form.price}
+            onChange={(e) => setForm({ ...form, price: e.target.value === "" ? 0 : Number(e.target.value) })}
+            className={inputClass}
+          />
         </div>
         <div className="flex items-center gap-3 pt-6">
           <input type="checkbox" id="isActive" checked={form.isActive} onChange={(e) => setForm({ ...form, isActive: e.target.checked })} className="w-4 h-4 rounded text-indigo-600" />
