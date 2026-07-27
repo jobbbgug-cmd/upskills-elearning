@@ -47,16 +47,23 @@ export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ 
   try {
     const { id } = await params;
     const auth = await getAuthUser();
-    if (!auth || auth.role !== "admin") {
+    if (!auth || (auth.role !== "admin" && auth.role !== "teacher")) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     await connectDB();
-    const course = await Course.findByIdAndDelete(id);
+    const course = await Course.findById(id);
 
     if (!course) {
       return NextResponse.json({ error: "Course not found" }, { status: 404 });
     }
+
+    // Teacher can only delete their own courses
+    if (auth.role === "teacher" && course.instructorId !== auth.userId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    await Course.findByIdAndDelete(id);
 
     return NextResponse.json({ success: true });
   } catch (err) {
