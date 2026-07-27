@@ -77,6 +77,7 @@ export interface ICourse {
   instructor: string;
   instructorId?: string;
   category: string;
+  type?: "online" | "live online" | "onsite";
   sessions: ISession[];
   price: number;
   isActive: boolean;
