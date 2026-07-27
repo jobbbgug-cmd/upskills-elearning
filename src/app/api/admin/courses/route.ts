@@ -33,3 +33,62 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Failed to fetch courses" }, { status: 500 });
   }
 }
+
+export async function POST(req: NextRequest) {
+  try {
+    const auth = await getAuthUser();
+    if (!auth || (auth.role !== "admin" && auth.role !== "teacher")) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    await connectDB();
+    const body = await req.json();
+
+    const {
+      title,
+      description,
+      price,
+      coverImage,
+      category,
+      type,
+      gradeLevels,
+      sessions,
+      instructor,
+      isActive,
+      contentId,
+    } = body;
+
+    if (!title || !description || !gradeLevels || !sessions) {
+      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    }
+
+    const course = new Course({
+      title,
+      description,
+      price: price || 0,
+      coverImage: coverImage || "",
+      category: category || "",
+      type: type || "online",
+      gradeLevels: gradeLevels || [],
+      sessions: sessions || [],
+      instructor: instructor || auth.name || "",
+      instructorId: auth.userId,
+      institutionId: auth.institutionId || null,
+      isActive: isActive !== false,
+      contentId: contentId || null,
+    });
+
+    await course.save();
+
+    return NextResponse.json(
+      JSON.parse(JSON.stringify(course)),
+      { status: 201 }
+    );
+  } catch (error: any) {
+    console.error("Failed to create course:", error);
+    return NextResponse.json(
+      { error: error.message || "Failed to create course" },
+      { status: 500 }
+    );
+  }
+}
