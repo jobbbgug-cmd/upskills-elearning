@@ -3,28 +3,37 @@ import { getAuthUser } from "@/lib/auth";
 import { connectDB } from "@/lib/mongodb";
 import Course from "@/models/Course";
 
-export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
     const auth = await getAuthUser();
-    if (!auth || auth.role !== "admin") {
+    if (!auth || (auth.role !== "admin" && auth.role !== "teacher")) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     await connectDB();
     const body = await req.json();
 
-    const course = await Course.findByIdAndUpdate(
-      id,
-      { ...body, institutionId: auth.institutionId },
-      { new: true }
-    );
-
+    const course = await Course.findById(id);
     if (!course) {
       return NextResponse.json({ error: "Course not found" }, { status: 404 });
     }
 
-    return NextResponse.json(course);
+    // Teacher can only edit their own courses
+    if (auth.role === "teacher" && course.instructorId !== auth.userId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { courseType, ...updateData } = body;
+    const updatePayload = {
+      ...updateData,
+      type: courseType || updateData.type,
+      institutionId: auth.institutionId,
+    };
+
+    const updated = await Course.findByIdAndUpdate(id, updatePayload, { new: true }).lean();
+
+    return NextResponse.json(JSON.parse(JSON.stringify(updated)));
   } catch (err: any) {
     console.error(err);
     return NextResponse.json(
