@@ -165,7 +165,8 @@ export default function CourseForm({ course, mode, courseType, teacherMode = fal
     setLoading(true);
     setError("");
     try {
-      const payload = { ...form, sessions, contentId: contentId || null };
+      const { courseType, ...formData } = form;
+      const payload = { ...formData, type: courseType, sessions, contentId: contentId || null };
       const url = mode === "create" ? "/api/admin/courses" : `/api/admin/courses/${course?._id}`;
       const method = mode === "create" ? "POST" : "PUT";
       const res = await fetch(url, {
