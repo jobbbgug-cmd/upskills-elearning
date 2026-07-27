@@ -94,7 +94,7 @@ export default function CourseForm({ course, mode, courseType, teacherMode = fal
     
     // Fetch categories by type
     const categoryType = courseType === "online" ? "online" : courseType === "live online" ? "live online" : "onsite";
-    fetch(`/api/super-admin/categories?type=${categoryType}`, { credentials: "include" })
+    fetch(`/api/categories?type=${categoryType}`)
       .then((r) => r.json())
       .then((data) => { 
         if (data.categories && Array.isArray(data.categories)) {

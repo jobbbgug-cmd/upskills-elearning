@@ -25,7 +25,7 @@ export default function NewCoursePage() {
               <li className="flex items-center gap-2">
                 <span className="text-blue-500">✓</span> สอนผ่าน Video 
               </li>
-              <li className="flex items-center gap-2">http://localhost:3001/admin/courses/live-online/new
+              <li className="flex items-center gap-2">
                 <span className="text-blue-500">✓</span> บันทึกคลิปสำหรับดูย้อนหลัง
               </li>
               <li className="flex items-center gap-2">
