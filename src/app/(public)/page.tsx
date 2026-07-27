@@ -547,6 +547,9 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {/* ─── Courses Showcase ─── */}
+      <CoursesShowcase />
+
       {/* ─── เลือกระดับชั้น ─── */}
       <section className="py-16 px-4 bg-gray-50">
         <div className="max-w-5xl mx-auto">
