@@ -58,7 +58,7 @@ export default function CourseForm({ course, mode, courseType, teacherMode = fal
     linkFullbook: course?.linkFullbook ?? "",
     linkDownload: course?.linkDownload ?? "",
     ebookPdfUrl: course?.ebookPdfUrl ?? "",
-    courseType: (courseType ?? "online") as "online" | "onsite" | "live online",
+    courseType: (courseType ?? course?.type ?? "online") as "online" | "onsite" | "live online",
   });
 
   const [contentId, setContentId] = useState<string>(course?.contentId ?? "");
@@ -92,17 +92,17 @@ export default function CourseForm({ course, mode, courseType, teacherMode = fal
       .then((r) => r.json())
       .then((data) => { if (Array.isArray(data.contents)) setContentOptions(data.contents); });
     
-    // Fetch categories by type
-    const categoryType = courseType === "online" ? "online" : courseType === "live online" ? "live online" : "onsite";
+    // Fetch categories by selected courseType
+    const categoryType = form.courseType === "online" ? "online" : form.courseType === "live online" ? "live online" : "onsite";
     fetch(`/api/categories?type=${categoryType}`)
       .then((r) => r.json())
-      .then((data) => { 
+      .then((data) => {
         if (data.categories && Array.isArray(data.categories)) {
           setCategories(data.categories);
         }
       })
       .catch((err) => console.error("Failed to load categories:", err));
-  }, [teacherMode, courseType]);
+  }, [form.courseType, teacherMode]);
 
   const toggleGrade = (grade: GradeLevel) => {
     setForm((f) => ({
