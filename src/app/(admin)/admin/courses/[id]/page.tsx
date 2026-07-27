@@ -37,6 +37,7 @@ export default async function EditCoursePage({ params }: { params: Promise<{ id:
         <CourseForm
           course={course}
           mode="edit"
+          courseType={(course.type || "online") as "online" | "live online" | "onsite"}
           teacherMode={auth.role === "teacher"}
           teacherName={auth.name}
         />
