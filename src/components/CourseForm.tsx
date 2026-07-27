@@ -193,12 +193,27 @@ export default function CourseForm({ course, mode, courseType, teacherMode = fal
   return (
     <>
       {toast && <Toast message={toast.message} type={toast.type} onClose={closeToast} />}
-      {form.courseType && (
-        <div className="mb-6 p-3 bg-indigo-50 border border-indigo-200 rounded-xl flex items-center gap-2">
-          <span className="text-xs font-semibold text-indigo-700 px-2 py-1 bg-indigo-100 rounded-lg">
-            {form.courseType === "online" ? "🌐 คอร์สออนไลน์" : form.courseType === "live online" ? "🎬 คอร์สเรียน Live" : "🏢 หลักสูตร Onsite"}
-          </span>
-          <span className="text-sm text-indigo-600">{form.courseType === "online" ? "สอนออนไลน์สด" : form.courseType === "live online" ? "สอนแบบ Live" : "สอนในสถาบัน"}</span>
+      {mode === "create" ? (
+        form.courseType && (
+          <div className="mb-6 p-3 bg-indigo-50 border border-indigo-200 rounded-xl flex items-center gap-2">
+            <span className="text-xs font-semibold text-indigo-700 px-2 py-1 bg-indigo-100 rounded-lg">
+              {form.courseType === "online" ? "🌐 คอร์สออนไลน์" : form.courseType === "live online" ? "🎬 คอร์สเรียน Live" : "🏢 หลักสูตร Onsite"}
+            </span>
+            <span className="text-sm text-indigo-600">{form.courseType === "online" ? "สอนออนไลน์สด" : form.courseType === "live online" ? "สอนแบบ Live" : "สอนในสถาบัน"}</span>
+          </div>
+        )
+      ) : (
+        <div className="mb-6">
+          <label className="block text-sm font-semibold text-gray-700 mb-1.5">ประเภทคอร์ส</label>
+          <select
+            value={form.courseType}
+            onChange={(e) => setForm({ ...form, courseType: e.target.value as "online" | "live online" | "onsite" })}
+            className={inputClass}
+          >
+            <option value="online">🌐 คอร์สออนไลน์</option>
+            <option value="live online">🎬 คอร์สเรียน Live</option>
+            <option value="onsite">🏢 หลักสูตร Onsite</option>
+          </select>
         </div>
       )}
     <form onSubmit={handleSubmit} className="space-y-8">
