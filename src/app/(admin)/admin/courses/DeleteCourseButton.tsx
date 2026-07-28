@@ -1,19 +1,30 @@
 "use client";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Trash2 } from "lucide-react";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
+import Toast from "@/components/ui/Toast";
 
 export default function DeleteCourseButton({ courseId }: { courseId: string }) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
   const router = useRouter();
+  const closeToast = useCallback(() => setToast(null), []);
 
   const handleDelete = async () => {
     setLoading(true);
     try {
-      await fetch(`/api/admin/courses/${courseId}`, { method: "DELETE" });
-      router.refresh();
+      const res = await fetch(`/api/admin/courses/${courseId}`, { method: "DELETE" });
+      if (res.ok) {
+        setToast({ message: "ลบรายการสำเร็จ!", type: "success" });
+        setOpen(false);
+        setTimeout(() => router.refresh(), 800);
+      } else {
+        setToast({ message: "ลบรายการล้มเหลว", type: "error" });
+      }
+    } catch (error) {
+      setToast({ message: "ลบรายการล้มเหลว", type: "error" });
     } finally {
       setLoading(false);
     }
@@ -21,6 +32,7 @@ export default function DeleteCourseButton({ courseId }: { courseId: string }) {
 
   return (
     <>
+      {toast && <Toast message={toast.message} type={toast.type} onClose={closeToast} />}
       <ConfirmDialog
         open={open}
         title="ลบคอร์สนี้?"
