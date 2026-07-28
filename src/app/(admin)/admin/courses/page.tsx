@@ -63,7 +63,7 @@ export default function AdminCoursesPage() {
           href={
             selectedType === "all"
               ? "/admin/courses/new"
-              : `/admin/courses/${selectedType}/new`
+              : `/admin/courses/${selectedType.replace(" ", "-")}/new`
           }
           className="flex items-center gap-2 px-4 py-2.5 theme-button text-sm font-medium rounded-xl transition-colors"
         >
