@@ -180,8 +180,9 @@ export default function CourseForm({ course, mode, courseType, teacherMode = fal
         setError(msg);
         setToast({ message: msg, type: "error" });
       } else {
+        setError("");
         setToast({ message: mode === "create" ? "สร้างคอร์สสำเร็จ!" : "บันทึกสำเร็จ!", type: "success" });
-        setTimeout(() => router.push("/admin/courses"), 1200);
+        setTimeout(() => router.push("/admin/courses"), 1500);
       }
     } finally {
       setLoading(false);
@@ -460,7 +461,9 @@ export default function CourseForm({ course, mode, courseType, teacherMode = fal
       </div>
 
       {error && (
-        <div className="bg-red-50 text-red-700 text-sm p-4 rounded-xl border border-red-200">{error}</div>
+        <div className="bg-red-50 text-red-700 text-sm p-4 rounded-xl border-2 border-red-400 mb-6 font-semibold">
+          ⚠️ {error}
+        </div>
       )}
 
       <div className="flex gap-3">
@@ -473,7 +476,7 @@ export default function CourseForm({ course, mode, courseType, teacherMode = fal
         </button>
         <button
           type="button"
-          onClick={() => router.push("/admin/courses")}
+          onClick={() => router.back()}
           className="px-6 py-3 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 transition-colors"
         >
           ยกเลิก
