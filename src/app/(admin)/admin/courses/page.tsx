@@ -60,7 +60,11 @@ export default function AdminCoursesPage() {
           </div>
         </div>
         <Link
-          href="/admin/courses/new"
+          href={
+            selectedType === "all"
+              ? "/admin/courses/new"
+              : `/admin/courses/${selectedType}/new`
+          }
           className="flex items-center gap-2 px-4 py-2.5 theme-button text-sm font-medium rounded-xl transition-colors"
         >
           <Plus className="w-4 h-4" />
