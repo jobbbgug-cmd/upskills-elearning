@@ -4,8 +4,9 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { ICourse, GradeLevel } from "@/types";
-import { Plus, Trash2, Upload, BookOpen, RefreshCw, ExternalLink, Pencil } from "lucide-react";
+import { Plus, Trash2, Upload, BookOpen, RefreshCw, ExternalLink, Pencil, X } from "lucide-react";
 import Toast from "@/components/ui/Toast";
+import RichTextEditor from "@/components/RichTextEditor";
 
 interface ContentOption { _id: string; name: string; description: string; }
 
@@ -29,6 +30,13 @@ interface Session {
   endTime: string;
   maxCapacity: number;
   zoomLink: string;
+}
+
+interface Lesson {
+  id: string;
+  name: string;
+  videoLink: string;
+  duration: string;
 }
 
 interface CourseFormProps {
@@ -73,6 +81,10 @@ export default function CourseForm({ course, mode, courseType, teacherMode = fal
       zoomLink: s.zoomLink ?? "",
     })) ?? [{ date: "", startTime: "09:00", endTime: "11:00", maxCapacity: 10, zoomLink: "" }]
   );
+
+  const [whatYouWillLearn, setWhatYouWillLearn] = useState<string>((course as any)?.whatYouWillLearn ?? "");
+  const [courseDetails, setCourseDetails] = useState<string>((course as any)?.courseDetails ?? "");
+  const [lessons, setLessons] = useState<Lesson[]>((course as any)?.lessons ?? []);
 
   const [loading, setLoading]   = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -166,7 +178,15 @@ export default function CourseForm({ course, mode, courseType, teacherMode = fal
     setError("");
     try {
       const { courseType, ...formData } = form;
-      const payload = { ...formData, type: courseType, sessions, contentId: contentId || null };
+      const payload = {
+        ...formData,
+        type: courseType,
+        sessions,
+        contentId: contentId || null,
+        whatYouWillLearn,
+        courseDetails,
+        lessons,
+      };
       const url = mode === "create" ? "/api/admin/courses" : `/api/admin/courses/${course?._id}`;
       const method = mode === "create" ? "POST" : "PUT";
       const res = await fetch(url, {
@@ -323,6 +343,81 @@ export default function CourseForm({ course, mode, courseType, teacherMode = fal
             >
               {g}
             </button>
+          ))}
+        </div>
+      </div>
+
+      {/* What you will learn */}
+      <div>
+        <label className="block text-sm font-semibold text-gray-700 mb-3">คอร์สนี้ได้เรียนอะไรบ้าง? *</label>
+        <RichTextEditor value={whatYouWillLearn} onChange={setWhatYouWillLearn} />
+      </div>
+
+      {/* Course details */}
+      <div>
+        <label className="block text-sm font-semibold text-gray-700 mb-3">รายละเอียดคอร์สเรียน *</label>
+        <RichTextEditor value={courseDetails} onChange={setCourseDetails} />
+      </div>
+
+      {/* Lessons */}
+      <div>
+        <div className="flex items-center justify-between mb-3">
+          <label className="text-sm font-semibold text-gray-700">รายละเอียดบทเรียน</label>
+          <button
+            type="button"
+            onClick={() => setLessons([...lessons, { id: Date.now().toString(), name: "", videoLink: "", duration: "" }])}
+            className="flex items-center gap-1.5 text-sm text-indigo-600 hover:text-indigo-700 font-medium"
+          >
+            <Plus className="w-4 h-4" />
+            เพิ่มบทเรียน
+          </button>
+        </div>
+        <div className="space-y-3">
+          {lessons.map((lesson, idx) => (
+            <div key={lesson.id} className="bg-gray-50 rounded-xl p-4 border border-gray-200">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
+                <div>
+                  <label className="text-xs text-gray-500 mb-1 block">ชื่อบทเรียน</label>
+                  <input
+                    type="text"
+                    value={lesson.name}
+                    onChange={(e) => setLessons(lessons.map((l, i) => i === idx ? { ...l, name: e.target.value } : l))}
+                    placeholder="เช่น บทที่ 1: บทนำ"
+                    className={inputClass}
+                  />
+                </div>
+                <div>
+                  <label className="text-xs text-gray-500 mb-1 block">ลิงค์วิดีโอ</label>
+                  <input
+                    type="url"
+                    value={lesson.videoLink}
+                    onChange={(e) => setLessons(lessons.map((l, i) => i === idx ? { ...l, videoLink: e.target.value } : l))}
+                    placeholder="https://youtube.com/..."
+                    className={inputClass}
+                  />
+                </div>
+              </div>
+              <div className="flex items-end gap-3">
+                <div className="flex-1">
+                  <label className="text-xs text-gray-500 mb-1 block">เวลา (นาที)</label>
+                  <input
+                    type="number"
+                    min={0}
+                    value={lesson.duration}
+                    onChange={(e) => setLessons(lessons.map((l, i) => i === idx ? { ...l, duration: e.target.value } : l))}
+                    placeholder="45"
+                    className={inputClass}
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setLessons(lessons.filter((_, i) => i !== idx))}
+                  className="px-3 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
           ))}
         </div>
       </div>
