@@ -220,7 +220,7 @@ export default function CourseForm({ course, mode, courseType, teacherMode = fal
             <span className="text-xs font-semibold text-indigo-700 px-2 py-1 bg-indigo-100 rounded-lg">
               {form.courseType === "online" ? "🌐 คอร์สออนไลน์" : form.courseType === "live online" ? "🎬 คอร์สเรียน Live" : "🏢 หลักสูตร Onsite"}
             </span>
-            <span className="text-sm text-indigo-600">{form.courseType === "online" ? "สอนออนไลน์สด" : form.courseType === "live online" ? "สอนแบบ Live" : "สอนในสถาบัน"}</span>
+            <span className="text-sm text-indigo-600">{form.courseType === "online" ? "สอนออนไลน์" : form.courseType === "live online" ? "สอนแบบ Live" : "สอนในสถาบัน"}</span>
           </div>
         )
       ) : (

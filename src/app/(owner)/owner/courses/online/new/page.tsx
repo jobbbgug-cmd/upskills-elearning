@@ -10,7 +10,7 @@ export default async function NewOnlineCoursePassPage() {
     <div>
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-gray-900">สร้างคอร์สออนไลน์</h1>
-        <p className="text-gray-500 text-sm mt-1">คอร์สเรียนออนไลน์สดหรือบันทึก</p>
+        <p className="text-gray-500 text-sm mt-1">คอร์สเรียนออนไลน์</p>
       </div>
       <div className="bg-white rounded-2xl border border-gray-100 p-8">
         <CourseForm
