@@ -10,7 +10,7 @@ import { ArrowLeft } from "lucide-react";
 async function getCourse(id: string): Promise<ICourse | null> {
   await connectDB();
   try {
-    const course = await Course.findById(id).lean();
+    const course = await Course.findById(id).populate("category", "name type").lean();
     if (!course) return null;
     return JSON.parse(JSON.stringify(course)) as ICourse;
   } catch {

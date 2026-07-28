@@ -49,7 +49,7 @@ export default function CourseForm({ course, mode, courseType, teacherMode = fal
     coverImage: course?.coverImage ?? "",
     gradeLevels: course?.gradeLevels ?? [] as GradeLevel[],
     instructor: course?.instructor ?? (teacherMode ? teacherName : ""),
-    category: course?.category ?? "",
+    category: course?.category && typeof course.category === "object" ? (course.category as any)._id : (course?.category as string) ?? "",
     price: course?.price ?? 0,
     isActive: course?.isActive ?? true,
     linkDigital: course?.linkDigital ?? "",
@@ -285,7 +285,7 @@ export default function CourseForm({ course, mode, courseType, teacherMode = fal
           <select required value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} className={inputClass}>
             <option value="">-- เลือกหมวดหมู่ --</option>
             {categories.map((cat) => (
-              <option key={cat._id} value={cat.name}>{cat.name}</option>
+              <option key={cat._id} value={cat._id}>{cat.name}</option>
             ))}
           </select>
         </div>

@@ -19,7 +19,8 @@ export interface ICourseDocument extends Document {
   gradeLevels: string[];
   instructor: string;
   instructorId: string;
-  category: string;
+  category: mongoose.Types.ObjectId;
+  type: "online" | "onsite" | "live online";
   sessions: ISessionDocument[];
   price: number;
   isActive: boolean;
@@ -76,7 +77,7 @@ const CourseSchema = new Schema<ICourseDocument>(
     gradeLevels: [{ type: String }],
     instructor: { type: String, required: true },
     instructorId: { type: String, default: "" },
-    category: { type: String, required: true },
+    category: {type: Schema.Types.ObjectId,ref: "Category",required: true,},type: {type: String,enum: ["online", "onsite", "live online"],default: "online",},
     sessions: [SessionSchema],
     price: { type: Number, default: 0 },
     isActive: { type: Boolean, default: true },

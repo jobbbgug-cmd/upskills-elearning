@@ -16,7 +16,7 @@ export async function GET(req: NextRequest) {
     const tenantClause = auth.institutionId ? { institutionId: auth.institutionId } : {};
     const filter = auth.role === "teacher" ? { ...tenantClause, instructorId: auth.userId } : tenantClause;
 
-    const courses = await Course.find(filter).sort({ createdAt: -1 }).lean();
+   const courses = await Course.find(filter).populate("category", "name type").sort({ createdAt: -1 }).lean();
 
     let institutionName = "";
     if (auth.institutionId) {
@@ -67,7 +67,7 @@ export async function POST(req: NextRequest) {
       description,
       price: price || 0,
       coverImage: coverImage || "",
-      category: category || "",
+      category: category || null,
       type: type || "online",
       gradeLevels: gradeLevels || [],
       sessions: sessions || [],
