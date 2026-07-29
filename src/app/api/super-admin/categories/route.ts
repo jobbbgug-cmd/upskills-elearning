@@ -77,7 +77,7 @@ export async function POST(req: NextRequest) {
     // Calculate order if not provided
     let finalOrder = order;
     if (finalOrder === undefined) {
-      const maxOrderDoc = await Category.findOne({ type }).sort({ order: -1 }).lean();
+      const maxOrderDoc = await Category.findOne({ type }).sort({ order: -1 }).lean() as any;
       finalOrder = (maxOrderDoc?.order || 0) + 1;
     }
 
