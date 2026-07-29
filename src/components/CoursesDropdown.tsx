@@ -67,14 +67,14 @@ export default function CoursesDropdown() {
         // Group courses by category for online
         const courseMap: Record<string, Course[]> = {};
         catList.forEach((cat: string) => {
-          courseMap[cat] = allCourses.filter((c: Course & { category?: string }) => c.category === cat).slice(0, 5);
+          courseMap[cat] = allCourses.filter((c: Course & { category?: string; type?: string }) => c.category === cat && (c.type === "online" || !c.type)).slice(0, 5);
         });
         setCategoryCoursesMap(courseMap);
 
         // Group courses by category for live online
         const liveOnlineCourseMapData: Record<string, Course[]> = {};
         liveOnlineCatList.forEach((cat: string) => {
-          liveOnlineCourseMapData[cat] = allCourses.filter((c: Course & { category?: string }) => c.category === cat).slice(0, 5);
+          liveOnlineCourseMapData[cat] = allCourses.filter((c: Course & { category?: string; type?: string }) => c.category === cat && c.type === "live online").slice(0, 5);
         });
         setLiveOnlineCourseMap(liveOnlineCourseMapData);
       } catch (error) {

@@ -229,8 +229,7 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
                     {/* Stats */}
                     <div className="flex items-center gap-4 text-xs text-gray-500 py-3 border-t border-gray-100">
                       <div>📚 {course.sessions?.length ?? 0} lessons</div>
-                      <div>⏱️ {Math.floor(Math.random() * 50) + 5}h</div>
-                      <div>⭐ {(Math.random() * 2 + 3).toFixed(1)}</div>
+                      {course.price && <div>💰 {course.price} บาท</div>}
                     </div>
 
                     {/* CTA */}

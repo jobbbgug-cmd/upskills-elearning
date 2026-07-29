@@ -50,13 +50,17 @@ export async function POST(req: NextRequest) {
   try {
     await connectDB();
     const body = await req.json();
-    const { name, description } = body;
+    const { name, description, type = "online" } = body;
 
     if (!name || name.trim().length === 0) {
       return NextResponse.json({ error: "ชื่อหมวดหมู่ไม่ถูกต้อง" }, { status: 400 });
     }
 
-    const existingCategory = await Category.findOne({ name: name.trim() });
+    if (!["online", "onsite", "live online"].includes(type)) {
+      return NextResponse.json({ error: "ประเภทหมวดหมู่ไม่ถูกต้อง" }, { status: 400 });
+    }
+
+    const existingCategory = await Category.findOne({ name: name.trim(), type });
     if (existingCategory) {
       return NextResponse.json({ error: "หมวดหมู่นี้มีอยู่แล้ว" }, { status: 400 });
     }
@@ -64,6 +68,7 @@ export async function POST(req: NextRequest) {
     const category = await Category.create({
       name: name.trim(),
       description: description || "",
+      type,
     });
 
     return NextResponse.json({ category }, { status: 201 });

@@ -1,75 +1,46 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getAuthUser } from "@/lib/auth";
 import { connectDB } from "@/lib/mongodb";
 import Category from "@/models/Category";
+import { getAuthUser } from "@/lib/auth";
 
-export async function PUT(
-  req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const auth = await getAuthUser();
     if (!auth || auth.role !== "super_admin") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
-    const { id } = await params;
     await connectDB();
-
+    const { id } = await params;
     const body = await req.json();
-    const { name, description, isActive, order } = body;
+    const { name, description, isActive } = body;
 
-    const updateData: any = {};
-    if (name !== undefined) {
-      if (!name?.trim()) {
-        return NextResponse.json({ error: "ชื่อหมวดหมู่ไม่ว่าง" }, { status: 400 });
-      }
-      updateData.name = name.trim();
-    }
-    if (description !== undefined) {
-      updateData.description = description?.trim() || "";
-    }
-    if (isActive !== undefined) {
-      updateData.isActive = isActive;
-    }
-    if (order !== undefined) {
-      updateData.order = order;
-    }
-
-    console.log(`📝 Updating category ${id}`, updateData);
     const category = await Category.findByIdAndUpdate(
       id,
-      updateData,
+      { ...(name && { name }), ...(description !== undefined && { description }), ...(isActive !== undefined && { isActive }) },
       { new: true }
-    ).lean() as any;
-    console.log(`✅ Updated category:`, category?.name, `order: ${category?.order}`);
+    ).lean();
 
     if (!category) {
       return NextResponse.json({ error: "ไม่พบหมวดหมู่" }, { status: 404 });
     }
 
-    return NextResponse.json(JSON.parse(JSON.stringify(category)));
-  } catch (err: any) {
+    return NextResponse.json(category);
+  } catch (err) {
     console.error(err);
-    return NextResponse.json(
-      { error: err.message || "เกิดข้อผิดพลาด" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "เกิดข้อผิดพลาด" }, { status: 500 });
   }
 }
 
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const auth = await getAuthUser();
     if (!auth || auth.role !== "super_admin") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
-    const { id } = await params;
     await connectDB();
+    const { id } = await params;
 
     const category = await Category.findByIdAndDelete(id).lean();
 
@@ -77,12 +48,9 @@ export async function DELETE(
       return NextResponse.json({ error: "ไม่พบหมวดหมู่" }, { status: 404 });
     }
 
-    return NextResponse.json({ success: true });
-  } catch (err: any) {
+    return NextResponse.json({ message: "ลบสำเร็จ" });
+  } catch (err) {
     console.error(err);
-    return NextResponse.json(
-      { error: err.message || "เกิดข้อผิดพลาด" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "เกิดข้อผิดพลาด" }, { status: 500 });
   }
 }

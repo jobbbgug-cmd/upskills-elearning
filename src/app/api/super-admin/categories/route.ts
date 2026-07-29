@@ -1,32 +1,49 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getAuthUser } from "@/lib/auth";
 import { connectDB } from "@/lib/mongodb";
 import Category from "@/models/Category";
+import Course from "@/models/Course";
+import { getAuthUser } from "@/lib/auth";
 
 export async function GET(req: NextRequest) {
   try {
     const auth = await getAuthUser();
     if (!auth || auth.role !== "super_admin") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
     await connectDB();
+    const { searchParams } = new URL(req.url);
+    const type = searchParams.get("type");
 
-    const typeParam = req.nextUrl.searchParams.get("type");
-    const filter: { type?: string } = {};
-    if (typeParam && ["online", "onsite"].includes(typeParam)) {
-      filter.type = typeParam;
+    const query: Record<string, unknown> = { isActive: true };
+    if (type && ["online", "onsite", "live online"].includes(type)) {
+      query.type = type;
     }
 
-    const categories = await Category.find(filter).sort({ order: 1, name: 1 }).lean();
+    const categories = await Category.find(query).sort({ order: 1, createdAt: -1 }).lean();
 
-    // Add default type for categories that don't have it (migration)
-    const categoriesWithType = categories.map((cat: any) => ({
-      ...cat,
-      type: cat.type || "onsite", // Default to onsite for old categories
+    // Get course counts for each category
+    const courseCounts: Record<string, number> = {};
+    const courseAgg = await Course.aggregate([
+      { $match: { isActive: true } },
+      { $group: { _id: "$category", count: { $sum: 1 } } },
+    ]);
+    courseAgg.forEach((item) => {
+      courseCounts[item._id?.toString() || ""] = item.count;
+    });
+
+    const categoriesWithCount = categories.map((cat: any) => ({
+      _id: cat._id,
+      name: cat.name,
+      description: cat.description,
+      type: cat.type,
+      isActive: cat.isActive,
+      order: cat.order,
+      createdAt: cat.createdAt,
+      count: courseCounts[cat._id?.toString() || ""] || 0,
     }));
 
-    return NextResponse.json({ categories: JSON.parse(JSON.stringify(categoriesWithType)) });
+    return NextResponse.json({ categories: categoriesWithCount });
   } catch (err) {
     console.error(err);
     return NextResponse.json({ error: "เกิดข้อผิดพลาด" }, { status: 500 });
@@ -37,36 +54,36 @@ export async function POST(req: NextRequest) {
   try {
     const auth = await getAuthUser();
     if (!auth || auth.role !== "super_admin") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
     await connectDB();
+    const body = await req.json();
+    const { name, description, type = "online" } = body;
 
-    const { name, description, type } = await req.json();
-
-    if (!name?.trim()) {
-      return NextResponse.json({ error: "ชื่อหมวดหมู่ไม่ว่าง" }, { status: 400 });
+    if (!name || name.trim().length === 0) {
+      return NextResponse.json({ error: "ชื่อหมวดหมู่ไม่ถูกต้อง" }, { status: 400 });
     }
 
-    if (!type || !["online", "onsite", "live online"].includes(type)) {
-      return NextResponse.json({ error: "เลือกประเภท (online/onsite/live online)" }, { status: 400 });
+    if (!["online", "onsite", "live online"].includes(type)) {
+      return NextResponse.json({ error: "ประเภทหมวดหมู่ไม่ถูกต้อง" }, { status: 400 });
     }
 
-    const existing = await Category.findOne({ name: name.trim(), type });
-    if (existing) {
+    const existingCategory = await Category.findOne({ name: name.trim(), type });
+    if (existingCategory) {
       return NextResponse.json({ error: "หมวดหมู่นี้มีอยู่แล้ว" }, { status: 400 });
     }
 
     const category = await Category.create({
       name: name.trim(),
-      description: description?.trim() || "",
-      type: type as any,
+      description: description || "",
+      type,
       isActive: true,
     });
 
-    return NextResponse.json(JSON.parse(JSON.stringify(category)), { status: 201 });
-  } catch (err: any) {
+    return NextResponse.json(category, { status: 201 });
+  } catch (err) {
     console.error(err);
-    return NextResponse.json({ error: err.message || "เกิดข้อผิดพลาด" }, { status: 500 });
+    return NextResponse.json({ error: "เกิดข้อผิดพลาด" }, { status: 500 });
   }
 }
