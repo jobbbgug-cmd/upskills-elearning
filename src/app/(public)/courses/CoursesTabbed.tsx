@@ -1,0 +1,253 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import Image from "next/image";
+import { ICourse } from "@/types";
+
+interface Category {
+  name: string;
+  count: number;
+}
+
+interface LearningPath {
+  _id: string;
+  title: string;
+}
+
+type TabType = "all" | "online" | "live-online" | "paths" | "onsite";
+
+interface CourseTabbedProps {
+  courses: ICourse[];
+}
+
+export default function CoursesTabbed({ courses }: CourseTabbedProps) {
+  const [activeTab, setActiveTab] = useState<TabType>("all");
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [learningPaths, setLearningPaths] = useState<LearningPath[]>([]);
+  const [loadingCategories, setLoadingCategories] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoadingCategories(true);
+      try {
+        if (activeTab === "paths") {
+          const res = await fetch("/api/learning-paths");
+          const data = await res.json();
+          setLearningPaths(data.paths || []);
+          setCategories([]);
+        } else {
+          let apiUrl = "/api/categories?type=online";
+          if (activeTab === "live-online") apiUrl = "/api/categories?type=live%20online";
+          else if (activeTab === "onsite") apiUrl = "/api/categories?type=onsite";
+          else if (activeTab === "all") apiUrl = "/api/categories";
+
+          const res = await fetch(apiUrl);
+          const data = await res.json();
+          setCategories(data.categories || []);
+          setLearningPaths([]);
+        }
+      } catch (error) {
+        console.error("Failed to fetch data:", error);
+      } finally {
+        setLoadingCategories(false);
+      }
+    };
+
+    fetchData();
+  }, [activeTab]);
+
+  const tabs = [
+    { id: "all", label: "ทั้งหมด", count: courses.length },
+    { id: "online", label: "คอร์สเรียน", count: courses.filter((c) => (c.type || "online") === "online").length },
+    { id: "live-online", label: "คอร์สเรียน Live", count: courses.filter((c) => c.type === "live online").length },
+    { id: "paths", label: "เส้นทางการเรียน", count: learningPaths.length },
+    { id: "onsite", label: "คอร์สเรียน Onsite", count: courses.filter((c) => c.type === "onsite").length },
+  ] as const;
+
+  const filteredCourses = activeTab === "all"
+    ? courses
+    : courses.filter((c) => {
+        if (activeTab === "online") return (c.type || "online") === "online";
+        if (activeTab === "live-online") return c.type === "live online";
+        if (activeTab === "onsite") return c.type === "onsite";
+        return true;
+      });
+
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+      {/* Sidebar */}
+      <div className="lg:col-span-1">
+        <div className="bg-white rounded-xl p-6 shadow-sm sticky top-24">
+          <h3 className="font-bold text-gray-900 mb-4">
+            {activeTab === "paths" ? "เส้นทาง" : "หมวดหมู่"} ({activeTab === "paths" ? learningPaths.length : categories.length})
+          </h3>
+
+          <div className="space-y-2 max-h-96 overflow-y-auto">
+            {loadingCategories ? (
+              <p className="text-sm text-gray-500">กำลังโหลด...</p>
+            ) : activeTab === "paths" ? (
+              learningPaths.length > 0 ? (
+                learningPaths.map((path) => (
+                  <Link
+                    key={path._id}
+                    href={`/learning-paths/${path._id}`}
+                    className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-indigo-50 hover:text-indigo-600 transition-colors group"
+                  >
+                    <input type="checkbox" className="w-4 h-4 rounded cursor-pointer" readOnly />
+                    <span className="text-sm text-gray-700 group-hover:text-indigo-600 flex-1">{path.title}</span>
+                  </Link>
+                ))
+              ) : (
+                <p className="text-sm text-gray-500">ไม่มีเส้นทาง</p>
+              )
+            ) : categories.length > 0 ? (
+              categories.map((cat) => (
+                <div
+                  key={cat.name}
+                  className="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-indigo-50 transition-colors group"
+                >
+                  <span className="flex items-center gap-2">
+                    <input type="checkbox" className="w-4 h-4 rounded cursor-pointer" readOnly />
+                    <span className="text-sm text-gray-700 group-hover:text-indigo-600">{cat.name}</span>
+                  </span>
+                  <span className="text-xs text-gray-500">({cat.count})</span>
+                </div>
+              ))
+            ) : (
+              <p className="text-sm text-gray-500">ไม่มีหมวดหมู่</p>
+            )}
+          </div>
+
+          {/* Price Range */}
+          <div className="mt-6 pt-6 border-t">
+            <h4 className="font-semibold text-gray-900 mb-3 text-sm">ระดับ</h4>
+            {["ฟรี", "ปรึกษา", "บาท"].map((price) => (
+              <label key={price} className="flex items-center gap-2 mb-2 cursor-pointer hover:text-indigo-600">
+                <input type="checkbox" className="w-4 h-4 rounded cursor-pointer" />
+                <span className="text-sm text-gray-600">{price}</span>
+              </label>
+            ))}
+          </div>
+
+          {/* Duration */}
+          <div className="mt-6 pt-6 border-t">
+            <h4 className="font-semibold text-gray-900 mb-3 text-sm">ความยาวคอร์ส</h4>
+            {["0 - 1 ชั่วโมง", "1 - 2 ชั่วโมง", "2 - 4 ชั่วโมง", "4 ชั่วโมงขึ้นไป"].map((duration) => (
+              <label key={duration} className="flex items-center gap-2 mb-2 cursor-pointer hover:text-indigo-600">
+                <input type="checkbox" className="w-4 h-4 rounded cursor-pointer" />
+                <span className="text-sm text-gray-600">{duration}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="lg:col-span-3">
+        {/* Tabs */}
+        <div className="mb-8 flex gap-4 border-b border-gray-200 pb-4 overflow-x-auto">
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id as TabType)}
+              className={`font-medium text-sm pb-2 transition-colors whitespace-nowrap ${
+                activeTab === tab.id
+                  ? "border-b-2 border-indigo-600 text-indigo-600"
+                  : "text-gray-600 hover:text-gray-900"
+              }`}
+            >
+              {tab.label} ({tab.count})
+            </button>
+          ))}
+        </div>
+
+        {/* Content */}
+        {activeTab === "paths" ? (
+          learningPaths.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {learningPaths.map((path) => (
+                <Link key={path._id} href={`/learning-paths/${path._id}`}>
+                  <div className="bg-white rounded-xl overflow-hidden hover:shadow-lg transition-shadow group">
+                    <div className="relative h-48 bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center">
+                      <span className="text-5xl">🗺️</span>
+                    </div>
+                    <div className="p-5">
+                      <h3 className="font-bold text-gray-900 mb-3 line-clamp-2 group-hover:text-indigo-600">
+                        {path.title}
+                      </h3>
+                      <button className="w-full py-2.5 bg-indigo-600 text-white rounded-lg font-semibold text-sm hover:bg-indigo-700 transition-colors">
+                        ดูเส้นทาง
+                      </button>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <p className="text-gray-600">ไม่มีเส้นทางการเรียน</p>
+            </div>
+          )
+        ) : filteredCourses.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {filteredCourses.map((course) => (
+              <Link key={course._id} href={`/courses/${course._id}`}>
+                <div className="bg-white rounded-xl overflow-hidden hover:shadow-lg transition-shadow group">
+                  {/* Course Image */}
+                  <div className="relative h-48 bg-gradient-to-br from-indigo-100 to-purple-100 overflow-hidden">
+                    {course.coverImage ? (
+                      <Image
+                        src={course.coverImage}
+                        alt={course.title}
+                        fill
+                        className="object-cover group-hover:scale-105 transition-transform"
+                      />
+                    ) : (
+                      <div className="flex items-center justify-center h-full">
+                        <span className="text-5xl">📚</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Course Info */}
+                  <div className="p-5">
+                    <h3 className="font-bold text-gray-900 mb-3 line-clamp-2 group-hover:text-indigo-600">
+                      {course.title}
+                    </h3>
+
+                    <p className="text-sm text-gray-600 mb-4 line-clamp-2">{course.description}</p>
+
+                    {/* Instructor */}
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-sm font-bold text-indigo-600">
+                        {course.instructor?.[0] || "U"}
+                      </div>
+                      <span className="text-xs text-gray-600">{course.instructor}</span>
+                    </div>
+
+                    {/* Stats */}
+                    <div className="flex items-center gap-4 text-xs text-gray-500 py-3 border-t border-gray-100">
+                      <div>📚 {course.sessions?.length ?? 0} lessons</div>
+                      <div>⏱️ {Math.floor(Math.random() * 50) + 5}h</div>
+                      <div>⭐ {(Math.random() * 2 + 3).toFixed(1)}</div>
+                    </div>
+
+                    {/* CTA */}
+                    <button className="w-full mt-4 py-2.5 bg-indigo-600 text-white rounded-lg font-semibold text-sm hover:bg-indigo-700 transition-colors">
+                      เรียนเลย
+                    </button>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-12">
+            <p className="text-gray-600">ไม่พบคอร์สในแท็บนี้</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
