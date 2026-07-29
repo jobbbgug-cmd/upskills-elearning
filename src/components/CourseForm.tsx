@@ -214,56 +214,51 @@ export default function CourseForm({ course, mode, courseType, teacherMode = fal
   return (
     <>
       {toast && <Toast message={toast.message} type={toast.type} onClose={closeToast} />}
-      {mode === "create" ? (
-        form.courseType && (
-          <div className="mb-6 p-3 bg-indigo-50 border border-indigo-200 rounded-xl flex items-center gap-2">
-            <span className="text-xs font-semibold text-indigo-700 px-2 py-1 bg-indigo-100 rounded-lg">
-              {form.courseType === "online" ? "🌐 คอร์สออนไลน์" : form.courseType === "live online" ? "🎬 คอร์สเรียน Live" : "🏢 หลักสูตร Onsite"}
-            </span>
-            <span className="text-sm text-indigo-600">{form.courseType === "online" ? "สอนออนไลน์" : form.courseType === "live online" ? "สอนแบบ Live" : "สอนในสถาบัน"}</span>
-          </div>
-        )
-      ) : (
-        <div className="mb-6">
-          <label className="block text-sm font-semibold text-gray-700 mb-1.5">ประเภทคอร์ส</label>
-          <select
-            value={form.courseType}
-            onChange={(e) => setForm({ ...form, courseType: e.target.value as "online" | "live online" | "onsite" })}
-            className={inputClass}
-          >
-            <option value="online">🌐 คอร์สออนไลน์</option>
-            <option value="live online">🎬 คอร์สเรียน Live</option>
-            <option value="onsite">🏢 หลักสูตร Onsite</option>
-          </select>
-        </div>
-      )}
-    <form onSubmit={handleSubmit} className="space-y-8">
-      {/* Cover image */}
-      <div>
-        <label className="block text-sm font-semibold text-gray-700 mb-3">รูปปกคอร์ส</label>
-        <div className="flex gap-4 items-start">
-          <div className="relative w-40 h-28 rounded-xl overflow-hidden bg-gradient-to-br from-indigo-100 to-purple-100 shrink-0">
-            {form.coverImage ? (
+      <form onSubmit={handleSubmit} className="space-y-8">
+      {/* Cover image + Course type badge */}
+      <div className="flex items-start gap-4">
+        <div className="flex-1">
+          <label className="block text-sm font-semibold text-gray-700 mb-3">รูปปกคอร์ส</label>
+          <div className="relative w-full h-64 rounded-xl overflow-hidden bg-gradient-to-br from-indigo-100 to-purple-100 group">
+          {form.coverImage ? (
+            <>
               <Image src={form.coverImage} alt="cover" fill className="object-cover" />
-            ) : (
-              <div className="flex items-center justify-center h-full">
-                <BookOpen className="w-8 h-8 text-indigo-300" />
-              </div>
-            )}
+              <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
+              <button
+                type="button"
+                onClick={() => setForm({ ...form, coverImage: "" })}
+                className="absolute bottom-3 right-3 p-2 bg-red-600 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
+            </>
+          ) : (
+            <div className="flex flex-col items-center justify-center h-full">
+              <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
+              <button
+                type="button"
+                onClick={() => fileRef.current?.click()}
+                disabled={uploading}
+                className="flex flex-col items-center gap-2 px-6 py-4"
+              >
+                <Upload className="w-8 h-8 text-indigo-400" />
+                <span className="text-sm text-indigo-600 font-medium">
+                  {uploading ? "กำลังอัปโหลด..." : "อัปโหลดรูปปก"}
+                </span>
+              </button>
+              <p className="text-xs text-gray-400 mt-2">JPG, PNG, WebP ขนาดไม่เกิน 10MB</p>
+            </div>
+          )}
           </div>
-          <div>
-            <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
-            <button
-              type="button"
-              onClick={() => fileRef.current?.click()}
-              disabled={uploading}
-              className="flex items-center gap-2 px-4 py-2.5 border-2 border-dashed border-gray-300 rounded-xl text-sm text-gray-500 hover:border-indigo-400 hover:text-indigo-600 transition-colors disabled:opacity-50"
-            >
-              <Upload className="w-4 h-4" />
-              {uploading ? "กำลังอัปโหลด..." : "อัปโหลดรูปปก"}
-            </button>
-            <p className="text-xs text-gray-400 mt-2">JPG, PNG, WebP ขนาดไม่เกิน 10MB</p>
-          </div>
+        </div>
+
+        {/* Course type badge */}
+        <div className="flex-shrink-0 mt-3">
+          {mode === "edit" && (
+            <span className="text-xs font-semibold text-indigo-700 px-2 py-1 bg-indigo-100 rounded-lg whitespace-nowrap">
+              {form.courseType === "online" ? "🌐 Online" : form.courseType === "live online" ? "🎬 Live" : "🏢 Onsite"}
+            </span>
+          )}
         </div>
       </div>
 
