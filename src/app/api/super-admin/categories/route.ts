@@ -59,7 +59,7 @@ export async function POST(req: NextRequest) {
 
     await connectDB();
     const body = await req.json();
-    const { name, description, type = "online" } = body;
+    const { name, description, type = "online", order } = body;
 
     if (!name || name.trim().length === 0) {
       return NextResponse.json({ error: "ชื่อหมวดหมู่ไม่ถูกต้อง" }, { status: 400 });
@@ -74,10 +74,18 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "หมวดหมู่นี้มีอยู่แล้ว" }, { status: 400 });
     }
 
+    // Calculate order if not provided
+    let finalOrder = order;
+    if (finalOrder === undefined) {
+      const maxOrderDoc = await Category.findOne({ type }).sort({ order: -1 }).lean();
+      finalOrder = (maxOrderDoc?.order || 0) + 1;
+    }
+
     const category = await Category.create({
       name: name.trim(),
       description: description || "",
       type,
+      order: finalOrder,
       isActive: true,
     });
 

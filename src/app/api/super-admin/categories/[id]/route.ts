@@ -13,11 +13,17 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     await connectDB();
     const { id } = await params;
     const body = await req.json();
-    const { name, description, isActive } = body;
+    const { name, description, isActive, order } = body;
+
+    const updateData: any = {};
+    if (name) updateData.name = name;
+    if (description !== undefined) updateData.description = description;
+    if (isActive !== undefined) updateData.isActive = isActive;
+    if (order !== undefined) updateData.order = order;
 
     const category = await Category.findByIdAndUpdate(
       id,
-      { ...(name && { name }), ...(description !== undefined && { description }), ...(isActive !== undefined && { isActive }) },
+      updateData,
       { new: true }
     ).lean();
 

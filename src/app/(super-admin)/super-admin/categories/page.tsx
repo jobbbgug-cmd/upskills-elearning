@@ -21,7 +21,7 @@ export default function SuperAdminCategoriesPage() {
   const [creatingType, setCreatingType] = useState<"online" | "onsite" | "live online">("online");
   const [newCategory, setNewCategory] = useState({ name: "", description: "" });
   const [editing, setEditing] = useState<Category | null>(null);
-  const [editData, setEditData] = useState({ name: "", description: "" });
+  const [editData, setEditData] = useState({ name: "", description: "", order: 0 });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
@@ -60,6 +60,15 @@ export default function SuperAdminCategoriesPage() {
     setError("");
 
     try {
+      // Get max order for this type
+      const categoriesRes = await fetch(`/api/super-admin/categories?type=${creatingType}`, {
+        credentials: "include",
+      });
+      const categoriesData = await categoriesRes.json();
+      const maxOrder = categoriesData.categories?.length > 0
+        ? Math.max(...categoriesData.categories.map((c: any) => c.order || 0))
+        : 0;
+
       const res = await fetch("/api/super-admin/categories", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -67,6 +76,7 @@ export default function SuperAdminCategoriesPage() {
           name: newCategory.name,
           description: newCategory.description,
           type: creatingType,
+          order: maxOrder + 1,
         }),
       });
 
@@ -97,11 +107,14 @@ export default function SuperAdminCategoriesPage() {
     setError("");
 
     try {
-      const res = await fetch(`/api/super-admin/categories/${editing._id}`, {
-        method: "PUT",
+      const res = await fetch(`/api/super-admin/categories/swap-order`, {
+        method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify({
+          id: editing._id,
+          newOrder: editData.order,
+          type: editing.type,
           name: editData.name,
           description: editData.description,
         }),
@@ -329,7 +342,7 @@ export default function SuperAdminCategoriesPage() {
                         <button
                           onClick={() => {
                             setEditing(cat);
-                            setEditData({ name: cat.name, description: cat.description || "" });
+                            setEditData({ name: cat.name, description: cat.description || "", order: cat.order });
                             setError("");
                           }}
                           className="p-1.5 text-gray-400 hover:text-violet-600 hover:bg-violet-50 rounded-lg transition-colors"
@@ -418,7 +431,7 @@ export default function SuperAdminCategoriesPage() {
                         <button
                           onClick={() => {
                             setEditing(cat);
-                            setEditData({ name: cat.name, description: cat.description || "" });
+                            setEditData({ name: cat.name, description: cat.description || "", order: cat.order });
                             setError("");
                           }}
                           className="p-1.5 text-gray-400 hover:text-violet-600 hover:bg-violet-50 rounded-lg transition-colors"
@@ -507,7 +520,7 @@ export default function SuperAdminCategoriesPage() {
                         <button
                           onClick={() => {
                             setEditing(cat);
-                            setEditData({ name: cat.name, description: cat.description || "" });
+                            setEditData({ name: cat.name, description: cat.description || "", order: cat.order });
                             setError("");
                           }}
                           className="p-1.5 text-gray-400 hover:text-violet-600 hover:bg-violet-50 rounded-lg transition-colors"
@@ -615,6 +628,16 @@ export default function SuperAdminCategoriesPage() {
                   placeholder="คำอธิบายหมวดหมู่"
                   className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm mt-1 focus:outline-none focus:ring-2 focus:ring-violet-300"
                   rows={3}
+                />
+              </div>
+
+              <div>
+                <label className="text-sm font-medium text-gray-700">ลำดับ</label>
+                <input
+                  type="number"
+                  value={editData.order}
+                  onChange={(e) => setEditData({ ...editData, order: parseInt(e.target.value) || 0 })}
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm mt-1 focus:outline-none focus:ring-2 focus:ring-violet-300"
                 />
               </div>
 
