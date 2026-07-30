@@ -36,7 +36,7 @@ export async function GET(req: NextRequest) {
       _id: cat._id,
       name: cat.name,
       type: cat.type,
-      count: courseCounts[cat.name] || 0,
+      count: courseCounts[cat._id?.toString() || ""] || 0,
     }));
 
     return NextResponse.json({ categories: categoriesWithCount });

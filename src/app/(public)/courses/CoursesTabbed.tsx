@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useSearchParams, useRouter } from "next/navigation";
 import { ICourse } from "@/types";
 
 interface Category {
@@ -22,10 +23,36 @@ interface CourseTabbedProps {
 }
 
 export default function CoursesTabbed({ courses }: CourseTabbedProps) {
-  const [activeTab, setActiveTab] = useState<TabType>("all");
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  
+  const getInitialTab = (): TabType => {
+    const tab = searchParams.get("tab");
+    if (tab === "online" || tab === "live-online" || tab === "paths" || tab === "onsite") {
+      return tab as TabType;
+    }
+    return "all";
+  };
+
+  const [activeTab, setActiveTab] = useState<TabType>(getInitialTab());
   const [categories, setCategories] = useState<Category[]>([]);
   const [learningPaths, setLearningPaths] = useState<LearningPath[]>([]);
   const [loadingCategories, setLoadingCategories] = useState(true);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(
+    searchParams.get("category")
+  );
+
+  // Sync activeTab and selectedCategory with URL on mount and when URL changes
+  useEffect(() => {
+    const tab = searchParams.get("tab");
+    if (tab === "online" || tab === "live-online" || tab === "paths" || tab === "onsite") {
+      setActiveTab(tab as TabType);
+    }
+    const category = searchParams.get("category");
+    if (category) {
+      setSelectedCategory(category);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -108,7 +135,12 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
                   className="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-indigo-50 transition-colors group"
                 >
                   <span className="flex items-center gap-2">
-                    <input type="checkbox" className="w-4 h-4 rounded cursor-pointer" readOnly />
+                    <input 
+                      type="checkbox" 
+                      className="w-4 h-4 rounded cursor-pointer" 
+                      checked={selectedCategory === cat.name}
+                      onChange={() => setSelectedCategory(selectedCategory === cat.name ? null : cat.name)}
+                    />
                     <span className="text-sm text-gray-700 group-hover:text-indigo-600">{cat.name}</span>
                   </span>
                   <span className="text-xs text-gray-500">({cat.count})</span>

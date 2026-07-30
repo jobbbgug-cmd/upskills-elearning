@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { ChevronDown, ChevronRight, Clock, User } from "lucide-react";
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 interface Course {
   _id: string;
@@ -15,10 +16,6 @@ interface Course {
   sessions?: { startTime?: string; endTime?: string }[];
 }
 
-interface Category {
-  name: string;
-  count: number;
-}
 
 interface LearningPath {
   _id: string;
@@ -28,6 +25,7 @@ interface LearningPath {
 type MenuSection = "courses" | "courses live" | "new-courses" | "learning-paths";
 
 export default function CoursesDropdown() {
+  const router = useRouter();
   const [activeSection, setActiveSection] = useState<MenuSection>("courses");
   const [categories, setCategories] = useState<string[]>([]);
   const [liveOnlineCategories, setLiveOnlineCategories] = useState<string[]>([]);
@@ -35,7 +33,10 @@ export default function CoursesDropdown() {
   const [learningPaths, setLearningPaths] = useState<LearningPath[]>([]);
   const [categoryCoursesMap, setCategoryCoursesMap] = useState<Record<string, Course[]>>({});
   const [liveOnlineCourseMap, setLiveOnlineCourseMap] = useState<Record<string, Course[]>>({});
+  const [onsiteCategories, setOnsiteCategories] = useState<string[]>([]);
+  const [onsiteCourseMap, setOnsiteCourseMap] = useState<Record<string, Course[]>>({});
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -53,8 +54,11 @@ export default function CoursesDropdown() {
         const coursesData = await coursesRes.json();
         const pathsData = await pathsRes.json();
 
-        const catList = (categoriesData.categories || []).map((cat: Category) => cat.name);
-        const liveOnlineCatList = (liveOnlineCategoriesData.categories || []).map((cat: Category) => cat.name);
+        const categories = categoriesData.categories || [];
+        const liveOnlineCategories = liveOnlineCategoriesData.categories || [];
+
+        const catList = categories.map((cat: any) => cat.name);
+        const liveOnlineCatList = liveOnlineCategories.map((cat: any) => cat.name);
 
         setCategories(catList);
         setLiveOnlineCategories(liveOnlineCatList);
@@ -66,16 +70,32 @@ export default function CoursesDropdown() {
 
         // Group courses by category for online
         const courseMap: Record<string, Course[]> = {};
-        catList.forEach((cat: string) => {
-          courseMap[cat] = allCourses.filter((c: Course & { category?: string; type?: string }) => c.category === cat && (c.type === "online" || !c.type)).slice(0, 5);
+        categories.forEach((cat: any) => {
+          courseMap[cat.name] = allCourses.filter((c: Course & { category?: string; type?: string }) => c.category === cat._id && (c.type === "online" || !c.type)).slice(0, 5);
         });
         setCategoryCoursesMap(courseMap);
 
         // Group courses by category for live online
         const liveOnlineCourseMapData: Record<string, Course[]> = {};
-        liveOnlineCatList.forEach((cat: string) => {
-          liveOnlineCourseMapData[cat] = allCourses.filter((c: Course & { category?: string; type?: string }) => c.category === cat && c.type === "live online").slice(0, 5);
+        liveOnlineCategories.forEach((cat: any) => {
+          liveOnlineCourseMapData[cat.name] = allCourses.filter((c: Course & { category?: string; type?: string }) => c.category === cat._id && c.type === "live online").slice(0, 5);
         });
+        setLiveOnlineCourseMap(liveOnlineCourseMapData);
+
+        // Fetch onsite categories
+        const onsiteRes = await fetch("/api/categories?type=onsite");
+        const onsiteCategoriesData = await onsiteRes.json();
+        const onsiteCats = onsiteCategoriesData.categories || [];
+        const onsiteCatList = onsiteCats.map((cat: any) => cat.name);
+        
+        // Group courses by category for onsite
+        const onsiteCourseMapData: Record<string, Course[]> = {};
+        onsiteCats.forEach((cat: any) => {
+          onsiteCourseMapData[cat.name] = allCourses.filter((c: Course & { category?: string; type?: string }) => c.category === cat._id && c.type === "onsite").slice(0, 5);
+        });
+        setOnsiteCategories(onsiteCatList);
+        setOnsiteCourseMap(onsiteCourseMapData);
+        setCategoryCoursesMap(courseMap);
         setLiveOnlineCourseMap(liveOnlineCourseMapData);
       } catch (error) {
         console.error("Failed to fetch dropdown data:", error);
@@ -164,6 +184,23 @@ export default function CoursesDropdown() {
                 {activeSection === "learning-paths" && <ChevronRight className="w-4 h-4" />}
               </span>
             </button>
+
+            <button
+              onClick={() => {
+                setActiveSection("onsite");
+                setSelectedCategory(null);
+              }}
+              className={`w-full text-left px-4 py-3 text-sm font-medium transition-colors ${
+                activeSection === "onsite"
+                  ? "bg-indigo-50 text-indigo-600 border-r-2 border-indigo-600"
+                  : "text-gray-700 hover:bg-gray-100"
+              }`}
+            >
+              <span className="flex items-center justify-between">
+                หลักสูตร Onsite
+                {activeSection === "onsite" && <ChevronRight className="w-4 h-4" />}
+              </span>
+            </button>
           </div>
 
           {/* Right Content Area */}
@@ -179,7 +216,7 @@ export default function CoursesDropdown() {
                     <p className="text-sm text-gray-600 mt-0.5">คอร์สเรียนออนไลน์แบบสด</p>
                   </div>
                   <Link
-                    href="/courses?type=live-online"
+                    href="/courses?tab=live-online"
                     className="flex items-center gap-1 text-sm text-indigo-600 hover:text-indigo-700 font-medium whitespace-nowrap"
                   >
                     ดูคอร์สเรียน Live ทั้งหมด
@@ -193,7 +230,10 @@ export default function CoursesDropdown() {
                     {liveOnlineCategories.map((cat) => (
                       <button
                         key={cat}
-                        onClick={() => setSelectedCategory(cat)}
+                        onClick={() => {
+                          setSelectedCategory(cat);
+                          setSelectedCourse(null);
+                        }}
                         className={`w-full text-left px-3 py-2 text-sm rounded-lg transition-colors ${
                           selectedCategory === cat
                             ? "bg-indigo-50 text-indigo-600 font-medium"
@@ -205,22 +245,67 @@ export default function CoursesDropdown() {
                     ))}
                   </div>
 
-                  {/* Right: Live Online Courses in Selected Category */}
-                  <div className="flex-1 space-y-3 overflow-y-auto">
+                  {/* Middle: Course List */}
+                  <div className="w-64 border-r border-gray-200 pr-4 space-y-2 overflow-y-auto">
                     {selectedCategory && (liveOnlineCourseMap[selectedCategory] || []).length > 0 ? (
                       (liveOnlineCourseMap[selectedCategory] || []).map((course) => (
-                        <Link
+                        <button
                           key={course._id}
-                          href={`/courses/${course.slug}?type=live online`}
-                          className="block p-3 bg-gray-50 rounded-lg hover:bg-indigo-50 transition-colors"
+                          onClick={() => setSelectedCourse(course)}
+                          className={`w-full text-left px-3 py-2 text-sm rounded-lg transition-colors line-clamp-2 ${
+                            selectedCourse?._id === course._id
+                              ? "bg-indigo-50 text-indigo-600 font-medium"
+                              : "text-gray-700 hover:bg-gray-50"
+                          }`}
                         >
-                          <p className="text-sm text-gray-900 font-medium line-clamp-2">{course.title}</p>
-                        </Link>
+                          {course.title}
+                        </button>
                       ))
                     ) : selectedCategory ? (
-                      <p className="text-xs text-gray-500">ไม่มีคอร์สในหมวดนี้</p>
+                      <p className="text-xs text-gray-500">ไม่มีคอร์ส</p>
                     ) : (
-                      <p className="text-xs text-gray-500">เลือกหมวดหมู่เพื่อดูคอร์ส</p>
+                      <p className="text-xs text-gray-500">เลือกหมวดหมู่</p>
+                    )}
+                  </div>
+
+                  {/* Right: Selected Course Card */}
+                  <div className="flex-1 p-4 overflow-y-auto flex items-start justify-center pt-4">
+                    {selectedCourse ? (
+                      <div className="w-full bg-white rounded-lg border border-gray-200 overflow-hidden">
+                        {/* Cover Image */}
+                        <div className="relative h-32 bg-gray-200 overflow-hidden">
+                          {selectedCourse.coverImage ? (
+                            <Image
+                              src={selectedCourse.coverImage}
+                              alt={selectedCourse.title}
+                              fill
+                              className="object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full bg-gradient-to-br from-indigo-100 to-violet-100 flex items-center justify-center">
+                              <span className="text-4xl">📚</span>
+                            </div>
+                          )}
+                        </div>
+                        {/* Content */}
+                        <div className="p-4">
+                          <h3 className="text-sm font-bold text-gray-900 mb-2">{selectedCourse.title}</h3>
+                          {selectedCourse.description && (
+                            <p className="text-xs text-gray-600 mb-3 line-clamp-2">{selectedCourse.description}</p>
+                          )}
+                          {selectedCourse.instructor && (
+                            <p className="text-xs text-gray-700 mb-3"><strong>สอน:</strong> {selectedCourse.instructor}</p>
+                          )}
+                          <Link
+                            href={`/courses/${selectedCourse.slug}?tab=live-online`}
+                            className="block w-full text-center bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-lg text-xs font-medium transition-colors"
+                          >
+                            เรียนเลย
+                          </Link>
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="text-xs text-gray-500">เลือกคอร์สเพื่อดูรายละเอียด</p>
                     )}
                   </div>
                 </div>
@@ -234,7 +319,7 @@ export default function CoursesDropdown() {
                     <p className="text-sm text-gray-600 mt-0.5">คอร์สเรียนออนไลน์</p>
                   </div>
                   <Link
-                    href="/courses?type=online"
+                    href="/courses?tab=online"
                     className="flex items-center gap-1 text-sm text-indigo-600 hover:text-indigo-700 font-medium whitespace-nowrap"
                   >
                     ดูคอร์สเรียนทั้งหมด
@@ -245,11 +330,14 @@ export default function CoursesDropdown() {
                 <div className="flex gap-4 h-full">
                   {/* Left: Categories List */}
                   <div className="w-56 border-r border-gray-200 pr-4 space-y-2 overflow-y-auto">
-                    {categories.map((cat) => (
+                    {onsiteCategories.map((cat) => (
                       <button
                         key={cat}
-                        onClick={() => setSelectedCategory(cat)}
-                        className={`w-full text-left px-3 py-2 text-sm rounded-lg transition-colors ${
+                        <button
+                          key={cat}
+                          onClick={() => {
+                            router.push(`/courses?tab=onsite&category=${encodeURIComponent(cat)}}`);
+                          }}
                           selectedCategory === cat
                             ? "bg-indigo-50 text-indigo-600 font-medium"
                             : "text-gray-700 hover:bg-gray-50"
@@ -260,22 +348,67 @@ export default function CoursesDropdown() {
                     ))}
                   </div>
 
-                  {/* Right: Courses in Selected Category */}
-                  <div className="flex-1 space-y-3 overflow-y-auto">
-                    {selectedCategory && (categoryCoursesMap[selectedCategory] || []).length > 0 ? (
-                      (categoryCoursesMap[selectedCategory] || []).map((course) => (
-                        <Link
+                  {/* Middle: Course List */}
+                  <div className="w-48 border-r border-gray-200 pr-4 space-y-2 overflow-y-auto">
+                    {selectedCategory && (onsiteCourseMap[selectedCategory] || []).length > 0 ? (
+                      (onsiteCourseMap[selectedCategory] || []).map((course) => (
+                        <button
                           key={course._id}
-                          href={`/courses/${course.slug}`}
-                          className="block p-3 bg-gray-50 rounded-lg hover:bg-indigo-50 transition-colors"
+                          onClick={() => setSelectedCourse(course)}
+                          className={`w-full text-left px-3 py-2 text-sm rounded-lg transition-colors line-clamp-2 ${
+                            selectedCourse?._id === course._id
+                              ? "bg-indigo-50 text-indigo-600 font-medium"
+                              : "text-gray-700 hover:bg-gray-50"
+                          }`}
                         >
-                          <p className="text-sm text-gray-900 font-medium line-clamp-2">{course.title}</p>
-                        </Link>
+                          {course.title}
+                        </button>
                       ))
                     ) : selectedCategory ? (
-                      <p className="text-xs text-gray-500">ไม่มีคอร์สในหมวดนี้</p>
+                      <p className="text-xs text-gray-500">ไม่มีคอร์ส</p>
                     ) : (
-                      <p className="text-xs text-gray-500">เลือกหมวดหมู่เพื่อดูคอร์ส</p>
+                      <p className="text-xs text-gray-500">เลือกหมวดหมู่</p>
+                    )}
+                  </div>
+
+                  {/* Right: Selected Course Card */}
+                  <div className="flex-1 p-4 overflow-y-auto flex items-start justify-center pt-4">
+                    {selectedCourse ? (
+                      <div className="w-full bg-white rounded-lg border border-gray-200 overflow-hidden">
+                        {/* Cover Image */}
+                        <div className="relative h-32 bg-gray-200 overflow-hidden">
+                          {selectedCourse.coverImage ? (
+                            <Image
+                              src={selectedCourse.coverImage}
+                              alt={selectedCourse.title}
+                              fill
+                              className="object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full bg-gradient-to-br from-indigo-100 to-violet-100 flex items-center justify-center">
+                              <span className="text-4xl">📚</span>
+                            </div>
+                          )}
+                        </div>
+                        {/* Content */}
+                        <div className="p-4">
+                          <h3 className="text-sm font-bold text-gray-900 mb-2">{selectedCourse.title}</h3>
+                          {selectedCourse.description && (
+                            <p className="text-xs text-gray-600 mb-3 line-clamp-2">{selectedCourse.description}</p>
+                          )}
+                          {selectedCourse.instructor && (
+                            <p className="text-xs text-gray-700 mb-3"><strong>สอน:</strong> {selectedCourse.instructor}</p>
+                          )}
+                          <Link
+                            href={`/courses/${selectedCourse.slug}?tab=online`}
+                            className="block w-full text-center bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-lg text-xs font-medium transition-colors"
+                          >
+                            เรียนเลย
+                          </Link>
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="text-xs text-gray-500">เลือกคอร์สเพื่อดูรายละเอียด</p>
                     )}
                   </div>
                 </div>
@@ -289,7 +422,7 @@ export default function CoursesDropdown() {
                     <p className="text-sm text-gray-600 mt-0.5">คอร์สเรียนที่อัปเดตล่าสุด</p>
                   </div>
                   <Link
-                    href="/courses?sort=newest"
+                    href="/courses?tab=all&sort=newest"
                     className="flex items-center gap-1 text-sm text-indigo-600 hover:text-indigo-700 font-medium whitespace-nowrap"
                   >
                     ดูคอร์สเรียนใหม่ทั้งหมด
@@ -347,6 +480,108 @@ export default function CoursesDropdown() {
                 )}
                 </div>
               </div>
+            ) : activeSection === "onsite" ? (
+              <div>
+                {/* Header */}
+                <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-200">
+                  <div>
+                    <h3 className="text-lg font-bold text-gray-900">หลักสูตร Onsite</h3>
+                    <p className="text-sm text-gray-600 mt-0.5">คอร์สเรียนที่สอนในสถาบัน</p>
+                  </div>
+                  <Link
+                    href="/courses?tab=onsite"
+                    className="flex items-center gap-1 text-sm text-indigo-600 hover:text-indigo-700 font-medium whitespace-nowrap"
+                  >
+                    ดูหลักสูตร Onsite ทั้งหมด
+                    <ChevronRight className="w-4 h-4" />
+                  </Link>
+                </div>
+
+                <div className="flex gap-4 h-full">
+                  {/* Left: Onsite Categories List */}
+                  <div className="w-56 border-r border-gray-200 pr-4 space-y-2 overflow-y-auto">
+                    {onsiteCategories.map((cat) => (
+                      <button
+                        key={cat}
+                        onClick={() => {
+                          router.push(`/courses?tab=onsite&category=${encodeURIComponent(cat)}`);
+                        }}
+                        className={`w-full text-left px-3 py-2 text-sm rounded-lg transition-colors ${
+                          selectedCategory === cat
+                            ? "bg-indigo-50 text-indigo-600 font-medium"
+                            : "text-gray-700 hover:bg-gray-50"
+                        }`}
+                      >
+                        {cat}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Middle: Course List */}
+                  <div className="w-64 border-r border-gray-200 pr-4 space-y-2 overflow-y-auto">
+                    {selectedCategory && (onsiteCourseMap[selectedCategory] || []).length > 0 ? (
+                      (onsiteCourseMap[selectedCategory] || []).map((course) => (
+                        <button
+                          key={course._id}
+                          onClick={() => setSelectedCourse(course)}
+                          className={`w-full text-left px-3 py-2 text-sm rounded-lg transition-colors line-clamp-2 ${
+                            selectedCourse?._id === course._id
+                              ? "bg-indigo-50 text-indigo-600 font-medium"
+                              : "text-gray-700 hover:bg-gray-50"
+                          }`}
+                        >
+                          {course.title}
+                        </button>
+                      ))
+                    ) : selectedCategory ? (
+                      <p className="text-xs text-gray-500">ไม่มีคอร์ส</p>
+                    ) : (
+                      <p className="text-xs text-gray-500">เลือกหมวดหมู่</p>
+                    )}
+                  </div>
+
+                  {/* Right: Selected Course Card */}
+                  <div className="flex-1 p-4 overflow-y-auto flex items-start justify-center pt-4">
+                    {selectedCourse ? (
+                      <div className="w-full bg-white rounded-lg border border-gray-200 overflow-hidden">
+                        {/* Cover Image */}
+                        <div className="relative h-32 bg-gray-200 overflow-hidden">
+                          {selectedCourse.coverImage ? (
+                            <Image
+                              src={selectedCourse.coverImage}
+                              alt={selectedCourse.title}
+                              fill
+                              className="object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full bg-gradient-to-br from-indigo-100 to-violet-100 flex items-center justify-center">
+                              <span className="text-4xl">📚</span>
+                            </div>
+                          )}
+                        </div>
+                        {/* Content */}
+                        <div className="p-4">
+                          <h3 className="text-sm font-bold text-gray-900 mb-2">{selectedCourse.title}</h3>
+                          {selectedCourse.description && (
+                            <p className="text-xs text-gray-600 mb-3 line-clamp-2">{selectedCourse.description}</p>
+                          )}
+                          {selectedCourse.instructor && (
+                            <p className="text-xs text-gray-700 mb-3"><strong>สอน:</strong> {selectedCourse.instructor}</p>
+                          )}
+                          <Link
+                            href={`/courses/${selectedCourse.slug}?tab=onsite`}
+                            className="block w-full text-center bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-lg text-xs font-medium transition-colors"
+                          >
+                            เรียนเลย
+                          </Link>
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="text-xs text-gray-500">เลือกคอร์สเพื่อดูรายละเอียด</p>
+                    )}
+                  </div>
+                </div>
+              </div>
             ) : activeSection === "learning-paths" ? (
               <div>
                 {/* Header */}
@@ -356,7 +591,7 @@ export default function CoursesDropdown() {
                     <p className="text-sm text-gray-600 mt-0.5">ชุดคอร์สเรียนที่จัดเตรียมไว้</p>
                   </div>
                   <Link
-                    href="/learning-paths"
+                    href="/courses?tab=paths"
                     className="flex items-center gap-1 text-sm text-indigo-600 hover:text-indigo-700 font-medium whitespace-nowrap"
                   >
                     ดูเส้นทางการเรียนทั้งหมด

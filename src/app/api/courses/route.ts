@@ -18,18 +18,12 @@ export async function GET(req: NextRequest) {
     if (gradeLevel) query.gradeLevels = gradeLevel;
     if (category) query.category = category;
 
-    let courseQuery = Course.find(query).populate("category", "name").sort(sort);
+    let courseQuery = Course.find(query).sort(sort);
     if (limit) courseQuery = courseQuery.limit(limit);
 
     const courses = await courseQuery.lean().exec();
 
-    // Extract category name from populated object
-    const coursesWithCategoryNames = courses.map((course: any) => ({
-      ...course,
-      category: typeof course.category === 'object' ? course.category?.name : course.category,
-    }));
-
-    return NextResponse.json({ courses: coursesWithCategoryNames });
+    return NextResponse.json({ courses });
   } catch (err) {
     console.error(err);
     return NextResponse.json({ error: "เกิดข้อผิดพลาด" }, { status: 500 });
