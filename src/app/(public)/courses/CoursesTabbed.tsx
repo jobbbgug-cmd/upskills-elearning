@@ -30,23 +30,29 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
   const [categories, setCategories] = useState<Category[]>([]);
   const [learningPaths, setLearningPaths] = useState<LearningPath[]>([]);
   const [loadingCategories, setLoadingCategories] = useState(true);
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(
-    searchParams.get("category")
-  );
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
 
-  // Sync activeTab and selectedCategory with URL on mount and when URL changes
+  // Sync with URL params after hydration
   useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
+
     const tab = searchParams.get("tab");
+    const category = searchParams.get("category");
+
     if (tab === "online" || tab === "live-online" || tab === "paths" || tab === "onsite") {
       setActiveTab(tab as TabType);
     } else {
       setActiveTab("all");
     }
-    const category = searchParams.get("category");
     if (category) {
       setSelectedCategory(category);
     }
-  }, [searchParams]);
+  }, [searchParams, mounted]);
 
   useEffect(() => {
     const fetchData = async () => {
