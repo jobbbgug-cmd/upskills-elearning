@@ -172,7 +172,7 @@ export default function Navbar() {
                   {categories.map((cat) => (
                     <Link
                       key={`onsite-${cat.name}`}
-                      href={`/courses?type=onsite&category=${encodeURIComponent(cat.name)}`}
+                      href={`/courses?tab=onsite&category=${encodeURIComponent(cat.name)}`}
                       className="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
                     >
                       {cat.name} ({cat.count})
@@ -531,7 +531,7 @@ export default function Navbar() {
             {openNavDropdown === "onsite" && (
               <div className="pl-3 space-y-1">
                 {categories.map((cat) => (
-                  <Link key={`onsite-${cat.name}`} href={`/courses?type=onsite&category=${encodeURIComponent(cat.name)}`} onClick={() => setMenuOpen(false)} className="block px-3 py-2 text-sm text-gray-600 hover:bg-indigo-50 rounded-lg">
+                  <Link key={`onsite-${cat.name}`} href={`/courses?tab=onsite&category=${encodeURIComponent(cat.name)}`} onClick={() => setMenuOpen(false)} className="block px-3 py-2 text-sm text-gray-600 hover:bg-indigo-50 rounded-lg">
                     {cat.name}
                   </Link>
                 ))}

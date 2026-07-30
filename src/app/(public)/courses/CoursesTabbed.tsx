@@ -26,15 +26,7 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
   
-  const getInitialTab = (): TabType => {
-    const tab = searchParams.get("tab");
-    if (tab === "online" || tab === "live-online" || tab === "paths" || tab === "onsite") {
-      return tab as TabType;
-    }
-    return "all";
-  };
-
-  const [activeTab, setActiveTab] = useState<TabType>(getInitialTab());
+  const [activeTab, setActiveTab] = useState<TabType>("all");
   const [categories, setCategories] = useState<Category[]>([]);
   const [learningPaths, setLearningPaths] = useState<LearningPath[]>([]);
   const [loadingCategories, setLoadingCategories] = useState(true);
@@ -47,6 +39,8 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
     const tab = searchParams.get("tab");
     if (tab === "online" || tab === "live-online" || tab === "paths" || tab === "onsite") {
       setActiveTab(tab as TabType);
+    } else {
+      setActiveTab("all");
     }
     const category = searchParams.get("category");
     if (category) {
