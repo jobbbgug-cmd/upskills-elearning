@@ -22,7 +22,7 @@ interface LearningPath {
   title: string;
 }
 
-type MenuSection = "courses" | "courses live" | "new-courses" | "learning-paths";
+type MenuSection = "courses" | "courses live" | "new-courses" | "learning-paths" | "onsite";
 
 export default function CoursesDropdown() {
   const router = useRouter();
@@ -333,11 +333,10 @@ export default function CoursesDropdown() {
                     {onsiteCategories.map((cat) => (
                       <button
                         key={cat}
-                        <button
-                          key={cat}
-                          onClick={() => {
-                            router.push(`/courses?tab=onsite&category=${encodeURIComponent(cat)}}`);
-                          }}
+                        onClick={() => {
+                          router.push(`/courses?tab=onsite&category=${encodeURIComponent(cat)}`);
+                        }}
+                        className={`w-full text-left px-3 py-2 text-sm rounded-lg transition-colors ${
                           selectedCategory === cat
                             ? "bg-indigo-50 text-indigo-600 font-medium"
                             : "text-gray-700 hover:bg-gray-50"
