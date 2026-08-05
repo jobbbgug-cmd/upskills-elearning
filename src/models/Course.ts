@@ -34,6 +34,9 @@ export interface ICourseDocument extends Document {
   linkDownload?: string;
   ebookPdfUrl?: string;
   contentId?: mongoose.Types.ObjectId;
+  whatYouWillLearn?: string;
+  courseDetails?: string;
+  lessons?: { id: string; name: string; videoLink: string; duration: string }[];
   smartPpts?: { title: string; thumbnailUrl: string; pptUrl: string }[];
   teachingClips?: { title: string; youtubeUrl: string }[];
   summaryClips?: { title: string; youtubeUrl: string }[];
@@ -91,6 +94,9 @@ const CourseSchema = new Schema<ICourseDocument>(
     linkDownload: { type: String, default: "" },
     ebookPdfUrl: { type: String, default: "" },
     contentId: { type: Schema.Types.ObjectId, ref: "CourseContent", default: null },
+    whatYouWillLearn: { type: String, default: "" },
+    courseDetails: { type: String, default: "" },
+    lessons: [{ type: Object, default: {} }],
     smartPpts: [SmartPptSchema],
     teachingClips: [YoutubeClipSchema],
     summaryClips: [YoutubeClipSchema],

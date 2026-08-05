@@ -219,7 +219,7 @@ export default function CourseForm({ course, mode, courseType, teacherMode = fal
       <div className="flex items-start gap-4">
         <div className="flex-1">
           <label className="block text-sm font-semibold text-gray-700 mb-3">รูปปกคอร์ส</label>
-          <div className="relative w-full h-64 rounded-xl overflow-hidden bg-gradient-to-br from-indigo-100 to-purple-100 group">
+          <div className="relative w-full h-[28rem] rounded-xl overflow-hidden bg-gradient-to-br from-indigo-100 to-purple-100 group">
           {form.coverImage ? (
             <>
               <Image src={form.coverImage} alt="cover" fill className="object-cover" />
@@ -417,7 +417,8 @@ export default function CourseForm({ course, mode, courseType, teacherMode = fal
         </div>
       </div>
 
-      {/* Sessions */}
+      {/* Sessions - only for live online courses */}
+      {form.courseType === "live online" && (
       <div>
         <div className="flex items-center justify-between mb-3">
           <label className="text-sm font-semibold text-gray-700">รอบเรียน</label>
@@ -490,6 +491,7 @@ export default function CourseForm({ course, mode, courseType, teacherMode = fal
           ))}
         </div>
       </div>
+      )}
 
       {/* ── เนื้อหาการเรียน ── */}
       <div className="border border-green-200 bg-green-50 rounded-2xl p-5 space-y-4">

@@ -1,33 +1,53 @@
-import { redirect } from "next/navigation";
+"use client";
+
 import Link from "next/link";
-import { getAuthUser } from "@/lib/auth";
-import { connectDB } from "@/lib/mongodb";
-import CourseContent from "@/models/CourseContent";
-import Institution from "@/models/Institution";
-import { ICourseContent } from "@/types";
 import Image from "next/image";
 import { Plus, Pencil, BookOpen, Building2 } from "lucide-react";
 import DeleteContentButton from "./DeleteContentButton";
+import { useState, useEffect } from "react";
+import { ICourseContent } from "@/types";
 
-async function getContents(institutionId?: string): Promise<ICourseContent[]> {
-  await connectDB();
-  const filter = institutionId ? { institutionId } : {};
-  const contents = await CourseContent.find(filter).sort({ createdAt: -1 }).lean();
-  return JSON.parse(JSON.stringify(contents));
-}
+type ContentType = "all" | "online" | "live online" | "onsite";
 
-export default async function ContentListPage() {
-  const auth = await getAuthUser();
-  if (!auth || (auth.role !== "admin" && auth.role !== "teacher")) redirect("/login");
+export default function ContentListPage() {
+  const [contents, setContents] = useState<(ICourseContent & { type?: ContentType })[]>([]);
+  const [filteredContents, setFilteredContents] = useState<(ICourseContent & { type?: ContentType })[]>([]);
+  const [activeTab, setActiveTab] = useState<ContentType>("all");
+  const [institutionName, setInstitutionName] = useState("");
+  const [loading, setLoading] = useState(true);
 
-  const contents = await getContents(auth.institutionId);
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const res = await fetch("/api/admin/contents");
+        if (res.ok) {
+          const data = await res.json();
+          setContents(data.contents || []);
+          setInstitutionName(data.institutionName || "");
+        }
+      } catch (error) {
+        console.error("Failed to load contents:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, []);
 
-  let institutionName = "";
-  if (auth.institutionId) {
-    await connectDB();
-    const inst = await Institution.findById(auth.institutionId).select("name").lean() as { name: string } | null;
-    institutionName = inst?.name ?? "";
-  }
+  useEffect(() => {
+    if (activeTab === "all") {
+      setFilteredContents(contents);
+    } else {
+      setFilteredContents(contents.filter((c) => c.type === activeTab));
+    }
+  }, [contents, activeTab]);
+
+  const tabs: { id: ContentType; label: string }[] = [
+    { id: "all", label: "ทั้งหมด" },
+    { id: "online", label: "คอร์สออนไลน์" },
+    { id: "live online", label: "Live Online" },
+    { id: "onsite", label: "Onsite" },
+  ];
 
   return (
     <div>
@@ -45,7 +65,7 @@ export default async function ContentListPage() {
           </div>
         </div>
         <Link
-          href="/admin/content/new"
+          href={activeTab === "all" ? "/admin/content/create/online" : `/admin/content/create/${activeTab === "live online" ? "live-online" : activeTab}`}
           className="flex items-center gap-2 px-4 py-2.5 theme-button text-sm font-semibold rounded-xl transition-colors"
         >
           <Plus className="w-4 h-4" />
@@ -53,7 +73,28 @@ export default async function ContentListPage() {
         </Link>
       </div>
 
-      {contents.length === 0 ? (
+      {/* Tabs */}
+      <div className="mb-8 flex gap-4 border-b border-gray-200 pb-4 overflow-x-auto">
+        {tabs.map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            className={`font-medium text-sm pb-2 transition-colors whitespace-nowrap ${
+              activeTab === tab.id
+                ? "border-b-2 border-indigo-600 text-indigo-600"
+                : "text-gray-600 hover:text-gray-900"
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {loading ? (
+        <div className="text-center py-20">
+          <p className="text-gray-500">กำลังโหลด...</p>
+        </div>
+      ) : filteredContents.length === 0 ? (
         <div className="text-center py-20 bg-white rounded-2xl border border-gray-100">
           <BookOpen className="w-12 h-12 text-gray-300 mx-auto mb-3" />
           <p className="text-gray-500 font-medium">ยังไม่มีชุดเนื้อหา</p>
@@ -61,7 +102,7 @@ export default async function ContentListPage() {
         </div>
       ) : (
         <div className="grid gap-4">
-          {contents.map((c) => {
+          {filteredContents.map((c) => {
             const total =
               (c.smartPpts?.length ?? 0) +
               (c.teachingClips?.length ?? 0) +
@@ -120,9 +161,7 @@ export default async function ContentListPage() {
                     <Pencil className="w-3.5 h-3.5" />
                     แก้ไข
                   </Link>
-                  {auth.role === "admin" && (
-                    <DeleteContentButton id={c._id} name={c.name} />
-                  )}
+                  <DeleteContentButton id={c._id} name={c.name} />
                 </div>
               </div>
             );

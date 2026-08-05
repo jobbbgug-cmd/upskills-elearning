@@ -8,12 +8,15 @@ import Toast from "@/components/ui/Toast";
 interface ContentFormProps {
   content?: ICourseContent;
   mode: "create" | "edit";
+  defaultType?: "online" | "live online" | "onsite";
+  lockType?: boolean;
 }
 
-export default function ContentForm({ content, mode }: ContentFormProps) {
+export default function ContentForm({ content, mode, defaultType, lockType }: ContentFormProps) {
   const router = useRouter();
   const [name, setName] = useState(content?.name ?? "");
   const [description, setDescription] = useState(content?.description ?? "");
+  const [type, setType] = useState<"online" | "live online" | "onsite">((content as any)?.type ?? defaultType ?? "online");
   const [ebookCoverUrl, setEbookCoverUrl] = useState(content?.ebookCoverUrl ?? "");
   const [ebookPdfUrl, setEbookPdfUrl] = useState(content?.ebookPdfUrl ?? "");
   const [uploadingEbook, setUploadingEbook] = useState<"cover" | "pdf" | null>(null);
@@ -44,7 +47,7 @@ export default function ContentForm({ content, mode }: ContentFormProps) {
     setLoading(true);
     setError("");
     try {
-      const payload = { name, description, ebookCoverUrl, ebookPdfUrl, smartPpts, teachingClips, summaryClips, downloadFree, downloadTeacherCard, downloadAksorn };
+      const payload = { name, description, type, ebookCoverUrl, ebookPdfUrl, smartPpts, teachingClips, summaryClips, downloadFree, downloadTeacherCard, downloadAksorn };
       const url = mode === "create" ? "/api/admin/content" : `/api/admin/content/${content?._id}`;
       const method = mode === "create" ? "POST" : "PUT";
       const res = await fetch(url, { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
@@ -113,6 +116,20 @@ export default function ContentForm({ content, mode }: ContentFormProps) {
             placeholder="รายละเอียดเพิ่มเติม..."
           />
         </div>
+        {!lockType && (
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-1.5">ประเภทเนื้อหา</label>
+            <select
+              value={type}
+              onChange={(e) => setType(e.target.value as "online" | "live online" | "onsite")}
+              className={inputClass}
+            >
+              <option value="online">คอร์สออนไลน์</option>
+              <option value="live online">Live Online</option>
+              <option value="onsite">Onsite</option>
+            </select>
+          </div>
+        )}
       </div>
 
       {/* e-Book */}

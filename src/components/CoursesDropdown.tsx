@@ -297,10 +297,10 @@ export default function CoursesDropdown() {
                             <p className="text-xs text-gray-700 mb-3"><strong>สอน:</strong> {selectedCourse.instructor}</p>
                           )}
                           <Link
-                            href={`/courses/${selectedCourse.slug}?tab=live-online`}
+                            href={`/courses/${selectedCourse._id}?tab=live-online`}
                             className="block w-full text-center bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-lg text-xs font-medium transition-colors"
                           >
-                            เรียนเลย
+                            ดูรายละเอียด
                           </Link>
                         </div>
                       </div>
