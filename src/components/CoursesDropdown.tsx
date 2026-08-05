@@ -330,11 +330,12 @@ export default function CoursesDropdown() {
                 <div className="flex gap-4 h-full">
                   {/* Left: Categories List */}
                   <div className="w-56 border-r border-gray-200 pr-4 space-y-2 overflow-y-auto">
-                    {onsiteCategories.map((cat) => (
+                    {categories.map((cat) => (
                       <button
                         key={cat}
                         onClick={() => {
-                          router.push(`/courses?tab=onsite&category=${encodeURIComponent(cat)}`);
+                          setSelectedCategory(cat);
+                          setSelectedCourse(null);
                         }}
                         className={`w-full text-left px-3 py-2 text-sm rounded-lg transition-colors ${
                           selectedCategory === cat
@@ -349,8 +350,8 @@ export default function CoursesDropdown() {
 
                   {/* Middle: Course List */}
                   <div className="w-48 border-r border-gray-200 pr-4 space-y-2 overflow-y-auto">
-                    {selectedCategory && (onsiteCourseMap[selectedCategory] || []).length > 0 ? (
-                      (onsiteCourseMap[selectedCategory] || []).map((course) => (
+                    {selectedCategory && (categoryCoursesMap[selectedCategory] || []).length > 0 ? (
+                      (categoryCoursesMap[selectedCategory] || []).map((course) => (
                         <button
                           key={course._id}
                           onClick={() => setSelectedCourse(course)}
@@ -399,10 +400,10 @@ export default function CoursesDropdown() {
                             <p className="text-xs text-gray-700 mb-3"><strong>สอน:</strong> {selectedCourse.instructor}</p>
                           )}
                           <Link
-                            href={`/courses/${selectedCourse.slug}?tab=online`}
+                            href={`/courses/${selectedCourse._id}?tab=online`}
                             className="block w-full text-center bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-lg text-xs font-medium transition-colors"
                           >
-                            เรียนเลย
+                            ดูรายละเอียด
                           </Link>
                         </div>
                       </div>
@@ -435,7 +436,7 @@ export default function CoursesDropdown() {
                   latestCourses.map((course) => (
                     <Link
                       key={course._id}
-                      href={`/courses/${course.slug}`}
+                      href={`/courses/${course._id}`}
                       className="group bg-gray-50 rounded-xl border border-gray-100 overflow-hidden hover:shadow-md transition-all"
                     >
                       {/* Cover Image */}
