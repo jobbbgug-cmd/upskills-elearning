@@ -14,7 +14,7 @@ export async function GET(req: NextRequest) {
     const institutionId = await resolveInstitutionId(req, auth.institutionId);
     const contents = await CourseContent.find(tenantFilter(institutionId))
       .sort({ createdAt: -1 })
-      .select("_id name description institutionId createdAt");
+      .select("_id name description type institutionId createdAt");
     return NextResponse.json({ contents });
   } catch (err) {
     console.error(err);
