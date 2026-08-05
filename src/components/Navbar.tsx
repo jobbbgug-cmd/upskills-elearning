@@ -3,7 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { Menu, X, User, LogOut, LayoutDashboard, CalendarDays, ShieldCheck, BookOpen, ClipboardCheck, PenLine, Award, Radio, Receipt, MessageSquare, Star, ChevronDown, Building2 } from "lucide-react";
+import { Menu, X, User, LogOut, LayoutDashboard, CalendarDays, ShieldCheck, BookOpen, ClipboardCheck, PenLine, Award, Radio, Receipt, MessageSquare, Star, ChevronDown, Building2, ShoppingCart } from "lucide-react";
 import NotificationBell from "@/components/NotificationBell";
 import CoursesDropdown from "@/components/CoursesDropdown";
 import ShoppingCartModal from "@/components/ShoppingCart";
