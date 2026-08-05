@@ -40,7 +40,6 @@ export async function POST(req: NextRequest) {
       name: user.name,
       role: user.role as import("@/lib/auth").JwtPayload["role"],
       institutionId,
-      isOwner: user.role === "owner",
     });
 
     const res = NextResponse.json({
