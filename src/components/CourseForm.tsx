@@ -8,7 +8,7 @@ import { Plus, Trash2, Upload, BookOpen, RefreshCw, ExternalLink, Pencil, X } fr
 import Toast from "@/components/ui/Toast";
 import RichTextEditor from "@/components/RichTextEditor";
 
-interface ContentOption { _id: string; name: string; description: string; }
+interface ContentOption { _id: string; name: string; description: string; type?: "online" | "live online" | "onsite"; }
 
 interface Teacher { _id: string; name: string; email: string; }
 
@@ -498,7 +498,7 @@ export default function CourseForm({ course, mode, courseType, teacherMode = fal
         <div className="flex items-center justify-between">
           <div>
             <h3 className="text-sm font-semibold text-green-800">เนื้อหาการเรียน</h3>
-            <p className="text-xs text-green-600 mt-0.5">เลือกชุดเนื้อหาที่จะใช้กับคอร์สนี้</p>
+            <p className="text-xs text-green-600 mt-0.5">เลือกชุดเนื้อหาที่จะใช้กับคอร์สนี้ (แสดงเฉพาะประเภท {form.courseType === "live online" ? "Live Online" : form.courseType === "online" ? "คอร์สออนไลน์" : "Onsite"})</p>
           </div>
           <Link
             href="/admin/content/new"
@@ -511,27 +511,34 @@ export default function CourseForm({ course, mode, courseType, teacherMode = fal
         </div>
 
         <div>
-          <select
-            value={contentId}
-            onChange={(e) => setContentId(e.target.value)}
-            className={`${inputClass} bg-white`}
-          >
-            <option value="">— ไม่ใช้ชุดเนื้อหา —</option>
-            {contentOptions.map((c) => (
-              <option key={c._id} value={c._id}>
-                {c.name}
-                {c.description ? ` — ${c.description}` : ""}
-              </option>
-            ))}
-          </select>
-          {contentOptions.length === 0 && (
-            <p className="text-xs text-gray-400 mt-1.5">
-              ยังไม่มีชุดเนื้อหา{" "}
-              <Link href="/admin/content/new" target="_blank" className="text-green-600 underline">
-                สร้างชุดเนื้อหาใหม่
-              </Link>
-            </p>
-          )}
+          {(() => {
+            const filteredContents = contentOptions.filter((c) => !c.type || c.type === form.courseType);
+            return (
+              <>
+                <select
+                  value={contentId}
+                  onChange={(e) => setContentId(e.target.value)}
+                  className={`${inputClass} bg-white`}
+                >
+                  <option value="">— ไม่ใช้ชุดเนื้อหา —</option>
+                  {filteredContents.map((c) => (
+                    <option key={c._id} value={c._id}>
+                      {c.name}
+                      {c.description ? ` — ${c.description}` : ""}
+                    </option>
+                  ))}
+                </select>
+                {filteredContents.length === 0 && (
+                  <p className="text-xs text-gray-400 mt-1.5">
+                    ยังไม่มีชุดเนื้อหา{" "}
+                    <Link href="/admin/content/new" target="_blank" className="text-green-600 underline">
+                      สร้างชุดเนื้อหาใหม่
+                    </Link>
+                  </p>
+                )}
+              </>
+            );
+          })()}
         </div>
 
         {contentId && (
