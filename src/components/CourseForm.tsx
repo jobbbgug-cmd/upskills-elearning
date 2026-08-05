@@ -168,7 +168,7 @@ export default function CourseForm({ course, mode, courseType, teacherMode = fal
       setToast({ message: msg, type: "error" });
       return;
     }
-    if (sessions.some((s) => !s.date)) {
+    if (form.courseType === "live online" && sessions.some((s) => !s.date)) {
       const msg = "กรุณากรอกวันที่ทุกรอบ";
       setError(msg);
       setToast({ message: msg, type: "error" });
