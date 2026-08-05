@@ -4,7 +4,6 @@ import Link from "next/link";
 import Image from "next/image";
 import { ChevronDown, ChevronRight, Clock, User } from "lucide-react";
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 
 interface Course {
   _id: string;
@@ -25,7 +24,6 @@ interface LearningPath {
 type MenuSection = "courses" | "courses live" | "new-courses" | "learning-paths" | "onsite";
 
 export default function CoursesDropdown() {
-  const router = useRouter();
   const [activeSection, setActiveSection] = useState<MenuSection>("courses");
   const [categories, setCategories] = useState<string[]>([]);
   const [liveOnlineCategories, setLiveOnlineCategories] = useState<string[]>([]);
@@ -504,7 +502,8 @@ export default function CoursesDropdown() {
                       <button
                         key={cat}
                         onClick={() => {
-                          router.push(`/courses?tab=onsite&category=${encodeURIComponent(cat)}`);
+                          setSelectedCategory(cat);
+                          setSelectedCourse(null);
                         }}
                         className={`w-full text-left px-3 py-2 text-sm rounded-lg transition-colors ${
                           selectedCategory === cat
