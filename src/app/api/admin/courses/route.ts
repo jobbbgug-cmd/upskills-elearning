@@ -58,8 +58,12 @@ export async function POST(req: NextRequest) {
       contentId,
     } = body;
 
-    if (!title || !description || !gradeLevels || !sessions) {
+    if (!title || !description || !gradeLevels) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    }
+
+    if (type === "live online" && !sessions) {
+      return NextResponse.json({ error: "Sessions are required for live online courses" }, { status: 400 });
     }
 
     const course = new Course({
