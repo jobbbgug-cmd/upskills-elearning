@@ -2,22 +2,19 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { Plus, Pencil, BookOpen, Building2, X } from "lucide-react";
+import { Plus, Pencil, BookOpen, Building2 } from "lucide-react";
 import DeleteContentButton from "./DeleteContentButton";
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { ICourseContent } from "@/types";
 
 type ContentType = "all" | "online" | "live online" | "onsite";
 
 export default function ContentListPage() {
-  const router = useRouter();
   const [contents, setContents] = useState<(ICourseContent & { type?: ContentType })[]>([]);
   const [filteredContents, setFilteredContents] = useState<(ICourseContent & { type?: ContentType })[]>([]);
   const [activeTab, setActiveTab] = useState<ContentType>("all");
   const [institutionName, setInstitutionName] = useState("");
   const [loading, setLoading] = useState(true);
-  const [showTypeModal, setShowTypeModal] = useState(false);
 
   useEffect(() => {
     const load = async () => {
@@ -67,23 +64,13 @@ export default function ContentListPage() {
             )}
           </div>
         </div>
-        {activeTab === "all" ? (
-          <button
-            onClick={() => setShowTypeModal(true)}
-            className="flex items-center gap-2 px-4 py-2.5 theme-button text-sm font-semibold rounded-xl transition-colors"
-          >
-            <Plus className="w-4 h-4" />
-            สร้างชุดเนื้อหาใหม่
-          </button>
-        ) : (
-          <Link
-            href={`/admin/content/create/${activeTab === "live online" ? "live-online" : activeTab}`}
-            className="flex items-center gap-2 px-4 py-2.5 theme-button text-sm font-semibold rounded-xl transition-colors"
-          >
-            <Plus className="w-4 h-4" />
-            สร้างชุดเนื้อหาใหม่
-          </Link>
-        )}
+        <Link
+          href={activeTab === "all" ? "/admin/content/new" : `/admin/content/create/${activeTab === "live online" ? "live-online" : activeTab}`}
+          className="flex items-center gap-2 px-4 py-2.5 theme-button text-sm font-semibold rounded-xl transition-colors"
+        >
+          <Plus className="w-4 h-4" />
+          สร้างชุดเนื้อหาใหม่
+        </Link>
       </div>
 
       {/* Tabs */}
@@ -179,52 +166,6 @@ export default function ContentListPage() {
               </div>
             );
           })}
-        </div>
-      )}
-
-      {/* Type Selection Modal */}
-      {showTypeModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-2xl p-8 max-w-md w-full mx-4">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold text-gray-900">เลือกประเภทเนื้อหา</h2>
-              <button
-                onClick={() => setShowTypeModal(false)}
-                className="text-gray-400 hover:text-gray-600 transition-colors"
-              >
-                <X className="w-6 h-6" />
-              </button>
-            </div>
-            <div className="space-y-3">
-              <button
-                onClick={() => {
-                  setShowTypeModal(false);
-                  router.push("/admin/content/create/online");
-                }}
-                className="w-full px-4 py-3 text-left font-medium text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors border border-indigo-200"
-              >
-                คอร์สออนไลน์
-              </button>
-              <button
-                onClick={() => {
-                  setShowTypeModal(false);
-                  router.push("/admin/content/create/live-online");
-                }}
-                className="w-full px-4 py-3 text-left font-medium text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors border border-indigo-200"
-              >
-                Live Online
-              </button>
-              <button
-                onClick={() => {
-                  setShowTypeModal(false);
-                  router.push("/admin/content/create/onsite");
-                }}
-                className="w-full px-4 py-3 text-left font-medium text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors border border-indigo-200"
-              >
-                Onsite
-              </button>
-            </div>
-          </div>
         </div>
       )}
     </div>
