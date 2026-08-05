@@ -246,7 +246,7 @@ export default function CoursesDropdown() {
                   </div>
 
                   {/* Middle: Course List */}
-                  <div className="w-64 border-r border-gray-200 pr-4 space-y-2 overflow-y-auto">
+                  <div className="w-72 border-r border-gray-200 pr-4 space-y-2 overflow-y-auto">
                     {selectedCategory && (liveOnlineCourseMap[selectedCategory] || []).length > 0 ? (
                       (liveOnlineCourseMap[selectedCategory] || []).map((course) => (
                         <button
@@ -349,7 +349,7 @@ export default function CoursesDropdown() {
                   </div>
 
                   {/* Middle: Course List */}
-                  <div className="w-56 border-r border-gray-200 pr-4 space-y-2 overflow-y-auto">
+                  <div className="w-64 border-r border-gray-200 pr-4 space-y-2 overflow-y-auto">
                     {selectedCategory && (categoryCoursesMap[selectedCategory] || []).length > 0 ? (
                       (categoryCoursesMap[selectedCategory] || []).map((course) => (
                         <button
@@ -518,7 +518,7 @@ export default function CoursesDropdown() {
                   </div>
 
                   {/* Middle: Course List */}
-                  <div className="w-64 border-r border-gray-200 pr-4 space-y-2 overflow-y-auto">
+                  <div className="w-72 border-r border-gray-200 pr-4 space-y-2 overflow-y-auto">
                     {selectedCategory && (onsiteCourseMap[selectedCategory] || []).length > 0 ? (
                       (onsiteCourseMap[selectedCategory] || []).map((course) => (
                         <button
