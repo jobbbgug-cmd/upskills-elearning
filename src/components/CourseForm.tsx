@@ -178,15 +178,17 @@ export default function CourseForm({ course, mode, courseType, teacherMode = fal
     setError("");
     try {
       const { courseType, ...formData } = form;
-      const payload = {
+      const payload: any = {
         ...formData,
         type: courseType,
-        sessions,
         contentId: contentId || null,
         whatYouWillLearn,
         courseDetails,
         lessons,
       };
+      if (courseType === "live online") {
+        payload.sessions = sessions;
+      }
       const url = mode === "create" ? "/api/admin/courses" : `/api/admin/courses/${course?._id}`;
       const method = mode === "create" ? "POST" : "PUT";
       const res = await fetch(url, {
