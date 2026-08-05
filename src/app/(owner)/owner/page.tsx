@@ -82,7 +82,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
   let selectedBranchId = branchId ?? auth.institutionId ?? "";
   let displayName = "";
 
-  if (auth.isOwner && auth.institutionId) {
+  if (auth.role === "owner" && auth.institutionId) {
     await connectDB();
     const [parent, children] = await Promise.all([
       Institution.findById(auth.institutionId).select("_id name").lean() as unknown as Promise<{ _id: mongoose.Types.ObjectId; name: string } | null>,
