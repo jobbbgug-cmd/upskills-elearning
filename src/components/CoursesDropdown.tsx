@@ -132,7 +132,7 @@ export default function CoursesDropdown() {
               }`}
             >
               <span className="flex items-center justify-between">
-                คอร์สเรียน
+                คอร์สเรียนออนไลน์
                 {activeSection === "courses" && <ChevronRight className="w-4 h-4" />}
               </span>
             </button>
@@ -313,8 +313,8 @@ export default function CoursesDropdown() {
                 {/* Header */}
                 <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-200">
                   <div>
-                    <h3 className="text-lg font-bold text-gray-900">คอร์สเรียน</h3>
-                    <p className="text-sm text-gray-600 mt-0.5">คอร์สเรียนออนไลน์</p>
+                    <h3 className="text-lg font-bold text-gray-900">คอร์สเรียนออนไลน์</h3>
+                    <p className="text-sm text-gray-600 mt-0.5">คอร์สเรียนออนไลน์สอนผ่านVDO</p>
                   </div>
                   <Link
                     href="/courses?tab=online"
