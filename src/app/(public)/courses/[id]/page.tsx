@@ -255,9 +255,9 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
       {(course as any)?.courseDetails && (
         <div className="max-w-[1200px] mx-auto px-4 mb-4">
           <ContentSection
-            icon={<FileText className="w-5 h-5 text-green-500" />}
+            icon={<FileText className="w-5 h-5 text-blue-500" />}
             title="รายละเอียดคอร์สเรียน"
-            accentColor="green"
+            accentColor="blue"
             locked={!hasPaidAccess}
           >
             <div className="prose prose-sm max-w-none text-gray-700" dangerouslySetInnerHTML={{ __html: (course as any).courseDetails }} />

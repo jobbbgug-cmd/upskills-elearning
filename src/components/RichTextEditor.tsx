@@ -33,7 +33,7 @@ export default function RichTextEditor({ value, onChange, placeholder = "เข�
     if (!editor) return;
 
     if (!editor.isFocused && editor.getHTML() !== value) {
-      editor.commands.setContent(value, false);
+      editor.commands.setContent(value);
     }
   }, [value, editor]);
 
