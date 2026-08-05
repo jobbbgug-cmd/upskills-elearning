@@ -77,23 +77,7 @@ export default async function HomePage() {
                   className="bg-indigo-500 text-white font-semibold px-8 py-3.5 rounded-xl hover:bg-indigo-400 transition-colors border border-indigo-400">
                   ไปที่ Dashboard
                 </Link>
-              )}
-              {user && user.role === "admin" && (
-                <Link href="/admin" className="bg-indigo-500 text-white font-semibold px-8 py-3.5 rounded-xl hover:bg-indigo-400 transition-colors border border-indigo-400">
-                  จัดการหลังบ้าน
-                </Link>
-              )}
-              {user && user.role === "super_admin" && (
-                <Link href="/super-admin" className="bg-indigo-500 text-white font-semibold px-8 py-3.5 rounded-xl hover:bg-indigo-400 transition-colors border border-indigo-400">
-                  จัดการหลังบ้าน
-                </Link>
-              )}
-              {user && (user.role === "teacher" || user.role === "parent" || user.role === "student") && (
-                <Link href={user.role === "teacher" ? "/teacher" : user.role === "parent" ? "/parent" : "/student"} className="bg-indigo-500 text-white font-semibold px-8 py-3.5 rounded-xl hover:bg-indigo-400 transition-colors border border-indigo-400">
-                  จัดการหลังบ้าน
-                </Link>
-              )}
-              {!user && (
+              ) : (
                 <Link href="/register" className="bg-indigo-500 text-white font-semibold px-8 py-3.5 rounded-xl hover:bg-indigo-400 transition-colors border border-indigo-400">
                   สมัครสมาชิกฟรี
                 </Link>
