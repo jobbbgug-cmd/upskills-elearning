@@ -289,7 +289,7 @@ export default function CoursesDropdown() {
                         </div>
                         {/* Content */}
                         <div className="p-4">
-                          <h3 className="text-sm font-bold text-gray-900 mb-2">{selectedCourse.title}</h3>
+                          <h3 className="text-xs font-bold text-gray-900 mb-2 line-clamp-2">{selectedCourse.title}</h3>
                           {selectedCourse.description && (
                             <p className="text-xs text-gray-600 mb-3 line-clamp-2">{selectedCourse.description}</p>
                           )}
@@ -349,7 +349,7 @@ export default function CoursesDropdown() {
                   </div>
 
                   {/* Middle: Course List */}
-                  <div className="w-48 border-r border-gray-200 pr-4 space-y-2 overflow-y-auto">
+                  <div className="w-56 border-r border-gray-200 pr-4 space-y-2 overflow-y-auto">
                     {selectedCategory && (categoryCoursesMap[selectedCategory] || []).length > 0 ? (
                       (categoryCoursesMap[selectedCategory] || []).map((course) => (
                         <button
@@ -392,7 +392,7 @@ export default function CoursesDropdown() {
                         </div>
                         {/* Content */}
                         <div className="p-4">
-                          <h3 className="text-sm font-bold text-gray-900 mb-2">{selectedCourse.title}</h3>
+                          <h3 className="text-xs font-bold text-gray-900 mb-2 line-clamp-2">{selectedCourse.title}</h3>
                           {selectedCourse.description && (
                             <p className="text-xs text-gray-600 mb-3 line-clamp-2">{selectedCourse.description}</p>
                           )}
@@ -561,7 +561,7 @@ export default function CoursesDropdown() {
                         </div>
                         {/* Content */}
                         <div className="p-4">
-                          <h3 className="text-sm font-bold text-gray-900 mb-2">{selectedCourse.title}</h3>
+                          <h3 className="text-xs font-bold text-gray-900 mb-2 line-clamp-2">{selectedCourse.title}</h3>
                           {selectedCourse.description && (
                             <p className="text-xs text-gray-600 mb-3 line-clamp-2">{selectedCourse.description}</p>
                           )}
