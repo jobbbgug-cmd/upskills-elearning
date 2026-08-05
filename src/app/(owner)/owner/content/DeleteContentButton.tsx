@@ -12,7 +12,7 @@ export default function DeleteContentButton({ id, name }: { id: string; name: st
   const handleDelete = async () => {
     setLoading(true);
     try {
-      await fetch(`/api/admin/content/${id}`, { method: "DELETE" });
+      await fetch(`/api/owner/content/${id}`, { method: "DELETE" });
       router.refresh();
     } finally {
       setLoading(false);

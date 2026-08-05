@@ -8,7 +8,7 @@ interface PendingUser {
   _id: string;
   name: string;
   email: string;
-  role: "student" | "teacher" | "admin" | "super_admin";
+  role: "student" | "teacher" | "admin" | "super_admin" | "owner";
   gradeLevel?: string;
   status: "pending" | "approved" | "rejected";
   contactChannel?: string;
@@ -37,8 +37,8 @@ export default function AdminMembersPage() {
   const loadPending = useCallback(async () => {
     setLoading(true);
     const [rPending, rAll] = await Promise.all([
-      fetch("/api/admin/users/pending"),
-      fetch("/api/admin/users"),
+      fetch("/api/owner/users/pending"),
+      fetch("/api/owner/users"),
     ]);
     if (rPending.ok) setUsers(await rPending.json());
     if (rAll.ok) setAllUsers(await rAll.json());
@@ -49,7 +49,7 @@ export default function AdminMembersPage() {
 
   const doApprove = async (user: PendingUser) => {
     setProcessing(user._id);
-    const res = await fetch(`/api/admin/users/${user._id}/approve`, { method: "POST" });
+    const res = await fetch(`/api/owner/users/${user._id}/approve`, { method: "POST" });
     const data = await res.json();
     if (res.ok) {
       setApproved((prev) => [...prev, { userId: user._id, password: data.password, name: user.name, email: user.email, role: user.role }]);
@@ -61,7 +61,7 @@ export default function AdminMembersPage() {
 
   const doReject = async (id: string) => {
     setProcessing(id);
-    await fetch(`/api/admin/users/${id}/reject`, { method: "POST" });
+    await fetch(`/api/owner/users/${id}/reject`, { method: "POST" });
     setUsers((prev) => prev.filter((u) => u._id !== id));
     setAllUsers((prev) => prev.map((u) => u._id === id ? { ...u, status: "rejected" } : u));
     setProcessing(null);

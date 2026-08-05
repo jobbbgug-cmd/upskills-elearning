@@ -120,7 +120,7 @@ export default function StudentDetailPage({ params }: { params: Promise<{ id: st
   useEffect(() => {
     const loadData = async () => {
       const [studentRes, meRes] = await Promise.all([
-        fetch(`/api/admin/students/${id}`),
+        fetch(`/api/owner/students/${id}`),
         fetch("/api/auth/me"),
       ]);
 
@@ -164,7 +164,7 @@ export default function StudentDetailPage({ params }: { params: Promise<{ id: st
     const loadParents = async () => {
       setLoadingParents(true);
       try {
-        const res = await fetch("/api/admin/users?role=parent", { credentials: "include" });
+        const res = await fetch("/api/owner/users?role=parent", { credentials: "include" });
         if (res.ok) {
           const data = await res.json();
           const parentList = Array.isArray(data) ? data : (data.users || []);
@@ -198,7 +198,7 @@ export default function StudentDetailPage({ params }: { params: Promise<{ id: st
 
   const handleSave = async () => {
     setSaving(true);
-    const res = await fetch(`/api/admin/students/${id}`, {
+    const res = await fetch(`/api/owner/students/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ ...form, groups }),
@@ -238,7 +238,7 @@ export default function StudentDetailPage({ params }: { params: Promise<{ id: st
 
   const handleAddDoc = async () => {
     if (!docName || !docUrl) return;
-    const res = await fetch(`/api/admin/students/${id}/documents`, {
+    const res = await fetch(`/api/owner/students/${id}/documents`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name: docName, url: docUrl, type: docType }),
@@ -251,7 +251,7 @@ export default function StudentDetailPage({ params }: { params: Promise<{ id: st
   };
 
   const handleDeleteDoc = async (docId: string) => {
-    const res = await fetch(`/api/admin/students/${id}/documents/${docId}`, { method: "DELETE" });
+    const res = await fetch(`/api/owner/students/${id}/documents/${docId}`, { method: "DELETE" });
     if (res.ok) {
       const docs: StudentDoc[] = await res.json();
       setStudent((s) => s ? { ...s, documents: docs } : s);
@@ -287,7 +287,7 @@ export default function StudentDetailPage({ params }: { params: Promise<{ id: st
     setTab(t);
     if (t === "progress" && !progress && !loadingProg) {
       setLoadingProg(true);
-      fetch(`/api/admin/students/${id}/progress`)
+      fetch(`/api/owner/students/${id}/progress`)
         .then((r) => r.json())
         .then((d) => setProgress(Array.isArray(d) ? d : []))
         .finally(() => setLoadingProg(false));
@@ -297,7 +297,7 @@ export default function StudentDetailPage({ params }: { params: Promise<{ id: st
   return (
     <div className="max-w-3xl mx-auto space-y-6">
       {/* Back */}
-      <Link href="/admin/users" className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-indigo-600 transition-colors">
+      <Link href="/owner/users" className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-indigo-600 transition-colors">
         <ArrowLeft className="w-4 h-4" /> กลับรายชื่อผู้ใช้
       </Link>
 

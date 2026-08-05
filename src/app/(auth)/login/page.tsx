@@ -150,15 +150,7 @@ export default function LoginPage() {
       if (!res.ok) {
         setError(data.error ?? "เกิดข้อผิดพลาด");
       } else {
-        const role = data.user.role;
-        let redirectPath = "/dashboard";
-        if (role === "owner") redirectPath = "/owner";
-        if (role === "admin") redirectPath = "/admin";
-        if (role === "super_admin") redirectPath = "/super-admin";
-        if (role === "teacher") redirectPath = "/teacher";
-        if (role === "parent") redirectPath = "/parent";
-        if (role === "student") redirectPath = "/student";
-        router.push(redirectPath);
+        router.push("/");
         router.refresh();
       }
     } catch {

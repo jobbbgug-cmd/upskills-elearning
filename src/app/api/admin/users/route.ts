@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
+import { ObjectId } from "mongodb";
 import { connectDB } from "@/lib/mongodb";
 import { getAuthUser } from "@/lib/auth";
 import { resolveInstitutionId, tenantFilter } from "@/lib/tenant";
 import User from "@/models/User";
+import Institution from "@/models/Institution";
 
 export async function GET(req: NextRequest) {
   try {
@@ -36,8 +38,10 @@ export async function GET(req: NextRequest) {
       filter._id = { $nin: assignedStudentIds };
     }
 
-    const users = await User.find(filter).select("-password").sort({ createdAt: -1 }).lean();
-    return NextResponse.json(JSON.parse(JSON.stringify(users)));
+    // Get users from admin's institution only
+    const institutionUsers = await User.find(filter).select("-password").sort({ createdAt: -1 }).lean();
+
+    return NextResponse.json(JSON.parse(JSON.stringify(institutionUsers)));
   } catch {
     return NextResponse.json({ error: "เกิดข้อผิดพลาด" }, { status: 500 });
   }

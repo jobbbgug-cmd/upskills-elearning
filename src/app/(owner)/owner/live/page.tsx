@@ -33,7 +33,7 @@ export default function AdminLivePage() {
   useEffect(() => {
     Promise.all([
       fetch("/api/live").then((r) => r.json()),
-      fetch("/api/admin/courses").then((r) => r.json()),
+      fetch("/api/owner/courses").then((r) => r.json()),
     ]).then(([s, c]) => {
       setSessions(Array.isArray(s) ? s : []);
       const cs = Array.isArray(c) ? c : c.courses ?? [];

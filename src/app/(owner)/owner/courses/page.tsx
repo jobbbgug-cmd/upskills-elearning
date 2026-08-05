@@ -47,7 +47,7 @@ export default async function AdminCoursesPage() {
           </div>
         </div>
         <Link
-          href="/admin/courses/new"
+          href="/owner/courses/new"
           className="flex items-center gap-2 px-4 py-2.5 theme-button text-sm font-medium rounded-xl transition-colors"
         >
           <Plus className="w-4 h-4" />
@@ -59,7 +59,7 @@ export default async function AdminCoursesPage() {
         <div className="bg-white rounded-2xl border border-gray-100 p-16 text-center text-gray-400">
           <BookOpen className="w-12 h-12 mx-auto mb-3 opacity-40" />
           <p>ยังไม่มีคอร์ส</p>
-          <Link href="/admin/courses/new" className="px-4 py-2.5 theme-button text-sm font-medium rounded-xl mt-2 inline-flex items-center gap-2">
+          <Link href="/owner/courses/new" className="px-4 py-2.5 theme-button text-sm font-medium rounded-xl mt-2 inline-flex items-center gap-2">
             + สร้างคอร์สแรก
           </Link>
         </div>
@@ -116,7 +116,7 @@ export default async function AdminCoursesPage() {
                   <td className="px-5 py-4">
                     <div className="flex items-center justify-end gap-2">
                       <Link
-                        href={`/admin/courses/${course._id}`}
+                        href={`/owner/courses/${course._id}`}
                         className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
                       >
                         <Pencil className="w-3.5 h-3.5" />

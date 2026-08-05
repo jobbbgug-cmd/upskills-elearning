@@ -3,7 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { Menu, X, User, LogOut, LayoutDashboard, CalendarDays, ShieldCheck, BookOpen, ClipboardCheck, PenLine, Award, Radio, Receipt, MessageSquare, Star, ChevronDown, ShoppingCart } from "lucide-react";
+import { Menu, X, User, LogOut, LayoutDashboard, CalendarDays, ShieldCheck, BookOpen, ClipboardCheck, PenLine, Award, Radio, Receipt, MessageSquare, Star, ChevronDown, Building2 } from "lucide-react";
 import NotificationBell from "@/components/NotificationBell";
 import CoursesDropdown from "@/components/CoursesDropdown";
 import ShoppingCartModal from "@/components/ShoppingCart";
@@ -16,15 +16,23 @@ interface Category {
   count: number;
 }
 
+interface Branch {
+  _id: string;
+  name: string;
+}
+
 export default function Navbar() {
   const [user, setUser]               = useState<IUser | null>(null);
   const [branding, setBranding]       = useState<IBranding | null>(null);
+  const [branches, setBranches]       = useState<Branch[]>([]);
+  const [activeBranchId, setActiveBranchId] = useState<string>("");
   const [menuOpen, setMenuOpen]       = useState(false);
   const [isNavigating, setIsNavigating] = useState(false);
   const [superAdminMenu, setSuperAdminMenu] = useState(false);
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
   const [pendingMembers, setPendingMembers] = useState(0);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [liveOnlineCategories, setLiveOnlineCategories] = useState<Category[]>([]);
   const [openNavDropdown, setOpenNavDropdown] = useState<string | null>(null);
   const [cartOpen, setCartOpen] = useState(false);
   const { items } = useCart();
@@ -39,10 +47,16 @@ export default function Navbar() {
   }, [pathname]);
 
   useEffect(() => {
-    fetch("/api/courses/categories")
-      .then((r) => r.json())
-      .then((data) => setCategories(Array.isArray(data) ? data : []))
-      .catch(() => {});
+    Promise.all([
+      fetch("/api/categories?type=live online")
+        .then((r) => r.json())
+        .then((data) => setLiveOnlineCategories((data.categories || []).map((cat: any) => ({ name: cat.name, count: cat.count || 0 }))))
+        .catch(() => setLiveOnlineCategories([])),
+      fetch("/api/categories?type=onsite")
+        .then((r) => r.json())
+        .then((data) => setCategories((data.categories || []).map((cat: any) => ({ name: cat.name, count: cat.count || 0 }))))
+        .catch(() => {}),
+    ]);
   }, []);
 
   const toggleGroup = (group: string) => {
@@ -73,10 +87,34 @@ export default function Navbar() {
         const qs = u?.institutionId ? `?institutionId=${u.institutionId}` : "";
         return fetch(`/api/branding${qs}`)
           .then((r) => r.json())
-          .then((bd) => setBranding(bd));
+          .then((bd) => setBranding(bd || { name: "", logoUrl: "/logo.png", faviconUrl: "", primaryColor: "", tagline: "", whiteLabelMode: false, isDefault: true }))
+          .catch(() => setBranding({ name: "", logoUrl: "/logo.png", faviconUrl: "", primaryColor: "", tagline: "", whiteLabelMode: false, isDefault: true }));
       })
-      .catch(() => {});
+      .catch(() => setBranding({ name: "", logoUrl: "/logo.png", faviconUrl: "", primaryColor: "", tagline: "", whiteLabelMode: false, isDefault: true }));
   }, []);
+
+  useEffect(() => {
+    if (user?.role === "owner" || user?.role === "admin") {
+      fetch("/api/owner/branches")
+        .then(r => r.json())
+        .then(data => {
+          setBranches(Array.isArray(data) ? data : []);
+          // Get activeBranchId from cookie
+          const match = document.cookie.match(/(?:^|; )activeBranchId=([^;]*)/);
+          if (match) setActiveBranchId(decodeURIComponent(match[1]));
+          else if (Array.isArray(data) && data.length > 0) setActiveBranchId(data[0]._id);
+        })
+        .catch(() => {});
+    }
+  }, [user]);
+
+  const changeBranch = (branchId: string) => {
+    setActiveBranchId(branchId);
+    const expires = new Date();
+    expires.setFullYear(expires.getFullYear() + 1);
+    document.cookie = `activeBranchId=${branchId};path=/;expires=${expires.toUTCString()}`;
+    router.refresh();
+  };
 
   const logout = async () => {
     await fetch("/api/auth/me", { method: "DELETE" });
@@ -98,11 +136,11 @@ export default function Navbar() {
             style={{ animation: "nav-progress 0.8s ease infinite" }} />
         </div>
       )}
-      <div className="w-full px-4 sm:px-6 lg:px-8">
+      <div className="px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
 
           {/* Left: logo + nav links */}
-          <div className="flex items-center gap-8 flex-1">
+          <div className="flex items-center gap-6">
             <Link href="/">
               {branding?.logoUrl ? (
                 <Image
@@ -113,17 +151,13 @@ export default function Navbar() {
                   className="object-contain h-8 w-auto"
                   priority
                 />
-              ) : branding && !branding.isDefault && branding.name ? (
-                <span className="font-bold text-lg text-indigo-700">
-                  {branding.name}
-                </span>
               ) : (
                 <Image
                   src="/logo.png"
                   alt="UPSkills"
-                  width={120}
-                  height={40}
-                  className="object-contain"
+                  width={135}
+                  height={35}
+                  className="object-contain h-8 w-auto"
                   priority
                 />
               )}
@@ -139,16 +173,13 @@ export default function Navbar() {
                   <ChevronDown className="w-4 h-4" />
                 </button>
                 <div className="absolute left-0 top-full hidden group-hover:block bg-white border border-gray-200 rounded-lg shadow-lg py-2 min-w-72 z-50">
-                  <Link href="/courses?type=onsite" className="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors">
-                    ทั้งหมด
-                  </Link>
                   {categories.map((cat) => (
                     <Link
                       key={`onsite-${cat.name}`}
-                      href={`/courses?type=onsite&category=${encodeURIComponent(cat.name)}`}
+                      href={`/courses?tab=onsite&category=${encodeURIComponent(cat.name)}`}
                       className="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
                     >
-                      {cat.name}
+                      {cat.name} ({cat.count})
                     </Link>
                   ))}
                 </div>
@@ -202,6 +233,23 @@ export default function Navbar() {
 
             {user ? (
               <>
+                {(user.role === "owner" || user.role === "admin") && branches.length > 0 && pathname !== "/" && !pathname.startsWith("/courses") && !pathname.startsWith("/learning-paths") && !pathname.startsWith("/skill-pass") && (
+                  <div className="relative">
+                    <button className="flex items-center gap-2 text-sm px-3 py-2 rounded-lg bg-gray-50 text-gray-700 hover:bg-gray-100 transition-colors border border-gray-200">
+                      <Building2 className="w-4 h-4" />
+                      {branches.find(b => b._id === activeBranchId)?.name || "เลือก"}
+                      <ChevronDown className="w-4 h-4" />
+                    </button>
+                    <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+                      {branches.map(b => (
+                        <button key={b._id} onClick={() => changeBranch(b._id)}
+                          className={`w-full text-left px-4 py-2 text-sm transition-colors ${activeBranchId === b._id ? "bg-indigo-50 text-indigo-600 font-medium" : "text-gray-700 hover:bg-gray-50"}`}>
+                          {b.name}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
                 <span className="text-sm text-gray-600">สวัสดี, {user.name}</span>
                 {user.role === "student" && (
                   <Link href="/dashboard/schedule" className="flex items-center gap-1.5 text-sm px-3 py-2 rounded-lg text-gray-600 hover:text-indigo-600 hover:bg-gray-50 transition-colors">
@@ -248,22 +296,46 @@ export default function Navbar() {
                           ภาพรวม
                         </Link>
 
-                        {/* แพลตฟอร์ม */}
+                        {/* รายได้และการเงิน */}
                         <div className="border-t border-gray-100 mt-1">
-                          <button onClick={() => toggleGroup("platform")} className="w-full flex items-center justify-between px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
-                            <span>แพลตฟอร์ม</span>
-                            <ChevronDown className={`w-4 h-4 transition-transform ${expandedGroups.has("platform") ? "rotate-180" : ""}`} />
+                          <button onClick={() => toggleGroup("finance")} className="w-full flex items-center justify-between px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                            <span>รายได้และการเงิน</span>
+                            <ChevronDown className={`w-4 h-4 transition-transform ${expandedGroups.has("finance") ? "rotate-180" : ""}`} />
                           </button>
-                          {expandedGroups.has("platform") && (
+                          {expandedGroups.has("finance") && (
                             <>
+                              <Link href="/super-admin/revenue" onClick={() => setSuperAdminMenu(false)} className="flex items-center gap-2 px-8 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
+                                รายได้
+                              </Link>
                               <Link href="/super-admin/analytics" onClick={() => setSuperAdminMenu(false)} className="flex items-center gap-2 px-8 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
                                 Analytics
                               </Link>
+                              <Link href="/super-admin/commission" onClick={() => setSuperAdminMenu(false)} className="flex items-center gap-2 px-8 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
+                                Commission & Payout
+                              </Link>
+                              <Link href="/super-admin/payments" onClick={() => setSuperAdminMenu(false)} className="flex items-center gap-2 px-8 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
+                                ตรวจสอบการชำระ
+                              </Link>
+                              <Link href="/super-admin/finance" onClick={() => setSuperAdminMenu(false)} className="flex items-center gap-2 px-8 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
+                                ข้อมูลทางการเงิน
+                              </Link>
+                            </>
+                          )}
+                        </div>
+
+                        {/* สถาบัน */}
+                        <div className="border-t border-gray-100 mt-1">
+                          <button onClick={() => toggleGroup("institutions")} className="w-full flex items-center justify-between px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                            <span>สถาบัน</span>
+                            <ChevronDown className={`w-4 h-4 transition-transform ${expandedGroups.has("institutions") ? "rotate-180" : ""}`} />
+                          </button>
+                          {expandedGroups.has("institutions") && (
+                            <>
                               <Link href="/super-admin/institutions" onClick={() => setSuperAdminMenu(false)} className="flex items-center gap-2 px-8 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
-                                สถาบัน
+                                สถาบันทั้งหมด
                               </Link>
                               <Link href="/super-admin/trials" onClick={() => setSuperAdminMenu(false)} className="flex items-center gap-2 px-8 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
-                                ทดลองใช้งาน
+                                คำขอทดลองใช้งาน
                               </Link>
                             </>
                           )}
@@ -309,8 +381,26 @@ export default function Navbar() {
                               <Link href="/super-admin/forum" onClick={() => setSuperAdminMenu(false)} className="flex items-center gap-2 px-8 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
                                 Forum
                               </Link>
+                            </>
+                          )}
+                        </div>
+
+                        {/* ระบบขาย */}
+                        <div className="border-t border-gray-100 mt-1">
+                          <button onClick={() => toggleGroup("sales")} className="w-full flex items-center justify-between px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                            <span>ระบบขาย</span>
+                            <ChevronDown className={`w-4 h-4 transition-transform ${expandedGroups.has("sales") ? "rotate-180" : ""}`} />
+                          </button>
+                          {expandedGroups.has("sales") && (
+                            <>
+                              <Link href="/super-admin/orders" onClick={() => setSuperAdminMenu(false)} className="flex items-center gap-2 px-8 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
+                                จัดการคำสั่งซื้อ
+                              </Link>
+                              <Link href="/super-admin/products" onClick={() => setSuperAdminMenu(false)} className="flex items-center gap-2 px-8 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
+                                จัดการสินค้า
+                              </Link>
                               <Link href="/super-admin/coupons" onClick={() => setSuperAdminMenu(false)} className="flex items-center gap-2 px-8 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
-                                คูปองส่วนลด
+                                คูปอง/โปรโมชั่น
                               </Link>
                             </>
                           )}
@@ -330,11 +420,17 @@ export default function Navbar() {
                               <Link href="/super-admin/content" onClick={() => setSuperAdminMenu(false)} className="flex items-center gap-2 px-8 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
                                 เนื้อหาการเรียน
                               </Link>
-                              <Link href="/super-admin/revenue" onClick={() => setSuperAdminMenu(false)} className="flex items-center gap-2 px-8 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
-                                รายได้
+                              <Link href="/dashboard/schedule" onClick={() => setSuperAdminMenu(false)} className="flex items-center gap-2 px-8 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
+                                ตารางเรียน
                               </Link>
                               <Link href="/super-admin/schedule" onClick={() => setSuperAdminMenu(false)} className="flex items-center gap-2 px-8 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
                                 ตารางสอน
+                              </Link>
+                              <Link href="/super-admin/certificates" onClick={() => setSuperAdminMenu(false)} className="flex items-center gap-2 px-8 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
+                                ใบรับรอง
+                              </Link>
+                              <Link href="/super-admin/categories" onClick={() => setSuperAdminMenu(false)} className="flex items-center gap-2 px-8 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
+                                หมวดหมู่
                               </Link>
                             </>
                           )}
@@ -348,14 +444,14 @@ export default function Navbar() {
                           </button>
                           {expandedGroups.has("system") && (
                             <>
-                              <Link href="/super-admin/finance" onClick={() => setSuperAdminMenu(false)} className="flex items-center gap-2 px-8 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
-                                ข้อมูลทางการเงิน
-                              </Link>
                               <Link href="/super-admin/banners" onClick={() => setSuperAdminMenu(false)} className="flex items-center gap-2 px-8 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
                                 จัดการแบนเนอร์
                               </Link>
                               <Link href="/super-admin/roles" onClick={() => setSuperAdminMenu(false)} className="flex items-center gap-2 px-8 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
                                 จัดการ Role
+                              </Link>
+                              <Link href="/super-admin/menu" onClick={() => setSuperAdminMenu(false)} className="flex items-center gap-2 px-8 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
+                                จัดการเมนู
                               </Link>
                               <Link href="/super-admin/logs" onClick={() => setSuperAdminMenu(false)} className="flex items-center gap-2 px-8 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
                                 ประวัติการใช้งาน
@@ -384,8 +480,8 @@ export default function Navbar() {
                     ศูนย์การเรียน
                   </Link>
                 )}
-                {(user.role === "admin" || user.role === "teacher") && (
-                  <Link href="/admin" className="flex items-center gap-1.5 text-sm font-medium px-3 py-2 rounded-lg text-indigo-600 hover:bg-indigo-50 transition-colors">
+                {(user.role === "admin" || user.role === "teacher" || user.role === "owner") && (
+                  <Link href={user.role === "owner" ? "/owner/dashboard" : "/admin"} className="flex items-center gap-1.5 text-sm font-medium px-3 py-2 rounded-lg text-indigo-600 hover:bg-indigo-50 transition-colors">
                     <User className="w-4 h-4" />
                     จัดการหลังบ้าน
                   </Link>
@@ -433,17 +529,27 @@ export default function Navbar() {
                 ))}
               </div>
             )}
+            <button onClick={() => setOpenNavDropdown(openNavDropdown === "live" ? null : "live")} className="w-full flex items-center justify-between px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg">
+              คอร์สเรียน Live
+              <ChevronDown className={`w-4 h-4 transition-transform ${openNavDropdown === "live" ? "rotate-180" : ""}`} />
+            </button>
+            {openNavDropdown === "live" && (
+              <div className="pl-3 space-y-1">
+                {liveOnlineCategories.map((cat) => (
+                  <Link key={`live-${cat.name}`} href={`/courses?type=live online&category=${encodeURIComponent(cat.name)}`} onClick={() => setMenuOpen(false)} className="block px-3 py-2 text-sm text-gray-600 hover:bg-indigo-50 rounded-lg">
+                    {cat.name}
+                  </Link>
+                ))}
+              </div>
+            )}
             <button onClick={() => setOpenNavDropdown(openNavDropdown === "onsite" ? null : "onsite")} className="w-full flex items-center justify-between px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg">
               หลักสูตร Onsite
               <ChevronDown className={`w-4 h-4 transition-transform ${openNavDropdown === "onsite" ? "rotate-180" : ""}`} />
             </button>
             {openNavDropdown === "onsite" && (
               <div className="pl-3 space-y-1">
-                <Link href="/courses?type=onsite" onClick={() => setMenuOpen(false)} className="block px-3 py-2 text-sm text-gray-600 hover:bg-indigo-50 rounded-lg">
-                  ทั้งหมด
-                </Link>
                 {categories.map((cat) => (
-                  <Link key={`onsite-${cat.name}`} href={`/courses?type=onsite&category=${encodeURIComponent(cat.name)}`} onClick={() => setMenuOpen(false)} className="block px-3 py-2 text-sm text-gray-600 hover:bg-indigo-50 rounded-lg">
+                  <Link key={`onsite-${cat.name}`} href={`/courses?tab=onsite&category=${encodeURIComponent(cat.name)}`} onClick={() => setMenuOpen(false)} className="block px-3 py-2 text-sm text-gray-600 hover:bg-indigo-50 rounded-lg">
                     {cat.name}
                   </Link>
                 ))}

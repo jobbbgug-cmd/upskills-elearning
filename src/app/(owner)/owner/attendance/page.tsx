@@ -23,7 +23,7 @@ export default function AdminAttendancePage() {
   const BASE_URL = typeof window !== "undefined" ? window.location.origin : "";
 
   useEffect(() => {
-    fetch("/api/admin/courses").then((r) => r.json()).then((d) => {
+    fetch("/api/owner/courses").then((r) => r.json()).then((d) => {
       const cs = Array.isArray(d) ? d : d.courses ?? [];
       setCourses(cs);
     });
@@ -33,7 +33,7 @@ export default function AdminAttendancePage() {
     if (!courseId || !sessionId) { setAttendance([]); return; }
     fetch(`/api/attendance?courseId=${courseId}&sessionId=${sessionId}`)
       .then((r) => r.json()).then((d) => setAttendance(Array.isArray(d) ? d : []));
-    fetch(`/api/admin/students?courseId=${courseId}`)
+    fetch(`/api/owner/students?courseId=${courseId}`)
       .then((r) => r.json()).then((d) => setStudents(Array.isArray(d) ? d : []));
   }, [courseId, sessionId]);
 

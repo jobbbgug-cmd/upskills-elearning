@@ -50,7 +50,7 @@ export default async function HomePage() {
       {/* ─── Hero / Banner ─── */}
       {banners.length > 0 ? (
         <div>
-          <BannerSlider banners={banners} institutionNames={institutionNames} />
+          <BannerSlider banners={banners} institutionNames={institutionNames} user={user} />
         </div>
       ) : (
         <section className="relative bg-gradient-to-br from-indigo-700 via-indigo-800 to-violet-900 text-white px-4 py-24 overflow-hidden">
@@ -72,9 +72,10 @@ export default async function HomePage() {
               <Link href="/courses" className="bg-white text-indigo-700 font-semibold px-8 py-3.5 rounded-xl hover:bg-indigo-50 transition-colors shadow-lg">
                 ดูคอร์สทั้งหมด
               </Link>
-              {user && user.role === "owner" && (
-                <Link href="/owner" className="bg-indigo-500 text-white font-semibold px-8 py-3.5 rounded-xl hover:bg-indigo-400 transition-colors border border-indigo-400">
-                  จัดการหลังบ้าน
+              {user ? (
+                <Link href={user.role === "admin" || user.role === "super_admin" ? "/admin" : user.role === "owner" ? "/owner/dashboard" : "/dashboard"}
+                  className="bg-indigo-500 text-white font-semibold px-8 py-3.5 rounded-xl hover:bg-indigo-400 transition-colors border border-indigo-400">
+                  ไปที่ Dashboard
                 </Link>
               )}
               {user && user.role === "admin" && (
@@ -561,6 +562,9 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* ─── Courses Showcase ─── */}
+      <CoursesShowcase />
 
       {/* ─── เลือกระดับชั้น ─── */}
       <section className="py-16 px-4 bg-gray-50">

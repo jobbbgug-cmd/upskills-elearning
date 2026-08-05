@@ -17,6 +17,8 @@ interface UserItem {
   createdAt: string;
   studentId?: string;
   studentName?: string;
+  institutionId?: string;
+  institutionName?: string;
 }
 
 const ROLES = [
@@ -49,8 +51,14 @@ interface StudentOption {
   gradeLevel?: string;
 }
 
+interface Institution {
+  _id: string;
+  name: string;
+}
+
 export default function AdminUsersPage() {
   const [users, setUsers]           = useState<UserItem[]>([]);
+  const [institutions, setInstitutions] = useState<Institution[]>([]);
   const [students, setStudents]     = useState<StudentOption[]>([]);
   const [loading, setLoading]       = useState(true);
   const [search, setSearch]         = useState("");
@@ -70,7 +78,7 @@ export default function AdminUsersPage() {
 
   // Create user modal
   const [createOpen, setCreateOpen]     = useState(false);
-  const [createForm, setCreateForm]     = useState({ name: "", email: "", role: "student" as UserItem["role"], gradeLevel: "", password: "", studentId: "", studentName: "" });
+  const [createForm, setCreateForm]     = useState({ name: "", email: "", role: "student" as UserItem["role"], gradeLevel: "", password: "", studentId: "", studentName: "", institutionId: "" });
   const [createError, setCreateError]   = useState("");
   const [creating, setCreating]         = useState(false);
   const [createShowPass, setCreateShowPass] = useState(false);
@@ -78,14 +86,54 @@ export default function AdminUsersPage() {
 
   const load = async () => {
     setLoading(true);
-    const [usersRes, meRes, studentsRes] = await Promise.all([
-      fetch("/api/admin/users"),
-      fetch("/api/auth/me"),
-      fetch("/api/admin/users?role=student&unassigned=true")
-    ]);
-    if (usersRes.ok) setUsers(await usersRes.json());
-    if (meRes.ok) { const d = await meRes.json(); setMyRole(d.user?.role ?? ""); }
-    if (studentsRes.ok) setStudents(await studentsRes.json());
+    try {
+      // Fetch users
+      const usersRes = await fetch("/api/owner/users");
+      const usersData = await usersRes.json();
+      console.log("✅ /api/owner/users response:", Array.isArray(usersData) ? `${usersData.length} users` : usersData);
+      
+      // Fetch institutions
+      const instRes = await fetch("/api/owner/institutions");
+      const ownerInsts = await instRes.json();
+      console.log("✅ /api/owner/institutions response:", Array.isArray(ownerInsts) ? `${ownerInsts.length} institutions` : ownerInsts);
+      
+      // Enrich users
+      if (Array.isArray(usersData) && Array.isArray(ownerInsts)) {
+        const enrichedUsers = usersData.map((u: any) => {
+          const inst = ownerInsts.find((i: any) => i._id === u.institutionId);
+          let instName = "";
+
+          if (inst) {
+            if (u.role === "owner") {
+              // Owner - show "All branches"
+              instName = "All branches";
+            } else {
+              // Others - show just the institution name
+              instName = inst.name;
+            }
+          }
+
+          return { ...u, institutionName: instName };
+        });
+        console.log("✅ Enriched users:", enrichedUsers.length);
+        setUsers(enrichedUsers);
+      } else {
+        setUsers(usersData);
+      }
+      
+      // Fetch other data
+      const [meRes, studentsRes, adminInstRes] = await Promise.all([
+        fetch("/api/auth/me"),
+        fetch("/api/owner/users?role=student&unassigned=true"),
+        fetch("/api/admin/institutions")
+      ]);
+      
+      if (meRes.ok) { const d = await meRes.json(); setMyRole(d.user?.role ?? ""); }
+      if (studentsRes.ok) setStudents(await studentsRes.json());
+      if (adminInstRes.ok) setInstitutions(await adminInstRes.json());
+    } catch (err) {
+      console.error("❌ Load error:", err);
+    }
     setLoading(false);
   };
 
@@ -97,8 +145,8 @@ export default function AdminUsersPage() {
     return () => { document.body.style.overflow = ""; };
   }, [editUser, createOpen]);
 
-  // super_admin-only role — hide from regular admin
-  const visibleRoles = myRole === "super_admin" ? ROLES : ROLES.filter((r) => r.value !== "super_admin" && r.value !== "owner");
+  // show roles based on myRole — owner can see owner role, super_admin sees all, admin sees all except super_admin
+  const visibleRoles = myRole === "super_admin" ? ROLES : myRole === "owner" ? ROLES.filter((r) => r.value !== "super_admin") : ROLES.filter((r) => r.value !== "super_admin" && r.value !== "owner");
 
   const openEdit = (u: UserItem) => {
     setEditUser(u);
@@ -139,7 +187,7 @@ export default function AdminUsersPage() {
     };
     if (editForm.password) body.password = editForm.password;
 
-    const res = await fetch(`/api/admin/users/${editUser._id}`, {
+    const res = await fetch(`/api/owner/users/${editUser._id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
@@ -155,7 +203,7 @@ export default function AdminUsersPage() {
 
   const changeRole = async (id: string, role: UserItem["role"]) => {
     setUpdating(id);
-    const res = await fetch(`/api/admin/users/${id}`, {
+    const res = await fetch(`/api/owner/users/${id}`, {
       method: "PUT", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ role }),
     });
@@ -164,7 +212,7 @@ export default function AdminUsersPage() {
   };
 
   const deleteUser = async (id: string) => {
-    const res = await fetch(`/api/admin/users/${id}`, { method: "DELETE" });
+    const res = await fetch(`/api/owner/users/${id}`, { method: "DELETE" });
     if (res.ok) setUsers((prev) => prev.filter((u) => u._id !== id));
   };
 
@@ -181,7 +229,7 @@ export default function AdminUsersPage() {
   };
 
   const openCreate = () => {
-    setCreateForm({ name: "", email: "", role: "student", gradeLevel: "", password: "", studentId: "", studentName: "" });
+    setCreateForm({ name: "", email: "", role: "student", gradeLevel: "", password: "", studentId: "", studentName: "", institutionId: "" });
     setCreateError("");
     setCreateShowPass(false);
     setCreateCopied(false);
@@ -200,7 +248,7 @@ export default function AdminUsersPage() {
       setCreateError("รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร"); return;
     }
     setCreating(true);
-    const res = await fetch("/api/admin/users", {
+    const res = await fetch("/api/owner/users", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -211,6 +259,7 @@ export default function AdminUsersPage() {
         gradeLevel: (createForm.role === "student" || createForm.role === "parent") ? createForm.gradeLevel : "ทุกระดับชั้น",
         studentId: createForm.role === "parent" ? createForm.studentId : "",
         studentName: createForm.role === "parent" ? createForm.studentName : "",
+        institutionId: createForm.institutionId,
         status: "approved",
       }),
     });
@@ -223,10 +272,15 @@ export default function AdminUsersPage() {
     setCreating(false);
   };
 
-  // Hide super_admin users from non-super_admin admins
+  // Hide super_admin users from non-super_admin, and sort owner users first
   const visibleUsers = myRole === "super_admin" ? users : users.filter((u) => u.role !== "super_admin");
+  const sortedUsers = visibleUsers.sort((a, b) => {
+    if (a.role === "owner" && b.role !== "owner") return -1;
+    if (a.role !== "owner" && b.role === "owner") return 1;
+    return 0;
+  });
 
-  const filtered = visibleUsers.filter((u) => {
+  const filtered = sortedUsers.filter((u) => {
     const matchRole   = filterRole === "all" || u.role === filterRole;
     const matchSearch = u.name.toLowerCase().includes(search.toLowerCase()) || u.email.toLowerCase().includes(search.toLowerCase());
     return matchRole && matchSearch;
@@ -334,10 +388,10 @@ export default function AdminUsersPage() {
             <thead>
               <tr className="border-b border-gray-100 bg-gray-50">
                 <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wide">ผู้ใช้</th>
+                <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wide">สถาบัน</th>
                 <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wide">ระดับชั้น</th>
                 <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wide">วันที่สมัคร</th>
                 <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wide">Role</th>
-                <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wide">เปลี่ยน Role</th>
                 <th className="px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wide text-right">จัดการ</th>
               </tr>
             </thead>
@@ -363,6 +417,9 @@ export default function AdminUsersPage() {
                       </div>
                     </td>
                     <td className="px-5 py-4 text-sm text-gray-500">
+                      {u.institutionName || "—"}
+                    </td>
+                    <td className="px-5 py-4 text-sm text-gray-500">
                       {(u.role === "student" || u.role === "parent")
                         ? (u.gradeLevel || "—")
                         : <span className="text-indigo-600 font-medium">ทุกระดับชั้น</span>}
@@ -375,23 +432,9 @@ export default function AdminUsersPage() {
                         <Icon className="w-3 h-3" />{info.label}
                       </span>
                     </td>
-                    <td className="px-5 py-4">
-                      {u.role === "owner" ? (
-                        <span className="text-xs text-gray-400 italic">—</span>
-                      ) : (
-                        <div className="relative inline-block">
-                          <select value={u.role} onChange={(e) => changeRole(u._id, e.target.value as UserItem["role"])}
-                            disabled={updating === u._id}
-                            className={`appearance-none pl-3 pr-8 py-1.5 rounded-lg text-sm font-medium border transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-50 ${info.color}`}>
-                            {visibleRoles.map((r) => <option key={r.value} value={r.value}>{r.label}</option>)}
-                          </select>
-                          <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 pointer-events-none text-gray-500" />
-                        </div>
-                      )}
-                    </td>
                     <td className="px-5 py-4 text-right">
                       <div className="flex items-center justify-end gap-1">
-                        <Link href={`/admin/profile/${u._id}`}
+                        <Link href={`/owner/profile/${u._id}`}
                           className="p-1.5 text-gray-400 hover:text-violet-600 hover:bg-violet-50 rounded-lg transition-colors" title="ดูโปรไฟล์">
                           <ExternalLink className="w-4 h-4" />
                         </Link>
@@ -406,9 +449,6 @@ export default function AdminUsersPage() {
                             className="p-1.5 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors" title="ลบ">
                             <Trash2 className="w-4 h-4" />
                           </button>
-                        )}
-                        {u.role === "owner" && (
-                          <span className="text-xs text-gray-300 px-2">จัดการโดย Super Admin</span>
                         )}
                       </div>
                     </td>

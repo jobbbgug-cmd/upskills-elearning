@@ -27,9 +27,9 @@ export default function BillingPage() {
 
   useEffect(() => {
     Promise.all([
-      fetch("/api/admin/payment-settings").then((r) => r.json()),
+      fetch("/api/owner/payment-settings").then((r) => r.json()),
       fetch("/api/receipts").then((r) => r.json()),
-      fetch("/api/admin/bookings/confirmed").then((r) => r.json()).catch(() => []),
+      fetch("/api/owner/bookings/confirmed").then((r) => r.json()).catch(() => []),
     ]).then(([s, r, b]) => {
       setSettings({ promptpayNumber: s.promptpayNumber ?? "", bankName: s.bankName ?? "", bankAccountNumber: s.bankAccountNumber ?? "", bankAccountName: s.bankAccountName ?? "" });
       setReceipts(Array.isArray(r) ? r : []);
@@ -39,7 +39,7 @@ export default function BillingPage() {
 
   const saveSettings = async () => {
     setSavingSettings(true);
-    await fetch("/api/admin/payment-settings", {
+    await fetch("/api/owner/payment-settings", {
       method: "PATCH", headers: { "Content-Type": "application/json" },
       body: JSON.stringify(settings),
     });

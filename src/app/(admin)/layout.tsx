@@ -119,8 +119,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     return () => { controller.abort(); clearInterval(interval); };
   }, []);
 
-  const isOwner = role === "owner";
-  const isAdmin = role === "admin" || role === "super_admin" || isOwner;
+  const isAdmin = role === "admin" 
   const close = () => setSidebarOpen(false);
 
   const switchBranch = async (branchId: string) => {
@@ -141,9 +140,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   };
 
   const ROLE_LABELS: Record<string, string> = {
-    super_admin: "Super Admin",
     admin: "Admin",
-    owner: "เจ้าของสถาบัน",
     teacher: "Teacher",
     student: "Student",
   };
@@ -364,126 +361,65 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           {(role === "owner" || role === "admin" || role === "teacher" || role === "super_admin") && renderGroup("courses", "จัดการเนื้อหา", <BookOpen className="w-4 h-4" />,
             ["/admin/courses","/admin/content","/admin/schedule","/admin/teacher-schedule","/admin/learning-paths"],
             <>
-              {navLink("/admin/courses",        <ListChecks className="w-4 h-4" />,   "จัดการคอร์ส")}
-              {navLink("/admin/content",        <BookOpen className="w-4 h-4" />,     "เนื้อหาการเรียน")}
-              {navLink("/admin/schedule",       <CalendarDays className="w-4 h-4" />, "ตารางเรียน")}
-              {navLink("/admin/teacher-schedule", <CalendarDays className="w-4 h-4" />, "ตารางสอน")}
-              {(role === "owner" || role === "admin") && navLink("/admin/learning-paths",  <Layers className="w-4 h-4" />,      "เส้นทางการเรียน")}
-            </>,
-            undefined,
-            role === "owner" || role === "admin" || role === "teacher" || role === "super_admin"
+              {(isAdmin || role === "teacher") && navLink("/admin/courses",        <ListChecks className="w-4 h-4" />,   "จัดการคอร์ส")}
+              {(isAdmin || role === "teacher") && navLink("/admin/content",        <BookOpen className="w-4 h-4" />,     "เนื้อหาการเรียน")}
+              {(isAdmin || role === "teacher") && navLink("/admin/schedule",       <CalendarDays className="w-4 h-4" />, "ตารางเรียน")}
+              {(isAdmin || role === "teacher") && navLink("/admin/teacher-schedule", <CalendarDays className="w-4 h-4" />, "ตารางสอน")}
+              {(isAdmin || role === "teacher") && navLink("/admin/learning-paths",  <Layers className="w-4 h-4" />,      "เส้นทางการเรียน")}
+              {isAdmin                         && navLink("/admin/certificates", <Award className="w-4 h-4" />,    "ใบรับรอง")}
+            </>
           )}
 
-          {/* Members Section - Owner/Admin/Super Admin */}
-          {(role === "owner" || role === "admin" || role === "super_admin") && renderGroup("members", "สมาชิก", <Users className="w-4 h-4" />,
+          {renderGroup("members", "สมาชิก", <Users className="w-4 h-4" />,
             ["/admin/members","/admin/users"],
             <>
-              {navLink("/admin/members", <UserCheck className="w-4 h-4" />,
-                <span className="flex items-center justify-between w-full gap-2">
+              {isAdmin && navLink("/admin/members", <UserCheck className="w-4 h-4" />,
+                <div className="flex items-center justify-between w-full gap-2">
                   อนุมัติสมาชิก
-                  {pendingCount > 0 && (
-                    <span className="bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full min-w-[20px] text-center">
-                      {pendingCount}
-                    </span>
-                  )}
-                </span>
+                  {pendingCount > 0 && <span className="bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full min-w-[20px] text-center">{pendingCount}</span>}
+                </div>
               )}
-              {navLink("/admin/users", <UserCog className="w-4 h-4" />, "จัดการผู้ใช้")}
-            </>,
-            pendingCount,
-            role === "owner" || role === "admin" || role === "super_admin"
+              {isAdmin && navLink("/admin/users", <UserCog className="w-4 h-4" />, "จัดการผู้ใช้")}
+            </>
           )}
 
           {/* Commerce Section - Owner/Admin/Super Admin */}
           {(role === "owner" || role === "admin" || role === "super_admin") && renderGroup("commerce", "ระบบขาย", <ShoppingCart className="w-4 h-4" />,
             ["/admin/orders","/admin/products","/admin/coupons"],
             <>
-              {navLink("/admin/orders", <ShoppingCart className="w-4 h-4" />, "จัดการคำสั่งซื้อ")}
-              {navLink("/admin/products", <Package className="w-4 h-4" />, "จัดการสินค้า")}
-              {navLink("/admin/coupons", <Tag className="w-4 h-4" />, "คูปอง/โปรโมชั่น")}
-            </>,
-            undefined,
-            role === "owner" || role === "admin" || role === "super_admin"
+              {isAdmin && navLink("/admin/orders", <ShoppingCart className="w-4 h-4" />, "จัดการคำสั่งซื้อ")}
+              {isAdmin && navLink("/admin/products", <Package className="w-4 h-4" />, "จัดการสินค้า")}
+              {isAdmin && navLink("/admin/coupons", <Tag className="w-4 h-4" />, "คูปอง/โปรโมชั่น")}
+            </>
           )}
 
           {/* Finance Section - All admin roles and teacher */}
           {(role === "owner" || role === "admin" || role === "teacher" || role === "super_admin") && renderGroup("finance", "รายได้และการเงิน", <TrendingUp className="w-4 h-4" />,
             ["/admin/analytics","/admin/revenue","/admin/billing","/admin/certificates","/admin/bookings","/admin/finance"],
             <>
-              {(role === "owner" || role === "admin" || role === "super_admin") && navLink("/admin/analytics", <BarChart2 className="w-4 h-4" />, "Analytics")}
-              {navLink("/admin/revenue",   <TrendingUp className="w-4 h-4" />, "รายได้")}
-              {(role === "owner" || role === "admin" || role === "super_admin") && navLink("/admin/billing",   <Receipt className="w-4 h-4" />,    "Billing & ใบเสร็จ")}
-              {(role === "owner" || role === "admin") && navLink("/admin/certificates", <Award className="w-4 h-4" />,    "ใบรับรอง")}
-              {role === "super_admin" && navLink("/admin/bookings",  <Users className="w-4 h-4" />, "ตรวจสอบการชำระ")}
-              {role === "super_admin" && navLink("/admin/finance", <Wallet className="w-4 h-4" />, "ข้อมูลทางการเงิน")}
-            </>,
-            undefined,
-            role === "owner" || role === "admin" || role === "teacher" || role === "super_admin"
+              {(isAdmin || role === "teacher") && navLink("/admin/revenue",   <TrendingUp className="w-4 h-4" />, "รายได้")}
+              {isAdmin                         && navLink("/admin/analytics", <BarChart2 className="w-4 h-4" />, "Analytics")}
+              {isAdmin                         && navLink("/admin/billing",   <Receipt className="w-4 h-4" />,    "Billing & ใบเสร็จ")}
+            </>
           )}
 
           {/* Marketing Section - Owner/Admin */}
           {(role === "owner" || role === "admin") && renderGroup("marketing", "การตลาด", <Globe className="w-4 h-4" />,
             ["/admin/landing","/admin/reviews","/admin/notifications","/admin/banners"],
             <>
-              {navLink("/admin/landing",       <Globe className="w-4 h-4" />,   "Landing Page")}
-              {navLink("/admin/reviews",       <Star className="w-4 h-4" />,    "รีวิวคอร์ส")}
-              {navLink("/admin/notifications", <Bell className="w-4 h-4" />,    "แจ้งเตือน")}
-              {navLink("/admin/banners",       <Images className="w-4 h-4" />,  "จัดการแบรนเนอร์")}
-            </>,
-            undefined,
-            role === "owner" || role === "admin"
+              {isAdmin && navLink("/admin/landing",       <Globe className="w-4 h-4" />,   "Landing Page")}
+              {isAdmin && navLink("/admin/reviews",       <Star className="w-4 h-4" />,    "รีวิวคอร์ส")}
+              {isAdmin && navLink("/admin/notifications", <Bell className="w-4 h-4" />,    "แจ้งเตือน")}
+              {isAdmin && navLink("/admin/banners",       <Images className="w-4 h-4" />,  "จัดการแบนเนอร์")}
+            </>
           )}
 
           {/* Settings Section - Different for each role */}
           {(role === "owner" || role === "admin" || role === "super_admin") && renderGroup("settings", "ตั้งค่าระบบ", <Shield className="w-4 h-4" />,
             ["/super-admin/roles","/admin/branding","/admin/categories","/admin/teacher-schedule","/admin/banners"],
             <>
-              {/* Super Admin only */}
-              {role === "super_admin" && <>
-                {navLink("/admin/banners",       <Images className="w-4 h-4" />,  "จัดการแบนเนอร์")}
-                {navLink("/super-admin/roles",    <Shield className="w-4 h-4" />,  "จัดการ Role")}
-                <div>
-                  <button
-                    onClick={() => toggleGroup("categories")}
-                    className={`w-full flex items-center justify-between px-3 py-2.5 text-sm rounded-lg transition-colors menu-hover ${
-                      openGroups.has("categories") ? "menu-section-active font-medium" : "text-gray-700 hover:bg-gray-50"
-                    }`}
-                  >
-                    <span className="flex items-center gap-3">
-                      <Tag className="w-4 h-4" />
-                      หมวดหมู่
-                    </span>
-                    <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${openGroups.has("categories") ? "rotate-180" : ""}`} />
-                  </button>
-                  {openGroups.has("categories") && (
-                    <div className="ml-3 pl-3 border-l border-gray-100 mt-0.5 mb-1">
-                      <div className="flex gap-2 p-2 bg-gray-50 rounded-lg">
-                        <Link href="/admin/categories" onClick={() => { close(); setIsNavigating(true); }}
-                          className={`flex-1 px-3 py-1.5 text-xs font-medium rounded transition-colors text-center ${
-                            pathname === "/admin/categories" || pathname.startsWith("/admin/categories") && !pathname.includes("/onsite")
-                              ? "theme-btn-active text-white"
-                              : "bg-white text-gray-700 hover:bg-gray-100"
-                          }`}>
-                          Online
-                        </Link>
-                        <Link href="/admin/categories/onsite" onClick={() => { close(); setIsNavigating(true); }}
-                          className={`flex-1 px-3 py-1.5 text-xs font-medium rounded transition-colors text-center ${
-                            pathname === "/admin/categories/onsite"
-                              ? "theme-btn-active text-white"
-                              : "bg-white text-gray-700 hover:bg-gray-100"
-                          }`}>
-                          Onsite
-                        </Link>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </>}
-              {/* Owner/Admin only */}
-              {(role === "owner" || role === "admin") && navLink("/admin/branding", <Palette className="w-4 h-4" />, "จัดการ Branding")}
-            </>,
-            undefined,
-            role === "owner" || role === "admin" || role === "super_admin"
+              {role === "admin"       && navLink("/admin/branding", <Palette className="w-4 h-4" />, "จัดการ Branding")}
+            </>
           )}
         </nav>
 
@@ -546,7 +482,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </Link>
           <div className="ml-auto flex items-center gap-2">
             {/* Branch switcher — owner only */}
-            {isOwner && branches.length > 0 && (
+            {role === "owner" && branches.length > 0 && (
               <div className="flex items-center gap-2">
                 <Building2 className="w-4 h-4 text-violet-500 shrink-0" />
                 <select

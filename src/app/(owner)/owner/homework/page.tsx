@@ -34,7 +34,7 @@ export default function AdminHomeworkPage() {
   useEffect(() => {
     Promise.all([
       fetch("/api/homework").then((r) => r.json()),
-      fetch("/api/admin/courses").then((r) => r.json()),
+      fetch("/api/owner/courses").then((r) => r.json()),
     ]).then(([hw, cs]) => {
       setHomeworks(hw);
       setCourses(Array.isArray(cs) ? cs : cs.courses ?? []);
@@ -122,7 +122,7 @@ export default function AdminHomeworkPage() {
                 <span className={`text-xs px-2.5 py-1 rounded-full font-semibold shrink-0 ${isPast ? "bg-gray-100 text-gray-500" : "bg-green-50 text-green-700"}`}>
                   {isPast ? "หมดเวลา" : "เปิดรับ"}
                 </span>
-                <Link href={`/admin/homework/${hw._id}`}
+                <Link href={`/owner/homework/${hw._id}`}
                   className="flex items-center gap-1 text-sm text-indigo-600 hover:text-indigo-800 font-medium shrink-0">
                   ดูงานที่ส่ง <ChevronRight className="w-3.5 h-3.5" />
                 </Link>

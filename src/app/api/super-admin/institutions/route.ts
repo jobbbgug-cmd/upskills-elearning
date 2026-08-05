@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { getAuthUser } from "@/lib/auth";
 import { connectDB } from "@/lib/mongodb";
 import Institution from "@/models/Institution";
@@ -6,7 +6,7 @@ import User from "@/models/User";
 import Course from "@/models/Course";
 import Booking from "@/models/Booking";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   const auth = await getAuthUser();
   if (!auth || auth.role !== "super_admin") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -14,7 +14,16 @@ export async function GET() {
 
   await connectDB();
 
-  const institutions = await Institution.find().sort({ createdAt: -1 }).lean();
+  const parentId = req.nextUrl.searchParams.get("parentId");
+
+  let institutions;
+  if (parentId) {
+    // Get branches of a parent institution
+    institutions = await Institution.find({ parentId }).sort({ createdAt: -1 }).lean();
+  } else {
+    // Get all parent institutions (no parentId)
+    institutions = await Institution.find({ parentId: null }).sort({ createdAt: -1 }).lean();
+  }
 
   // Batch-fetch stats per institution
   const ids = institutions.map((i) => i._id);

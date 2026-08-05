@@ -38,7 +38,7 @@ export default function AdminOrdersPage() {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/admin/sales");
+      const res = await fetch("/api/owner/sales");
       if (!res.ok) {
         setOrders([]);
         setLoading(false);
@@ -60,7 +60,7 @@ export default function AdminOrdersPage() {
   const handleStatusChange = async (id: string, newStatus: string) => {
     setActing(id);
     try {
-      const res = await fetch(`/api/admin/orders/${id}`, {
+      const res = await fetch(`/api/owner/orders/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: newStatus }),
@@ -82,7 +82,7 @@ export default function AdminOrdersPage() {
     if (!confirm("ลบรายการนี้?")) return;
     setActing(id);
     try {
-      const res = await fetch(`/api/admin/orders/${id}`, { method: "DELETE" });
+      const res = await fetch(`/api/owner/orders/${id}`, { method: "DELETE" });
       if (res.ok) {
         setOrders((prev) => prev.filter((o) => o._id !== id));
       }

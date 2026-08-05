@@ -58,7 +58,7 @@ export default function FinancePage() {
         return;
       }
       setAuthorized(true);
-      const res = await fetch("/api/admin/finance");
+      const res = await fetch("/api/owner/finance");
       const d   = await res.json();
       if (d && !d.error) {
         setForm({
@@ -90,7 +90,7 @@ export default function FinancePage() {
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
-    const res = await fetch("/api/admin/finance", {
+    const res = await fetch("/api/owner/finance", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(form),

@@ -104,7 +104,7 @@ export default function AdminCouponsPage() {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch(`/api/admin/coupons?type=${activeTab}`);
+      const res = await fetch(`/api/owner/coupons?type=${activeTab}`);
       if (!res.ok) {
         setItems([]);
         setLoading(false);
@@ -149,7 +149,7 @@ export default function AdminCouponsPage() {
       if (createForm.endDate) payload.endDate = new Date(createForm.endDate).toISOString();
       if (createForm.startDate) payload.startDate = new Date(createForm.startDate).toISOString();
 
-      const res = await fetch("/api/admin/coupons", {
+      const res = await fetch("/api/owner/coupons", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),

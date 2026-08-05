@@ -237,7 +237,69 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
         </div>
       </div>
 
+      {/* ── คอร์สนี้ได้เรียนอะไรบ้าง — full width ── */}
+      {(course as any)?.whatYouWillLearn && (
+        <div className="max-w-[1200px] mx-auto px-4 mb-4">
+          <ContentSection
+            icon={<BookOpen className="w-5 h-5 text-blue-500" />}
+            title="คอร์สนี้ได้เรียนอะไรบ้าง"
+            accentColor="blue"
+            locked={!hasPaidAccess}
+          >
+            <div className="prose prose-sm max-w-none text-gray-700" dangerouslySetInnerHTML={{ __html: (course as any).whatYouWillLearn }} />
+          </ContentSection>
+        </div>
+      )}
+
+      {/* ── รายละเอียดคอร์สเรียน — full width ── */}
+      {(course as any)?.courseDetails && (
+        <div className="max-w-[1200px] mx-auto px-4 mb-4">
+          <ContentSection
+            icon={<FileText className="w-5 h-5 text-blue-500" />}
+            title="รายละเอียดคอร์สเรียน"
+            accentColor="blue"
+            locked={!hasPaidAccess}
+          >
+            <div className="prose prose-sm max-w-none text-gray-700" dangerouslySetInnerHTML={{ __html: (course as any).courseDetails }} />
+          </ContentSection>
+        </div>
+      )}
+
+      {/* ── รายละเอียดบทเรียน — full width ── */}
+      {(course as any)?.lessons && (course as any).lessons.length > 0 && (
+        <div className="max-w-[1200px] mx-auto px-4 mb-4">
+          <ContentSection
+            icon={<Play className="w-5 h-5 text-purple-500" />}
+            title="รายละเอียดบทเรียน"
+            accentColor="purple"
+            locked={!hasPaidAccess}
+          >
+            <div className="space-y-3">
+              {(course as any).lessons.map((lesson: any, idx: number) => (
+                <div key={lesson.id || idx} className="p-4 border border-gray-200 rounded-lg">
+                  <div className="flex items-start gap-3">
+                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 font-semibold text-sm">
+                      {idx + 1}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-semibold text-gray-900 mb-1">{lesson.name}</h4>
+                      {lesson.duration && <p className="text-xs text-gray-500">⏱️ {lesson.duration}</p>}
+                      {lesson.videoLink && (
+                        <a href={lesson.videoLink} target="_blank" rel="noopener noreferrer" className="text-xs text-indigo-600 hover:text-indigo-700 mt-2 inline-flex items-center gap-1">
+                          <Play className="w-3 h-3" /> ดูวิดีโอ
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </ContentSection>
+        </div>
+      )}
+
       {/* ── สื่อการเรียนการสอน — full width ── */}
+      {hasPaidAccess && (
       <div className="max-w-[1200px] mx-auto px-4 space-y-4">
         <h2 className="text-lg font-bold text-gray-900">สื่อการเรียนการสอน</h2>
 
@@ -385,6 +447,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
         </ContentSection>
         </div>
       </div>
+      )}
     </div>
   );
 }

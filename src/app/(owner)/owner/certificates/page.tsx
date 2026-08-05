@@ -52,8 +52,8 @@ export default function AdminCertificatesPage() {
     try {
       const [certsRes, studentsRes, coursesRes] = await Promise.all([
         fetch("/api/certificates"),
-        fetch("/api/admin/users?role=student"),
-        fetch("/api/admin/courses"),
+        fetch("/api/owner/users?role=student"),
+        fetch("/api/owner/courses"),
       ]);
 
       if (certsRes.ok) {

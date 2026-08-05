@@ -1,6 +1,5 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { withTimeout } from "@/lib/query-timeout";
 import { getAuthUser } from "@/lib/auth";
 import { connectDB } from "@/lib/mongodb";
 import Course from "@/models/Course";
@@ -24,8 +23,8 @@ async function getStats(role: string, userId: string, institutionId?: string, al
     ? { institutionId: { $in: allBranchIds } }
     : institutionId ? { institutionId } : {};
 
-  const courseFilter = (role === "teacher" || role === "owner")
-    ? { ...tenantClause, ...(role === "teacher" ? { instructorId: userId } : {}) }
+  const courseFilter = role === "teacher"
+    ? { ...tenantClause, instructorId: userId }
     : tenantClause;
 
   const courses = await Course.find(courseFilter).select("_id price isActive").lean();
@@ -69,9 +68,9 @@ async function getStats(role: string, userId: string, institutionId?: string, al
   return { totalCourses: courses.length, activeCourses, totalContent, pendingBookings, confirmedBookings, totalStudents, pendingUsers, revenue, pendingRevenue, commissionRate };
 }
 
-export default async function OwnerPage({ searchParams }: { searchParams: Promise<{ branchId?: string }> }) {
+export default async function AdminPage({ searchParams }: { searchParams: Promise<{ branchId?: string }> }) {
   const auth = await getAuthUser();
-  if (!auth || (auth.role !== "owner" && auth.role !== "admin" && auth.role !== "teacher")) redirect("/login");
+  if (!auth || (auth.role !== "admin" && auth.role !== "teacher" && auth.role !== "owner")) redirect("/login");
 
   const { branchId } = await searchParams;
   const isAdmin = auth.role === "admin";
@@ -83,7 +82,7 @@ export default async function OwnerPage({ searchParams }: { searchParams: Promis
   let selectedBranchId = branchId ?? auth.institutionId ?? "";
   let displayName = "";
 
-  if (auth.role === "owner" && auth.institutionId) {
+  if (auth.isOwner && auth.institutionId) {
     await connectDB();
     const [parent, children] = await Promise.all([
       Institution.findById(auth.institutionId).select("_id name").lean() as unknown as Promise<{ _id: mongoose.Types.ObjectId; name: string } | null>,
@@ -121,12 +120,7 @@ export default async function OwnerPage({ searchParams }: { searchParams: Promis
     displayName = inst?.name ?? "";
   }
 
-  const defaultStats = { totalCourses: 0, activeCourses: 0, totalContent: 0, pendingBookings: 0, confirmedBookings: 0, totalStudents: 0, pendingUsers: 0, revenue: 0, pendingRevenue: 0, commissionRate: 0 };
-  const stats = await withTimeout(
-    getStats(auth.role, auth.userId, statsInstitutionId, allBranchIds),
-    10000,
-    defaultStats
-  );
+  const stats = await getStats(auth.role, auth.userId, statsInstitutionId, allBranchIds);
 
   const today = new Date().toLocaleDateString("th-TH", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
 
@@ -142,7 +136,7 @@ export default async function OwnerPage({ searchParams }: { searchParams: Promis
           <p className="text-sm text-gray-400 mt-0.5">{today}</p>
         </div>
         <div className="flex items-center gap-3 flex-wrap">
-          {auth.role === "owner" && branches.length > 1 && (
+          {auth.isOwner && branches.length > 1 && (
             <BranchFilter branches={branches} selected={selectedBranchId} />
           )}
           {displayName && (
@@ -161,7 +155,7 @@ export default async function OwnerPage({ searchParams }: { searchParams: Promis
           sub={stats.pendingUsers > 0 ? `รออนุมัติ ${stats.pendingUsers} คน` : "ไม่มีรอดำเนินการ"}
           accent="from-indigo-500 to-violet-600"
           icon={<GraduationCap className="w-5 h-5 text-white" />}
-          href="/admin/members"
+          href="/owner/members"
         />
         <KpiCard
           label="คอร์สที่เปิดสอน"
@@ -169,7 +163,7 @@ export default async function OwnerPage({ searchParams }: { searchParams: Promis
           sub="คอร์สที่เปิด / ทั้งหมด"
           accent="from-teal-500 to-emerald-500"
           icon={<BookOpen className="w-5 h-5 text-white" />}
-          href="/admin/courses"
+          href="/owner/courses"
         />
         <KpiCard
           label="การจองยืนยันแล้ว"
@@ -177,7 +171,7 @@ export default async function OwnerPage({ searchParams }: { searchParams: Promis
           sub={`รอชำระ ${stats.pendingBookings} รายการ`}
           accent="from-amber-400 to-orange-500"
           icon={<CheckCircle2 className="w-5 h-5 text-white" />}
-          href="/admin/bookings"
+          href="/owner/bookings"
         />
         <KpiCard
           label="รายได้รับแล้ว"
@@ -185,7 +179,7 @@ export default async function OwnerPage({ searchParams }: { searchParams: Promis
           sub={stats.commissionRate > 0 ? `หักค่าคอม ${stats.commissionRate}% แล้ว` : "ยังไม่หักค่าคอม"}
           accent="from-rose-500 to-pink-500"
           icon={<TrendingUp className="w-5 h-5 text-white" />}
-          href="/admin/revenue"
+          href="/owner/revenue"
         />
       </div>
 
@@ -224,12 +218,12 @@ export default async function OwnerPage({ searchParams }: { searchParams: Promis
         <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">เมนูลัด</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {[
-            { href: "/admin/courses",  icon: BookOpen,     label: "จัดการคอร์ส",     desc: "เพิ่ม แก้ไข ลบ กำหนดรอบเรียน", color: "bg-indigo-50 text-indigo-500 group-hover:bg-indigo-100" },
-            { href: "/admin/bookings", icon: CheckCircle2, label: "ตรวจสอบการชำระ",  desc: "ตรวจสลิปและอนุมัติการจอง",       color: "bg-green-50 text-green-500 group-hover:bg-green-100" },
-            { href: "/admin/members",  icon: UserCheck,    label: "อนุมัติสมาชิก",    desc: "ตรวจสอบและอนุมัตินักเรียนใหม่", color: "bg-teal-50 text-teal-500 group-hover:bg-teal-100" },
-            { href: "/admin/revenue",  icon: TrendingUp,   label: "รายงานรายได้",     desc: "ดูรายงานรายได้และสถิติ",          color: "bg-rose-50 text-rose-500 group-hover:bg-rose-100" },
-            { href: "/admin/content",  icon: FileText,     label: "เนื้อหาการเรียน", desc: "จัดการคลิป PPT ไฟล์ดาวน์โหลด",  color: "bg-purple-50 text-purple-500 group-hover:bg-purple-100" },
-            { href: "/admin/schedule", icon: BarChart2,    label: "ตารางสอน",         desc: "ดูตารางการสอนรายเดือน",           color: "bg-amber-50 text-amber-500 group-hover:bg-amber-100" },
+            { href: "/owner/courses",  icon: BookOpen,     label: "จัดการคอร์ส",     desc: "เพิ่ม แก้ไข ลบ กำหนดรอบเรียน", color: "bg-indigo-50 text-indigo-500 group-hover:bg-indigo-100" },
+            { href: "/owner/bookings", icon: CheckCircle2, label: "ตรวจสอบการชำระ",  desc: "ตรวจสลิปและอนุมัติการจอง",       color: "bg-green-50 text-green-500 group-hover:bg-green-100" },
+            { href: "/owner/members",  icon: UserCheck,    label: "อนุมัติสมาชิก",    desc: "ตรวจสอบและอนุมัตินักเรียนใหม่", color: "bg-teal-50 text-teal-500 group-hover:bg-teal-100" },
+            { href: "/owner/revenue",  icon: TrendingUp,   label: "รายงานรายได้",     desc: "ดูรายงานรายได้และสถิติ",          color: "bg-rose-50 text-rose-500 group-hover:bg-rose-100" },
+            { href: "/owner/content",  icon: FileText,     label: "เนื้อหาการเรียน", desc: "จัดการคลิป PPT ไฟล์ดาวน์โหลด",  color: "bg-purple-50 text-purple-500 group-hover:bg-purple-100" },
+            { href: "/owner/schedule", icon: BarChart2,    label: "ตารางสอน",         desc: "ดูตารางการสอนรายเดือน",           color: "bg-amber-50 text-amber-500 group-hover:bg-amber-100" },
           ].map(({ href, icon: Icon, label, desc, color }) => (
             <Link key={href} href={href}
               className="bg-white rounded-2xl border border-gray-100 p-4 hover:border-indigo-200 hover:shadow-sm transition-all group flex items-start gap-3">

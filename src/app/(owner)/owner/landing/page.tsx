@@ -38,14 +38,14 @@ export default function LandingBuilderPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/api/admin/landing").then((r) => r.json()).then((d) => {
+    fetch("/api/owner/landing").then((r) => r.json()).then((d) => {
       if (d && Object.keys(d).length > 0) setConfig({ ...DEFAULT, ...d });
     }).finally(() => setLoading(false));
   }, []);
 
   const save = async () => {
     setSaving(true);
-    await fetch("/api/admin/landing", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(config) });
+    await fetch("/api/owner/landing", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(config) });
     setSaving(false); setSaved(true); setTimeout(() => setSaved(false), 2500);
   };
 

@@ -23,7 +23,7 @@ export default function AdminReviewsPage() {
 
   const load = useCallback(async () => {
     setLoading(true);
-    const r = await fetch(`/api/admin/reviews?status=${tab === "all" ? "" : tab}`);
+    const r = await fetch(`/api/owner/reviews?status=${tab === "all" ? "" : tab}`);
     const data = await r.json();
     setReviews(Array.isArray(data) ? data : []);
     setLoading(false);
@@ -33,7 +33,7 @@ export default function AdminReviewsPage() {
 
   const approve = async (id: string, val: boolean) => {
     setWorking(id);
-    await fetch(`/api/admin/reviews/${id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ isApproved: val }) });
+    await fetch(`/api/owner/reviews/${id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ isApproved: val }) });
     await load();
     setWorking(null);
   };
@@ -41,7 +41,7 @@ export default function AdminReviewsPage() {
   const remove = async (id: string) => {
     if (!confirm("ลบรีวิวนี้?")) return;
     setWorking(id);
-    await fetch(`/api/admin/reviews/${id}`, { method: "DELETE" });
+    await fetch(`/api/owner/reviews/${id}`, { method: "DELETE" });
     setReviews((prev) => prev.filter((r) => r._id !== id));
     setWorking(null);
   };

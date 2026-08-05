@@ -52,7 +52,7 @@ export default function DashboardCharts({ branchId }: { branchId: string }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const url = branchId ? `/api/admin/dashboard?branchId=${branchId}` : "/api/admin/dashboard";
+    const url = branchId ? `/api/owner/dashboard?branchId=${branchId}` : "/api/owner/dashboard";
     fetch(url).then((r) => r.json()).then((d) => { setData(d); setLoading(false); });
   }, [branchId]);
 

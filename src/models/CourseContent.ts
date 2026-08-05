@@ -4,6 +4,7 @@ export interface ICourseContentDocument extends Document {
   institutionId?: mongoose.Types.ObjectId;
   name: string;
   description: string;
+  type?: "online" | "live online" | "onsite";
   ebookCoverUrl: string;
   ebookPdfUrl: string;
   smartPpts: { title: string; thumbnailUrl: string; pptUrl: string }[];
@@ -35,6 +36,7 @@ const CourseContentSchema = new Schema<ICourseContentDocument>(
     institutionId: { type: Schema.Types.ObjectId, ref: "Institution", default: null },
     name: { type: String, required: true, trim: true },
     description: { type: String, default: "" },
+    type: { type: String, enum: ["online", "live online", "onsite"], default: "online" },
     ebookCoverUrl: { type: String, default: "" },
     ebookPdfUrl: { type: String, default: "" },
     smartPpts: [SmartPptSchema],

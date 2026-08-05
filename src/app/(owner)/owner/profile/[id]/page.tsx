@@ -113,7 +113,7 @@ export default function UserProfilePage({ params }: { params: Promise<{ id: stri
   useEffect(() => {
     const loadData = async () => {
       const [userRes, meRes] = await Promise.all([
-        fetch(`/api/admin/users/${id}`),
+        fetch(`/api/owner/users/${id}`),
         fetch("/api/auth/me"),
       ]);
 
@@ -150,7 +150,7 @@ export default function UserProfilePage({ params }: { params: Promise<{ id: stri
   const loadParentStudents = async () => {
     setLoadingStudents(true);
     try {
-      const res = await fetch(`/api/admin/users/${id}/students`, { credentials: "include" });
+      const res = await fetch(`/api/owner/users/${id}/students`, { credentials: "include" });
       if (res.ok) {
         const data = await res.json();
         setStudents(Array.isArray(data) ? data : []);
@@ -176,7 +176,7 @@ export default function UserProfilePage({ params }: { params: Promise<{ id: stri
   const handleSave = async () => {
     setSaving(true);
     setSaved(false);
-    const res = await fetch(`/api/admin/users/${id}`, {
+    const res = await fetch(`/api/owner/users/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -211,7 +211,7 @@ export default function UserProfilePage({ params }: { params: Promise<{ id: stri
 
   const handleAddDoc = async () => {
     if (!docName || !docUrl) return;
-    const res = await fetch(`/api/admin/users/${id}/documents`, {
+    const res = await fetch(`/api/owner/users/${id}/documents`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name: docName, url: docUrl, type: docType }),
@@ -226,7 +226,7 @@ export default function UserProfilePage({ params }: { params: Promise<{ id: stri
   };
 
   const handleDeleteDoc = async (docId: string) => {
-    const res = await fetch(`/api/admin/users/${id}/documents/${docId}`, { method: "DELETE" });
+    const res = await fetch(`/api/owner/users/${id}/documents/${docId}`, { method: "DELETE" });
     if (res.ok) {
       setDocuments(documents.filter((d) => d._id !== docId));
     }
@@ -275,7 +275,7 @@ export default function UserProfilePage({ params }: { params: Promise<{ id: stri
     setTab(t);
     if (t === "progress" && !progress && !loadingProg) {
       setLoadingProg(true);
-      fetch(`/api/admin/students/${id}/progress`)
+      fetch(`/api/owner/students/${id}/progress`)
         .then((r) => r.json())
         .then((d) => setProgress(Array.isArray(d) ? d : []))
         .finally(() => setLoadingProg(false));
@@ -294,7 +294,7 @@ export default function UserProfilePage({ params }: { params: Promise<{ id: stri
   return (
     <div className="max-w-3xl mx-auto space-y-6">
       {/* Back */}
-      <Link href="/admin/users" className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-indigo-600 transition-colors">
+      <Link href="/owner/users" className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-indigo-600 transition-colors">
         <ArrowLeft className="w-4 h-4" /> กลับรายชื่อผู้ใช้
       </Link>
 
@@ -478,7 +478,7 @@ export default function UserProfilePage({ params }: { params: Promise<{ id: stri
             students.map((s) => (
               <Link
                 key={s._id}
-                href={`/admin/students/${s._id}`}
+                href={`/owner/students/${s._id}`}
                 className="bg-white rounded-xl border border-gray-100 p-4 hover:shadow-sm transition-all flex items-center justify-between group theme-item-hover"
               >
                 <div className="min-w-0 flex-1">

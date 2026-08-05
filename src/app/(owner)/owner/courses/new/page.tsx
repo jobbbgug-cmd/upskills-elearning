@@ -12,14 +12,14 @@ export default function NewCoursePage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Online Course */}
-        <Link href="/admin/courses/online/new" className="group">
+        <Link href="/owner/courses/online/new" className="group">
           <div className="bg-white rounded-2xl border border-gray-100 p-8 hover:border-indigo-300 hover:shadow-lg transition-all h-full">
             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-100 to-cyan-100 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
               <Globe className="w-6 h-6 text-blue-600" />
             </div>
             <h2 className="text-xl font-bold text-gray-900 mb-2">คอร์สออนไลน์</h2>
             <p className="text-gray-600 text-sm mb-6 leading-relaxed">
-              คอร์สเรียนออนไลน์สดหรือบันทึก เรียนได้ตามเวลาของคุณ มีวิดีโอให้ชมย้อนหลัง
+              คอร์สเรียนออนไลน์ เรียนได้ตามเวลาของคุณ มีวิดีโอให้ชมย้อนหลัง
             </p>
             <ul className="space-y-2 text-sm text-gray-600">
               <li className="flex items-center gap-2">
@@ -42,7 +42,7 @@ export default function NewCoursePage() {
         </Link>
 
         {/* Onsite Course */}
-        <Link href="/admin/courses/onsite/new" className="group">
+        <Link href="/owner/courses/onsite/new" className="group">
           <div className="bg-white rounded-2xl border border-gray-100 p-8 hover:border-orange-300 hover:shadow-lg transition-all h-full">
             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-100 to-amber-100 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
               <Building2 className="w-6 h-6 text-orange-600" />

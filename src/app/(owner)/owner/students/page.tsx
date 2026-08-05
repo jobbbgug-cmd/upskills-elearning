@@ -49,7 +49,7 @@ export default function AdminStudentsPage() {
     if (search) params.set("search", search);
     if (grade)  params.set("grade", grade);
     if (group)  params.set("group", group);
-    const res = await fetch(`/api/admin/students?${params}`);
+    const res = await fetch(`/api/owner/students?${params}`);
     if (res.ok) {
       const data: Student[] = await res.json();
       setStudents(data);
@@ -69,7 +69,7 @@ export default function AdminStudentsPage() {
     }
     setSaving(true);
     try {
-      const res = await fetch("/api/admin/students", {
+      const res = await fetch("/api/owner/students", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -298,7 +298,7 @@ export default function AdminStudentsPage() {
                     </td>
                     <td className="px-5 py-4 text-right">
                       <Link
-                        href={`/admin/students/${s._id}`}
+                        href={`/owner/students/${s._id}`}
                         className="inline-flex items-center gap-1 text-sm text-indigo-600 hover:text-indigo-800 font-medium"
                       >
                         ดูโปรไฟล์ <ChevronRight className="w-3.5 h-3.5" />

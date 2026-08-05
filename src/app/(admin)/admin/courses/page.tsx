@@ -1,35 +1,48 @@
-import { redirect } from "next/navigation";
+"use client";
+
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { getAuthUser } from "@/lib/auth";
-import { connectDB } from "@/lib/mongodb";
-import Course from "@/models/Course";
-import Institution from "@/models/Institution";
 import { ICourse } from "@/types";
 import Badge from "@/components/ui/Badge";
-import { BookOpen, Plus, Pencil, Building2 } from "lucide-react";
+import { BookOpen, Plus, Pencil, Building2, Globe, Radio, Building2 as Building } from "lucide-react";
 import DeleteCourseButton from "./DeleteCourseButton";
 
-async function getCourses(role: string, userId: string, institutionId?: string) {
-  await connectDB();
-  const tenantClause = institutionId ? { institutionId } : {};
-  const filter = role === "teacher" ? { ...tenantClause, instructorId: userId } : tenantClause;
-  const courses = await Course.find(filter).sort({ createdAt: -1 }).lean();
-  return JSON.parse(JSON.stringify(courses)) as ICourse[];
-}
+type CourseType = "all" | "online" | "live online" | "onsite";
 
-export default async function AdminCoursesPage() {
-  const auth = await getAuthUser();
-  if (!auth || (auth.role !== "admin" && auth.role !== "teacher" && auth.role !== "owner")) redirect("/login");
+const COURSE_TYPES: { value: CourseType; label: string; icon: React.ComponentType<any>; color: string }[] = [
+  { value: "all", label: "ทั้งหมด", icon: BookOpen, color: "gray" },
+  { value: "online", label: "คอร์สออนไลน์", icon: Globe, color: "blue" },
+  { value: "live online", label: "Live Online", icon: Radio, color: "purple" },
+  { value: "onsite", label: "Onsite", icon: Building, color: "orange" },
+];
 
-  const courses = await getCourses(auth.role, auth.userId, auth.institutionId);
+export default function AdminCoursesPage() {
+  const [courses, setCourses] = useState<ICourse[]>([]);
+  const [selectedType, setSelectedType] = useState<CourseType>("all");
+  const [loading, setLoading] = useState(true);
+  const [institutionName, setInstitutionName] = useState("");
 
-  let institutionName = "";
-  if (auth.institutionId) {
-    await connectDB();
-    const inst = await Institution.findById(auth.institutionId).select("name").lean() as { name: string } | null;
-    institutionName = inst?.name ?? "";
-  }
+  useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        const res = await fetch("/api/admin/courses");
+        const data = await res.json();
+        setCourses(data.courses || []);
+        setInstitutionName(data.institutionName || "");
+      } catch (error) {
+        console.error("Failed to fetch courses:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCourses();
+  }, []);
+
+  const filteredCourses = selectedType === "all"
+    ? courses
+    : courses.filter(c => (c.type || "online") === selectedType);
 
   return (
     <div>
@@ -47,7 +60,11 @@ export default async function AdminCoursesPage() {
           </div>
         </div>
         <Link
-          href="/admin/courses/new"
+          href={
+            selectedType === "all"
+              ? "/admin/courses/new"
+              : `/admin/courses/${selectedType.replace(" ", "-")}/new`
+          }
           className="flex items-center gap-2 px-4 py-2.5 theme-button text-sm font-medium rounded-xl transition-colors"
         >
           <Plus className="w-4 h-4" />
@@ -55,7 +72,27 @@ export default async function AdminCoursesPage() {
         </Link>
       </div>
 
-      {courses.length === 0 ? (
+      {/* Tabs */}
+      <div className="flex gap-2 mb-6 border-b border-gray-200">
+        {COURSE_TYPES.map((type) => (
+          <button
+            key={type.value}
+            onClick={() => setSelectedType(type.value)}
+            className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
+              selectedType === type.value
+                ? "border-indigo-600 text-indigo-600"
+                : "border-transparent text-gray-600 hover:text-gray-900"
+            }`}
+          >
+            <type.icon className="w-4 h-4" />
+            {type.label}
+          </button>
+        ))}
+      </div>
+
+      {loading ? (
+        <div className="text-center py-12 text-gray-400">กำลังโหลด...</div>
+      ) : filteredCourses.length === 0 ? (
         <div className="bg-white rounded-2xl border border-gray-100 p-16 text-center text-gray-400">
           <BookOpen className="w-12 h-12 mx-auto mb-3 opacity-40" />
           <p>ยังไม่มีคอร์ส</p>
@@ -69,6 +106,7 @@ export default async function AdminCoursesPage() {
             <thead className="bg-gray-50 border-b border-gray-100">
               <tr>
                 <th className="px-5 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">คอร์ส</th>
+                <th className="px-5 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide hidden md:table-cell">ประเภท</th>
                 <th className="px-5 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide hidden md:table-cell">ระดับชั้น</th>
                 <th className="px-5 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide hidden lg:table-cell">รอบ</th>
                 <th className="px-5 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">สถานะ</th>
@@ -76,7 +114,7 @@ export default async function AdminCoursesPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
-              {courses.map((course) => (
+              {filteredCourses.map((course) => (
                 <tr key={course._id} className="hover:bg-gray-50/50 transition-colors">
                   <td className="px-5 py-4">
                     <div className="flex items-center gap-3">
@@ -94,6 +132,14 @@ export default async function AdminCoursesPage() {
                         <div className="text-xs text-gray-400">{course.instructor}</div>
                       </div>
                     </div>
+                  </td>
+                  <td className="px-5 py-4 hidden md:table-cell">
+                    {(() => {
+                      const type = (course.type || "online") as string;
+                      const typeLabel = type === "live online" ? "Live Online" : type === "online" ? "ออนไลน์" : "Onsite";
+                      const typeColor = type === "live online" ? "purple" : type === "online" ? "blue" : "orange";
+                      return <Badge variant={typeColor as any} className="text-xs">{typeLabel}</Badge>;
+                    })()}
                   </td>
                   <td className="px-5 py-4 hidden md:table-cell">
                     <div className="flex flex-wrap gap-1">

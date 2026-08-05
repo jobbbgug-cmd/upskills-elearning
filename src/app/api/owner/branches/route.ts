@@ -3,12 +3,10 @@ import { getAuthUser } from "@/lib/auth";
 import { connectDB } from "@/lib/mongodb";
 import Institution from "@/models/Institution";
 
-export async function GET(req: NextRequest) {
-  try {
-    const user = await getAuthUser();
-    if (!user || user.role !== "owner") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+export async function GET() {
+  const auth = await getAuthUser();
+  if (!auth || !["admin", "owner", "super_admin"].includes(auth.role))
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     await connectDB();
 

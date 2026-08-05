@@ -40,7 +40,7 @@ export default function AnalyticsPage() {
   const [sortBy,    setSortBy]    = useState<"enrolled" | "watchingRate" | "hwSubmitted" | "quizAttempts">("enrolled");
 
   useEffect(() => {
-    fetch("/api/admin/analytics")
+    fetch("/api/owner/analytics")
       .then((r) => r.json())
       .then((d) => { setData(d); setLoading(false); });
   }, []);

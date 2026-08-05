@@ -31,7 +31,7 @@ export default function BrandingPage() {
   const logoRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    fetch("/api/admin/branding")
+    fetch("/api/owner/branding")
       .then((r) => r.json())
       .then((d) => {
         setForm({
@@ -42,8 +42,9 @@ export default function BrandingPage() {
           tagline: d.tagline ?? "",
           whiteLabelMode: d.whiteLabelMode ?? false,
         });
-        setLoading(false);
-      });
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, []);
 
   const uploadImage = async (file: File, field: "logo" | "favicon") => {
@@ -68,7 +69,7 @@ export default function BrandingPage() {
     setSaving(true);
     setSaved(false);
     try {
-      const res = await fetch("/api/admin/branding", {
+      const res = await fetch("/api/owner/branding", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
@@ -142,11 +143,11 @@ export default function BrandingPage() {
           <Upload className="w-4 h-4 theme-link" /> โลโก้
         </h2>
         <div className="flex items-center gap-4">
-          <div className="w-32 h-14 rounded-xl border border-gray-200 bg-gray-50 flex items-center justify-center overflow-hidden px-2">
+          <div className="w-32 h-14 rounded-xl border border-gray-200 bg-gray-50 flex items-center justify-center overflow-hidden">
             {form.logoUrl ? (
-              <Image src={form.logoUrl} alt="logo" width={120} height={48} className="object-contain w-full h-full" />
+              <Image src={form.logoUrl} alt="logo" width={120} height={48} className="object-contain object-center w-full h-full" />
             ) : (
-              <span className="text-xs text-gray-500 font-medium text-center leading-tight">{form.name || "ยังไม่มีโลโก้"}</span>
+              <span className="text-xs text-gray-400 font-medium text-center leading-tight px-1">{form.name ? form.name : "ไม่มีโลโก้"}</span>
             )}
           </div>
           <div className="flex-1">

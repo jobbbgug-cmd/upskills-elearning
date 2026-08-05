@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
 import { tenantFilter } from "@/lib/tenant";
 import Course from "@/models/Course";
+import Category from "@/models/Category";
 
 export async function GET(req: NextRequest) {
   try {
@@ -20,7 +21,8 @@ export async function GET(req: NextRequest) {
     let courseQuery = Course.find(query).sort(sort);
     if (limit) courseQuery = courseQuery.limit(limit);
 
-    const courses = await courseQuery.exec();
+    const courses = await courseQuery.lean().exec();
+
     return NextResponse.json({ courses });
   } catch (err) {
     console.error(err);

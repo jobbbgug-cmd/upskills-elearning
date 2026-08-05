@@ -77,6 +77,7 @@ export interface ICourse {
   instructor: string;
   instructorId?: string;
   category: string;
+  type?: "online" | "live online" | "onsite";
   sessions: ISession[];
   price: number;
   isActive: boolean;
@@ -106,7 +107,7 @@ export interface IUser {
   _id: string;
   name: string;
   email: string;
-  role: "student" | "teacher" | "parent" | "admin" | "super_admin";
+  role: "student" | "teacher" | "parent" | "admin" | "super_admin" | "owner";
   status: "pending" | "approved" | "rejected";
   gradeLevel?: GradeLevel;
   profileImage?: string;

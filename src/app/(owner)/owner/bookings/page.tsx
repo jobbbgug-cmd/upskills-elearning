@@ -45,8 +45,8 @@ export default function AdminBookingsPage() {
     setLoading(true);
     const qs = institutionId && institutionId !== "all" ? `?institutionId=${institutionId}` : "";
     const [bookingsRes, instRes] = await Promise.all([
-      fetch(`/api/admin/bookings${qs}`),
-      fetch("/api/admin/institutions"),
+      fetch(`/api/owner/bookings${qs}`),
+      fetch("/api/owner/institutions"),
     ]);
     if (bookingsRes.ok) {
       const data = await bookingsRes.json();
@@ -67,7 +67,7 @@ export default function AdminBookingsPage() {
 
   const act = async (id: string, action: "approve" | "reject") => {
     setActing(id);
-    const res = await fetch(`/api/admin/bookings/${id}`, {
+    const res = await fetch(`/api/owner/bookings/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ action }),

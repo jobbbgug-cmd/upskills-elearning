@@ -60,7 +60,7 @@ export default function AdminProductsPage() {
       if (search) params.set("search", search);
 
       if (activeTab === "product") {
-        const res = await fetch(`/api/admin/products?${params.toString()}`);
+        const res = await fetch(`/api/owner/products?${params.toString()}`);
         if (!res.ok) {
           setProducts([]);
           setLoading(false);
@@ -69,7 +69,7 @@ export default function AdminProductsPage() {
         const data = await res.json();
         setProducts(Array.isArray(data) ? data : []);
       } else {
-        const res = await fetch(`/api/admin/courses?${params.toString()}`);
+        const res = await fetch(`/api/owner/courses?${params.toString()}`);
         if (!res.ok) {
           setCourses([]);
           setLoading(false);
@@ -127,8 +127,8 @@ export default function AdminProductsPage() {
       const endpoint = activeTab === "product" ? "products" : "courses";
       const method = editing ? "PATCH" : "POST";
       const url = editing
-        ? `/api/admin/${endpoint}/${editing._id}`
-        : `/api/admin/${endpoint}`;
+        ? `/api/owner/${endpoint}/${editing._id}`
+        : `/api/owner/${endpoint}`;
 
       const payload = activeTab === "product"
         ? { name: form.name, description: form.description, price: form.price, stock: form.stock, category: form.category, sku: form.sku, image: form.image, isActive: form.isActive }
@@ -199,7 +199,7 @@ export default function AdminProductsPage() {
     setActing(id);
     try {
       const endpoint = activeTab === "product" ? "products" : "courses";
-      const res = await fetch(`/api/admin/${endpoint}/${id}`, {
+      const res = await fetch(`/api/owner/${endpoint}/${id}`, {
         method: "DELETE",
       });
       if (res.ok) {

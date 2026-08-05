@@ -34,7 +34,7 @@ export default function AdminBannersPage() {
   const load = async () => {
     setLoading(true);
     const [bannersRes, meRes] = await Promise.all([
-      fetch("/api/admin/banners"),
+      fetch("/api/owner/banners"),
       fetch("/api/auth/me"),
     ]);
     if (bannersRes.ok) setBanners(await bannersRes.json());
@@ -43,7 +43,7 @@ export default function AdminBannersPage() {
       const role = d.user?.role ?? "";
       setMyRole(role);
       if (role === "super_admin") {
-        const instRes = await fetch("/api/admin/institutions");
+        const instRes = await fetch("/api/owner/institutions");
         if (instRes.ok) {
           const institutions = await instRes.json() as { _id: string; name: string }[];
           const names: Record<string, string> = {};
@@ -102,14 +102,14 @@ export default function AdminBannersPage() {
     e.preventDefault();
     if (!form.imageUrl) return alert("กรุณาอัปโหลดรูปภาพ Desktop ก่อน");
     if (editingId) {
-      const res = await fetch(`/api/admin/banners/${editingId}`, {
+      const res = await fetch(`/api/owner/banners/${editingId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
       if (res.ok) { closeForm(); load(); }
     } else {
-      const res = await fetch("/api/admin/banners", {
+      const res = await fetch("/api/owner/banners", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...form, order: banners.length }),
@@ -120,12 +120,12 @@ export default function AdminBannersPage() {
 
   const handleDelete = async (id: string) => {
     if (!confirm("ลบแบนเนอร์นี้?")) return;
-    await fetch(`/api/admin/banners/${id}`, { method: "DELETE" });
+    await fetch(`/api/owner/banners/${id}`, { method: "DELETE" });
     load();
   };
 
   const toggleActive = async (banner: IBanner) => {
-    await fetch(`/api/admin/banners/${banner._id}`, {
+    await fetch(`/api/owner/banners/${banner._id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ isActive: !banner.isActive }),

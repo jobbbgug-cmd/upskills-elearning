@@ -19,7 +19,8 @@ export interface ICourseDocument extends Document {
   gradeLevels: string[];
   instructor: string;
   instructorId: string;
-  category: string;
+  category: mongoose.Types.ObjectId;
+  type: "online" | "onsite" | "live online";
   sessions: ISessionDocument[];
   price: number;
   isActive: boolean;
@@ -33,6 +34,9 @@ export interface ICourseDocument extends Document {
   linkDownload?: string;
   ebookPdfUrl?: string;
   contentId?: mongoose.Types.ObjectId;
+  whatYouWillLearn?: string;
+  courseDetails?: string;
+  lessons?: { id: string; name: string; videoLink: string; duration: string }[];
   smartPpts?: { title: string; thumbnailUrl: string; pptUrl: string }[];
   teachingClips?: { title: string; youtubeUrl: string }[];
   summaryClips?: { title: string; youtubeUrl: string }[];
@@ -80,7 +84,7 @@ const CourseSchema = new Schema<ICourseDocument>(
     gradeLevels: [{ type: String }],
     instructor: { type: String, required: true },
     instructorId: { type: String, default: "" },
-    category: { type: String, required: true },
+    category: {type: Schema.Types.ObjectId,ref: "Category",required: true,},type: {type: String,enum: ["online", "onsite", "live online"],default: "online",},
     sessions: [SessionSchema],
     price: { type: Number, default: 0 },
     isActive: { type: Boolean, default: true },
@@ -94,6 +98,9 @@ const CourseSchema = new Schema<ICourseDocument>(
     linkDownload: { type: String, default: "" },
     ebookPdfUrl: { type: String, default: "" },
     contentId: { type: Schema.Types.ObjectId, ref: "CourseContent", default: null },
+    whatYouWillLearn: { type: String, default: "" },
+    courseDetails: { type: String, default: "" },
+    lessons: [{ type: Object, default: {} }],
     smartPpts: [SmartPptSchema],
     teachingClips: [YoutubeClipSchema],
     summaryClips: [YoutubeClipSchema],

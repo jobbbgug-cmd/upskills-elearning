@@ -12,7 +12,7 @@ export default function DeleteCourseButton({ courseId }: { courseId: string }) {
   const handleDelete = async () => {
     setLoading(true);
     try {
-      await fetch(`/api/admin/courses/${courseId}`, { method: "DELETE" });
+      await fetch(`/api/owner/courses/${courseId}`, { method: "DELETE" });
       router.refresh();
     } finally {
       setLoading(false);

@@ -25,7 +25,7 @@ export default async function EditCoursePage({ params }: { params: Promise<{ id:
   if (!course) notFound();
 
   // Teacher can only edit their own courses
-  if (auth.role === "teacher" && course.instructorId !== auth.userId) redirect("/admin/courses");
+  if (auth.role === "teacher" && course.instructorId !== auth.userId) redirect("/owner/courses");
 
   return (
     <div>

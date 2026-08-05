@@ -20,7 +20,7 @@ export default function TeacherPortalPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/api/admin/teacher/stats")
+    fetch("/api/owner/teacher/stats")
       .then((r) => r.json())
       .then((d) => setData(d))
       .finally(() => setLoading(false));
@@ -58,7 +58,7 @@ export default function TeacherPortalPage() {
         <div>
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-semibold text-gray-900 flex items-center gap-2"><BookOpen className="w-4 h-4 text-indigo-500" />คอร์สของคุณ</h2>
-            <Link href="/admin/courses" className="text-xs text-indigo-600 hover:text-indigo-800 flex items-center gap-1">จัดการ <ChevronRight className="w-3 h-3" /></Link>
+            <Link href="/owner/courses" className="text-xs text-indigo-600 hover:text-indigo-800 flex items-center gap-1">จัดการ <ChevronRight className="w-3 h-3" /></Link>
           </div>
           {data.courseStats.length === 0 ? (
             <div className="bg-white rounded-2xl border border-gray-100 p-8 text-center text-gray-300 text-sm">ยังไม่มีคอร์ส</div>
@@ -87,7 +87,7 @@ export default function TeacherPortalPage() {
         <div>
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-semibold text-gray-900 flex items-center gap-2"><FileText className="w-4 h-4 text-amber-500" />รอตรวจการบ้าน</h2>
-            <Link href="/admin/homework" className="text-xs text-indigo-600 hover:text-indigo-800 flex items-center gap-1">ดูทั้งหมด <ChevronRight className="w-3 h-3" /></Link>
+            <Link href="/owner/homework" className="text-xs text-indigo-600 hover:text-indigo-800 flex items-center gap-1">ดูทั้งหมด <ChevronRight className="w-3 h-3" /></Link>
           </div>
           {data.pendingHomework.length === 0 ? (
             <div className="bg-white rounded-2xl border border-gray-100 p-8 text-center">
@@ -106,7 +106,7 @@ export default function TeacherPortalPage() {
                     <p className="text-xs text-gray-400 mt-0.5">ส่งโดย: {(sub as unknown as { studentId?: { name: string } }).studentId?.name ?? "—"}</p>
                   </div>
                   <Link
-                    href={sub.homeworkId?.courseId ? `/admin/homework` : "/admin/homework"}
+                    href={sub.homeworkId?.courseId ? `/owner/homework` : "/owner/homework"}
                     className="shrink-0 text-xs text-indigo-500 hover:text-indigo-700 font-medium flex items-center gap-1">
                     ตรวจ <ChevronRight className="w-3 h-3" />
                   </Link>
@@ -122,10 +122,10 @@ export default function TeacherPortalPage() {
         <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">เมนูลัด</h2>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {[
-            { href: "/admin/attendance", label: "เช็คชื่อ",    color: "bg-green-50 text-green-600"  },
-            { href: "/admin/quiz",       label: "ข้อสอบ",       color: "bg-rose-50  text-rose-600"   },
-            { href: "/admin/live",       label: "Live Class",  color: "bg-red-50   text-red-600"    },
-            { href: "/admin/schedule",   label: "ตารางสอน",   color: "bg-blue-50  text-blue-600"   },
+            { href: "/owner/attendance", label: "เช็คชื่อ",    color: "bg-green-50 text-green-600"  },
+            { href: "/owner/quiz",       label: "ข้อสอบ",       color: "bg-rose-50  text-rose-600"   },
+            { href: "/owner/live",       label: "Live Class",  color: "bg-red-50   text-red-600"    },
+            { href: "/owner/schedule",   label: "ตารางสอน",   color: "bg-blue-50  text-blue-600"   },
           ].map((link) => (
             <Link key={link.href} href={link.href}
               className={`flex items-center justify-between px-4 py-3 rounded-xl text-sm font-semibold ${link.color} hover:opacity-80 transition-opacity`}>

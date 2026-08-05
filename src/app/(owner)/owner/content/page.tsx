@@ -45,7 +45,7 @@ export default async function ContentListPage() {
           </div>
         </div>
         <Link
-          href="/admin/content/new"
+          href="/owner/content/new"
           className="flex items-center gap-2 px-4 py-2.5 theme-button text-sm font-semibold rounded-xl transition-colors"
         >
           <Plus className="w-4 h-4" />
@@ -114,7 +114,7 @@ export default async function ContentListPage() {
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   <Link
-                    href={`/admin/content/${c._id}`}
+                    href={`/owner/content/${c._id}`}
                     className="flex items-center gap-1.5 px-3 py-2 text-sm theme-link rounded-lg transition-colors font-medium hover:bg-gray-100"
                   >
                     <Pencil className="w-3.5 h-3.5" />

@@ -29,7 +29,7 @@ export default function AdminQuizPage() {
     const controller = new AbortController();
     Promise.all([
       fetch("/api/quiz",           { signal: controller.signal }).then((r) => r.json()),
-      fetch("/api/admin/courses",  { signal: controller.signal }).then((r) => r.json()),
+      fetch("/api/owner/courses",  { signal: controller.signal }).then((r) => r.json()),
     ]).then(([q, c]) => {
       setQuizzes(Array.isArray(q) ? q : []);
       const cs = Array.isArray(c) ? c : c.courses ?? [];
@@ -120,7 +120,7 @@ export default function AdminQuizPage() {
                 className={`shrink-0 transition-colors ${q.isActive ? "text-indigo-500 hover:text-indigo-700" : "text-gray-300 hover:text-indigo-400"}`}>
                 {q.isActive ? <ToggleRight className="w-7 h-7" /> : <ToggleLeft className="w-7 h-7" />}
               </button>
-              <Link href={`/admin/quiz/${q._id}`}
+              <Link href={`/owner/quiz/${q._id}`}
                 className="flex items-center gap-1 text-sm text-indigo-600 hover:text-indigo-800 font-medium shrink-0">
                 จัดการ <ChevronRight className="w-3.5 h-3.5" />
               </Link>
