@@ -347,13 +347,13 @@ export default function CourseForm({ course, mode, courseType, teacherMode = fal
       {/* What you will learn */}
       <div>
         <label className="block text-sm font-semibold text-gray-700 mb-3">คอร์สนี้ได้เรียนอะไรบ้าง? *</label>
-        <RichTextEditor value={whatYouWillLearn} onChange={setWhatYouWillLearn} />
+        <RichTextEditor key={`whatYouWillLearn-${course?._id || 'new'}`} value={whatYouWillLearn} onChange={setWhatYouWillLearn} />
       </div>
 
       {/* Course details */}
       <div>
         <label className="block text-sm font-semibold text-gray-700 mb-3">รายละเอียดคอร์สเรียน *</label>
-        <RichTextEditor value={courseDetails} onChange={setCourseDetails} />
+        <RichTextEditor key={`courseDetails-${course?._id || 'new'}`} value={courseDetails} onChange={setCourseDetails} />
       </div>
 
       {/* Lessons */}
