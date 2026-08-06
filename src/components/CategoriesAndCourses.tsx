@@ -104,8 +104,8 @@ export default function CategoriesAndCourses() {
             ))}
           </div>
         ) : filteredCourses.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {filteredCourses.slice(0, 6).map((course) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {filteredCourses.slice(0, 4).map((course) => (
               <Link
                 key={course._id}
                 href={`/courses/${course._id}`}
