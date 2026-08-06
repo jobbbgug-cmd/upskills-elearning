@@ -93,14 +93,14 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
   ] as const;
 
   const filteredCourses = activeTab === "all"
-    ? courses.filter((c) => !selectedCategory || c.category === selectedCategory)
+    ? courses.filter((c) => !selectedCategory || (c as any).categoryName === selectedCategory)
     : courses.filter((c) => {
         const typeMatches =
           (activeTab === "online" && (c.type || "online") === "online") ||
           (activeTab === "live-online" && c.type === "live online") ||
           (activeTab === "onsite" && c.type === "onsite");
 
-        const categoryMatches = !selectedCategory || c.category === selectedCategory;
+        const categoryMatches = !selectedCategory || (c as any).categoryName === selectedCategory;
 
         return typeMatches && categoryMatches;
       });
