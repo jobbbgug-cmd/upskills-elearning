@@ -276,7 +276,7 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
                 <div className="px-4 py-3 flex items-center justify-between text-xs text-gray-500 border-b border-gray-100">
                   <div className="flex items-center gap-1">
                     <span>👥</span>
-                    <span>113</span>
+                    <span>{course.enrollmentCount || 0}</span>
                   </div>
                   <div className="flex items-center gap-1">
                     <span>⏱️</span>
