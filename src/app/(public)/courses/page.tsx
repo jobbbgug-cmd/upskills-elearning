@@ -18,20 +18,16 @@ const ALL_GRADE_LEVELS: GradeLevel[] = GRADE_GROUPS.flatMap((g) => g.grades);
 
 async function getCourses() {
   await connectDB();
-  const courses = await Course.find({ isActive: true })
-    .sort({ createdAt: -1 })
-    .lean();
+  const db = Course.collection.db;
 
-  // Map courses and fetch category names
-  const courseIds = courses.map(c => c._id);
-  const categories = await Course.collection.db.collection("categories").find({}).toArray();
+  // Use raw MongoDB query to avoid Mongoose validation issues
+  const courses = await db.collection("courses").find({ isActive: true }).sort({ createdAt: -1 }).toArray();
+  const categories = await db.collection("categories").find({}).toArray();
   const categoryMap = new Map(categories.map(cat => [cat._id?.toString(), cat.name]));
 
-  return JSON.parse(JSON.stringify(courses.map(course => ({
+  return JSON.parse(JSON.stringify(courses.map((course: any) => ({
     ...course,
-    categoryName: typeof course.category === "string" && categoryMap.has(course.category)
-      ? categoryMap.get(course.category)
-      : null
+    categoryName: course.category ? categoryMap.get(course.category.toString()) : null
   })))) as (ICourse & { categoryName?: string })[];
 }
 
