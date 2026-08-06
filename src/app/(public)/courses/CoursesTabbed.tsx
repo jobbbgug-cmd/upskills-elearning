@@ -6,6 +6,7 @@ import Image from "next/image";
 import { useSearchParams, useRouter } from "next/navigation";
 import { ICourse } from "@/types";
 import Toast from "@/components/ui/Toast";
+import { useCart } from "@/context/CartContext";
 
 interface Category {
   name: string;
@@ -26,6 +27,7 @@ interface CourseTabbedProps {
 export default function CoursesTabbed({ courses }: CourseTabbedProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const { addToCart } = useCart();
   
   const [activeTab, setActiveTab] = useState<TabType>("all");
   const [categories, setCategories] = useState<Category[]>([]);
@@ -86,7 +88,8 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
     fetchData();
   }, [activeTab]);
 
-  const handleAddToCart = (courseId: string) => {
+  const handleAddToCart = (course: ICourse) => {
+    addToCart(course);
     setToast({ message: "เพิ่มคอร์สลงตะกร้าแล้ว!", type: "success" });
     setTimeout(() => setToast(null), 3000);
   };
@@ -314,7 +317,7 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
                 {/* Buttons */}
                 <div className="px-4 py-3 flex gap-2">
                   <button
-                    onClick={() => handleAddToCart(course._id)}
+                    onClick={() => handleAddToCart(course)}
                     className="flex-1 py-2 border-2 border-indigo-600 text-indigo-600 rounded-lg font-semibold text-sm hover:bg-indigo-50 transition-colors flex items-center justify-center gap-2"
                   >
                     <span>🛒</span>
