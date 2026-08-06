@@ -224,10 +224,31 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
         ) : filteredCourses.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-6">
             {filteredCourses.map((course) => (
-              <Link key={course._id} href={`/courses/${course._id}`}>
-                <div className="bg-white rounded-xl overflow-hidden hover:shadow-lg transition-shadow group">
-                  {/* Course Image */}
-                  <div className="relative h-48 bg-gradient-to-br from-indigo-100 to-purple-100 overflow-hidden">
+              <div key={course._id} className="bg-white rounded-xl overflow-hidden hover:shadow-lg transition-shadow group">
+                {/* Course Type Badge */}
+                <div className="px-4 pt-4 pb-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-semibold text-gray-700">
+                      {activeTab === "online" ? "คอร์สเรียน" : activeTab === "live-online" ? "คอร์สเรียน Live" : "คอร์สเรียน Onsite"}
+                    </span>
+                    {course.category && (
+                      <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">
+                        {course.category}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Course Title */}
+                <div className="px-4 pb-3">
+                  <h3 className="font-bold text-gray-900 line-clamp-2 text-sm group-hover:text-indigo-600 transition-colors">
+                    {course.title}
+                  </h3>
+                </div>
+
+                {/* Course Image */}
+                <Link href={`/courses/${course._id}`}>
+                  <div className="relative h-40 bg-gradient-to-br from-indigo-100 to-purple-100 overflow-hidden cursor-pointer">
                     {course.coverImage ? (
                       <Image
                         src={course.coverImage}
@@ -237,40 +258,61 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
                       />
                     ) : (
                       <div className="flex items-center justify-center h-full">
-                        <span className="text-5xl">📚</span>
+                        <span className="text-4xl">📚</span>
                       </div>
                     )}
                   </div>
+                </Link>
 
-                  {/* Course Info */}
-                  <div className="p-5">
-                    <h3 className="font-bold text-gray-900 mb-3 line-clamp-2 group-hover:text-indigo-600">
-                      {course.title}
-                    </h3>
-
-                    <p className="text-sm text-gray-600 mb-4 line-clamp-2">{course.description}</p>
-
-                    {/* Instructor */}
-                    <div className="flex items-center gap-3 mb-4">
-                      <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-sm font-bold text-indigo-600">
-                        {course.instructor?.[0] || "U"}
-                      </div>
-                      <span className="text-xs text-gray-600">{course.instructor}</span>
+                {/* Instructor */}
+                <div className="px-4 py-3 border-b border-gray-100">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-xs font-bold text-indigo-600 flex-shrink-0">
+                      {course.instructor?.[0] || "U"}
                     </div>
-
-                    {/* Stats */}
-                    <div className="flex items-center gap-4 text-xs text-gray-500 py-3 border-t border-gray-100">
-                      <div>📚 {course.sessions?.length ?? 0} lessons</div>
-                      {course.price && <div>💰 {course.price} บาท</div>}
-                    </div>
-
-                    {/* CTA */}
-                    <button className="w-full mt-4 py-2.5 bg-indigo-600 text-white rounded-lg font-semibold text-sm hover:bg-indigo-700 transition-colors">
-                      เรียนเลย
-                    </button>
+                    <span className="text-xs text-gray-600 truncate">{course.instructor}</span>
                   </div>
                 </div>
-              </Link>
+
+                {/* Stats */}
+                <div className="px-4 py-3 flex items-center justify-between text-xs text-gray-500 border-b border-gray-100">
+                  <div className="flex items-center gap-1">
+                    <span>👥</span>
+                    <span>113</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <span>⏱️</span>
+                    <span>{course.sessions?.length ? `${course.sessions.length * 30}` : "0"} นาที</span>
+                  </div>
+                </div>
+
+                {/* Price */}
+                <div className="px-4 py-3 border-b border-gray-100">
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-xl font-bold text-pink-600">
+                      ฿{course.price || "0"}
+                    </span>
+                    {course.price && (
+                      <span className="text-xs text-gray-400 line-through">
+                        ฿{Math.round((course.price as number) * 1.3)}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Buttons */}
+                <div className="px-4 py-3 flex gap-2">
+                  <button className="flex-1 py-2 border-2 border-indigo-600 text-indigo-600 rounded-lg font-semibold text-sm hover:bg-indigo-50 transition-colors flex items-center justify-center gap-2">
+                    <span>🛒</span>
+                    <span>ใส่ตะกร้า</span>
+                  </button>
+                  <Link href={`/courses/${course._id}`} className="flex-1">
+                    <button className="w-full py-2 bg-indigo-600 text-white rounded-lg font-semibold text-sm hover:bg-indigo-700 transition-colors">
+                      ซื้อเลย
+                    </button>
+                  </Link>
+                </div>
+              </div>
             ))}
           </div>
         ) : (
