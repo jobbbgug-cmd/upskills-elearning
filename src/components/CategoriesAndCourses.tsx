@@ -70,7 +70,7 @@ export default function CategoriesAndCourses() {
     <section className="py-16 px-4 bg-white">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="mb-12">
+        <div className="mb-12 text-center">
           <h2 className="text-3xl font-bold text-gray-900 mb-2">
             มากกว่า 400+ คอร์สเรียนออนไลน์ ใน 18 หมวดหมู่
           </h2>
