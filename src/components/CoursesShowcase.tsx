@@ -22,7 +22,7 @@ export default function CoursesShowcase() {
   useEffect(() => {
     const fetchCourses = async () => {
       try {
-        const res = await fetch("/api/courses?limit=3");
+        const res = await fetch("/api/courses?type=online&limit=3");
         const data = await res.json();
         setCourses(data.courses || []);
       } catch (error) {
@@ -50,14 +50,14 @@ export default function CoursesShowcase() {
         {/* Header */}
         <div className="flex items-center justify-between mb-12">
           <div>
-            <h2 className="text-3xl font-bold text-gray-900 mb-2">คอร์สเรียนใหม่</h2>
-            <p className="text-gray-600">คอร์สเรียนที่อัปเดตล่าสุด</p>
+            <h2 className="text-3xl font-bold text-gray-900 mb-2">คอร์สเรียนออนไลน์</h2>
+            <p className="text-gray-600">เรียนได้ตามเวลาของคุณ</p>
           </div>
           <Link
-            href="/courses?sort=newest"
+            href="/courses?type=online"
             className="flex items-center gap-2 text-indigo-600 hover:text-indigo-700 font-medium transition-colors"
           >
-            ดูคอร์สเรียนใหม่ทั้งหมด
+            ดูคอร์สเรียนออนไลน์ทั้งหมด
             <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
