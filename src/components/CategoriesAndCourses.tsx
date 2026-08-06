@@ -96,7 +96,7 @@ export default function CategoriesAndCourses() {
           <div className="flex justify-center">
             <Link
               href="/courses?type=online"
-              className="flex items-center gap-2 px-6 py-3 border-2 border-orange-500 text-orange-500 hover:bg-orange-50 rounded-lg font-medium transition-colors"
+              className="flex items-center gap-2 text-orange-500 hover:text-orange-600 font-medium transition-colors cursor-pointer"
             >
               ดูคอร์สทั้งหมด
               <ArrowRight className="w-4 h-4" />
