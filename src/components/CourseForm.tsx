@@ -67,6 +67,7 @@ export default function CourseForm({ course, mode, courseType, teacherMode = fal
     linkDownload: course?.linkDownload ?? "",
     ebookPdfUrl: course?.ebookPdfUrl ?? "",
     courseType: (courseType ?? course?.type ?? "online") as "online" | "onsite" | "live online",
+    duration: course?.duration ?? 0,
   });
 
   const [contentId, setContentId] = useState<string>(course?.contentId ?? "");
@@ -314,6 +315,17 @@ export default function CourseForm({ course, mode, courseType, teacherMode = fal
             min={0}
             value={form.price === 0 ? "" : form.price}
             onChange={(e) => setForm({ ...form, price: e.target.value === "" ? 0 : Number(e.target.value) })}
+            className={inputClass}
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-semibold text-gray-700 mb-1.5">เวลาในการเรียน (นาที)</label>
+          <input
+            type="number"
+            min={0}
+            value={form.duration === 0 ? "" : form.duration}
+            onChange={(e) => setForm({ ...form, duration: e.target.value === "" ? 0 : Number(e.target.value) })}
+            placeholder="เช่น 120"
             className={inputClass}
           />
         </div>
