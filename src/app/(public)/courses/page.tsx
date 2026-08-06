@@ -18,7 +18,10 @@ const ALL_GRADE_LEVELS: GradeLevel[] = GRADE_GROUPS.flatMap((g) => g.grades);
 
 async function getCourses() {
   await connectDB();
-  const courses = await Course.find({ isActive: true }).sort({ createdAt: -1 }).lean();
+  const courses = await Course.find({ isActive: true })
+    .populate("category", "name")
+    .sort({ createdAt: -1 })
+    .lean();
   return JSON.parse(JSON.stringify(courses)) as ICourse[];
 }
 

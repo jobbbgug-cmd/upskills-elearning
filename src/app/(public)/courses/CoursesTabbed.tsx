@@ -247,7 +247,7 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
                 <div className="px-4 pt-4 pb-2">
                   <span className="text-xs font-semibold text-gray-700">
                     {activeTab === "online" ? "คอร์สเรียน" : activeTab === "live-online" ? "คอร์สเรียน Live" : "คอร์สเรียน Onsite"}
-                    {course.category && <span className="ml-1">{course.category}</span>}
+                    {course.category && <span className="ml-1">{typeof course.category === "object" ? (course.category as any).name : course.category}</span>}
                   </span>
                 </div>
 
