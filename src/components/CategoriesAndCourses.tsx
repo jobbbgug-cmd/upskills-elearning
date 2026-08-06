@@ -70,25 +70,16 @@ export default function CategoriesAndCourses() {
     <section className="py-16 px-4 bg-white">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="flex items-center justify-between mb-12">
-          <div>
-            <h2 className="text-3xl font-bold text-gray-900 mb-2">
-              มากกว่า 400+ คอร์สเรียนออนไลน์ ใน 18 หมวดหมู่
-            </h2>
-            <p className="text-gray-600">เลือกหมวดหมู่ที่สนใจ</p>
-          </div>
-          <Link
-            href="/courses?type=online"
-            className="flex items-center gap-2 px-6 py-3 border-2 border-orange-500 text-orange-500 hover:bg-orange-50 rounded-lg font-medium transition-colors whitespace-nowrap"
-          >
-            ดูคอร์สทั้งหมด
-            <ArrowRight className="w-4 h-4" />
-          </Link>
+        <div className="mb-12">
+          <h2 className="text-3xl font-bold text-gray-900 mb-2">
+            มากกว่า 400+ คอร์สเรียนออนไลน์ ใน 18 หมวดหมู่
+          </h2>
+          <p className="text-gray-600">เลือกหมวดหมู่ที่สนใจ</p>
         </div>
 
         {/* Categories */}
         <div className="mb-12">
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-3 justify-center mb-8">
             {categories.map((cat) => (
               <button
                 key={cat._id}
@@ -102,6 +93,15 @@ export default function CategoriesAndCourses() {
                 {cat.name}
               </button>
             ))}
+          </div>
+          <div className="flex justify-center">
+            <Link
+              href="/courses?type=online"
+              className="flex items-center gap-2 px-6 py-3 border-2 border-orange-500 text-orange-500 hover:bg-orange-50 rounded-lg font-medium transition-colors"
+            >
+              ดูคอร์สทั้งหมด
+              <ArrowRight className="w-4 h-4" />
+            </Link>
           </div>
         </div>
 
