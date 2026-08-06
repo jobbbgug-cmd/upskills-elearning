@@ -1,5 +1,6 @@
 import { connectDB } from "@/lib/mongodb";
 import Course from "@/models/Course";
+import Category from "@/models/Category";
 import { getAuthUser } from "@/lib/auth";
 import { ICourse, GradeLevel } from "@/types";
 import Link from "next/link";
@@ -18,17 +19,24 @@ const ALL_GRADE_LEVELS: GradeLevel[] = GRADE_GROUPS.flatMap((g) => g.grades);
 
 async function getCourses() {
   await connectDB();
-  const db = Course.collection.db;
 
-  // Use raw MongoDB query to avoid Mongoose validation issues
-  const courses = await db.collection("courses").find({ isActive: true }).sort({ createdAt: -1 }).toArray();
-  const categories = await db.collection("categories").find({}).toArray();
-  const categoryMap = new Map(categories.map(cat => [cat._id?.toString(), cat.name]));
+  try {
+    // Fetch courses without validation
+    const courses = await Course.find({ isActive: true }).select("-__v").lean().exec();
 
-  return JSON.parse(JSON.stringify(courses.map((course: any) => ({
-    ...course,
-    categoryName: course.category ? categoryMap.get(course.category.toString()) : null
-  })))) as (ICourse & { categoryName?: string })[];
+    // Fetch all categories
+    const categories = await Category.find({}).select("_id name").lean().exec();
+    const categoryMap = new Map(categories.map(cat => [cat._id?.toString(), cat.name]));
+
+    return JSON.parse(JSON.stringify(courses.map((course: any) => ({
+      ...course,
+      categoryName: course.category ? categoryMap.get(course.category.toString()) : null
+    })))) as (ICourse & { categoryName?: string })[];
+  } catch (error) {
+    console.error("Error fetching courses:", error);
+    // Return empty array on error to prevent page crash
+    return [];
+  }
 }
 
 export default async function CoursesPage() {
