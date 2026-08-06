@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useSearchParams, useRouter } from "next/navigation";
 import { ICourse } from "@/types";
+import Toast from "@/components/ui/Toast";
 
 interface Category {
   name: string;
@@ -32,6 +33,7 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
   const [loadingCategories, setLoadingCategories] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
+  const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
 
   // Sync with URL params after hydration
   useEffect(() => {
@@ -84,6 +86,11 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
     fetchData();
   }, [activeTab]);
 
+  const handleAddToCart = (courseId: string) => {
+    setToast({ message: "เพิ่มคอร์สลงตะกร้าแล้ว!", type: "success" });
+    setTimeout(() => setToast(null), 3000);
+  };
+
   const tabs = [
     { id: "all", label: "ทั้งหมด", count: courses.length },
     { id: "online", label: "คอร์สเรียน", count: courses.filter((c) => (c.type || "online") === "online").length },
@@ -106,7 +113,9 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
       });
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+    <>
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
       {/* Sidebar */}
       <div className="lg:col-span-1">
         <div className="bg-white rounded-xl p-6 shadow-sm sticky top-24">
@@ -304,7 +313,10 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
 
                 {/* Buttons */}
                 <div className="px-4 py-3 flex gap-2">
-                  <button className="flex-1 py-2 border-2 border-indigo-600 text-indigo-600 rounded-lg font-semibold text-sm hover:bg-indigo-50 transition-colors flex items-center justify-center gap-2">
+                  <button
+                    onClick={() => handleAddToCart(course._id)}
+                    className="flex-1 py-2 border-2 border-indigo-600 text-indigo-600 rounded-lg font-semibold text-sm hover:bg-indigo-50 transition-colors flex items-center justify-center gap-2"
+                  >
                     <span>🛒</span>
                     <span>ใส่ตะกร้า</span>
                   </button>
@@ -324,5 +336,6 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
         )}
       </div>
     </div>
+    </>
   );
 }
