@@ -251,7 +251,6 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
                         {activeTab === "online" ? "คอร์สเรียน" : activeTab === "live-online" ? "คอร์สเรียน Live" : "คอร์สเรียน Onsite"}
                       </span>
                     </div>
-                    <div className="text-xs text-gray-500">{course._id}</div>
                     {course.category && (
                       <div className="text-xs text-gray-600">{course.category}</div>
                     )}
