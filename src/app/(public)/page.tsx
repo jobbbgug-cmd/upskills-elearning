@@ -6,7 +6,6 @@ import Institution from "@/models/Institution";
 import BannerSlider from "@/components/BannerSlider";
 import TrialRequestModal from "@/components/TrialRequestModal";
 import PublicPageThemeReset from "@/components/PublicPageThemeReset";
-import CoursesShowcase from "@/components/CoursesShowcase";
 import CategoriesAndCourses from "@/components/CategoriesAndCourses";
 import { IBanner, GradeLevel } from "@/types";
 import {
@@ -115,9 +114,6 @@ export default async function HomePage() {
           ))}
         </div>
       </section>
-
-      {/* ─── Courses Showcase ─── */}
-      <CoursesShowcase />
 
       {/* ─── Categories and Courses ─── */}
       <CategoriesAndCourses />
