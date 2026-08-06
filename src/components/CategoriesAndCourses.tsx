@@ -54,7 +54,7 @@ export default function CategoriesAndCourses() {
   }, []);
 
   const filteredCourses = selectedCategory
-    ? courses.filter(c => c.category === selectedCategory)
+    ? courses.filter(c => (c as any).categoryName === selectedCategory)
     : courses;
 
   const getDuration = (sessions?: { startTime?: string; endTime?: string }[]) => {
