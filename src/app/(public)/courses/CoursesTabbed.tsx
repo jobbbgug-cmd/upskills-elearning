@@ -197,7 +197,7 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
         {/* Content */}
         {activeTab === "paths" ? (
           learningPaths.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
               {learningPaths.map((path) => (
                 <Link key={path._id} href={`/learning-paths/${path._id}`}>
                   <div className="bg-white rounded-xl overflow-hidden hover:shadow-lg transition-shadow group">
@@ -222,7 +222,7 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
             </div>
           )
         ) : filteredCourses.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-6">
             {filteredCourses.map((course) => (
               <Link key={course._id} href={`/courses/${course._id}`}>
                 <div className="bg-white rounded-xl overflow-hidden hover:shadow-lg transition-shadow group">
