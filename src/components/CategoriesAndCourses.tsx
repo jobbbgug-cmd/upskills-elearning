@@ -30,8 +30,8 @@ export default function CategoriesAndCourses() {
     const fetchData = async () => {
       try {
         const [categoriesRes, coursesRes] = await Promise.all([
-          fetch("/api/categories"),
-          fetch("/api/courses?limit=100"),
+          fetch("/api/categories?type=online"),
+          fetch("/api/courses?type=online&limit=100"),
         ]);
         const categoriesData = await categoriesRes.json();
         const coursesData = await coursesRes.json();
