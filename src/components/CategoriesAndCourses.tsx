@@ -73,7 +73,7 @@ export default function CategoriesAndCourses() {
         <div className="flex items-center justify-between mb-12">
           <div>
             <h2 className="text-3xl font-bold text-gray-900 mb-2">
-              มากกว่า {courses.length}+ คอร์สเรียนออนไลน์
+              มากกว่า 400+ คอร์สเรียนออนไลน์ ใน 18 หมวดหมู่
             </h2>
             <p className="text-gray-600">เลือกหมวดหมู่ที่สนใจ</p>
           </div>
