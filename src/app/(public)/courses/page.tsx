@@ -19,10 +19,20 @@ const ALL_GRADE_LEVELS: GradeLevel[] = GRADE_GROUPS.flatMap((g) => g.grades);
 async function getCourses() {
   await connectDB();
   const courses = await Course.find({ isActive: true })
-    .populate("category", "name")
     .sort({ createdAt: -1 })
     .lean();
-  return JSON.parse(JSON.stringify(courses)) as ICourse[];
+
+  // Map courses and fetch category names
+  const courseIds = courses.map(c => c._id);
+  const categories = await Course.collection.db.collection("categories").find({}).toArray();
+  const categoryMap = new Map(categories.map(cat => [cat._id?.toString(), cat.name]));
+
+  return JSON.parse(JSON.stringify(courses.map(course => ({
+    ...course,
+    categoryName: typeof course.category === "string" && categoryMap.has(course.category)
+      ? categoryMap.get(course.category)
+      : null
+  })))) as (ICourse & { categoryName?: string })[];
 }
 
 export default async function CoursesPage() {
