@@ -284,7 +284,7 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
                   </div>
                   <div className="flex items-center gap-1">
                     <span>⏱️</span>
-                    <span>{course.sessions?.length ? `${course.sessions.length * 30}` : "0"} นาที</span>
+                    <span>{course.duration || 0} นาที</span>
                   </div>
                 </div>
 
