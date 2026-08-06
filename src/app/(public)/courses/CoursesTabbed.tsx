@@ -245,16 +245,9 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
 
                 {/* Course Type Badge */}
                 <div className="px-4 pt-4 pb-2">
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-semibold text-gray-700">
-                        {activeTab === "online" ? "คอร์สเรียน" : activeTab === "live-online" ? "คอร์สเรียน Live" : "คอร์สเรียน Onsite"}
-                      </span>
-                    </div>
-                    {course.category && (
-                      <div className="text-xs text-gray-600">{course.category}</div>
-                    )}
-                  </div>
+                  <span className="text-xs font-semibold text-gray-700">
+                    {activeTab === "online" ? "คอร์สเรียน" : activeTab === "live-online" ? "คอร์สเรียน Live" : "คอร์สเรียน Onsite"}
+                  </span>
                 </div>
 
                 {/* Course Title */}
