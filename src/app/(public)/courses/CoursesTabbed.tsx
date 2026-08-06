@@ -225,27 +225,6 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
           <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-6">
             {filteredCourses.map((course) => (
               <div key={course._id} className="bg-white rounded-xl overflow-hidden hover:shadow-lg transition-shadow group">
-                {/* Course Type Badge */}
-                <div className="px-4 pt-4 pb-2">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-semibold text-gray-700">
-                      {activeTab === "online" ? "คอร์สเรียน" : activeTab === "live-online" ? "คอร์สเรียน Live" : "คอร์สเรียน Onsite"}
-                    </span>
-                    {course.category && (
-                      <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">
-                        {course.category}
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                {/* Course Title */}
-                <div className="px-4 pb-3">
-                  <h3 className="font-bold text-gray-900 line-clamp-2 text-sm group-hover:text-indigo-600 transition-colors">
-                    {course.title}
-                  </h3>
-                </div>
-
                 {/* Course Image */}
                 <Link href={`/courses/${course._id}`}>
                   <div className="relative h-40 bg-gradient-to-br from-indigo-100 to-purple-100 overflow-hidden cursor-pointer">
@@ -263,6 +242,28 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
                     )}
                   </div>
                 </Link>
+
+                {/* Course Type Badge */}
+                <div className="px-4 pt-4 pb-2">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-semibold text-gray-700">
+                        {activeTab === "online" ? "คอร์สเรียน" : activeTab === "live-online" ? "คอร์สเรียน Live" : "คอร์สเรียน Onsite"}
+                      </span>
+                    </div>
+                    <div className="text-xs text-gray-500">{course._id}</div>
+                    {course.category && (
+                      <div className="text-xs text-gray-600">{course.category}</div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Course Title */}
+                <div className="px-4 pb-3">
+                  <h3 className="font-bold text-gray-900 line-clamp-2 text-sm group-hover:text-indigo-600 transition-colors">
+                    {course.title}
+                  </h3>
+                </div>
 
                 {/* Instructor */}
                 <div className="px-4 py-3 border-b border-gray-100">
