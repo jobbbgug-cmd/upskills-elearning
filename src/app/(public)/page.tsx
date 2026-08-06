@@ -6,6 +6,7 @@ import Institution from "@/models/Institution";
 import BannerSlider from "@/components/BannerSlider";
 import TrialRequestModal from "@/components/TrialRequestModal";
 import PublicPageThemeReset from "@/components/PublicPageThemeReset";
+import CoursesShowcase from "@/components/CoursesShowcase";
 import { IBanner, GradeLevel } from "@/types";
 import {
   BookOpen, Users, Video, CheckCircle, Star, Zap, Shield,
@@ -114,6 +115,8 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {/* ─── Courses Showcase ─── */}
+      <CoursesShowcase />
 
       {/* ─── About UPSkills - Comprehensive Overview ─── */}
       <section className="py-20 px-4 bg-white">
@@ -544,6 +547,8 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {/* ─── Courses Showcase ─── */}
+      <CoursesShowcase />
 
       {/* ─── เลือกระดับชั้น ─── */}
       <section className="py-16 px-4 bg-gray-50">
