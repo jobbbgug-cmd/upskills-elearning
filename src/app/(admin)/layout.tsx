@@ -83,7 +83,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
     const load = async () => {
       try {
-        const res = await fetch("/api/admin/layout-init", { signal: controller.signal });
+        const res = await fetch("/api/admin/layout-init", { signal: controller.signal, credentials: "include" });
         if (!res.ok) return;
         const data = await res.json();
 

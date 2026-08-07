@@ -36,7 +36,7 @@ export default function NotificationBell() {
 
   const fetch_ = async () => {
     try {
-      const res = await fetch("/api/notifications");
+      const res = await fetch("/api/notifications", { credentials: "include" });
       if (!res.ok) return;
       const d = await res.json();
       setNotifs(d.notifications ?? []);
@@ -62,7 +62,7 @@ export default function NotificationBell() {
 
   const markAllRead = async () => {
     setMarking(true);
-    await fetch("/api/notifications", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({}) });
+    await fetch("/api/notifications", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({}), credentials: "include" });
     setNotifs((prev) => prev.map((n) => ({ ...n, isRead: true })));
     setUnread(0);
     setMarking(false);
