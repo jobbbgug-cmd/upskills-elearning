@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
     }
 
     await connectDB();
-    const { title, description, difficulty, price, courseIds } = await req.json();
+    const { title, description, difficulty, price, discount, courseIds } = await req.json();
 
     if (!title?.trim() || !description?.trim() || !Array.isArray(courseIds) || courseIds.length === 0) {
       return NextResponse.json({ error: "Invalid input" }, { status: 400 });
@@ -45,6 +45,7 @@ export async function POST(req: NextRequest) {
       description,
       difficulty: difficulty || "beginner",
       price: price || 0,
+      discount: discount || 0,
       courses: courseIds,
       instructor: auth.name || "Admin",
       institutionId: auth.institutionId,

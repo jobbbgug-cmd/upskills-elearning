@@ -34,6 +34,7 @@ export default function LearningPathForm({ path, mode }: LearningPathFormProps) 
   const [difficulty, setDifficulty] = useState(path?.difficulty || "beginner");
   const [estimatedHours, setEstimatedHours] = useState(path?.estimatedHours || 0);
   const [price, setPrice] = useState(path?.price || 0);
+  const [discount, setDiscount] = useState(path?.discount || 0);
   const [courses, setCourses] = useState<Course[]>([]);
   const [selectedCourses, setSelectedCourses] = useState<string[]>(
     path?.courses?.map((c: any) => c._id || c) || []
@@ -90,6 +91,7 @@ export default function LearningPathForm({ path, mode }: LearningPathFormProps) 
           difficulty,
           estimatedHours,
           price,
+          discount,
           courseIds: selectedCourses,
         }),
       });
@@ -169,6 +171,19 @@ export default function LearningPathForm({ path, mode }: LearningPathFormProps) 
               min={0}
               value={price === 0 ? "" : price}
               onChange={(e) => setPrice(e.target.value === "" ? 0 : Number(e.target.value))}
+              placeholder="0"
+              className={inputClass}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-1.5">ส่วนลด (%)</label>
+            <input
+              type="number"
+              min={0}
+              max={100}
+              value={discount === 0 ? "" : discount}
+              onChange={(e) => setDiscount(e.target.value === "" ? 0 : Number(e.target.value))}
               placeholder="0"
               className={inputClass}
             />

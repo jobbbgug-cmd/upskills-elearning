@@ -10,6 +10,7 @@ export interface ILearningPathDocument extends Document {
   difficulty: "beginner" | "intermediate" | "advanced";
   estimatedHours: number;
   price: number;
+  discount: number;
   isActive: boolean;
   createdAt: Date;
 }
@@ -25,6 +26,7 @@ const LearningPathSchema = new Schema<ILearningPathDocument>(
     difficulty: { type: String, enum: ["beginner", "intermediate", "advanced"], default: "beginner" },
     estimatedHours: { type: Number, default: 0 },
     price: { type: Number, default: 0 },
+    discount: { type: Number, default: 0 },
     isActive: { type: Boolean, default: true },
   },
   { timestamps: true }

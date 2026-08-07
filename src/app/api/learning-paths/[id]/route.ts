@@ -65,7 +65,7 @@ export async function PUT(
 
     await connectDB();
     const { id } = await params;
-    const { title, description, difficulty, estimatedHours, price, courseIds } = await req.json();
+    const { title, description, difficulty, estimatedHours, price, discount, courseIds } = await req.json();
 
     if (!title?.trim() || !description?.trim()) {
       return NextResponse.json({ error: "Invalid input" }, { status: 400 });
@@ -79,6 +79,7 @@ export async function PUT(
         difficulty: difficulty || "beginner",
         estimatedHours: estimatedHours || 0,
         price: price || 0,
+        discount: discount || 0,
         courses: courseIds || [],
       },
       { new: true }
