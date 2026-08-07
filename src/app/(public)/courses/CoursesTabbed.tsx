@@ -403,7 +403,7 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
                 <div className="px-4 py-3 flex gap-2">
                   <button
                     onClick={() => handleAddToCart(course)}
-                    className="flex-1 py-2 border-2 border-indigo-600 text-indigo-600 rounded-lg font-semibold text-sm hover:bg-indigo-50 transition-colors flex items-center justify-center"
+                    className="w-12 py-2 border-2 border-indigo-600 text-indigo-600 rounded-lg font-semibold text-sm hover:bg-indigo-50 transition-colors flex items-center justify-center flex-shrink-0"
                     title="ใส่ตะกร้า"
                   >
                     <ShoppingCart className="w-5 h-5" />
