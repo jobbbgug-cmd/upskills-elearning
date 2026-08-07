@@ -239,10 +239,15 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
               {learningPaths.map((path) => (
                 <div key={path._id} className="bg-white rounded-xl overflow-hidden hover:shadow-lg transition-shadow group">
                   {/* Title - Full Width */}
-                  <div className="px-4 pt-4 pb-2">
+                  <div className="px-4 pt-4 pb-1">
                     <h3 className="font-bold text-gray-900 line-clamp-2 text-sm group-hover:text-indigo-600 transition-colors">
                       {path.title}
                     </h3>
+                  </div>
+
+                  {/* Description Subtitle - Full Width */}
+                  <div className="px-4 pb-3">
+                    <p className="text-xs text-gray-600 line-clamp-2">{path.description}</p>
                   </div>
 
                   <div className="flex gap-4 px-4 pb-4">
@@ -255,11 +260,8 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
 
                     {/* Right: Content */}
                     <div className="flex-1 flex flex-col">
-                      {/* Description */}
-                      <p className="text-xs text-gray-600 mb-3 line-clamp-2">{path.description}</p>
-
                       {/* Stats - Top Right */}
-                      <div className="flex items-center gap-3 text-xs text-gray-500 mb-3">
+                      <div className="flex items-center gap-3 text-xs text-gray-500 mb-2">
                         <div className="flex items-center gap-1">
                           <span>📚</span>
                           <span>{path.courses?.length || 0} คอร์สเรียน</span>
