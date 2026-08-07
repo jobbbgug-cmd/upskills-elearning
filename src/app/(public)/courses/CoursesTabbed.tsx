@@ -238,61 +238,75 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
               {learningPaths.map((path) => (
                 <div key={path._id} className="bg-white rounded-xl overflow-hidden hover:shadow-lg transition-shadow group">
-                  {/* Cover Image */}
-                  <Link href={`/learning-paths/${path._id}`}>
-                    <div className="relative h-40 bg-gradient-to-br from-indigo-100 to-purple-100 overflow-hidden cursor-pointer flex items-center justify-center">
-                      <span className="text-5xl">🗺️</span>
-                    </div>
-                  </Link>
-
-                  {/* Content */}
-                  <div className="p-4 flex flex-col">
-                    {/* Title and Description */}
-                    <h3 className="font-bold text-gray-900 line-clamp-2 text-sm group-hover:text-indigo-600 transition-colors mb-1">
-                      {path.title}
-                    </h3>
-                    <p className="text-xs text-gray-600 mb-3 line-clamp-2">{path.description}</p>
-
-                    {/* Stats */}
-                    <div className="flex items-center gap-4 text-xs text-gray-500 mb-3">
-                      <div className="flex items-center gap-1">
-                        <span>📚</span>
-                        <span>{path.courses?.length || 0} คอร์สเรียน</span>
+                  <div className="flex">
+                    {/* Left: Cover Image */}
+                    <Link href={`/learning-paths/${path._id}`}>
+                      <div className="relative w-32 h-32 bg-gradient-to-br from-indigo-100 to-purple-100 overflow-hidden cursor-pointer flex items-center justify-center flex-shrink-0">
+                        <span className="text-4xl">🗺️</span>
                       </div>
-                      <div className="flex items-center gap-1">
-                        <span>⏱️</span>
-                        <span>{formatDuration(path.estimatedHours || 0)}</span>
-                      </div>
-                    </div>
+                    </Link>
 
-                    {/* Bottom Row: Price + Buttons */}
-                    <div className="flex items-center justify-between gap-3 pt-3 border-t border-gray-100">
-                      {/* Price Section */}
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-base font-bold text-red-600">
-                          ฿{Math.round((path.price || 0) - (path.discountType === "percentage" ? (path.price || 0) * (path.discount || 0) / 100 : (path.discount || 0))).toLocaleString()}
-                        </span>
-                        {(path.discount || 0) > 0 && (
-                          <span className="text-xs text-gray-400 line-through">
-                            ฿{(path.price || 0).toLocaleString()}
+                    {/* Right: Content */}
+                    <div className="flex-1 p-4 flex flex-col">
+                      {/* Title and Description */}
+                      <h3 className="font-bold text-gray-900 line-clamp-2 text-sm group-hover:text-indigo-600 transition-colors mb-1">
+                        {path.title}
+                      </h3>
+                      <p className="text-xs text-gray-600 mb-2 line-clamp-1">{path.description}</p>
+
+                      {/* Stats - Top Right */}
+                      <div className="flex items-center gap-3 text-xs text-gray-500 mb-3">
+                        <div className="flex items-center gap-1">
+                          <span>📚</span>
+                          <span>{path.courses?.length || 0} คอร์สเรียน</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <span>⏱️</span>
+                          <span>{formatDuration(path.estimatedHours || 0)}</span>
+                        </div>
+                      </div>
+
+                      {/* Courses List */}
+                      <div className="text-xs mb-3">
+                        <p className="text-gray-700 font-semibold mb-1">ประกอบด้วยคอร์สเรียน</p>
+                        <div className="text-gray-600 space-y-0.5">
+                          {path.courses?.slice(0, 3).map((course: any, idx: number) => (
+                            <p key={idx} className="truncate">
+                              {idx + 1}. {typeof course === 'object' ? course.title : course}
+                            </p>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Bottom Row: Price + Buttons */}
+                      <div className="flex items-center justify-between gap-2 pt-2 border-t border-gray-100 mt-auto">
+                        {/* Price Section */}
+                        <div className="flex items-center gap-1">
+                          <span className="text-sm font-bold text-red-600">
+                            ฿{Math.round((path.price || 0) - (path.discountType === "percentage" ? (path.price || 0) * (path.discount || 0) / 100 : (path.discount || 0))).toLocaleString()}
                           </span>
-                        )}
-                      </div>
+                          {(path.discount || 0) > 0 && (
+                            <span className="text-xs text-gray-400 line-through">
+                              ฿{(path.price || 0).toLocaleString()}
+                            </span>
+                          )}
+                        </div>
 
-                      {/* Buttons */}
-                      <div className="flex items-center gap-2 ml-auto">
-                        <button
-                          onClick={() => handleAddToCart(path)}
-                          className="p-2 border-2 border-indigo-600 text-indigo-600 rounded-lg hover:bg-indigo-50 transition-colors"
-                          title="ใส่ตะกร้า"
-                        >
-                          <span className="text-lg">🛒</span>
-                        </button>
-                        <Link href={`/learning-paths/${path._id}`}>
-                          <button className="px-4 py-2 bg-indigo-600 text-white rounded-lg font-semibold text-sm hover:bg-indigo-700 transition-colors whitespace-nowrap">
-                            ดูเส้นทาง
+                        {/* Buttons */}
+                        <div className="flex items-center gap-1.5 ml-auto">
+                          <button
+                            onClick={() => handleAddToCart(path)}
+                            className="p-1.5 border-2 border-indigo-600 text-indigo-600 rounded hover:bg-indigo-50 transition-colors"
+                            title="ใส่ตะกร้า"
+                          >
+                            <span className="text-base">🛒</span>
                           </button>
-                        </Link>
+                          <Link href={`/learning-paths/${path._id}`}>
+                            <button className="px-3 py-1.5 bg-indigo-600 text-white rounded font-semibold text-xs hover:bg-indigo-700 transition-colors whitespace-nowrap">
+                              ดูเส้นทาง
+                            </button>
+                          </Link>
+                        </div>
                       </div>
                     </div>
                   </div>
