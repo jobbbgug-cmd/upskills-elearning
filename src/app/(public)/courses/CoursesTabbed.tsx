@@ -242,8 +242,8 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
                   <div className="flex gap-4 p-4">
                     {/* Left: Cover Image */}
                     <Link href={`/learning-paths/${path._id}`} className="flex-shrink-0">
-                      <div className="relative w-32 h-32 bg-gradient-to-br from-indigo-100 to-purple-100 overflow-hidden cursor-pointer flex items-center justify-center rounded-lg">
-                        <span className="text-4xl">🗺️</span>
+                      <div className="relative w-40 h-40 bg-gradient-to-br from-indigo-100 to-purple-100 overflow-hidden cursor-pointer flex items-center justify-center rounded-lg">
+                        <span className="text-5xl">🗺️</span>
                       </div>
                     </Link>
 
