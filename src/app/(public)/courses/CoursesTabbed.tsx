@@ -296,7 +296,7 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
                               {finalPrice <= 0 ? "ฟรี" : `฿${finalPrice.toLocaleString()}`}
                             </span>
                             {(path.discount || 0) > 0 && (path.price || 0) > 0 && finalPrice > 0 && (
-                              <span className="text-base text-gray-400 line-through">
+                              <span className="text-xl text-gray-400 line-through">
                                 ฿{(path.price || 0).toLocaleString()}
                               </span>
                             )}
@@ -399,7 +399,7 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
                       {(course.price || 0) === 0 ? "ฟรี" : `฿${course.price || "0"}`}
                     </span>
                     {(course.price || 0) > 0 && (
-                      <span className="text-xs text-gray-400 line-through">
+                      <span className="text-lg text-gray-400 line-through">
                         ฿{Math.round((course.price as number) * 1.3)}
                       </span>
                     )}
