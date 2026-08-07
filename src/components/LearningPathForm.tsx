@@ -10,6 +10,7 @@ interface Course {
   title: string;
   instructor: string;
   price: number;
+  duration?: number;
 }
 
 interface LearningPath {
@@ -69,6 +70,20 @@ export default function LearningPathForm({ path, mode }: LearningPathFormProps) 
     const timer = setTimeout(fetchCourses, 300);
     return () => clearTimeout(timer);
   }, [search, showCourseModal]);
+
+  // Calculate total duration from selected courses
+  useEffect(() => {
+    const totalDuration = selectedCourses.reduce((sum, courseId) => {
+      const course = courses.find(c => c._id === courseId) || path?.courses?.find((c: any) => c._id === courseId);
+      const duration = typeof course === 'object' ? (course?.duration || 0) : 0;
+      return sum + duration;
+    }, 0);
+    
+    // Only auto-update if not manually edited
+    if (totalDuration > 0 && estimatedHours === 0) {
+      setEstimatedHours(totalDuration);
+    }
+  }, [selectedCourses, courses, path?.courses]);
 
   const addCourse = (courseId: string) => {
     if (!selectedCourses.includes(courseId)) {
