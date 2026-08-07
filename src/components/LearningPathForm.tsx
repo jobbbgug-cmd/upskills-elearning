@@ -59,7 +59,7 @@ export default function LearningPathForm({ path, mode }: LearningPathFormProps) 
 
     const fetchCourses = async () => {
       try {
-        const res = await fetch(`/api/courses?search=${search}`);
+        const res = await fetch(`/api/courses?type=online&search=${search}`);
         const data = await res.json();
         setCourses(data.courses || []);
       } catch (error) {
