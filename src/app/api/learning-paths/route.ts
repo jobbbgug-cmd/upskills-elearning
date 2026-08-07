@@ -45,13 +45,14 @@ export async function POST(req: NextRequest) {
       description,
       difficulty: difficulty || "beginner",
       courses: courseIds,
-      ...tenantFilter(auth.institutionId),
+      instructor: auth.name || "Admin",
+      institutionId: auth.institutionId,
       isActive: true,
     });
 
     return NextResponse.json({ path }, { status: 201 });
   } catch (err) {
-    console.error(err);
+    console.error("Error creating learning path:", err);
     return NextResponse.json({ error: "เกิดข้อผิดพลาด" }, { status: 500 });
   }
 }
