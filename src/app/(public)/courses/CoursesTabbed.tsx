@@ -273,6 +273,20 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
                       </div>
                     </div>
 
+                    {/* Price */}
+                    <div className="px-4 py-3 border-b border-gray-100">
+                      <div className="flex items-center gap-2">
+                        <span className="text-lg font-bold text-red-600">
+                          ฿{Math.round((path.price || 0) - (path.discountType === "percentage" ? (path.price || 0) * (path.discount || 0) / 100 : (path.discount || 0))).toLocaleString()}
+                        </span>
+                        {(path.discount || 0) > 0 && (
+                          <span className="text-sm text-gray-500 line-through">
+                            ฿{(path.price || 0).toLocaleString()}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
                     {/* Buttons */}
                     <div className="px-4 py-3 flex gap-2 mt-3">
                       <button
