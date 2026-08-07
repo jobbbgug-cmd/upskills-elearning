@@ -73,15 +73,19 @@ export default function LearningPathForm({ path, mode }: LearningPathFormProps) 
 
   // Calculate total duration from selected courses
   useEffect(() => {
-    const totalDuration = selectedCourses.reduce((sum, courseId) => {
+    const totalMinutes = selectedCourses.reduce((sum, courseId) => {
       const course = courses.find(c => c._id === courseId) || path?.courses?.find((c: any) => c._id === courseId);
-      const duration = typeof course === 'object' ? (course?.duration || 0) : 0;
-      return sum + duration;
+      // Duration is in minutes, need to convert to hours
+      const durationInMinutes = typeof course === 'object' ? (course?.duration || 0) : 0;
+      return sum + durationInMinutes;
     }, 0);
     
+    // Convert minutes to hours
+    const totalHours = Math.round((totalMinutes / 60) * 10) / 10; // Round to 1 decimal place
+    
     // Only auto-update if not manually edited
-    if (totalDuration > 0 && estimatedHours === 0) {
-      setEstimatedHours(totalDuration);
+    if (totalHours > 0 && estimatedHours === 0) {
+      setEstimatedHours(totalHours);
     }
   }, [selectedCourses, courses, path?.courses]);
 
