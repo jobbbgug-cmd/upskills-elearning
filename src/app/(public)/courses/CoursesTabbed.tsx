@@ -277,7 +277,7 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
 
                   {/* Title and Description - Full Width */}
                   <div className="px-4 py-3 border-t border-gray-100">
-                    <h3 className="font-bold text-gray-900 line-clamp-2 text-sm group-hover:text-indigo-600 transition-colors mb-1">
+                    <h3 className="font-bold text-gray-900 line-clamp-2 text-lg group-hover:text-indigo-600 transition-colors mb-1.5">
                       {path.title}
                     </h3>
                     <p className="text-xs text-gray-600 line-clamp-2">{path.description}</p>
