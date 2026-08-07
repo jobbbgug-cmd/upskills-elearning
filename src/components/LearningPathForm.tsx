@@ -19,6 +19,7 @@ interface LearningPath {
   difficulty: string;
   courses: any[];
   estimatedHours?: number;
+  price?: number;
 }
 
 interface LearningPathFormProps {
@@ -32,6 +33,7 @@ export default function LearningPathForm({ path, mode }: LearningPathFormProps) 
   const [description, setDescription] = useState(path?.description || "");
   const [difficulty, setDifficulty] = useState(path?.difficulty || "beginner");
   const [estimatedHours, setEstimatedHours] = useState(path?.estimatedHours || 0);
+  const [price, setPrice] = useState(path?.price || 0);
   const [courses, setCourses] = useState<Course[]>([]);
   const [selectedCourses, setSelectedCourses] = useState<string[]>(
     path?.courses?.map((c: any) => c._id || c) || []
@@ -87,6 +89,7 @@ export default function LearningPathForm({ path, mode }: LearningPathFormProps) 
           description,
           difficulty,
           estimatedHours,
+          price,
           courseIds: selectedCourses,
         }),
       });
@@ -137,7 +140,7 @@ export default function LearningPathForm({ path, mode }: LearningPathFormProps) 
           />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-1.5">ระดับความยาก *</label>
             <select value={difficulty} onChange={(e) => setDifficulty(e.target.value)} className={inputClass}>
@@ -154,6 +157,18 @@ export default function LearningPathForm({ path, mode }: LearningPathFormProps) 
               min={0}
               value={estimatedHours}
               onChange={(e) => setEstimatedHours(Number(e.target.value))}
+              className={inputClass}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-1.5">ราคา (บาท)</label>
+            <input
+              type="number"
+              min={0}
+              value={price === 0 ? "" : price}
+              onChange={(e) => setPrice(e.target.value === "" ? 0 : Number(e.target.value))}
+              placeholder="0"
               className={inputClass}
             />
           </div>
