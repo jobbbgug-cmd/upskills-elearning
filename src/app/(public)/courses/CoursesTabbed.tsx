@@ -253,63 +253,63 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
                     <p className="text-xs text-gray-600 line-clamp-2">{path.description}</p>
                   </div>
 
-                  {/* Content Section */}
-                  <div className="px-4 pb-4">
+                  {/* Stats + Courses Section */}
+                  <div className="px-4 py-3 bg-gray-50 border-t border-gray-100">
                     {/* Stats */}
-                    <div className="flex items-center gap-3 text-xs text-gray-500 mb-3">
-                        <div className="flex items-center gap-1">
-                          <span>📚</span>
-                          <span>{path.courses?.length || 0} คอร์สเรียน</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <span>⏱️</span>
-                          <span>{formatDuration(path.estimatedHours || 0)}</span>
-                        </div>
+                    <div className="flex items-center gap-4 text-xs text-gray-600 mb-3">
+                      <div className="flex items-center gap-1.5">
+                        <span>📚</span>
+                        <span className="font-medium">{path.courses?.length || 0} คอร์สเรียน</span>
                       </div>
-
-                      {/* Courses List */}
-                      <div className="text-xs mb-3">
-                        <p className="text-gray-700 font-semibold mb-1">ประกอบด้วยคอร์สเรียน</p>
-                        <div className="text-gray-600 space-y-0.5">
-                          {path.courses?.slice(0, 3).map((course: any, idx: number) => (
-                            <p key={idx} className="truncate">
-                              {idx + 1}. {typeof course === 'object' ? course.title : course}
-                            </p>
-                          ))}
-                        </div>
-                      </div>
-
-                      {/* Bottom Row: Price + Buttons */}
-                      <div className="flex items-center justify-between gap-2 pt-2 border-t border-gray-100 mt-auto">
-                        {/* Price Section */}
-                        <div className="flex items-center gap-1">
-                          <span className="text-sm font-bold text-red-600">
-                            ฿{Math.round((path.price || 0) - (path.discountType === "percentage" ? (path.price || 0) * (path.discount || 0) / 100 : (path.discount || 0))).toLocaleString()}
-                          </span>
-                          {(path.discount || 0) > 0 && (
-                            <span className="text-xs text-gray-400 line-through">
-                              ฿{(path.price || 0).toLocaleString()}
-                            </span>
-                          )}
-                        </div>
-
-                        {/* Buttons */}
-                        <div className="flex items-center gap-1.5 ml-auto">
-                          <button
-                            onClick={() => handleAddToCart(path)}
-                            className="p-1.5 border-2 border-indigo-600 text-indigo-600 rounded hover:bg-indigo-50 transition-colors"
-                            title="ใส่ตะกร้า"
-                          >
-                            <span className="text-base">🛒</span>
-                          </button>
-                          <Link href={`/learning-paths/${path._id}`}>
-                            <button className="px-3 py-1.5 bg-indigo-600 text-white rounded font-semibold text-xs hover:bg-indigo-700 transition-colors whitespace-nowrap">
-                              ดูเส้นทาง
-                            </button>
-                          </Link>
-                        </div>
+                      <div className="flex items-center gap-1.5">
+                        <span>⏱️</span>
+                        <span className="font-medium">{formatDuration(path.estimatedHours || 0)}</span>
                       </div>
                     </div>
+
+                    {/* Courses List */}
+                    <div className="text-xs">
+                      <p className="text-gray-700 font-semibold mb-2">ประกอบด้วยคอร์สเรียน</p>
+                      <div className="text-gray-600 space-y-1">
+                        {path.courses?.slice(0, 3).map((course: any, idx: number) => (
+                          <p key={idx} className="truncate">
+                            {idx + 1}. {typeof course === 'object' ? course.title : course}
+                          </p>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Bottom Row: Price + Buttons */}
+                  <div className="flex items-center justify-between gap-2 px-4 py-3 border-t border-gray-100">
+                    {/* Price Section */}
+                    <div className="flex items-center gap-1">
+                      <span className="text-sm font-bold text-red-600">
+                        ฿{Math.round((path.price || 0) - (path.discountType === "percentage" ? (path.price || 0) * (path.discount || 0) / 100 : (path.discount || 0))).toLocaleString()}
+                      </span>
+                      {(path.discount || 0) > 0 && (
+                        <span className="text-xs text-gray-400 line-through">
+                          ฿{(path.price || 0).toLocaleString()}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Buttons */}
+                    <div className="flex items-center gap-1.5 ml-auto">
+                      <button
+                        onClick={() => handleAddToCart(path)}
+                        className="p-1.5 border-2 border-indigo-600 text-indigo-600 rounded hover:bg-indigo-50 transition-colors"
+                        title="ใส่ตะกร้า"
+                      >
+                        <span className="text-base">🛒</span>
+                      </button>
+                      <Link href={`/learning-paths/${path._id}`}>
+                        <button className="px-3 py-1.5 bg-indigo-600 text-white rounded font-semibold text-xs hover:bg-indigo-700 transition-colors whitespace-nowrap">
+                          ดูเส้นทาง
+                        </button>
+                      </Link>
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>
