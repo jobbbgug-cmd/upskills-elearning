@@ -35,6 +35,7 @@ export default function LearningPathForm({ path, mode }: LearningPathFormProps) 
   const [estimatedHours, setEstimatedHours] = useState(path?.estimatedHours || 0);
   const [price, setPrice] = useState(path?.price || 0);
   const [discount, setDiscount] = useState(path?.discount || 0);
+  const [discountType, setDiscountType] = useState<"percentage" | "fixed">(path?.discountType || "percentage");
   const [courses, setCourses] = useState<Course[]>([]);
   const [selectedCourses, setSelectedCourses] = useState<string[]>(
     path?.courses?.map((c: any) => c._id || c) || []
@@ -92,6 +93,7 @@ export default function LearningPathForm({ path, mode }: LearningPathFormProps) 
           estimatedHours,
           price,
           discount,
+          discountType,
           courseIds: selectedCourses,
         }),
       });
@@ -177,11 +179,19 @@ export default function LearningPathForm({ path, mode }: LearningPathFormProps) 
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1.5">ส่วนลด (%)</label>
+            <label className="block text-sm font-semibold text-gray-700 mb-1.5">ประเภทส่วนลด</label>
+            <select value={discountType} onChange={(e) => setDiscountType(e.target.value as "percentage" | "fixed")} className={inputClass}>
+              <option value="percentage">เปอร์เซนต์ (%)</option>
+              <option value="fixed">จำนวนเต็ม (บาท)</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-1.5">ส่วนลด {discountType === "percentage" ? "(%)" : "(บาท)"}</label>
             <input
               type="number"
               min={0}
-              max={100}
+              max={discountType === "percentage" ? 100 : undefined}
               value={discount === 0 ? "" : discount}
               onChange={(e) => setDiscount(e.target.value === "" ? 0 : Number(e.target.value))}
               placeholder="0"

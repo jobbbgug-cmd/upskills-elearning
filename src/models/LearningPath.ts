@@ -11,6 +11,7 @@ export interface ILearningPathDocument extends Document {
   estimatedHours: number;
   price: number;
   discount: number;
+  discountType: "percentage" | "fixed";
   isActive: boolean;
   createdAt: Date;
 }
@@ -27,6 +28,7 @@ const LearningPathSchema = new Schema<ILearningPathDocument>(
     estimatedHours: { type: Number, default: 0 },
     price: { type: Number, default: 0 },
     discount: { type: Number, default: 0 },
+    discountType: { type: String, enum: ["percentage", "fixed"], default: "percentage" },
     isActive: { type: Boolean, default: true },
   },
   { timestamps: true }
