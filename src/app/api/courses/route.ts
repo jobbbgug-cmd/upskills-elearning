@@ -10,6 +10,7 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const gradeLevel = searchParams.get("gradeLevel");
     const category = searchParams.get("category");
+    const type = searchParams.get("type");
     const institutionId = searchParams.get("institutionId");
     const limit = searchParams.get("limit") ? parseInt(searchParams.get("limit")!) : null;
     const sort = searchParams.get("sort") || "-createdAt";
@@ -17,6 +18,7 @@ export async function GET(req: NextRequest) {
     const query: Record<string, unknown> = { ...tenantFilter(institutionId), isActive: true };
     if (gradeLevel) query.gradeLevels = gradeLevel;
     if (category) query.category = category;
+    if (type) query.type = type;
 
     let courseQuery = Course.find(query).sort(sort);
     if (limit) courseQuery = courseQuery.limit(limit);
