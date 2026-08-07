@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
+import { getAuthUser } from "@/lib/auth";
 import LearningPath from "@/models/LearningPath";
 
 export async function GET(
@@ -20,6 +21,32 @@ export async function GET(
     }
 
     return NextResponse.json({ path });
+  } catch (err) {
+    console.error(err);
+    return NextResponse.json({ error: "เกิดข้อผิดพลาด" }, { status: 500 });
+  }
+}
+
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const auth = await getAuthUser();
+    if (!auth || (auth.role !== "admin" && auth.role !== "owner")) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    await connectDB();
+    const { id } = await params;
+
+    const path = await LearningPath.findByIdAndDelete(id);
+
+    if (!path) {
+      return NextResponse.json({ error: "ไม่พบเส้นทาง" }, { status: 404 });
+    }
+
+    return NextResponse.json({ message: "ลบสำเร็จ" });
   } catch (err) {
     console.error(err);
     return NextResponse.json({ error: "เกิดข้อผิดพลาด" }, { status: 500 });
