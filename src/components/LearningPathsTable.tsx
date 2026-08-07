@@ -2,9 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Edit, Trash2 } from "lucide-react";
+import { Edit, Trash2, X } from "lucide-react";
 import { useRouter } from "next/navigation";
-import Toast from "@/components/ui/Toast";
 
 interface LearningPathItem {
   _id: string;
@@ -19,35 +18,69 @@ interface LearningPathsTableProps {
   paths: LearningPathItem[];
 }
 
+interface Modal {
+  type: "confirm" | "success" | "error";
+  title: string;
+  message: string;
+  pathId?: string;
+}
+
 export default function LearningPathsTable({ paths: initialPaths }: LearningPathsTableProps) {
   const router = useRouter();
   const [paths, setPaths] = useState<LearningPathItem[]>(initialPaths);
   const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
+  const [modal, setModal] = useState<Modal | null>(null);
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("คุณแน่ใจหรือว่าต้องการลบเส้นทางการเรียนนี้?")) {
-      return;
-    }
+  const handleDeleteClick = (id: string, title: string) => {
+    setModal({
+      type: "confirm",
+      title: "ยืนยันการลบ",
+      message: `คุณแน่ใจหรือว่าต้องการลบเส้นทางการเรียน "${title}" นี้?`,
+      pathId: id,
+    });
+  };
 
-    setDeletingId(id);
+  const handleConfirmDelete = async () => {
+    if (!modal?.pathId) return;
+
+    setDeletingId(modal.pathId);
     try {
-      const res = await fetch(`/api/learning-paths/${id}`, {
+      const res = await fetch(`/api/learning-paths/${modal.pathId}`, {
         method: "DELETE",
       });
 
       if (res.ok) {
-        setPaths(paths.filter(p => p._id !== id));
-        setToast({ message: "ลบเส้นทางการเรียนสำเร็จ!", type: "success" });
-        setTimeout(() => setToast(null), 3000);
+        setPaths(paths.filter(p => p._id !== modal.pathId));
+        setModal({
+          type: "success",
+          title: "ลบสำเร็จ",
+          message: "ลบเส้นทางการเรียนสำเร็จแล้ว",
+        });
+        setTimeout(() => setModal(null), 2000);
       } else {
-        setToast({ message: "ไม่สามารถลบเส้นทางการเรียนได้", type: "error" });
+        setModal({
+          type: "error",
+          title: "ลบไม่สำเร็จ",
+          message: "ไม่สามารถลบเส้นทางการเรียนได้",
+        });
       }
     } catch (error) {
       console.error("Delete error:", error);
-      setToast({ message: "เกิดข้อผิดพลาด", type: "error" });
+      setModal({
+        type: "error",
+        title: "ข้อผิดพลาด",
+        message: "เกิดข้อผิดพลาดในการลบ",
+      });
     } finally {
       setDeletingId(null);
+    }
+  };
+
+  const closeModal = () => {
+    if (modal?.type === "confirm") {
+      setModal(null);
+    } else {
+      setModal(null);
     }
   };
 
@@ -66,7 +99,62 @@ export default function LearningPathsTable({ paths: initialPaths }: LearningPath
 
   return (
     <>
-      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
+      {/* Modal */}
+      {modal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-white rounded-2xl p-8 max-w-md mx-4 shadow-xl">
+            <div className="flex items-start justify-between mb-4">
+              <h3 className={`text-lg font-bold ${
+                modal.type === "confirm" ? "text-gray-900" :
+                modal.type === "success" ? "text-green-600" :
+                "text-red-600"
+              }`}>
+                {modal.title}
+              </h3>
+              <button
+                onClick={closeModal}
+                className="p-1 hover:bg-gray-100 rounded transition-colors"
+              >
+                <X className="w-5 h-5 text-gray-500" />
+              </button>
+            </div>
+
+            <p className="text-gray-600 mb-6">{modal.message}</p>
+
+            <div className="flex gap-3">
+              {modal.type === "confirm" ? (
+                <>
+                  <button
+                    onClick={closeModal}
+                    className="flex-1 px-4 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+                  >
+                    ยกเลิก
+                  </button>
+                  <button
+                    onClick={handleConfirmDelete}
+                    disabled={deletingId !== null}
+                    className="flex-1 px-4 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {deletingId ? "กำลังลบ..." : "ลบ"}
+                  </button>
+                </>
+              ) : (
+                <button
+                  onClick={closeModal}
+                  className={`w-full px-4 py-2.5 rounded-lg transition-colors font-medium text-white ${
+                    modal.type === "success"
+                      ? "bg-green-600 hover:bg-green-700"
+                      : "bg-red-600 hover:bg-red-700"
+                  }`}
+                >
+                  ปิด
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
@@ -106,7 +194,7 @@ export default function LearningPathsTable({ paths: initialPaths }: LearningPath
                         <Edit className="w-4 h-4" />
                       </Link>
                       <button
-                        onClick={() => handleDelete(path._id)}
+                        onClick={() => handleDeleteClick(path._id, path.title)}
                         disabled={deletingId === path._id}
                         className="p-1.5 hover:bg-red-100 rounded text-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                       >
