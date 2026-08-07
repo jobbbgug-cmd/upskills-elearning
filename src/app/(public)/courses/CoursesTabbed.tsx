@@ -238,21 +238,23 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
               {learningPaths.map((path) => (
                 <div key={path._id} className="bg-white rounded-xl overflow-hidden hover:shadow-lg transition-shadow group">
-                  <div className="flex gap-4">
-                    {/* Left: Cover Image + Title */}
-                    <div className="flex flex-col items-center flex-shrink-0 pt-4">
-                      <Link href={`/learning-paths/${path._id}`}>
-                        <div className="relative w-32 h-32 bg-gradient-to-br from-indigo-100 to-purple-100 overflow-hidden cursor-pointer flex items-center justify-center rounded-lg">
-                          <span className="text-4xl">🗺️</span>
-                        </div>
-                      </Link>
-                      <p className="text-xs text-gray-700 font-semibold mt-2 text-center line-clamp-2 w-32">
-                        {path.title}
-                      </p>
-                    </div>
+                  {/* Title - Full Width */}
+                  <div className="px-4 pt-4 pb-2">
+                    <h3 className="font-bold text-gray-900 line-clamp-2 text-sm group-hover:text-indigo-600 transition-colors">
+                      {path.title}
+                    </h3>
+                  </div>
+
+                  <div className="flex gap-4 px-4 pb-4">
+                    {/* Left: Cover Image */}
+                    <Link href={`/learning-paths/${path._id}`}>
+                      <div className="relative w-32 h-32 bg-gradient-to-br from-indigo-100 to-purple-100 overflow-hidden cursor-pointer flex items-center justify-center rounded-lg flex-shrink-0">
+                        <span className="text-4xl">🗺️</span>
+                      </div>
+                    </Link>
 
                     {/* Right: Content */}
-                    <div className="flex-1 p-4 pb-0 flex flex-col">
+                    <div className="flex-1 flex flex-col">
                       {/* Description */}
                       <p className="text-xs text-gray-600 mb-3 line-clamp-2">{path.description}</p>
 
