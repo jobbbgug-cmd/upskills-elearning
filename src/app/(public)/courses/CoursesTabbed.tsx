@@ -96,9 +96,9 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
     fetchData();
   }, [activeTab]);
 
-  const handleAddToCart = (course: ICourse) => {
-    addToCart(course);
-    setToast({ message: "เพิ่มคอร์สลงตะกร้าแล้ว!", type: "success" });
+  const handleAddToCart = (course: ICourse | LearningPath) => {
+    addToCart(course as ICourse);
+    setToast({ message: "เพิ่มลงตะกร้าแล้ว!", type: "success" });
     setTimeout(() => setToast(null), 3000);
   };
 
