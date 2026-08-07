@@ -198,11 +198,26 @@ export default function LearningPathForm({ path, mode }: LearningPathFormProps) 
             <label className="block text-sm font-semibold text-gray-700 mb-1.5">ส่วนลด {discountType === "percentage" ? "(%)" : "(บาท)"}</label>
             <input
               type="number"
-              min={0}
-              max={discountType === "percentage" ? 100 : undefined}
+              min={discountType === "percentage" ? 1 : 0}
+              max={discountType === "percentage" ? 99 : undefined}
               value={discount === 0 ? "" : discount}
-              onChange={(e) => setDiscount(e.target.value === "" ? 0 : Number(e.target.value))}
-              placeholder="0"
+              onChange={(e) => {
+                const val = e.target.value === "" ? 0 : Number(e.target.value);
+                if (discountType === "percentage") {
+                  if (val >= 1 && val <= 99) {
+                    setDiscount(val);
+                  } else if (val > 99) {
+                    setDiscount(99);
+                  } else if (val < 1 && val !== 0) {
+                    setDiscount(1);
+                  } else {
+                    setDiscount(0);
+                  }
+                } else {
+                  setDiscount(val);
+                }
+              }}
+              placeholder={discountType === "percentage" ? "1-99" : "0"}
               className={inputClass}
             />
           </div>
