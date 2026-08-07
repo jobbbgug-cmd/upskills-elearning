@@ -27,6 +27,14 @@ interface LearningPathFormProps {
   mode: "create" | "edit";
 }
 
+const calculateFinalPrice = (price: number, discount: number, discountType: string) => {
+  if (discountType === "percentage") {
+    return Math.max(0, price - (price * discount / 100));
+  } else {
+    return Math.max(0, price - discount);
+  }
+};
+
 export default function LearningPathForm({ path, mode }: LearningPathFormProps) {
   const router = useRouter();
   const [title, setTitle] = useState(path?.title || "");
@@ -197,6 +205,15 @@ export default function LearningPathForm({ path, mode }: LearningPathFormProps) 
               placeholder="0"
               className={inputClass}
             />
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-1.5">ราคาสุดท้าย (บาท)</label>
+            <div className={`${inputClass} bg-gray-50 flex items-center`}>
+              <span className="text-lg font-bold text-indigo-600">
+                {calculateFinalPrice(price, discount, discountType).toFixed(2)}
+              </span>
+            </div>
           </div>
         </div>
 
