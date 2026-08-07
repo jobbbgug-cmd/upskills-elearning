@@ -179,9 +179,23 @@ export default function CourseForm({ course, mode, courseType, teacherMode = fal
     setError("");
     try {
       const { courseType, ...formData } = form;
+
+      // Auto-calculate course duration from lessons if not manually set
+      let courseDuration = formData.duration;
+      if (lessons.length > 0) {
+        const lessonsDuration = lessons.reduce((sum, lesson) => {
+          const duration = lesson.duration ? parseInt(lesson.duration) : 0;
+          return sum + duration;
+        }, 0);
+        if (lessonsDuration > 0) {
+          courseDuration = lessonsDuration;
+        }
+      }
+
       const payload: any = {
         ...formData,
         type: courseType,
+        duration: courseDuration,
         contentId: contentId || null,
         whatYouWillLearn,
         courseDetails,
