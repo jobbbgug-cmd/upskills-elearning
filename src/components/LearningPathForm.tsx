@@ -21,6 +21,8 @@ interface LearningPath {
   courses: any[];
   estimatedHours?: number;
   price?: number;
+  discount?: number;
+  discountType?: "percentage" | "fixed";
 }
 
 interface LearningPathFormProps {
