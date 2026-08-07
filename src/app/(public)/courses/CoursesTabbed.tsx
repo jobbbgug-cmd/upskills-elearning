@@ -293,9 +293,9 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
                         return (
                           <>
                             <span className="text-2xl font-bold text-red-600">
-                              {finalPrice === 0 ? "ฟรี" : `฿${finalPrice.toLocaleString()}`}
+                              {finalPrice <= 0 ? "ฟรี" : `฿${finalPrice.toLocaleString()}`}
                             </span>
-                            {(path.discount || 0) > 0 && (path.price || 0) > 0 && (
+                            {(path.discount || 0) > 0 && (path.price || 0) > 0 && finalPrice > 0 && (
                               <span className="text-base text-gray-400 line-through">
                                 ฿{(path.price || 0).toLocaleString()}
                               </span>
@@ -396,9 +396,9 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
                 <div className="px-4 py-3 border-b border-gray-100">
                   <div className="flex items-baseline gap-2">
                     <span className="text-xl font-bold text-pink-600">
-                      {course.price === 0 ? "ฟรี" : `฿${course.price || "0"}`}
+                      {(course.price || 0) === 0 ? "ฟรี" : `฿${course.price || "0"}`}
                     </span>
-                    {course.price && course.price > 0 && (
+                    {(course.price || 0) > 0 && (
                       <span className="text-xs text-gray-400 line-through">
                         ฿{Math.round((course.price as number) * 1.3)}
                       </span>
