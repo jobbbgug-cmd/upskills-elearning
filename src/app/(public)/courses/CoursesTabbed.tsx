@@ -292,7 +292,7 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
                         const finalPrice = Math.round((path.price || 0) - (path.discountType === "percentage" ? (path.price || 0) * (path.discount || 0) / 100 : (path.discount || 0)));
                         return (
                           <>
-                            <span className="text-2xl font-bold text-red-600">
+                            <span className="text-3xl font-bold text-red-600">
                               {finalPrice <= 0 ? "ฟรี" : `฿${finalPrice.toLocaleString()}`}
                             </span>
                             {(path.discount || 0) > 0 && (path.price || 0) > 0 && finalPrice > 0 && (
@@ -395,7 +395,7 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
                 {/* Price */}
                 <div className="px-4 py-3 border-b border-gray-100">
                   <div className="flex items-baseline gap-2">
-                    <span className="text-xl font-bold text-pink-600">
+                    <span className="text-3xl font-bold text-pink-600">
                       {(course.price || 0) === 0 ? "ฟรี" : `฿${course.price || "0"}`}
                     </span>
                     {(course.price || 0) > 0 && (
