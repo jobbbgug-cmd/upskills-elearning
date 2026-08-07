@@ -28,6 +28,20 @@ interface LearningPath {
 
 type TabType = "all" | "online" | "live-online" | "paths" | "onsite";
 
+const formatDuration = (hours: number): string => {
+  if (hours === 0) return "0 น.";
+
+  const totalMinutes = Math.round(hours * 60);
+
+  if (totalMinutes < 60) {
+    return `${totalMinutes} น.`;
+  } else {
+    const h = Math.floor(totalMinutes / 60);
+    const m = totalMinutes % 60;
+    return `${h}.${m.toString().padStart(2, '0')} ชม.`;
+  }
+};
+
 interface CourseTabbedProps {
   courses: (ICourse & { categoryName?: string })[];
 }
@@ -255,7 +269,7 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
                       </div>
                       <div className="flex items-center gap-1">
                         <span>⏱️</span>
-                        <span>{path.estimatedHours || 0} ชม.</span>
+                        <span>{formatDuration(path.estimatedHours || 0)}</span>
                       </div>
                     </div>
 
