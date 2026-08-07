@@ -215,21 +215,59 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
           learningPaths.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
               {learningPaths.map((path) => (
-                <Link key={path._id} href={`/learning-paths/${path._id}`}>
-                  <div className="bg-white rounded-xl overflow-hidden hover:shadow-lg transition-shadow group">
-                    <div className="relative h-48 bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center">
+                <div key={path._id} className="bg-white rounded-xl overflow-hidden hover:shadow-lg transition-shadow group">
+                  {/* Cover Image */}
+                  <Link href={`/learning-paths/${path._id}`}>
+                    <div className="relative h-40 bg-gradient-to-br from-indigo-100 to-purple-100 overflow-hidden cursor-pointer flex items-center justify-center">
                       <span className="text-5xl">🗺️</span>
                     </div>
-                    <div className="p-5">
-                      <h3 className="font-bold text-gray-900 mb-3 line-clamp-2 group-hover:text-indigo-600">
-                        {path.title}
-                      </h3>
-                      <button className="w-full py-2.5 bg-indigo-600 text-white rounded-lg font-semibold text-sm hover:bg-indigo-700 transition-colors">
-                        ดูเส้นทาง
+                  </Link>
+
+                  {/* Content */}
+                  <div className="p-5">
+                    <h3 className="font-bold text-gray-900 line-clamp-2 text-sm group-hover:text-indigo-600 transition-colors mb-2">
+                      {path.title}
+                    </h3>
+
+                    <p className="text-sm text-gray-600 mb-4 line-clamp-2">{path.description}</p>
+
+                    {/* Instructor */}
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-sm font-bold text-indigo-600 flex-shrink-0">
+                        {path.instructor?.[0] || "P"}
+                      </div>
+                      <span className="text-xs text-gray-600">{path.instructor}</span>
+                    </div>
+
+                    {/* Stats */}
+                    <div className="px-4 py-3 flex items-center justify-between text-xs text-gray-500 border-b border-gray-100">
+                      <div className="flex items-center gap-1">
+                        <span>📚</span>
+                        <span>{path.courses?.length || 0} คอร์สเรียน</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <span>⏱️</span>
+                        <span>{path.estimatedHours || 0} ชม.</span>
+                      </div>
+                    </div>
+
+                    {/* Buttons */}
+                    <div className="px-4 py-3 flex gap-2 mt-3">
+                      <button
+                        onClick={() => handleAddToCart(path)}
+                        className="flex-1 py-2 border-2 border-indigo-600 text-indigo-600 rounded-lg font-semibold text-sm hover:bg-indigo-50 transition-colors flex items-center justify-center gap-2"
+                      >
+                        <span>🛒</span>
+                        <span>ใส่ตะกร้า</span>
                       </button>
+                      <Link href={`/learning-paths/${path._id}`} className="flex-1">
+                        <button className="w-full py-2 bg-indigo-600 text-white rounded-lg font-semibold text-sm hover:bg-indigo-700 transition-colors">
+                          ดูเส้นทาง
+                        </button>
+                      </Link>
                     </div>
                   </div>
-                </Link>
+                </div>
               ))}
             </div>
           ) : (
