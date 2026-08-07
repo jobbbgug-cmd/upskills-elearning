@@ -36,6 +36,19 @@ const calculateFinalPrice = (price: number, discount: number, discountType: stri
   }
 };
 
+const formatDuration = (hours: number): string => {
+  if (hours === 0) return "0 น.";
+  
+  const totalMinutes = Math.round(hours * 60);
+  
+  if (totalMinutes < 60) {
+    return `${totalMinutes} น.`;
+  } else {
+    const displayHours = Math.round((totalMinutes / 60) * 10) / 10;
+    return `${displayHours} ชม.`;
+  }
+};
+
 export default function LearningPathForm({ path, mode }: LearningPathFormProps) {
   const router = useRouter();
   const [title, setTitle] = useState(path?.title || "");
@@ -182,15 +195,10 @@ export default function LearningPathForm({ path, mode }: LearningPathFormProps) 
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1.5">เวลาโดยประมาณ (ชั่วโมง)</label>
-            <input
-              type="number"
-              min={0}
-              value={estimatedHours === 0 ? "" : estimatedHours}
-              onChange={(e) => setEstimatedHours(e.target.value === "" ? 0 : Number(e.target.value))}
-              placeholder="0"
-              className={inputClass}
-            />
+            <label className="block text-sm font-semibold text-gray-700 mb-1.5">เวลาโดยประมาณ</label>
+            <div className={`${inputClass} bg-gray-50 flex items-center text-lg font-semibold text-indigo-600`}>
+              {formatDuration(estimatedHours)}
+            </div>
           </div>
 
           <div>
