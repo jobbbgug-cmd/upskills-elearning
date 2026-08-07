@@ -155,8 +155,9 @@ export default function LearningPathForm({ path, mode }: LearningPathFormProps) 
             <input
               type="number"
               min={0}
-              value={estimatedHours}
-              onChange={(e) => setEstimatedHours(Number(e.target.value))}
+              value={estimatedHours === 0 ? "" : estimatedHours}
+              onChange={(e) => setEstimatedHours(e.target.value === "" ? 0 : Number(e.target.value))}
+              placeholder="0"
               className={inputClass}
             />
           </div>
