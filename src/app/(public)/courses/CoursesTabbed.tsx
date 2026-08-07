@@ -16,6 +16,14 @@ interface Category {
 interface LearningPath {
   _id: string;
   title: string;
+  description: string;
+  instructor: string;
+  difficulty: string;
+  courses: any[];
+  estimatedHours?: number;
+  price?: number;
+  discount?: number;
+  discountType?: "percentage" | "fixed";
 }
 
 type TabType = "all" | "online" | "live-online" | "paths" | "onsite";
