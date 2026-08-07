@@ -238,30 +238,25 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
               {learningPaths.map((path) => (
                 <div key={path._id} className="bg-white rounded-xl overflow-hidden hover:shadow-lg transition-shadow group">
-                  {/* Title - Full Width */}
-                  <div className="px-4 pt-4 pb-1">
-                    <h3 className="font-bold text-gray-900 line-clamp-2 text-sm group-hover:text-indigo-600 transition-colors">
+                  {/* Cover Image - Full Width */}
+                  <Link href={`/learning-paths/${path._id}`}>
+                    <div className="relative h-40 bg-gradient-to-br from-indigo-100 to-purple-100 overflow-hidden cursor-pointer flex items-center justify-center">
+                      <span className="text-5xl">🗺️</span>
+                    </div>
+                  </Link>
+
+                  {/* Title and Description - Below Image */}
+                  <div className="px-4 pt-4 pb-3">
+                    <h3 className="font-bold text-gray-900 line-clamp-2 text-sm group-hover:text-indigo-600 transition-colors mb-1">
                       {path.title}
                     </h3>
-                  </div>
-
-                  {/* Description Subtitle - Full Width */}
-                  <div className="px-4 pb-3">
                     <p className="text-xs text-gray-600 line-clamp-2">{path.description}</p>
                   </div>
 
-                  <div className="flex gap-4 px-4 pb-4">
-                    {/* Left: Cover Image */}
-                    <Link href={`/learning-paths/${path._id}`}>
-                      <div className="relative w-32 h-32 bg-gradient-to-br from-indigo-100 to-purple-100 overflow-hidden cursor-pointer flex items-center justify-center rounded-lg flex-shrink-0">
-                        <span className="text-4xl">🗺️</span>
-                      </div>
-                    </Link>
-
-                    {/* Right: Content */}
-                    <div className="flex-1 flex flex-col">
-                      {/* Stats - Top Right */}
-                      <div className="flex items-center gap-3 text-xs text-gray-500 mb-2">
+                  {/* Content Section */}
+                  <div className="px-4 pb-4">
+                    {/* Stats */}
+                    <div className="flex items-center gap-3 text-xs text-gray-500 mb-3">
                         <div className="flex items-center gap-1">
                           <span>📚</span>
                           <span>{path.courses?.length || 0} คอร์สเรียน</span>
@@ -315,7 +310,6 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
                         </div>
                       </div>
                     </div>
-                  </div>
                 </div>
               ))}
             </div>
