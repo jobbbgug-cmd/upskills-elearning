@@ -112,6 +112,20 @@ export default function LearningPathForm({ path, mode }: LearningPathFormProps) 
     setSelectedCourses(selectedCourses.filter(id => id !== courseId));
   };
 
+  // Sync form state when path prop changes
+  useEffect(() => {
+    if (path && mode === "edit") {
+      setTitle(path.title || "");
+      setDescription(path.description || "");
+      setDifficulty(path.difficulty || "beginner");
+      setEstimatedHours(path.estimatedHours || 0);
+      setPrice(path.price || 0);
+      setDiscount(path.discount || 0);
+      setDiscountType((path.discountType as "percentage" | "fixed") || "percentage");
+      setSelectedCourses(path.courses?.map((c: any) => c._id || c) || []);
+    }
+  }, [path, mode]);
+
   const handleSave = async () => {
     if (!title.trim() || !description.trim() || selectedCourses.length === 0) {
       setToast({ message: "กรุณากรอกข้อมูลให้ครบถ้วนและเลือกคอร์สอย่างน้อย 1 คอร์ส", type: "error" });
