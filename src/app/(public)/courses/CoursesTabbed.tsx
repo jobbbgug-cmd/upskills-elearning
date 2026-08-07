@@ -306,8 +306,8 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
                       >
                         <span className="text-lg">🛒</span>
                       </button>
-                      <Link href={`/learning-paths/${path._id}`} className="flex-1 min-w-max">
-                        <button className="px-6 py-2.5 bg-indigo-600 text-white rounded font-semibold text-sm hover:bg-indigo-700 transition-colors whitespace-nowrap w-full">
+                      <Link href={`/learning-paths/${path._id}`} className="flex-1">
+                        <button className="w-full px-8 py-3 bg-indigo-600 text-white rounded font-semibold text-base hover:bg-indigo-700 transition-colors">
                           ดูเส้นทาง
                         </button>
                       </Link>
