@@ -7,7 +7,14 @@ import { logActivity, ACTION } from "@/lib/activityLog";
 
 export async function POST(req: NextRequest) {
   try {
-    const { email, password } = await req.json();
+    let body;
+    try {
+      body = await req.json();
+    } catch {
+      return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
+    }
+
+    const { email, password } = body;
 
     if (!email || !password) {
       return NextResponse.json({ error: "กรุณากรอกอีเมลและรหัสผ่าน" }, { status: 400 });
