@@ -46,8 +46,9 @@ const formatDuration = (hours: number): string => {
   if (totalMinutes < 60) {
     return `${totalMinutes} น.`;
   } else {
-    const displayHours = Math.round((totalMinutes / 60) * 10) / 10;
-    return `${displayHours} ชม.`;
+    const h = Math.floor(totalMinutes / 60);
+    const m = totalMinutes % 60;
+    return `${h}.${m.toString().padStart(2, '0')} ชม.`;
   }
 };
 
