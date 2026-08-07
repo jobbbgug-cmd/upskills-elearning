@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
 import { tenantFilter } from "@/lib/tenant";
+import { getAuthUser } from "@/lib/auth";
 import LearningPath from "@/models/LearningPath";
 
 export async function GET(req: NextRequest) {
@@ -19,6 +20,36 @@ export async function GET(req: NextRequest) {
       .populate("courses", "title slug");
 
     return NextResponse.json({ paths });
+  } catch (err) {
+    console.error(err);
+    return NextResponse.json({ error: "เกิดข้อผิดพลาด" }, { status: 500 });
+  }
+}
+
+export async function POST(req: NextRequest) {
+  try {
+    const auth = await getAuthUser();
+    if (!auth || (auth.role !== "admin" && auth.role !== "owner")) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    await connectDB();
+    const { title, description, difficulty, courseIds } = await req.json();
+
+    if (!title?.trim() || !description?.trim() || !Array.isArray(courseIds) || courseIds.length === 0) {
+      return NextResponse.json({ error: "Invalid input" }, { status: 400 });
+    }
+
+    const path = await LearningPath.create({
+      title,
+      description,
+      difficulty: difficulty || "beginner",
+      courses: courseIds,
+      ...tenantFilter(auth.institutionId),
+      isActive: true,
+    });
+
+    return NextResponse.json({ path }, { status: 201 });
   } catch (err) {
     console.error(err);
     return NextResponse.json({ error: "เกิดข้อผิดพลาด" }, { status: 500 });
