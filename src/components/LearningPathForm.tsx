@@ -91,17 +91,14 @@ export default function LearningPathForm({ path, mode }: LearningPathFormProps) 
   useEffect(() => {
     const totalMinutes = selectedCourses.reduce((sum, courseId) => {
       const course = courses.find(c => c._id === courseId) || path?.courses?.find((c: any) => c._id === courseId);
-      // Duration is in minutes, need to convert to hours
+      // Duration is in minutes
       const durationInMinutes = typeof course === 'object' ? (course?.duration || 0) : 0;
       return sum + durationInMinutes;
     }, 0);
-    
-    // Convert minutes to hours
-    const totalHours = Math.round((totalMinutes / 60) * 10) / 10; // Round to 1 decimal place
-    
-    // Only auto-update if not manually edited
-    if (totalHours > 0 && estimatedHours === 0) {
-      setEstimatedHours(totalHours);
+
+    // Auto-update estimated hours when courses change
+    if (totalMinutes > 0) {
+      setEstimatedHours(totalMinutes / 60);
     }
   }, [selectedCourses, courses, path?.courses]);
 
