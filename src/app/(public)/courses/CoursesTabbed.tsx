@@ -287,11 +287,11 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
                   <div className="flex items-center justify-between gap-2 px-4 py-3 border-t border-gray-100 mt-auto">
                     {/* Price Section */}
                     <div className="flex items-center gap-2">
-                      <span className="text-4xl font-bold text-red-600">
+                      <span className="text-2xl font-bold text-red-600">
                         ฿{Math.round((path.price || 0) - (path.discountType === "percentage" ? (path.price || 0) * (path.discount || 0) / 100 : (path.discount || 0))).toLocaleString()}
                       </span>
                       {(path.discount || 0) > 0 && (
-                        <span className="text-xs text-gray-400 line-through">
+                        <span className="text-base text-gray-400 line-through">
                           ฿{(path.price || 0).toLocaleString()}
                         </span>
                       )}
