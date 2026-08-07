@@ -237,51 +237,54 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
           learningPaths.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
               {learningPaths.map((path) => (
-                <div key={path._id} className="bg-white rounded-xl overflow-hidden hover:shadow-lg transition-shadow group">
-                  {/* Cover Image - Full Width */}
-                  <Link href={`/learning-paths/${path._id}`}>
-                    <div className="relative h-40 bg-gradient-to-br from-indigo-100 to-purple-100 overflow-hidden cursor-pointer flex items-center justify-center">
-                      <span className="text-5xl">🗺️</span>
-                    </div>
-                  </Link>
+                <div key={path._id} className="bg-white rounded-xl overflow-hidden hover:shadow-lg transition-shadow group flex flex-col">
+                  {/* Top Section: Image (Left) + Stats/Courses (Right) */}
+                  <div className="flex gap-4 p-4">
+                    {/* Left: Cover Image */}
+                    <Link href={`/learning-paths/${path._id}`} className="flex-shrink-0">
+                      <div className="relative w-32 h-32 bg-gradient-to-br from-indigo-100 to-purple-100 overflow-hidden cursor-pointer flex items-center justify-center rounded-lg">
+                        <span className="text-4xl">🗺️</span>
+                      </div>
+                    </Link>
 
-                  {/* Title and Description - Below Image */}
-                  <div className="px-4 pt-4 pb-3">
+                    {/* Right: Stats + Courses */}
+                    <div className="flex-1">
+                      {/* Stats */}
+                      <div className="flex items-center gap-3 text-xs text-gray-600 mb-3">
+                        <div className="flex items-center gap-1.5">
+                          <span>📚</span>
+                          <span className="font-medium">{path.courses?.length || 0} คอร์สเรียน</span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <span>⏱️</span>
+                          <span className="font-medium">{formatDuration(path.estimatedHours || 0)}</span>
+                        </div>
+                      </div>
+
+                      {/* Courses List */}
+                      <div className="text-xs">
+                        <p className="text-gray-700 font-semibold mb-2">ประกอบด้วยคอร์สเรียน</p>
+                        <div className="text-gray-600 space-y-1">
+                          {path.courses?.slice(0, 3).map((course: any, idx: number) => (
+                            <p key={idx} className="truncate">
+                              {idx + 1}. {typeof course === 'object' ? course.title : course}
+                            </p>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Title and Description - Full Width */}
+                  <div className="px-4 py-3 border-t border-gray-100">
                     <h3 className="font-bold text-gray-900 line-clamp-2 text-sm group-hover:text-indigo-600 transition-colors mb-1">
                       {path.title}
                     </h3>
                     <p className="text-xs text-gray-600 line-clamp-2">{path.description}</p>
                   </div>
 
-                  {/* Stats + Courses Section */}
-                  <div className="px-4 py-3 bg-gray-50 border-t border-gray-100">
-                    {/* Stats */}
-                    <div className="flex items-center gap-4 text-xs text-gray-600 mb-3">
-                      <div className="flex items-center gap-1.5">
-                        <span>📚</span>
-                        <span className="font-medium">{path.courses?.length || 0} คอร์สเรียน</span>
-                      </div>
-                      <div className="flex items-center gap-1.5">
-                        <span>⏱️</span>
-                        <span className="font-medium">{formatDuration(path.estimatedHours || 0)}</span>
-                      </div>
-                    </div>
-
-                    {/* Courses List */}
-                    <div className="text-xs">
-                      <p className="text-gray-700 font-semibold mb-2">ประกอบด้วยคอร์สเรียน</p>
-                      <div className="text-gray-600 space-y-1">
-                        {path.courses?.slice(0, 3).map((course: any, idx: number) => (
-                          <p key={idx} className="truncate">
-                            {idx + 1}. {typeof course === 'object' ? course.title : course}
-                          </p>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-
                   {/* Bottom Row: Price + Buttons */}
-                  <div className="flex items-center justify-between gap-2 px-4 py-3 border-t border-gray-100">
+                  <div className="flex items-center justify-between gap-2 px-4 py-3 border-t border-gray-100 mt-auto">
                     {/* Price Section */}
                     <div className="flex items-center gap-1">
                       <span className="text-sm font-bold text-red-600">
