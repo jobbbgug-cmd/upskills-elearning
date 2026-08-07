@@ -247,6 +247,27 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
 
                   {/* Content */}
                   <div className="p-5">
+                    {/* Price - At the top */}
+                    <div className="flex items-center justify-between gap-2 mb-4">
+                      <div className="flex items-center gap-2">
+                        <span className="text-lg font-bold text-red-600">
+                          ฿{Math.round((path.price || 0) - (path.discountType === "percentage" ? (path.price || 0) * (path.discount || 0) / 100 : (path.discount || 0))).toLocaleString()}
+                        </span>
+                        {(path.discount || 0) > 0 && (
+                          <span className="text-xs text-gray-500 line-through">
+                            ฿{(path.price || 0).toLocaleString()}
+                          </span>
+                        )}
+                      </div>
+                      <button
+                        onClick={() => handleAddToCart(path)}
+                        className="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                        title="ใส่ตะกร้า"
+                      >
+                        <span className="text-xl">🛒</span>
+                      </button>
+                    </div>
+
                     <h3 className="font-bold text-gray-900 line-clamp-2 text-sm group-hover:text-indigo-600 transition-colors mb-2">
                       {path.title}
                     </h3>
@@ -262,7 +283,7 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
                     </div>
 
                     {/* Stats */}
-                    <div className="px-4 py-3 flex items-center justify-between text-xs text-gray-500 border-b border-gray-100">
+                    <div className="px-4 py-3 flex items-center justify-between text-xs text-gray-500 border-b border-gray-100 mb-3">
                       <div className="flex items-center gap-1">
                         <span>📚</span>
                         <span>{path.courses?.length || 0} คอร์สเรียน</span>
@@ -273,35 +294,12 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
                       </div>
                     </div>
 
-                    {/* Price */}
-                    <div className="px-4 py-3 border-b border-gray-100">
-                      <div className="flex items-center gap-2">
-                        <span className="text-lg font-bold text-red-600">
-                          ฿{Math.round((path.price || 0) - (path.discountType === "percentage" ? (path.price || 0) * (path.discount || 0) / 100 : (path.discount || 0))).toLocaleString()}
-                        </span>
-                        {(path.discount || 0) > 0 && (
-                          <span className="text-sm text-gray-500 line-through">
-                            ฿{(path.price || 0).toLocaleString()}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Buttons */}
-                    <div className="px-4 py-3 flex gap-2 mt-3">
-                      <button
-                        onClick={() => handleAddToCart(path)}
-                        className="flex-1 py-2 border-2 border-indigo-600 text-indigo-600 rounded-lg font-semibold text-sm hover:bg-indigo-50 transition-colors flex items-center justify-center gap-2"
-                      >
-                        <span>🛒</span>
-                        <span>ใส่ตะกร้า</span>
+                    {/* View Button */}
+                    <Link href={`/learning-paths/${path._id}`}>
+                      <button className="w-full py-2 bg-indigo-600 text-white rounded-lg font-semibold text-sm hover:bg-indigo-700 transition-colors">
+                        ดูเส้นทาง
                       </button>
-                      <Link href={`/learning-paths/${path._id}`} className="flex-1">
-                        <button className="w-full py-2 bg-indigo-600 text-white rounded-lg font-semibold text-sm hover:bg-indigo-700 transition-colors">
-                          ดูเส้นทาง
-                        </button>
-                      </Link>
-                    </div>
+                    </Link>
                   </div>
                 </div>
               ))}
