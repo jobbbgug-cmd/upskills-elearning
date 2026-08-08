@@ -217,11 +217,11 @@ export default function LearningPathDetail() {
               </div>
 
               {/* Courses */}
-              <div className="flex-1 space-y-6">
+              <div className="flex-1 space-y-6 lg:max-w-2xl">
                 {path.courses.map((course, index) => (
                   <div
                     key={course._id}
-                    className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow p-6 flex gap-6 max-w-4xl"
+                    className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow p-6 flex gap-6"
                   >
                     {/* Course Image */}
                     <Link href={`/courses/${course.slug}`} className="flex-shrink-0">
