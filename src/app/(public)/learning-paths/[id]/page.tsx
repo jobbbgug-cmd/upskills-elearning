@@ -11,6 +11,12 @@ interface Course {
   slug: string;
   thumbnail?: string;
   instructorName?: string;
+  coverImage?: string;
+  description?: string;
+  duration?: number;
+  price?: number;
+  enrollmentCount?: number;
+  category?: string | { name: string };
 }
 
 interface LearningPath {
@@ -135,18 +141,53 @@ export default function LearningPathDetail() {
                     <Link
                       key={course._id}
                       href={`/courses/${course.slug}`}
-                      className="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow flex items-start gap-4"
+                      className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow flex gap-4 p-4"
                     >
-                      <div className="w-12 h-12 rounded-lg bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold flex-shrink-0">
-                        {index + 1}
-                      </div>
-                      <div className="flex-1">
-                        <h3 className="font-medium text-gray-900 mb-1">{course.title}</h3>
-                        {course.instructorName && (
-                          <p className="text-sm text-gray-600">{course.instructorName}</p>
+                      {/* Course Image */}
+                      <div className="w-40 h-32 flex-shrink-0 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-lg overflow-hidden flex items-center justify-center">
+                        {course.coverImage ? (
+                          <img src={course.coverImage} alt={course.title} className="w-full h-full object-cover" />
+                        ) : (
+                          <span className="text-3xl">📚</span>
                         )}
                       </div>
-                      <span className="text-indigo-600 text-sm font-medium">→</span>
+
+                      {/* Course Info */}
+                      <div className="flex-1 flex flex-col justify-between py-2">
+                        <div>
+                          <div className="flex items-start justify-between gap-4 mb-2">
+                            <h3 className="font-bold text-gray-900 text-lg line-clamp-2">{course.title}</h3>
+                            <span className="text-indigo-600 text-lg flex-shrink-0">→</span>
+                          </div>
+                          {course.instructorName && (
+                            <p className="text-sm text-gray-600 mb-2">{course.instructorName}</p>
+                          )}
+                          {course.description && (
+                            <p className="text-sm text-gray-600 line-clamp-1">{course.description}</p>
+                          )}
+                        </div>
+
+                        {/* Stats */}
+                        <div className="flex items-center gap-4 text-xs text-gray-500 mt-2">
+                          {course.duration && (
+                            <div className="flex items-center gap-1">
+                              <span>⏱️</span>
+                              <span>{course.duration} นาที</span>
+                            </div>
+                          )}
+                          {course.enrollmentCount !== undefined && (
+                            <div className="flex items-center gap-1">
+                              <span>👥</span>
+                              <span>{course.enrollmentCount} คน</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Number Badge */}
+                      <div className="w-10 h-10 rounded-lg bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold flex-shrink-0">
+                        {index + 1}
+                      </div>
                     </Link>
                   ))
                 ) : (
