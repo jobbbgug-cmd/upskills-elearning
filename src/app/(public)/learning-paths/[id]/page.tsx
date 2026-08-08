@@ -137,8 +137,8 @@ export default function LearningPathDetail() {
           </div>
 
           {/* Sidebar - Price & Courses */}
-          <div className="lg:col-span-1">
-            <div className="bg-white rounded-xl border border-gray-200 p-6 sticky top-8 max-h-[calc(100vh-2rem)]">
+          <div className="lg:col-span-1 h-full">
+            <div className="bg-white rounded-xl border border-gray-200 p-6 sticky top-8 h-fit">
               {/* Price */}
               <div className="mb-6 pb-6 border-b border-gray-100">
                 <div className="flex items-baseline gap-2">
