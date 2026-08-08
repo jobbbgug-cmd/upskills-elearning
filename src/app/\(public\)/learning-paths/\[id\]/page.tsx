@@ -57,29 +57,20 @@ const formatDuration = (hours: number): string => {
   }
 };
 
-const extractBulletPoints = (html: string): string[] => {
-  if (!html) return [];
-  if (typeof document === 'undefined') return [];
-  
+const parseHtmlContent = (html: string) => {
   const div = document.createElement('div');
   div.innerHTML = html;
+  return div.textContent || div.innerText || '';
+};
 
-  const listItems = div.querySelectorAll('li');
-  if (listItems.length > 0) {
-    return Array.from(listItems)
-      .map(item => item.textContent?.trim())
-      .filter(text => text && text.length > 0) as string[];
-  }
-
-  const paragraphs = div.querySelectorAll('p');
-  if (paragraphs.length > 0) {
-    return Array.from(paragraphs)
-      .map(item => item.textContent?.trim())
-      .filter(text => text && text.length > 0) as string[];
-  }
-
-  const text = div.textContent?.trim();
-  return text ? [text] : [];
+const extractBulletPoints = (html: string): string[] => {
+  if (!html) return [];
+  const div = document.createElement('div');
+  div.innerHTML = html;
+  const items = div.querySelectorAll('li, p');
+  return Array.from(items)
+    .map(item => item.textContent?.trim())
+    .filter(text => text && text.length > 0) as string[];
 };
 
 export default function LearningPathDetail() {
@@ -172,6 +163,7 @@ export default function LearningPathDetail() {
             {/* Suitable For & What You Will Learn */}
             {(suitableForItems.length > 0 || whatYouWillLearnItems.length > 0) && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {/* Suitable For */}
                 {suitableForItems.length > 0 && (
                   <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
                     <h3 className="text-lg font-bold text-indigo-600 mb-4">เส้นทางการเรียนนี้เหมาะกับใคร?</h3>
@@ -186,6 +178,7 @@ export default function LearningPathDetail() {
                   </div>
                 )}
 
+                {/* What You Will Learn */}
                 {whatYouWillLearnItems.length > 0 && (
                   <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
                     <h3 className="text-lg font-bold text-indigo-600 mb-4">สิ่งที่ได้เรียนรู้</h3>
@@ -209,9 +202,9 @@ export default function LearningPathDetail() {
               {path.courses && path.courses.length > 0 ? (
                 <div className="space-y-0">
                   {path.courses.map((course, index) => (
-                    <div key={course._id} className="flex gap-6 items-center">
+                    <div key={course._id} className="flex gap-6">
                       {/* Timeline Number with connecting line */}
-                      <div className="flex flex-col items-center flex-shrink-0">
+                      <div className="flex flex-col items-center flex-shrink-0 self-center">
                         <div className="w-14 h-14 rounded-full bg-white border-2 border-gray-300 flex items-center justify-center text-gray-600 font-bold text-lg">
                           {index + 1}
                         </div>

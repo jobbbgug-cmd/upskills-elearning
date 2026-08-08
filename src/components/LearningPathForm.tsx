@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, X } from "lucide-react";
 import Toast from "@/components/ui/Toast";
+import RichTextEditor from "@/components/RichTextEditor";
 
 interface Course {
   _id: string;
@@ -23,6 +24,8 @@ interface LearningPath {
   price?: number;
   discount?: number;
   discountType?: "percentage" | "fixed";
+  whoIsItSuitableFor?: string;
+  whatYouWillLearn?: string;
 }
 
 interface LearningPathFormProps {
@@ -61,6 +64,8 @@ export default function LearningPathForm({ path, mode }: LearningPathFormProps) 
   const [price, setPrice] = useState(path?.price || 0);
   const [discount, setDiscount] = useState(path?.discount || 0);
   const [discountType, setDiscountType] = useState<"percentage" | "fixed">(path?.discountType || "percentage");
+  const [whoIsItSuitableFor, setWhoIsItSuitableFor] = useState(path?.whoIsItSuitableFor || "");
+  const [whatYouWillLearn, setWhatYouWillLearn] = useState(path?.whatYouWillLearn || "");
   const [courses, setCourses] = useState<Course[]>([]);
   const [selectedCourses, setSelectedCourses] = useState<string[]>(
     path?.courses?.map((c: any) => c._id || c) || []
@@ -122,6 +127,8 @@ export default function LearningPathForm({ path, mode }: LearningPathFormProps) 
       setPrice(path.price || 0);
       setDiscount(path.discount || 0);
       setDiscountType((path.discountType as "percentage" | "fixed") || "percentage");
+      setWhoIsItSuitableFor(path.whoIsItSuitableFor || "");
+      setWhatYouWillLearn(path.whatYouWillLearn || "");
       setSelectedCourses(path.courses?.map((c: any) => c._id || c) || []);
     }
   }, [path, mode]);
@@ -148,6 +155,8 @@ export default function LearningPathForm({ path, mode }: LearningPathFormProps) 
           price,
           discount,
           discountType,
+          whoIsItSuitableFor,
+          whatYouWillLearn,
           courseIds: selectedCourses,
         }),
       });
@@ -195,6 +204,24 @@ export default function LearningPathForm({ path, mode }: LearningPathFormProps) 
             placeholder="อธิบายเส้นทางการเรียนนี้"
             rows={4}
             className={inputClass}
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-semibold text-gray-700 mb-3">เส้นทางการเรียนนี้เหมาะกับใคร?</label>
+          <RichTextEditor
+            key={`whoIsItSuitableFor-${path?._id || 'new'}`}
+            value={whoIsItSuitableFor}
+            onChange={setWhoIsItSuitableFor}
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-semibold text-gray-700 mb-3">สิ่งที่ได้เรียนรู้</label>
+          <RichTextEditor
+            key={`whatYouWillLearn-${path?._id || 'new'}`}
+            value={whatYouWillLearn}
+            onChange={setWhatYouWillLearn}
           />
         </div>
 

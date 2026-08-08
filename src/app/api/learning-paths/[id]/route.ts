@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
 import { getAuthUser } from "@/lib/auth";
 import LearningPath from "@/models/LearningPath";
+import Course from "@/models/Course";
+import Category from "@/models/Category";
 
 export async function GET(
   req: NextRequest,
@@ -11,14 +13,16 @@ export async function GET(
     await connectDB();
     const { id } = await params;
 
-    const path = await LearningPath.findById(id).populate({
-      path: "courses",
-      select: "title slug thumbnail instructor duration category enrollmentCount coverImage",
-      populate: {
-        path: "category",
-        select: "name",
-      },
-    });
+    const path = await LearningPath.findById(id)
+      .populate({
+        path: "courses",
+        select: "title slug thumbnail instructor duration category enrollmentCount coverImage",
+        populate: {
+          path: "category",
+          select: "name",
+        },
+      })
+      .exec();
 
     if (!path) {
       return NextResponse.json({ error: "ไม่พบเส้นทาง" }, { status: 404 });
@@ -69,7 +73,7 @@ export async function PUT(
 
     await connectDB();
     const { id } = await params;
-    const { title, description, difficulty, estimatedHours, price, discount, discountType, courseIds } = await req.json();
+    const { title, description, difficulty, estimatedHours, price, discount, discountType, courseIds, whoIsItSuitableFor, whatYouWillLearn } = await req.json();
 
     if (!title?.trim() || !description?.trim()) {
       return NextResponse.json({ error: "Invalid input" }, { status: 400 });
@@ -85,6 +89,8 @@ export async function PUT(
         price: price || 0,
         discount: discount || 0,
         discountType: discountType || "percentage",
+        whoIsItSuitableFor: whoIsItSuitableFor || "",
+        whatYouWillLearn: whatYouWillLearn || "",
         courses: courseIds || [],
       },
       { new: true }

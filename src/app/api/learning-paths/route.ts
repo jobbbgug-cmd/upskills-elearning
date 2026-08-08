@@ -3,6 +3,7 @@ import { connectDB } from "@/lib/mongodb";
 import { tenantFilter } from "@/lib/tenant";
 import { getAuthUser } from "@/lib/auth";
 import LearningPath from "@/models/LearningPath";
+import Course from "@/models/Course";
 
 export async function GET(req: NextRequest) {
   try {
@@ -34,7 +35,7 @@ export async function POST(req: NextRequest) {
     }
 
     await connectDB();
-    const { title, description, difficulty, price, discount, discountType, courseIds } = await req.json();
+    const { title, description, difficulty, price, discount, discountType, courseIds, whoIsItSuitableFor, whatYouWillLearn } = await req.json();
 
     if (!title?.trim() || !description?.trim() || !Array.isArray(courseIds) || courseIds.length === 0) {
       return NextResponse.json({ error: "Invalid input" }, { status: 400 });
@@ -47,6 +48,8 @@ export async function POST(req: NextRequest) {
       price: price || 0,
       discount: discount || 0,
       discountType: discountType || "percentage",
+      whoIsItSuitableFor: whoIsItSuitableFor || "",
+      whatYouWillLearn: whatYouWillLearn || "",
       courses: courseIds,
       instructor: auth.name || "Admin",
       institutionId: auth.institutionId,
