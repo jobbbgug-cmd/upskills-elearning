@@ -162,11 +162,11 @@ export default function LearningPathDetail() {
                       <div className="flex-1 bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow mb-4 p-6 flex gap-6">
                         {/* Course Image */}
                         <Link href={`/courses/${course.slug}`} className="flex-shrink-0 block">
-                          <div className="w-80 h-56 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-lg overflow-hidden flex items-center justify-center hover:scale-105 transition-transform">
+                          <div className="w-64 h-48 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-lg overflow-hidden flex items-center justify-center hover:scale-105 transition-transform">
                             {course.coverImage ? (
                               <img src={course.coverImage} alt={course.title} className="w-full h-full object-cover" />
                             ) : (
-                              <span className="text-6xl">📚</span>
+                              <span className="text-5xl">📚</span>
                             )}
                           </div>
                         </Link>
