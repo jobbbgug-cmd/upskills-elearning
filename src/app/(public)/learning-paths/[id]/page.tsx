@@ -114,7 +114,7 @@ export default function LearningPathDetail() {
           {/* Cover Image & Info */}
           <div className="lg:col-span-2">
             {/* Cover Image */}
-            <div className="h-80 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-2xl overflow-hidden mb-6 flex items-center justify-center">
+            <div className="h-96 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-2xl overflow-hidden mb-6 flex items-center justify-center">
               {path.coverImage ? (
                 <img src={path.coverImage} alt={path.title} className="w-full h-full object-cover" />
               ) : (
