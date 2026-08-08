@@ -145,16 +145,16 @@ export default function LearningPathDetail() {
               <h2 className="text-2xl font-bold text-gray-900 mb-8">หลักสูตรในเส้นทาง</h2>
 
               {path.courses && path.courses.length > 0 ? (
-                <div className="space-y-6">
+                <div className="space-y-0">
                   {path.courses.map((course, index) => (
-                    <div key={course._id} className="flex gap-6">
+                    <div key={course._id} className="flex gap-6 pt-6">
                       {/* Timeline Number with connecting line */}
-                      <div className="flex flex-col items-center flex-shrink-0 pt-6">
+                      <div className="flex flex-col items-center flex-shrink-0">
                         <div className="w-14 h-14 rounded-full bg-white border-2 border-gray-300 flex items-center justify-center text-gray-600 font-bold text-lg">
                           {index + 1}
                         </div>
                         {index < path.courses.length - 1 && (
-                          <div className="w-0.5 bg-gray-300 mt-3" style={{ height: "320px" }}></div>
+                          <div className="w-0.5 bg-gray-300" style={{ height: "calc(100% + 6rem)" }}></div>
                         )}
                       </div>
 
