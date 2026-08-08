@@ -173,10 +173,13 @@ export default function LearningPathDetail() {
                             <h3 className="font-bold text-gray-900 text-lg mb-2">{course.title}</h3>
 
                             {/* Tags/Categories */}
-                            <div className="flex flex-wrap gap-2 mb-4">
-                              <span className="text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded-full">Customer Experience & CRM</span>
-                              <span className="text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded-full">Customer Service</span>
-                            </div>
+                            {course.category && (
+                              <div className="flex flex-wrap gap-2 mb-4">
+                                <span className="text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded-full">
+                                  {typeof course.category === "string" ? course.category : course.category.name}
+                                </span>
+                              </div>
+                            )}
 
                             {/* Description */}
                             <p className="text-sm text-gray-600 line-clamp-2">{course.title}</p>
