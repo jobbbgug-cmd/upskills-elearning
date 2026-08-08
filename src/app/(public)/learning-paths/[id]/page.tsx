@@ -140,30 +140,23 @@ export default function LearningPathDetail() {
               <h2 className="text-2xl font-bold text-gray-900 mb-8">หลักสูตรในเส้นทาง</h2>
 
               {path.courses && path.courses.length > 0 ? (
-                <div className="flex gap-6">
-                  {/* Timeline - Sequence Numbers */}
-                  <div className="flex flex-col items-center flex-shrink-0 pt-2">
-                    {path.courses.map((_, index) => (
-                      <div key={`timeline-${index}`} className="flex flex-col items-center">
-                        <div className="w-12 h-12 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-lg border-2 border-indigo-300">
+                <div className="space-y-6 lg:max-w-2xl">
+                  {path.courses.map((course, index) => (
+                    <div key={course._id} className="flex gap-6">
+                      {/* Timeline Number with connecting line */}
+                      <div className="flex flex-col items-center flex-shrink-0">
+                        <div className="w-12 h-12 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-lg border-2 border-indigo-300 z-10 bg-white">
                           {index + 1}
                         </div>
                         {index < path.courses.length - 1 && (
-                          <div className="w-1 h-16 bg-indigo-300 mt-2 mb-2"></div>
+                          <div className="w-1 h-24 bg-indigo-300 mt-2"></div>
                         )}
                       </div>
-                    ))}
-                  </div>
 
-                  {/* Courses */}
-                  <div className="flex-1 space-y-6 lg:max-w-2xl">
-                    {path.courses.map((course, index) => (
-                      <div
-                        key={course._id}
-                        className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow p-6 flex gap-6"
-                      >
+                      {/* Course Card */}
+                      <div className="flex-1">
                         {/* Course Image */}
-                        <Link href={`/courses/${course.slug}`} className="flex-shrink-0">
+                        <Link href={`/courses/${course.slug}`} className="flex-shrink-0 mb-4 block">
                           <div className="w-56 h-40 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-lg overflow-hidden flex items-center justify-center hover:scale-105 transition-transform">
                             {course.coverImage ? (
                               <img src={course.coverImage} alt={course.title} className="w-full h-full object-cover" />
@@ -198,7 +191,7 @@ export default function LearningPathDetail() {
                         </div>
 
                         {/* Stats - Vertical on Right */}
-                        <div className="flex flex-col items-center gap-4 flex-shrink-0 py-2">
+                        <div className="flex flex-col items-center gap-4 flex-shrink-0 py-2 mt-4">
                           {course.enrollmentCount !== undefined && (
                             <div className="flex flex-col items-center gap-1 text-sm text-gray-600">
                               <span>👥</span>
@@ -216,8 +209,8 @@ export default function LearningPathDetail() {
                           )}
                         </div>
                       </div>
-                    ))}
-                  </div>
+                    </div>
+                  ))}
                 </div>
               ) : (
                 <p className="text-gray-500 text-center py-8">ยังไม่มีคอร์สในเส้นทางนี้</p>
