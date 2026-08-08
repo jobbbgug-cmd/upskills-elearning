@@ -154,7 +154,7 @@ export default function LearningPathDetail() {
                           {index + 1}
                         </div>
                         {index < path.courses.length - 1 && (
-                          <div className="w-0.5 h-48 bg-gray-300 mt-3"></div>
+                          <div className="w-0.5 bg-gray-300 mt-3" style={{ height: "320px" }}></div>
                         )}
                       </div>
 
