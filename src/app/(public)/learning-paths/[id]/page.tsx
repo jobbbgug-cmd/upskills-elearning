@@ -154,7 +154,7 @@ export default function LearningPathDetail() {
                           {index + 1}
                         </div>
                         {index < path.courses.length - 1 && (
-                          <div className="w-0.5 bg-gray-300" style={{ height: "calc(100% + 6rem)" }}></div>
+                          <div className="w-0.5 bg-gray-300" style={{ height: "500px", marginBottom: "-250px" }}></div>
                         )}
                       </div>
 
