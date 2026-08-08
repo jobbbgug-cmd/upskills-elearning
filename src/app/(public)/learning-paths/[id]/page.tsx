@@ -110,9 +110,9 @@ export default function LearningPathDetail() {
 
       {/* Main Content - Cover Image + Sidebar */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Cover Image & Info */}
-          <div className="lg:col-span-3">
+          <div className="lg:col-span-2">
             {/* Cover Image */}
             <div className="h-[450px] bg-gradient-to-br from-indigo-100 to-purple-100 rounded-2xl overflow-hidden mb-6 flex items-center justify-center">
               {path.coverImage ? (
