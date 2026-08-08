@@ -142,21 +142,39 @@ export default function LearningPathDetail() {
           <div className="lg:col-span-1">
             <div className="bg-white rounded-xl border border-gray-200 p-6 sticky top-4">
               {/* Price */}
-              <div className="mb-6">
-                <div className="flex items-baseline gap-2 mb-4">
-                  <span className="text-3xl font-bold text-red-600">฿2,590.00</span>
-                  <span className="text-lg text-gray-400 line-through">3,570.00</span>
+              <div className="mb-6 pb-6 border-b border-gray-100">
+                <div className="flex items-baseline gap-2">
+                  <span className="text-4xl font-bold text-red-600">฿2,590.00</span>
+                  <span className="text-base text-gray-400 line-through">3,570.00</span>
+                </div>
+              </div>
+
+              {/* Stats */}
+              <div className="mb-6 pb-6 border-b border-gray-100 space-y-3">
+                <div className="flex items-center justify-between text-gray-700">
+                  <div className="flex items-center gap-3">
+                    <Clock className="w-5 h-5 text-gray-500" />
+                    <span className="text-sm">ชั่วโมงการเรียน</span>
+                  </div>
+                  <span className="font-semibold text-gray-900">{path.estimatedHours} ชั่วโมง</span>
+                </div>
+                <div className="flex items-center justify-between text-gray-700">
+                  <div className="flex items-center gap-3">
+                    <BookOpen className="w-5 h-5 text-gray-500" />
+                    <span className="text-sm">จำนวนคอร์สเรียน</span>
+                  </div>
+                  <span className="font-semibold text-gray-900">{path.courses.length} คอร์ส</span>
                 </div>
               </div>
 
               {/* Courses List */}
               <div className="mb-6 pb-6 border-b border-gray-100">
-                <h3 className="font-semibold text-gray-900 mb-3">คอร์สในเส้นทาง</h3>
+                <h3 className="font-semibold text-gray-900 mb-3 text-sm">คอร์สในเส้นทางการเรียนนี้</h3>
                 <div className="space-y-2">
                   {path.courses && path.courses.length > 0 ? (
-                    path.courses.map((course, index) => (
+                    path.courses.map((course) => (
                       <div key={course._id} className="flex items-start gap-2 text-sm">
-                        <input type="checkbox" defaultChecked className="mt-0.5" />
+                        <span className="text-indigo-600 mt-1">✓</span>
                         <span className="text-gray-700">{course.title}</span>
                       </div>
                     ))
