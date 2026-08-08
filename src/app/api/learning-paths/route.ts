@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
     }
 
     await connectDB();
-    const { title, description, difficulty, price, discount, discountType, courseIds, whoIsItSuitableFor, whatYouWillLearn } = await req.json();
+    const { title, description, coverImage, difficulty, price, discount, discountType, courseIds, whoIsItSuitableFor, whatYouWillLearn } = await req.json();
 
     if (!title?.trim() || !description?.trim() || !Array.isArray(courseIds) || courseIds.length === 0) {
       return NextResponse.json({ error: "Invalid input" }, { status: 400 });
@@ -44,6 +44,7 @@ export async function POST(req: NextRequest) {
     const path = await LearningPath.create({
       title,
       description,
+      coverImage: coverImage || "",
       difficulty: difficulty || "beginner",
       price: price || 0,
       discount: discount || 0,
