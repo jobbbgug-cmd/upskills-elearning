@@ -110,11 +110,11 @@ export default function LearningPathDetail() {
 
       {/* Main Content - Cover Image + Sidebar */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Cover Image & Info */}
-          <div className="lg:col-span-2">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+          {/* Left Column: Cover Image, Info + Courses */}
+          <div className="lg:col-span-2 space-y-8">
             {/* Cover Image */}
-            <div className="h-[450px] bg-gradient-to-br from-indigo-100 to-purple-100 rounded-2xl overflow-hidden mb-6 flex items-center justify-center">
+            <div className="h-[450px] bg-gradient-to-br from-indigo-100 to-purple-100 rounded-2xl overflow-hidden flex items-center justify-center">
               {path.coverImage ? (
                 <img src={path.coverImage} alt={path.title} className="w-full h-full object-cover" />
               ) : (
@@ -124,7 +124,7 @@ export default function LearningPathDetail() {
 
             {/* Title & Description */}
             <div>
-              <div className="flex items-start gap-4 mb-4">
+              <div className="flex items-start gap-4">
                 <div className="flex-1">
                   <h1 className="text-3xl font-bold text-gray-900 mb-2">{path.title}</h1>
                   <p className="text-gray-600 text-lg">{path.description}</p>
@@ -134,10 +134,99 @@ export default function LearningPathDetail() {
                 </span>
               </div>
             </div>
+
+            {/* Courses Section */}
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-8">หลักสูตรในเส้นทาง</h2>
+
+              {path.courses && path.courses.length > 0 ? (
+                <div className="flex gap-6">
+                  {/* Timeline - Sequence Numbers */}
+                  <div className="flex flex-col items-center flex-shrink-0 pt-2">
+                    {path.courses.map((_, index) => (
+                      <div key={`timeline-${index}`} className="flex flex-col items-center">
+                        <div className="w-12 h-12 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-lg border-2 border-indigo-300">
+                          {index + 1}
+                        </div>
+                        {index < path.courses.length - 1 && (
+                          <div className="w-1 h-16 bg-indigo-300 mt-2 mb-2"></div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Courses */}
+                  <div className="flex-1 space-y-6 lg:max-w-2xl">
+                    {path.courses.map((course, index) => (
+                      <div
+                        key={course._id}
+                        className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow p-6 flex gap-6"
+                      >
+                        {/* Course Image */}
+                        <Link href={`/courses/${course.slug}`} className="flex-shrink-0">
+                          <div className="w-56 h-40 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-lg overflow-hidden flex items-center justify-center hover:scale-105 transition-transform">
+                            {course.coverImage ? (
+                              <img src={course.coverImage} alt={course.title} className="w-full h-full object-cover" />
+                            ) : (
+                              <span className="text-4xl">📚</span>
+                            )}
+                          </div>
+                        </Link>
+
+                        {/* Course Info */}
+                        <div className="w-64 flex flex-col justify-between">
+                          <div>
+                            <h3 className="font-bold text-gray-900 text-base mb-2">{course.title}</h3>
+
+                            {/* Instructor */}
+                            <div className="flex items-center gap-2 mb-3">
+                              <div className="w-6 h-6 rounded-full bg-gray-300 flex items-center justify-center text-xs">👤</div>
+                              <span className="text-xs text-gray-700">{course.instructorName || "ผู้สอน"}</span>
+                            </div>
+
+                            {/* Tags/Categories */}
+                            <div className="flex flex-wrap gap-1 mb-3">
+                              <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">Customer Experience & CRM</span>
+                              <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">Customer Service</span>
+                            </div>
+                          </div>
+
+                          {/* View Details Link */}
+                          <Link href={`/courses/${course.slug}`} className="text-indigo-600 hover:text-indigo-700 font-medium text-sm self-start">
+                            ดูรายละเอียด →
+                          </Link>
+                        </div>
+
+                        {/* Stats - Vertical on Right */}
+                        <div className="flex flex-col items-center gap-4 flex-shrink-0 py-2">
+                          {course.enrollmentCount !== undefined && (
+                            <div className="flex flex-col items-center gap-1 text-sm text-gray-600">
+                              <span>👥</span>
+                              <span className="font-semibold text-gray-900">{course.enrollmentCount}</span>
+                              <span className="text-xs text-gray-500">คน</span>
+                            </div>
+                          )}
+
+                          {course.duration && (
+                            <div className="flex flex-col items-center gap-1 text-sm text-gray-600">
+                              <span>⏱️</span>
+                              <span className="font-semibold text-gray-900">{course.duration}</span>
+                              <span className="text-xs text-gray-500">นาที</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <p className="text-gray-500 text-center py-8">ยังไม่มีคอร์สในเส้นทางนี้</p>
+              )}
+            </div>
           </div>
 
-          {/* Sidebar - Price & Courses */}
-          <div className="lg:col-span-1 h-full">
+          {/* Right Column: Sidebar - Price & Courses */}
+          <div className="lg:col-span-1">
             <div className="bg-white rounded-xl border border-gray-200 p-6 sticky top-8 h-fit">
               {/* Price */}
               <div className="mb-6 pb-6 border-b border-gray-100">
@@ -194,95 +283,6 @@ export default function LearningPathDetail() {
               </div>
             </div>
           </div>
-        </div>
-
-        {/* Courses Section */}
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-8">หลักสูตรในเส้นทาง</h2>
-
-          {path.courses && path.courses.length > 0 ? (
-            <div className="flex gap-6">
-              {/* Timeline - Sequence Numbers */}
-              <div className="flex flex-col items-center flex-shrink-0 pt-2">
-                {path.courses.map((_, index) => (
-                  <div key={`timeline-${index}`} className="flex flex-col items-center">
-                    <div className="w-12 h-12 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-lg border-2 border-indigo-300">
-                      {index + 1}
-                    </div>
-                    {index < path.courses.length - 1 && (
-                      <div className="w-1 h-16 bg-indigo-300 mt-2 mb-2"></div>
-                    )}
-                  </div>
-                ))}
-              </div>
-
-              {/* Courses */}
-              <div className="flex-1 space-y-6 lg:max-w-2xl">
-                {path.courses.map((course, index) => (
-                  <div
-                    key={course._id}
-                    className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow p-6 flex gap-6"
-                  >
-                    {/* Course Image */}
-                    <Link href={`/courses/${course.slug}`} className="flex-shrink-0">
-                      <div className="w-56 h-40 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-lg overflow-hidden flex items-center justify-center hover:scale-105 transition-transform">
-                        {course.coverImage ? (
-                          <img src={course.coverImage} alt={course.title} className="w-full h-full object-cover" />
-                        ) : (
-                          <span className="text-4xl">📚</span>
-                        )}
-                      </div>
-                    </Link>
-
-                    {/* Course Info */}
-                    <div className="w-64 flex flex-col justify-between">
-                      <div>
-                        <h3 className="font-bold text-gray-900 text-base mb-2">{course.title}</h3>
-
-                        {/* Instructor */}
-                        <div className="flex items-center gap-2 mb-3">
-                          <div className="w-6 h-6 rounded-full bg-gray-300 flex items-center justify-center text-xs">👤</div>
-                          <span className="text-xs text-gray-700">{course.instructorName || "ผู้สอน"}</span>
-                        </div>
-
-                        {/* Tags/Categories */}
-                        <div className="flex flex-wrap gap-1 mb-3">
-                          <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">Customer Experience & CRM</span>
-                          <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">Customer Service</span>
-                        </div>
-                      </div>
-
-                      {/* View Details Link */}
-                      <Link href={`/courses/${course.slug}`} className="text-indigo-600 hover:text-indigo-700 font-medium text-sm self-start">
-                        ดูรายละเอียด →
-                      </Link>
-                    </div>
-
-                    {/* Stats - Vertical on Right */}
-                    <div className="flex flex-col items-center gap-4 flex-shrink-0 py-2">
-                      {course.enrollmentCount !== undefined && (
-                        <div className="flex flex-col items-center gap-1 text-sm text-gray-600">
-                          <span>👥</span>
-                          <span className="font-semibold text-gray-900">{course.enrollmentCount}</span>
-                          <span className="text-xs text-gray-500">คน</span>
-                        </div>
-                      )}
-
-                      {course.duration && (
-                        <div className="flex flex-col items-center gap-1 text-sm text-gray-600">
-                          <span>⏱️</span>
-                          <span className="font-semibold text-gray-900">{course.duration}</span>
-                          <span className="text-xs text-gray-500">นาที</span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ) : (
-            <p className="text-gray-500 text-center py-8">ยังไม่มีคอร์สในเส้นทางนี้</p>
-          )}
         </div>
       </div>
     </div>
