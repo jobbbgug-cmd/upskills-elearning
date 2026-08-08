@@ -147,9 +147,9 @@ export default function LearningPathDetail() {
               {path.courses && path.courses.length > 0 ? (
                 <div className="space-y-0">
                   {path.courses.map((course, index) => (
-                    <div key={course._id} className="flex gap-6 pt-6 items-center">
+                    <div key={course._id} className="flex gap-6 pt-6 relative">
                       {/* Timeline Number with connecting line */}
-                      <div className="flex flex-col items-center flex-shrink-0 -mt-6">
+                      <div className="flex flex-col items-center flex-shrink-0 absolute left-0 top-0">
                         <div className="w-14 h-14 rounded-full bg-white border-2 border-gray-300 flex items-center justify-center text-gray-600 font-bold text-lg">
                           {index + 1}
                         </div>
@@ -159,7 +159,7 @@ export default function LearningPathDetail() {
                       </div>
 
                       {/* Course Card - Floating */}
-                      <div className="flex-1 bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow mb-4 p-6 flex gap-6">
+                      <div className="flex-1 bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow mb-4 p-6 pl-20 flex gap-6">
                         {/* Course Image */}
                         <Link href={`/courses/${course.slug}`} className="flex-shrink-0 block">
                           <div className="w-64 h-48 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-lg overflow-hidden flex items-center justify-center hover:scale-105 transition-transform">
