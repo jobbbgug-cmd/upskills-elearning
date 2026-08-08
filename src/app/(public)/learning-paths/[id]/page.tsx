@@ -15,7 +15,7 @@ interface Course {
   title: string;
   slug: string;
   thumbnail?: string;
-  instructorName?: string;
+  instructor?: string;
   coverImage?: string;
   description?: string;
   duration?: number;
@@ -195,7 +195,7 @@ export default function LearningPathDetail() {
                             {/* Instructor */}
                             <div className="flex items-center gap-2 mb-3">
                               <div className="w-6 h-6 rounded-full bg-gray-300 flex items-center justify-center text-xs">👤</div>
-                              <span className="text-sm text-gray-700 font-medium">{course.instructorName || "ผู้สอน"}</span>
+                              <span className="text-sm text-gray-700 font-medium">{course.instructor || "ผู้สอน"}</span>
                             </div>
 
                             {/* Stats */}

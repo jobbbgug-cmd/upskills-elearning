@@ -13,7 +13,7 @@ export async function GET(
 
     const path = await LearningPath.findById(id).populate({
       path: "courses",
-      select: "title slug thumbnail instructorName duration category enrollmentCount coverImage",
+      select: "title slug thumbnail instructor duration category enrollmentCount coverImage",
       populate: {
         path: "category",
         select: "name",
