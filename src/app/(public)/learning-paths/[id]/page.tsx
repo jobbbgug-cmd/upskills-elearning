@@ -221,66 +221,61 @@ export default function LearningPathDetail() {
                 {path.courses.map((course, index) => (
                   <div
                     key={course._id}
-                    className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow p-6"
+                    className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow p-6 flex gap-6"
+                    style={{ width: "fit-content" }}
                   >
-                    <div className="flex gap-6">
-                      {/* Course Image */}
-                      <Link href={`/courses/${course.slug}`} className="flex-shrink-0">
-                        <div className="w-56 h-40 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-lg overflow-hidden flex items-center justify-center hover:scale-105 transition-transform">
-                          {course.coverImage ? (
-                            <img src={course.coverImage} alt={course.title} className="w-full h-full object-cover" />
-                          ) : (
-                            <span className="text-4xl">📚</span>
-                          )}
-                        </div>
-                      </Link>
+                    {/* Course Image */}
+                    <Link href={`/courses/${course.slug}`} className="flex-shrink-0">
+                      <div className="w-56 h-40 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-lg overflow-hidden flex items-center justify-center hover:scale-105 transition-transform">
+                        {course.coverImage ? (
+                          <img src={course.coverImage} alt={course.title} className="w-full h-full object-cover" />
+                        ) : (
+                          <span className="text-4xl">📚</span>
+                        )}
+                      </div>
+                    </Link>
 
-                      {/* Course Info */}
-                      <div className="flex-1 flex flex-col justify-between">
-                        <div>
-                          <div className="mb-3">
-                            <h3 className="font-bold text-gray-900 text-lg mb-1">{course.title}</h3>
-                            {course.description && (
-                              <p className="text-sm text-gray-600 line-clamp-2">{course.description}</p>
-                            )}
-                          </div>
+                    {/* Course Info */}
+                    <div className="w-56 flex flex-col justify-between">
+                      <div>
+                        <h3 className="font-bold text-gray-900 text-base mb-2">{course.title}</h3>
 
-                          {/* Instructor & Categories */}
-                          <div className="flex items-center gap-4 mb-3">
-                            <div className="flex items-center gap-2">
-                              <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center text-sm">👤</div>
-                              <span className="text-sm text-gray-700">{course.instructorName || "ผู้สอน"}</span>
-                            </div>
-                          </div>
-
-                          {/* Tags/Categories */}
-                          <div className="flex flex-wrap gap-2 mb-3">
-                            <span className="text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded-full">Customer Experience & CRM</span>
-                            <span className="text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded-full">Customer Service</span>
-                          </div>
+                        {/* Instructor */}
+                        <div className="flex items-center gap-2 mb-3">
+                          <div className="w-6 h-6 rounded-full bg-gray-300 flex items-center justify-center text-xs">👤</div>
+                          <span className="text-xs text-gray-700">{course.instructorName || "ผู้สอน"}</span>
                         </div>
 
-                        {/* Stats & Button */}
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-4 text-sm text-gray-600">
-                            {course.enrollmentCount !== undefined && (
-                              <div className="flex items-center gap-1">
-                                <span>👥</span>
-                                <span>{course.enrollmentCount} คน</span>
-                              </div>
-                            )}
-                            {course.duration && (
-                              <div className="flex items-center gap-1">
-                                <span>⏱️</span>
-                                <span>{course.duration} นาที</span>
-                              </div>
-                            )}
-                          </div>
-                          <Link href={`/courses/${course.slug}`} className="text-indigo-600 hover:text-indigo-700 font-medium text-sm">
-                            ดูรายละเอียด →
-                          </Link>
+                        {/* Tags/Categories */}
+                        <div className="flex flex-wrap gap-1 mb-3">
+                          <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">Customer Experience & CRM</span>
+                          <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">Customer Service</span>
                         </div>
                       </div>
+
+                      {/* View Details Link */}
+                      <Link href={`/courses/${course.slug}`} className="text-indigo-600 hover:text-indigo-700 font-medium text-sm self-start">
+                        ดูรายละเอียด →
+                      </Link>
+                    </div>
+
+                    {/* Stats - Vertical on Right */}
+                    <div className="flex flex-col items-center gap-4 flex-shrink-0 py-2">
+                      {course.enrollmentCount !== undefined && (
+                        <div className="flex flex-col items-center gap-1 text-sm text-gray-600">
+                          <span>👥</span>
+                          <span className="font-semibold text-gray-900">{course.enrollmentCount}</span>
+                          <span className="text-xs text-gray-500">คน</span>
+                        </div>
+                      )}
+
+                      {course.duration && (
+                        <div className="flex flex-col items-center gap-1 text-sm text-gray-600">
+                          <span>⏱️</span>
+                          <span className="font-semibold text-gray-900">{course.duration}</span>
+                          <span className="text-xs text-gray-500">นาที</span>
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))}
