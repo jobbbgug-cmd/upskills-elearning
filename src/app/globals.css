@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@100;300;400;500;600;700;800&display=swap');
 @import "tailwindcss";
 
 :root {
@@ -9,13 +10,13 @@
 }
 
 @theme {
-  --font-kanit: var(--font-kanit), Arial, sans-serif;
+  --font-sarabun: 'Sarabun', sans-serif;
 }
 
 body {
   background: #ffffff;
   color: #171717;
-  font-family: var(--font-kanit), Arial, sans-serif;
+  font-family: 'Sarabun', sans-serif;
 }
 
 @keyframes nav-progress {

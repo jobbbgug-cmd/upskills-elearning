@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
-import { Kanit } from "next/font/google";
+import { Sarabun } from "next/font/google";
 import "./globals.css";
 import ThemeProvider from "@/components/ThemeProvider";
 import { CartProvider } from "@/context/CartContext";
 
-const kanit = Kanit({
+const sarabun = Sarabun({
   subsets: ["thai", "latin"],
-  weight: ["300", "400", "500", "600", "700", "800"],
-  variable: "--font-kanit",
+  weight: ["100", "300", "400", "500", "600", "700", "800"],
+  variable: "--font-sarabun",
   display: "swap",
 });
 
@@ -35,8 +35,8 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="th" className={kanit.variable}>
-      <body className="bg-gray-50 min-h-screen font-kanit">
+    <html lang="th" className={sarabun.variable}>
+      <body className="bg-gray-50 min-h-screen" style={{ fontFamily: "'Sarabun', sans-serif" }}>
         <CartProvider>
           <ThemeProvider>{children}</ThemeProvider>
         </CartProvider>

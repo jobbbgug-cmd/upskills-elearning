@@ -29,10 +29,30 @@ async function getCourses() {
     const categories = await Category.find({}).select("_id name").lean().exec();
     const categoryMap = new Map(categories.map(cat => [cat._id?.toString(), cat.name]));
 
-    return JSON.parse(JSON.stringify(courses.map((course: any) => ({
-      ...course,
-      categoryName: course.category ? categoryMap.get(course.category.toString()) : null
-    })))) as (ICourse & { categoryName?: string })[];
+    const processedCourses = courses.map((course: any) => {
+      let categoryName = null;
+
+      if (course.category) {
+        if (typeof course.category === 'string') {
+          categoryName = course.category;
+        } else if (typeof course.category === 'object' && course.category.name) {
+          categoryName = course.category.name;
+        } else if (typeof course.category === 'object' && course.category._id) {
+          categoryName = categoryMap.get(course.category._id.toString());
+        } else {
+          categoryName = categoryMap.get(course.category?.toString());
+        }
+      }
+
+      return {
+        ...course,
+        categoryName
+      };
+    });
+
+    console.log("Sample course categoryNames:", processedCourses.slice(0, 3).map(c => ({ id: c._id, title: c.title, categoryName: c.categoryName })));
+
+    return JSON.parse(JSON.stringify(processedCourses)) as (ICourse & { categoryName?: string })[];
   } catch (error) {
     console.error("Error fetching courses:", error);
     return [];
