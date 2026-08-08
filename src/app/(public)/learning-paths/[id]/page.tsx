@@ -147,9 +147,9 @@ export default function LearningPathDetail() {
               {path.courses && path.courses.length > 0 ? (
                 <div className="space-y-0">
                   {path.courses.map((course, index) => (
-                    <div key={course._id} className="flex gap-6 pt-6">
+                    <div key={course._id} className="flex gap-6 pt-6 items-center">
                       {/* Timeline Number with connecting line */}
-                      <div className="flex flex-col items-center flex-shrink-0">
+                      <div className="flex flex-col items-center flex-shrink-0 -mt-6">
                         <div className="w-14 h-14 rounded-full bg-white border-2 border-gray-300 flex items-center justify-center text-gray-600 font-bold text-lg">
                           {index + 1}
                         </div>
