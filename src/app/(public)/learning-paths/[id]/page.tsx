@@ -110,9 +110,9 @@ export default function LearningPathDetail() {
 
       {/* Main Content - Cover Image + Sidebar */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Cover Image & Info */}
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-3">
             {/* Cover Image */}
             <div className="h-[450px] bg-gradient-to-br from-indigo-100 to-purple-100 rounded-2xl overflow-hidden mb-6 flex items-center justify-center">
               {path.coverImage ? (
@@ -138,7 +138,7 @@ export default function LearningPathDetail() {
 
           {/* Sidebar - Price & Courses */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-xl border border-gray-200 p-6 sticky top-4">
+            <div className="bg-white rounded-xl border border-gray-200 p-6 sticky top-8 max-h-[calc(100vh-2rem)]">
               {/* Price */}
               <div className="mb-6 pb-6 border-b border-gray-100">
                 <div className="flex items-baseline gap-2">
