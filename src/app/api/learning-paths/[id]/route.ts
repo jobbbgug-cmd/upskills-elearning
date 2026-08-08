@@ -14,6 +14,10 @@ export async function GET(
     const path = await LearningPath.findById(id).populate({
       path: "courses",
       select: "title slug thumbnail instructorName duration category enrollmentCount",
+      populate: {
+        path: "category",
+        select: "name",
+      },
     });
 
     if (!path) {

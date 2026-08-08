@@ -5,6 +5,11 @@ import Link from "next/link";
 import { ArrowLeft, Clock, Users, BookOpen, ShoppingCart } from "lucide-react";
 import { useParams } from "next/navigation";
 
+interface Category {
+  _id: string;
+  name: string;
+}
+
 interface Course {
   _id: string;
   title: string;
@@ -16,7 +21,7 @@ interface Course {
   duration?: number;
   price?: number;
   enrollmentCount?: number;
-  category?: string | { name: string };
+  category?: string | Category;
 }
 
 interface LearningPath {
@@ -176,7 +181,7 @@ export default function LearningPathDetail() {
                             {course.category && (
                               <div className="flex flex-wrap gap-2 mb-4">
                                 <span className="text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded-full">
-                                  {typeof course.category === "string" ? course.category : course.category.name}
+                                  {typeof course.category === "string" ? course.category : (course.category as Category)?.name || ""}
                                 </span>
                               </div>
                             )}
