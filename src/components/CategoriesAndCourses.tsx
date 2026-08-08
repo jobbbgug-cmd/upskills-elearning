@@ -29,22 +29,16 @@ export default function CategoriesAndCourses() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [categoriesRes, coursesRes] = await Promise.all([
-          fetch("/api/categories?type=online"),
-          fetch("/api/courses?type=online&limit=100"),
-        ]);
+        const categoriesRes = await fetch("/api/categories?type=online");
         const categoriesData = await categoriesRes.json();
-        const coursesData = await coursesRes.json();
-
         const cats = categoriesData.categories || [];
         setCategories(cats);
-        setCourses(coursesData.courses || []);
 
         if (cats.length > 0) {
           setSelectedCategory(cats[0]._id);
         }
       } catch (error) {
-        console.error("Failed to fetch data:", error);
+        console.error("Failed to fetch categories:", error);
       } finally {
         setLoading(false);
       }
@@ -53,9 +47,28 @@ export default function CategoriesAndCourses() {
     fetchData();
   }, []);
 
-  const filteredCourses = selectedCategory
-    ? courses.filter(c => (c as any).categoryName === selectedCategory)
-    : courses;
+  useEffect(() => {
+    const fetchCourses = async () => {
+      if (!selectedCategory) return;
+
+      try {
+        setLoading(true);
+        const url = `/api/courses?type=online&category=${selectedCategory}&limit=100`;
+        const coursesRes = await fetch(url);
+        const coursesData = await coursesRes.json();
+        setCourses(coursesData.courses || []);
+      } catch (error) {
+        console.error("Failed to fetch courses:", error);
+        setCourses([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCourses();
+  }, [selectedCategory]);
+
+  const filteredCourses = courses;
 
   const getDuration = (sessions?: { startTime?: string; endTime?: string }[]) => {
     if (!sessions || sessions.length === 0) return "เรียนตามแผน";

@@ -21,40 +21,41 @@ async function getCourses() {
   await connectDB();
 
   try {
+    // Simple approach: fetch courses and populate category
     const courses = await Course.find({ isActive: true })
       .select("_id title description coverImage type instructor price enrollmentCount duration category")
+      .populate({
+        path: "category",
+        select: "name",
+        strictPopulate: false // Allow missing references
+      })
       .lean()
       .exec();
 
-    const categories = await Category.find({}).select("_id name").lean().exec();
-    const categoryMap = new Map(categories.map(cat => [cat._id?.toString(), cat.name]));
-
-    const processedCourses = courses.map((course: any) => {
+    // Map to include categoryName
+    const result = courses.map((course: any) => {
       let categoryName = null;
 
       if (course.category) {
-        if (typeof course.category === 'string') {
+        if (typeof course.category === "string") {
+          // Category is already a string
           categoryName = course.category;
-        } else if (typeof course.category === 'object' && course.category.name) {
+        } else if (typeof course.category === "object" && course.category.name) {
+          // Category is populated object
           categoryName = course.category.name;
-        } else if (typeof course.category === 'object' && course.category._id) {
-          categoryName = categoryMap.get(course.category._id.toString());
-        } else {
-          categoryName = categoryMap.get(course.category?.toString());
         }
       }
 
       return {
         ...course,
-        categoryName
+        categoryName: categoryName || null
       };
     });
 
-    console.log("Sample course categoryNames:", processedCourses.slice(0, 3).map(c => ({ id: c._id, title: c.title, categoryName: c.categoryName })));
-
-    return JSON.parse(JSON.stringify(processedCourses)) as (ICourse & { categoryName?: string })[];
+    return JSON.parse(JSON.stringify(result)) as (ICourse & { categoryName?: string })[];
   } catch (error) {
     console.error("Error fetching courses:", error);
+    // Fallback: return courses without category filtering
     return [];
   }
 }
