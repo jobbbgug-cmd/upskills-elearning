@@ -231,8 +231,8 @@ export default function LearningPathForm({ path, mode }: LearningPathFormProps) 
                 <Image
                   src={coverImage}
                   alt="Learning path cover"
-                  width={200}
-                  height={150}
+                  width={600}
+                  height={400}
                   className="rounded-lg object-cover"
                 />
                 <button

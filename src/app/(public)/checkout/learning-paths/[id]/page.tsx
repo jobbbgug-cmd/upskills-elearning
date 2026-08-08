@@ -1,0 +1,218 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { AlertCircle, ChevronRight } from "lucide-react";
+import { useParams } from "next/navigation";
+
+interface Course {
+  _id: string;
+  title: string;
+}
+
+interface LearningPath {
+  _id: string;
+  title: string;
+  description: string;
+  coverImage?: string;
+  instructor: string;
+  difficulty: string;
+  courses: Course[];
+  price?: number;
+  discount?: number;
+  discountType?: "percentage" | "fixed";
+}
+
+export default function CheckoutPage() {
+  const params = useParams();
+  const id = params.id as string;
+
+  const [path, setPath] = useState<LearningPath | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [discountCode, setDiscountCode] = useState("");
+
+  useEffect(() => {
+    const fetchPath = async () => {
+      try {
+        const res = await fetch(`/api/learning-paths/${id}`);
+        const data = await res.json();
+        setPath(data.path);
+      } catch (error) {
+        console.error("Failed to fetch learning path:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (id) fetchPath();
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <p className="text-gray-500">กำลังโหลด...</p>
+      </div>
+    );
+  }
+
+  if (!path) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-gray-500 mb-4">ไม่พบเส้นทางการเรียน</p>
+          <Link href="/courses?tab=paths" className="text-indigo-600 hover:text-indigo-700 font-medium">
+            กลับไปหน้าเส้นทาง
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  const price = path.price || 0;
+  const discount = path.discountType === "percentage" ? (price * (path.discount || 0) / 100) : (path.discount || 0);
+  const finalPrice = price - discount;
+  const originalPrice = price;
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <div className="bg-white border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-10 h-10 bg-gradient-to-br from-purple-400 to-pink-400 rounded-lg flex items-center justify-center text-white font-bold text-lg">
+              S
+            </div>
+            <h1 className="text-2xl font-bold text-gray-900">สรุปรายการค่าสั่งซื้อ</h1>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Left Column: Product Info */}
+          <div className="lg:col-span-2">
+            {/* Info Box */}
+            <div className="bg-blue-50 border-2 border-dashed border-blue-300 rounded-lg p-4 mb-8 flex items-start gap-3">
+              <AlertCircle className="w-5 h-5 text-purple-600 flex-shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <p className="text-sm text-gray-700">
+                  <span className="font-semibold">*ท่านบันทึกชั้นบันทึก</span> เพิ่มเติมในแบบฟอร์มได้ที่นี่ก่อนการชำระเงิน
+                </p>
+              </div>
+              <button className="bg-purple-600 text-white px-6 py-2 rounded-full text-sm font-semibold hover:bg-purple-700 transition-colors flex-shrink-0">
+                เพิ่มเพิ่มคอร์ส
+              </button>
+            </div>
+
+            {/* Order Items Section */}
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold text-gray-900">รายการสั่งซื้อ</h2>
+                <span className="text-sm text-gray-600">1 รายการ</span>
+              </div>
+
+              {/* Product Card */}
+              <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 mb-6">
+                <div className="flex gap-6">
+                  {/* Product Image */}
+                  <div className="flex-shrink-0">
+                    <div className="w-40 h-32 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-lg overflow-hidden flex items-center justify-center">
+                      {path.coverImage ? (
+                        <img src={path.coverImage} alt={path.title} className="w-full h-full object-cover" />
+                      ) : (
+                        <span className="text-4xl">🗺️</span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Product Details */}
+                  <div className="flex-1">
+                    <div className="flex items-start justify-between mb-2">
+                      <h3 className="text-lg font-bold text-gray-900">{path.title}</h3>
+                    </div>
+                    <p className="text-sm text-gray-600 mb-4 line-clamp-2">{path.description}</p>
+
+                    {/* Price */}
+                    <div className="flex items-center gap-3 mb-4">
+                      <span className="text-3xl font-bold text-purple-600">
+                        ฿{finalPrice.toLocaleString()}
+                      </span>
+                      {discount > 0 && (
+                        <span className="text-lg text-gray-400 line-through">
+                          ฿{originalPrice.toLocaleString()}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* View Details Button */}
+                    <Link href={`/learning-paths/${path._id}`}>
+                      <button className="border-2 border-purple-600 text-purple-600 px-6 py-2 rounded-full text-sm font-semibold hover:bg-purple-50 transition-colors">
+                        ดูรายละเอียด
+                      </button>
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Column: Summary */}
+          <div className="lg:col-span-1">
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 sticky top-24">
+              <h3 className="text-lg font-bold text-gray-900 mb-6">สรุปยอดที่ต้องชำระ</h3>
+
+              {/* Price Breakdown */}
+              <div className="space-y-4 mb-6 pb-6 border-b border-gray-200">
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">ยอดรวม (จำนวน 1 รายการ)</span>
+                  <span className="font-medium text-gray-900">฿{price.toLocaleString()}</span>
+                </div>
+                {discount > 0 && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">ส่วนลด</span>
+                    <span className="font-medium text-gray-900">-฿{discount.toLocaleString()}</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Total */}
+              <div className="mb-6">
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600 font-medium">ยอดชำระระดับสินค้า</span>
+                  <span className="text-3xl font-bold text-purple-600">
+                    ฿{finalPrice.toLocaleString()}
+                  </span>
+                </div>
+              </div>
+
+              {/* Discount Code */}
+              <div className="mb-6">
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    placeholder="ระหว่างโปรโมชั่นคอร์ด"
+                    value={discountCode}
+                    onChange={(e) => setDiscountCode(e.target.value)}
+                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-purple-600"
+                  />
+                  <button className="bg-purple-600 text-white px-6 py-2 rounded-full text-sm font-semibold hover:bg-purple-700 transition-colors">
+                    ใช้คำ
+                  </button>
+                </div>
+              </div>
+
+              {/* Proceed to Payment */}
+              <Link href={`/checkout/payment/${path._id}`} className="block">
+                <button className="w-full bg-purple-600 text-white py-3 rounded-full font-semibold hover:bg-purple-700 transition-colors flex items-center justify-center gap-2">
+                  เลือกวิธีชำระเงินต่อไป
+                  <ChevronRight className="w-5 h-5" />
+                </button>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

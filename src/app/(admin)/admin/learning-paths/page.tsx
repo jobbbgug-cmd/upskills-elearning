@@ -11,6 +11,7 @@ interface LearningPathItem {
   _id: string;
   title: string;
   description: string;
+  coverImage?: string;
   instructor: string;
   difficulty: string;
   courses: any[];
@@ -24,6 +25,7 @@ async function getLearningPaths(institutionId?: string): Promise<LearningPathIte
       ...tenantFilter(institutionId),
       isActive: true,
     })
+      .select("title description coverImage instructor difficulty courses createdAt")
       .sort({ createdAt: -1 })
       .populate("courses", "title")
       .lean();

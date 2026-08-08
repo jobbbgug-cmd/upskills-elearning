@@ -60,7 +60,7 @@ const formatDuration = (hours: number): string => {
 const extractBulletPoints = (html: string): string[] => {
   if (!html) return [];
   if (typeof document === 'undefined') return [];
-  
+
   const div = document.createElement('div');
   div.innerHTML = html;
 
@@ -81,6 +81,30 @@ const extractBulletPoints = (html: string): string[] => {
   const text = div.textContent?.trim();
   return text ? [text] : [];
 };
+
+function FAQItem({ question, answer }: { question: string; answer: string }) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
+      >
+        <span className="text-left font-medium text-gray-900">{question}</span>
+        <span className={`text-2xl text-indigo-600 transition-transform ${isOpen ? 'rotate-180' : ''}`}>
+          ∨
+        </span>
+      </button>
+
+      {isOpen && (
+        <div className="px-6 py-4 border-t border-gray-100 bg-gray-50">
+          <p className="text-gray-700 text-sm leading-relaxed">{answer}</p>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function LearningPathDetail() {
   const params = useParams();
@@ -118,7 +142,7 @@ export default function LearningPathDetail() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <p className="text-gray-500 mb-4">ไม่พบเส้นทางการเรียน</p>
-          <Link href="/learning-paths" className="text-indigo-600 hover:text-indigo-700 font-medium">
+          <Link href="/courses?tab=online" className="text-indigo-600 hover:text-indigo-700 font-medium">
             กลับไปหน้าเส้นทาง
           </Link>
         </div>
@@ -135,7 +159,7 @@ export default function LearningPathDetail() {
       {/* Back Button */}
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <Link href="/learning-paths" className="flex items-center gap-2 text-indigo-600 hover:text-indigo-700 font-medium text-sm">
+          <Link href="/courses?tab=online" className="flex items-center gap-2 text-indigo-600 hover:text-indigo-700 font-medium text-sm">
             <ArrowLeft className="w-4 h-4" />
             กลับไป
           </Link>
@@ -223,8 +247,8 @@ export default function LearningPathDetail() {
                       {/* Course Card - Floating */}
                       <div className="flex-1 bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow mb-4 p-6 flex gap-6">
                         {/* Course Image */}
-                        <Link href={`/courses/${course.slug}`} className="flex-shrink-0 block">
-                          <div className="w-64 h-48 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-lg overflow-hidden flex items-center justify-center hover:scale-105 transition-transform">
+                        <Link href={`/courses/${course._id}`} className="flex-shrink-0 block">
+                          <div className="w-80 h-48 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-lg overflow-hidden flex items-center justify-center hover:scale-105 transition-transform">
                             {course.coverImage ? (
                               <img src={course.coverImage} alt={course.title} className="w-full h-full object-cover" />
                             ) : (
@@ -252,36 +276,40 @@ export default function LearningPathDetail() {
                             <p className="text-sm text-gray-600 line-clamp-2">{course.title}</p>
                           </div>
 
-                          {/* Footer */}
-                          <div>
-                            {/* Instructor */}
-                            <div className="flex items-center gap-2 mb-3">
-                              <div className="w-6 h-6 rounded-full bg-gray-300 flex items-center justify-center text-xs">👤</div>
-                              <span className="text-sm text-gray-700 font-medium">{course.instructor || "ผู้สอน"}</span>
-                            </div>
+                          {/* Stats and CTA */}
+                          <div className="flex flex-col">
+                            <div className="flex-1">
+                              {/* Instructor */}
+                              <div className="flex items-center gap-2 mb-3">
+                                <div className="w-6 h-6 rounded-full bg-gray-300 flex items-center justify-center text-xs">👤</div>
+                                <span className="text-sm text-gray-700 font-medium">{course.instructor || "ผู้สอน"}</span>
+                              </div>
 
-                            {/* Stats */}
-                            <div className="flex items-center gap-4 mb-4 text-sm">
-                              {course.enrollmentCount !== undefined && (
-                                <div className="flex items-center gap-1">
-                                  <span>👥</span>
-                                  <span className="font-semibold text-gray-900">{course.enrollmentCount}</span>
-                                </div>
-                              )}
+                              {/* Stats */}
+                              <div className="flex items-center gap-4 mb-4 text-sm">
+                                {course.enrollmentCount !== undefined && (
+                                  <div className="flex items-center gap-1">
+                                    <span>👥</span>
+                                    <span className="font-semibold text-gray-900">{course.enrollmentCount}</span>
+                                  </div>
+                                )}
 
-                              {course.duration && (
-                                <div className="flex items-center gap-1">
-                                  <span>⏱️</span>
-                                  <span className="font-semibold text-gray-900">{course.duration}</span>
-                                  <span className="text-gray-600">นาที</span>
-                                </div>
-                              )}
+                                {course.duration && (
+                                  <div className="flex items-center gap-1">
+                                    <span>⏱️</span>
+                                    <span className="font-semibold text-gray-900">{course.duration}</span>
+                                    <span className="text-gray-600">นาที</span>
+                                  </div>
+                                )}
+                              </div>
                             </div>
 
                             {/* View Details Link */}
-                            <Link href={`/courses/${course.slug}`} className="text-indigo-600 hover:text-indigo-700 font-medium text-sm">
-                              ดูรายละเอียด →
-                            </Link>
+                            <div className="flex justify-end">
+                              <Link href={`/courses/${course._id}`} className="text-indigo-600 hover:text-indigo-700 font-medium text-sm">
+                                ดูรายละเอียด →
+                              </Link>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -296,7 +324,7 @@ export default function LearningPathDetail() {
 
           {/* Right Column: Sidebar - Price & Courses */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-xl border border-gray-200 p-6 sticky top-8 h-fit">
+            <div className="bg-white rounded-xl border border-gray-200 p-6 sticky top-4 max-h-[calc(100vh-100px)] overflow-y-auto">
               {/* Price */}
               <div className="mb-6 pb-6 border-b border-gray-100">
                 <div className="flex items-baseline gap-2">
@@ -343,17 +371,122 @@ export default function LearningPathDetail() {
               {/* Action Buttons */}
               <div className="space-y-3">
                 <button className="w-full px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-semibold">
-                  ซื้อเลยหรือ
+                  ซื้อเส้นทางการเรียนนี้
                 </button>
                 <button className="w-full px-6 py-3 border-2 border-indigo-600 text-indigo-600 rounded-lg hover:bg-indigo-50 transition-colors font-semibold flex items-center justify-center gap-2">
                   <ShoppingCart className="w-5 h-5" />
-                  เพิ่มลงตะกร้า
+                  เพิ่มลงในตะกร้า
                 </button>
               </div>
             </div>
           </div>
         </div>
       </div>
+
+      {/* FAQ Section */}
+      <div className="bg-white py-8">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-2xl font-bold text-gray-900 mb-8 text-center">คำถามที่พบบ่อย</h2>
+          <div className="space-y-4">
+            <FAQItem
+              question="เส้นทางการเรียนคืออะไร?"
+              answer="เส้นทางการเรียนของ UPSkill คือการจัดกลุ่มคอร์สเรียนตามเป้าหมายของการเรียน, ทักษะหรืออาชีพ เพื่อให้ผู้เรียนสามารถเรียนตามคอร์สเรียนที่อยู่ในเส้นทางการเรียนตามความสนใจหรือความต้องการของตนเองได้"
+            />
+            <FAQItem
+              question="เข้าถึงเส้นทางการเรียนได้อย่างไร?"
+              answer="ตอนนี้เส้นทางการเรียนจะสามารถเข้าถึงได้เฉพาะสมาชิก UPSkill ที่สมัครแพ็คเกจรายปีเท่านั้น แต่ในอนาคต ทีม UPSkill กำลังจะพัฒนาระบบการซื้อให้สามารถซื้อเส้นทางการเรียนที่ลูกค้าหรือสมาชิกสนใจได้ โดยไม่จำเป็นต้องเป็นสมาชิกรายปี"
+            />
+            <FAQItem
+              question="แพ็คเกจรายปีเข้าถึงได้ทุกเส้นทางการเรียนและคอร์สเรียนใช่หรือไม่?"
+              answer="เรียนได้ทุกเส้นทางการเรียนรู้ และทุกคอร์สเรียนบน UPSkill ยกเว้น *คอร์สเรียนจาก SuperClass, The Vision, MBAx และ Exclusive Partners"
+            />
+            <FAQItem
+              question="เส้นทางการเรียนอัพเดทบ่อยแค่ไหน?"
+              answer="UPSkill จะอัพเดทเส้นทางการเรียนตามคอร์สเรียนใหม่ที่ออกทุกเดือน"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Footer */}
+      <footer className="bg-white text-gray-700 py-12 border-t border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Top Section */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 mb-12 pb-12 border-b border-gray-200">
+            {/* Brand */}
+            <div className="md:col-span-2 lg:col-span-1">
+              <h2 className="text-gray-900 font-bold text-lg mb-2">UPSkills</h2>
+              <p className="text-sm text-gray-600 mb-4">แพลตฟอร์มการเรียนรู้ออนไลน์สำหรับทักษะแห่งอนาคต</p>
+              <div className="flex gap-4">
+                <a href="#" className="text-gray-600 hover:text-gray-900">f</a>
+                <a href="#" className="text-gray-600 hover:text-gray-900">📷</a>
+                <a href="#" className="text-gray-600 hover:text-gray-900">🎵</a>
+              </div>
+            </div>
+
+            {/* Courses */}
+            <div>
+              <h3 className="text-gray-900 font-semibold text-sm mb-4">บริการรหัสสินค้า</h3>
+              <ul className="space-y-3 text-sm">
+                <li><a href="#" className="text-gray-600 hover:text-gray-900">คอร์สออนไลน์</a></li>
+                <li><a href="#" className="text-gray-600 hover:text-gray-900">หลักสูตร Onsite</a></li>
+                <li><a href="#" className="text-gray-600 hover:text-gray-900">หลักสูตร Class</a></li>
+                <li><a href="#" className="text-gray-600 hover:text-gray-900">Skill Pass</a></li>
+              </ul>
+            </div>
+
+            {/* Company */}
+            <div>
+              <h3 className="text-gray-900 font-semibold text-sm mb-4">ร่วมงานกับเรา</h3>
+              <ul className="space-y-3 text-sm">
+                <li><a href="#" className="text-gray-600 hover:text-gray-900">สำหรับครู</a></li>
+                <li><a href="#" className="text-gray-600 hover:text-gray-900">เส้นทางการเรียน</a></li>
+                <li><a href="#" className="text-gray-600 hover:text-gray-900">วัตรสัดทักษะ</a></li>
+                <li><a href="#" className="text-gray-600 hover:text-gray-900">บทความ</a></li>
+                <li><a href="#" className="text-gray-600 hover:text-gray-900">คำถามที่พบบ่อย</a></li>
+              </ul>
+            </div>
+
+            {/* Support */}
+            <div>
+              <h3 className="text-gray-900 font-semibold text-sm mb-4">ความช่วยเหลือและสนับสนุน</h3>
+              <ul className="space-y-3 text-sm">
+                <li><a href="#" className="text-gray-600 hover:text-gray-900">ติดต่อเรา</a></li>
+                <li><a href="#" className="text-gray-600 hover:text-gray-900">ศูนย์ความช่วยเหลือ</a></li>
+                <li><a href="#" className="text-gray-600 hover:text-gray-900">สมัครเป็น Affiliate</a></li>
+                <li><a href="#" className="text-gray-600 hover:text-gray-900">สมัครเป็นผู้สอน</a></li>
+              </ul>
+            </div>
+
+            {/* Download & Contact */}
+            <div>
+              <h3 className="text-gray-900 font-semibold text-sm mb-4">ดาวน์โหลดแอปพลิเคชัน</h3>
+              <div className="space-y-2 mb-6">
+                <button className="w-full px-4 py-2 bg-gray-100 border border-gray-300 rounded text-sm text-gray-900 hover:bg-gray-200 flex items-center justify-center gap-2">
+                  <span>🍎</span> App Store
+                </button>
+                <button className="w-full px-4 py-2 bg-gray-100 border border-gray-300 rounded text-sm text-gray-900 hover:bg-gray-200 flex items-center justify-center gap-2">
+                  <span>▶</span> Google Play
+                </button>
+              </div>
+              <h3 className="text-gray-900 font-semibold text-sm mb-2">ปรึกษาการเรียน</h3>
+              <button className="w-full px-4 py-2 bg-green-500 text-white rounded font-medium text-sm hover:bg-green-600">
+                💬 เพิ่มเพื่อน
+              </button>
+            </div>
+          </div>
+
+          {/* Bottom Section */}
+          <div className="flex flex-col md:flex-row justify-between items-center text-sm text-gray-600">
+            <p>© Copyright 2019-2026 UKE ME X CO.,LTD All rights reserved.</p>
+            <div className="flex gap-6 mt-4 md:mt-0">
+              <a href="#" className="text-gray-600 hover:text-gray-900">ข้อตกลงการใช้บริการ</a>
+              <a href="#" className="text-gray-600 hover:text-gray-900">นโยบายความเป็นส่วนตัว</a>
+              <a href="#" className="text-gray-600 hover:text-gray-900">นโยบายการลิขสิทธิ์</a>
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

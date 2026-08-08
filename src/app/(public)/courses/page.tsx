@@ -21,10 +21,11 @@ async function getCourses() {
   await connectDB();
 
   try {
-    // Fetch courses without validation
-    const courses = await Course.find({ isActive: true }).select("-__v").lean().exec();
+    const courses = await Course.find({ isActive: true })
+      .select("_id title description coverImage type instructor price enrollmentCount duration category")
+      .lean()
+      .exec();
 
-    // Fetch all categories
     const categories = await Category.find({}).select("_id name").lean().exec();
     const categoryMap = new Map(categories.map(cat => [cat._id?.toString(), cat.name]));
 
@@ -34,7 +35,6 @@ async function getCourses() {
     })))) as (ICourse & { categoryName?: string })[];
   } catch (error) {
     console.error("Error fetching courses:", error);
-    // Return empty array on error to prevent page crash
     return [];
   }
 }

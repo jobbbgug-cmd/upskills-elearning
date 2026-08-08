@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Edit, Trash2, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -9,6 +10,7 @@ interface LearningPathItem {
   _id: string;
   title: string;
   description: string;
+  coverImage?: string;
   instructor: string;
   difficulty: string;
   courses: any[];
@@ -160,6 +162,7 @@ export default function LearningPathsTable({ paths: initialPaths }: LearningPath
           <table className="w-full">
             <thead>
               <tr className="border-b border-gray-200 bg-gray-50">
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700">รูปปก</th>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700">ชื่อเส้นทาง</th>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700">ผู้สอน</th>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700">จำนวนคอร์ส</th>
@@ -170,6 +173,21 @@ export default function LearningPathsTable({ paths: initialPaths }: LearningPath
             <tbody>
               {paths.map((path) => (
                 <tr key={path._id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                  <td className="px-6 py-4">
+                    {path.coverImage ? (
+                      <Image
+                        src={path.coverImage}
+                        alt={path.title}
+                        width={120}
+                        height={90}
+                        className="rounded object-cover"
+                      />
+                    ) : (
+                      <div className="w-30 h-22.5 bg-gray-200 rounded flex items-center justify-center">
+                        <span className="text-xs text-gray-500">ไม่มีรูป</span>
+                      </div>
+                    )}
+                  </td>
                   <td className="px-6 py-4">
                     <div>
                       <p className="font-medium text-gray-900">{path.title}</p>
