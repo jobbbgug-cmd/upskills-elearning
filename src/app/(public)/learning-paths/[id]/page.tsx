@@ -36,6 +36,20 @@ const difficultyColors = {
   advanced: { bg: "bg-red-50", text: "text-red-700", label: "ขั้นสูง" },
 };
 
+const formatDuration = (hours: number): string => {
+  if (hours === 0) return "0 นาที";
+
+  const totalMinutes = Math.round(hours * 60);
+
+  if (totalMinutes < 60) {
+    return `${totalMinutes} นาที`;
+  } else {
+    const h = Math.floor(totalMinutes / 60);
+    const m = totalMinutes % 60;
+    return `${h}.${m.toString().padStart(2, "0")} ชม.`;
+  }
+};
+
 export default function LearningPathDetail() {
   const params = useParams();
   const id = params.id as string;
@@ -156,7 +170,7 @@ export default function LearningPathDetail() {
                     <Clock className="w-5 h-5 text-gray-500" />
                     <span className="text-sm">ชั่วโมงการเรียน</span>
                   </div>
-                  <span className="font-semibold text-gray-900">{path.estimatedHours} ชั่วโมง</span>
+                  <span className="font-semibold text-gray-900">{formatDuration(path.estimatedHours)}</span>
                 </div>
                 <div className="flex items-center justify-between text-gray-700">
                   <div className="flex items-center gap-3">
