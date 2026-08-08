@@ -20,6 +20,20 @@ const difficultyColors = {
   advanced: { bg: "bg-red-50", text: "text-red-700", label: "ขั้นสูง" },
 };
 
+const formatDuration = (hours: number): string => {
+  if (hours === 0) return "0 น.";
+  
+  const totalMinutes = Math.round(hours * 60);
+  
+  if (totalMinutes < 60) {
+    return `${totalMinutes} น.`;
+  } else {
+    const h = Math.floor(totalMinutes / 60);
+    const m = totalMinutes % 60;
+    return `${h}.${m.toString().padStart(2, "0")} ชม.`;
+  }
+};
+
 export default function LearningPathsPage() {
   const [paths, setPaths] = useState<LearningPath[]>([]);
   const [loading, setLoading] = useState(true);
@@ -95,7 +109,7 @@ export default function LearningPathsPage() {
                     <div className="flex items-center gap-4 text-sm text-gray-600 mb-4">
                       <div className="flex items-center gap-1">
                         <Clock className="w-4 h-4" />
-                        {path.estimatedHours} ชั่วโมง
+                        {formatDuration(path.estimatedHours)}
                       </div>
                       <div className="flex items-center gap-1">
                         <Users className="w-4 h-4" />
