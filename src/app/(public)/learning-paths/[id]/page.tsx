@@ -144,75 +144,69 @@ export default function LearningPathDetail() {
                   {path.courses.map((course, index) => (
                     <div key={course._id} className="flex gap-6">
                       {/* Timeline Number with connecting line */}
-                      <div className="flex flex-col items-center flex-shrink-0 pt-6">
-                        <div className="w-14 h-14 rounded-full bg-white border-2 border-gray-300 flex items-center justify-center text-gray-600 font-bold text-lg">
+                      <div className="flex flex-col items-center flex-shrink-0">
+                        <div className="w-12 h-12 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-lg border-2 border-indigo-300 z-10 bg-white">
                           {index + 1}
                         </div>
                         {index < path.courses.length - 1 && (
-                          <div className="w-0.5 h-32 bg-gray-300 mt-3"></div>
+                          <div className="w-1 h-24 bg-indigo-300 mt-2"></div>
                         )}
                       </div>
 
-                      {/* Course Card - Floating */}
-                      <div className="flex-1 bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow overflow-hidden flex mb-4">
+                      {/* Course Card */}
+                      <div className="flex-1">
                         {/* Course Image */}
-                        <Link href={`/courses/${course.slug}`} className="flex-shrink-0 w-80">
-                          <div className="w-80 h-56 bg-gradient-to-br from-indigo-100 to-purple-100 overflow-hidden flex items-center justify-center hover:scale-105 transition-transform">
+                        <Link href={`/courses/${course.slug}`} className="flex-shrink-0 mb-4 block">
+                          <div className="w-56 h-40 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-lg overflow-hidden flex items-center justify-center hover:scale-105 transition-transform">
                             {course.coverImage ? (
                               <img src={course.coverImage} alt={course.title} className="w-full h-full object-cover" />
                             ) : (
-                              <span className="text-6xl">📚</span>
+                              <span className="text-4xl">📚</span>
                             )}
                           </div>
                         </Link>
 
                         {/* Course Info */}
-                        <div className="flex-1 p-6 flex flex-col justify-between">
-                          {/* Header */}
+                        <div className="w-64 flex flex-col justify-between">
                           <div>
-                            <h3 className="font-bold text-gray-900 text-lg mb-2">{course.title}</h3>
+                            <h3 className="font-bold text-gray-900 text-base mb-2">{course.title}</h3>
 
-                            {/* Tags/Categories */}
-                            <div className="flex flex-wrap gap-2 mb-4">
-                              <span className="text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded-full">Customer Experience & CRM</span>
-                              <span className="text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded-full">Customer Service</span>
-                            </div>
-
-                            {/* Description */}
-                            <p className="text-sm text-gray-600 mb-4 line-clamp-2">{course.title}</p>
-                          </div>
-
-                          {/* Footer */}
-                          <div>
                             {/* Instructor */}
                             <div className="flex items-center gap-2 mb-3">
                               <div className="w-6 h-6 rounded-full bg-gray-300 flex items-center justify-center text-xs">👤</div>
-                              <span className="text-sm text-gray-700 font-medium">{course.instructorName || "ผู้สอน"}</span>
+                              <span className="text-xs text-gray-700">{course.instructorName || "ผู้สอน"}</span>
                             </div>
 
-                            {/* Stats */}
-                            <div className="flex items-center gap-4 mb-4 text-sm">
-                              {course.enrollmentCount !== undefined && (
-                                <div className="flex items-center gap-1">
-                                  <span>👥</span>
-                                  <span className="font-semibold text-gray-900">{course.enrollmentCount}</span>
-                                </div>
-                              )}
-
-                              {course.duration && (
-                                <div className="flex items-center gap-1">
-                                  <span>⏱️</span>
-                                  <span className="font-semibold text-gray-900">{course.duration}</span>
-                                  <span className="text-gray-600">นาที</span>
-                                </div>
-                              )}
+                            {/* Tags/Categories */}
+                            <div className="flex flex-wrap gap-1 mb-3">
+                              <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">Customer Experience & CRM</span>
+                              <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">Customer Service</span>
                             </div>
-
-                            {/* View Details Link */}
-                            <Link href={`/courses/${course.slug}`} className="text-indigo-600 hover:text-indigo-700 font-medium text-sm">
-                              ดูรายละเอียด →
-                            </Link>
                           </div>
+
+                          {/* View Details Link */}
+                          <Link href={`/courses/${course.slug}`} className="text-indigo-600 hover:text-indigo-700 font-medium text-sm self-start">
+                            ดูรายละเอียด →
+                          </Link>
+                        </div>
+
+                        {/* Stats - Vertical on Right */}
+                        <div className="flex flex-col items-center gap-4 flex-shrink-0 py-2 mt-4">
+                          {course.enrollmentCount !== undefined && (
+                            <div className="flex flex-col items-center gap-1 text-sm text-gray-600">
+                              <span>👥</span>
+                              <span className="font-semibold text-gray-900">{course.enrollmentCount}</span>
+                              <span className="text-xs text-gray-500">คน</span>
+                            </div>
+                          )}
+
+                          {course.duration && (
+                            <div className="flex flex-col items-center gap-1 text-sm text-gray-600">
+                              <span>⏱️</span>
+                              <span className="font-semibold text-gray-900">{course.duration}</span>
+                              <span className="text-xs text-gray-500">นาที</span>
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>
