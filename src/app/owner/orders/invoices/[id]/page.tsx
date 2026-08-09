@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { Download, Printer } from "lucide-react";
+import { Download, Printer, ArrowLeft } from "lucide-react";
+import Link from "next/link";
 
 interface Invoice {
   _id: string;
@@ -84,6 +85,13 @@ export default function InvoiceDetailPage() {
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-3xl font-bold text-gray-900">ใบกำกับภาษี</h1>
         <div className="flex gap-2">
+          <Link
+            href="/owner/orders/invoices"
+            className="flex items-center gap-2 bg-gray-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-gray-600"
+          >
+            <ArrowLeft className="w-5 h-5" />
+            กลับ
+          </Link>
           <button
             onClick={handlePrint}
             className="flex items-center gap-2 bg-gray-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-gray-700"

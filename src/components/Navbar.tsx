@@ -39,11 +39,6 @@ export default function Navbar() {
   const router   = useRouter();
   const pathname = usePathname();
 
-  // Hide navbar on checkout pages
-  if (pathname.includes('/checkout/')) {
-    return null;
-  }
-
   useEffect(() => {
     setIsNavigating(false);
     setMenuOpen(false);
@@ -127,6 +122,10 @@ export default function Navbar() {
     router.push("/");
     router.refresh();
   };
+
+  if (pathname.includes('/checkout/')) {
+    return null;
+  }
 
   return (
     <nav
