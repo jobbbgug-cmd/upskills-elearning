@@ -7,6 +7,7 @@ import BannerSlider from "@/components/BannerSlider";
 import TrialRequestModal from "@/components/TrialRequestModal";
 import PublicPageThemeReset from "@/components/PublicPageThemeReset";
 import CategoriesAndCourses from "@/components/CategoriesAndCourses";
+import LearningPathsShowcase from "@/components/LearningPathsShowcase";
 import { IBanner, GradeLevel } from "@/types";
 import {
   BookOpen, Users, Video, CheckCircle, Star, Zap, Shield,
@@ -117,6 +118,9 @@ export default async function HomePage() {
 
       {/* ─── Categories and Courses ─── */}
       <CategoriesAndCourses />
+
+      {/* ─── Learning Paths Showcase ─── */}
+      <LearningPathsShowcase />
 
       {/* ─── About UPSkills - Comprehensive Overview ─── */}
       <section className="py-20 px-4 bg-white">

@@ -85,7 +85,8 @@ export default function CategoriesAndCourses() {
         {/* Header */}
         <div className="mb-12 text-center">
           <h2 className="text-3xl font-bold text-gray-900 mb-2">
-            มากกว่า 400+ คอร์สเรียนออนไลน์ ใน {categories.length} หมวดหมู่
+            
+             400+ คอร์สเรียนออนไลน์ ใน {categories.length} หมวดหมู่
           </h2>
         </div>
 
