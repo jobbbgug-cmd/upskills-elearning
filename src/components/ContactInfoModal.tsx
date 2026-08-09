@@ -8,6 +8,8 @@ interface ContactInfoData {
   lastName: string;
   email: string;
   phone: string;
+  address: string;
+  taxId: string;
   needsTaxInvoice: boolean;
 }
 
@@ -30,6 +32,8 @@ export default function ContactInfoModal({
       lastName: "",
       email: "",
       phone: "",
+      address: "",
+      taxId: "",
       needsTaxInvoice: false
     }
   );
@@ -102,6 +106,24 @@ export default function ContactInfoModal({
               className="px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
           </div>
+
+          <input
+            type="text"
+            name="address"
+            placeholder="ที่อยู่"
+            value={formData.address}
+            onChange={handleChange}
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          />
+
+          <input
+            type="text"
+            name="taxId"
+            placeholder="เลขประจำตัวผู้เสียภาษี"
+            value={formData.taxId}
+            onChange={handleChange}
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          />
         </div>
 
         {/* Checkbox */}

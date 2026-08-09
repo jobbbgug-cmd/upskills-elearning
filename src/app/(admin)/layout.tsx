@@ -65,7 +65,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       teaching:  ["/admin/students","/admin/attendance","/admin/homework","/admin/quiz","/admin/live","/admin/teacher-portal","/admin/forum"],
       courses:   ["/admin/courses","/admin/content","/admin/schedule","/admin/teacher-schedule","/admin/learning-paths"],
       members:   ["/admin/members","/admin/users"],
-      commerce:  ["/admin/orders","/admin/products","/admin/coupons"],
+      commerce:  ["/admin/orders","/admin/orders/invoices","/admin/products","/admin/coupons"],
       finance:   ["/admin/analytics","/admin/revenue","/admin/billing","/admin/certificates","/admin/bookings","/admin/finance"],
       marketing: ["/admin/landing","/admin/reviews","/admin/notifications","/admin/banners"],
       settings:  ["/super-admin/roles","/admin/branding"],
@@ -385,9 +385,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
           {/* Commerce Section - Owner/Admin/Super Admin */}
           {(role === "owner" || role === "admin" || role === "super_admin") && renderGroup("commerce", "ระบบขาย", <ShoppingCart className="w-4 h-4" />,
-            ["/admin/orders","/admin/products","/admin/coupons"],
+            ["/admin/orders","/admin/orders/invoices","/admin/products","/admin/coupons"],
             <>
               {isAdmin && navLink("/admin/orders", <ShoppingCart className="w-4 h-4" />, "จัดการคำสั่งซื้อ")}
+              {isAdmin && navLink("/admin/orders/invoices", <FileText className="w-4 h-4" />, "ออกใบกำกับภาษี")}
               {isAdmin && navLink("/admin/products", <Package className="w-4 h-4" />, "จัดการสินค้า")}
               {isAdmin && navLink("/admin/coupons", <Tag className="w-4 h-4" />, "คูปอง/โปรโมชั่น")}
             </>

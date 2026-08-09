@@ -30,6 +30,8 @@ interface ContactInfo {
   lastName: string;
   email: string;
   phone: string;
+  address: string;
+  taxId: string;
   needsTaxInvoice: boolean;
 }
 

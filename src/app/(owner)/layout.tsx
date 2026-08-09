@@ -58,7 +58,7 @@ export default function OwnerLayout({ children }: { children: React.ReactNode })
       teaching:  ["/owner/students","/owner/attendance","/owner/homework","/owner/quiz","/owner/live","/owner/teacher-portal","/owner/forum"],
       courses:   ["/owner/courses","/owner/content","/owner/schedule","/owner/teacher-schedule","/owner/certificates"],
       members:   ["/owner/members","/owner/users"],
-      commerce:  ["/owner/orders","/owner/products","/owner/coupons"],
+      commerce:  ["/owner/orders","/owner/orders/invoices","/owner/products","/owner/coupons"],
       finance:   ["/owner/analytics","/owner/revenue","/owner/billing"],
       marketing: ["/owner/landing","/owner/reviews","/owner/notifications","/owner/banners"],
       settings:  ["/owner/branding"],
@@ -276,9 +276,10 @@ export default function OwnerLayout({ children }: { children: React.ReactNode })
           )}
 
           {renderGroup("commerce", "ระบบขาย", <ShoppingCart className="w-4 h-4" />,
-            ["/owner/orders","/owner/products","/owner/coupons"],
+            ["/owner/orders","/owner/orders/invoices","/owner/products","/owner/coupons"],
             <>
               {navLink("/owner/orders", <ShoppingCart className="w-4 h-4" />, "จัดการคำสั่งซื้อ")}
+              {navLink("/owner/orders/invoices", <FileText className="w-4 h-4" />, "ออกใบกำกับภาษี")}
               {navLink("/owner/products", <Package className="w-4 h-4" />, "จัดการสินค้า")}
               {navLink("/owner/coupons", <Tag className="w-4 h-4" />, "คูปอง/โปรโมชั่น")}
             </>
