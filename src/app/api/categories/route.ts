@@ -25,13 +25,20 @@ export async function GET(req: NextRequest) {
 
     // Get course counts for each category
     const courseCounts: Record<string, number> = {};
-    const courseAgg = await Course.aggregate([
-      { $match: { isActive: true } },
-      { $group: { _id: "$category", count: { $sum: 1 } } },
-    ]);
-    courseAgg.forEach((item) => {
-      courseCounts[item._id || ""] = item.count;
-    });
+    try {
+      const courseAgg = await Course.aggregate([
+        { $match: { isActive: true } },
+        { $group: { _id: "$category", count: { $sum: 1 } } },
+      ]);
+      courseAgg.forEach((item) => {
+        if (item._id) {
+          courseCounts[item._id.toString()] = item.count;
+        }
+      });
+    } catch (aggError) {
+      console.error("Error aggregating course counts:", aggError);
+      // Continue without course counts if aggregation fails
+    }
 
     const categoriesWithCount = categories.map((cat: any) => ({
       _id: cat._id,

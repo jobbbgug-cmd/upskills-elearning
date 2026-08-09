@@ -144,7 +144,7 @@ export default function LearningPathsShowcase() {
                   <div className="flex items-center gap-2 mb-3">
                     {path.price > 0 ? (
                       <>
-                        <span className="text-2xl font-bold text-red-600">
+                        <span className="text-3xl font-bold" style={{ color: '#DC2626' }}>
                           ฿{path.price.toLocaleString("th-TH")}
                         </span>
                         <span className="text-sm text-gray-400 line-through">
@@ -152,7 +152,7 @@ export default function LearningPathsShowcase() {
                         </span>
                       </>
                     ) : (
-                      <span className="text-2xl font-bold text-green-600">ฟรี</span>
+                      <span className="text-3xl font-bold text-green-600">ฟรี</span>
                     )}
                   </div>
 

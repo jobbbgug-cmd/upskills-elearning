@@ -2,8 +2,10 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { AlertCircle, ChevronRight } from "lucide-react";
 import { useParams } from "next/navigation";
+import ContactInfoModal from "@/components/ContactInfoModal";
 
 interface Course {
   _id: string;
@@ -23,6 +25,14 @@ interface LearningPath {
   discountType?: "percentage" | "fixed";
 }
 
+interface ContactInfo {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  needsTaxInvoice: boolean;
+}
+
 export default function CheckoutPage() {
   const params = useParams();
   const id = params.id as string;
@@ -30,6 +40,8 @@ export default function CheckoutPage() {
   const [path, setPath] = useState<LearningPath | null>(null);
   const [loading, setLoading] = useState(true);
   const [discountCode, setDiscountCode] = useState("");
+  const [modalOpen, setModalOpen] = useState(false);
+  const [contactInfo, setContactInfo] = useState<ContactInfo | null>(null);
 
   useEffect(() => {
     const fetchPath = async () => {
@@ -79,10 +91,14 @@ export default function CheckoutPage() {
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center gap-3 mb-2">
-            <div className="w-10 h-10 bg-gradient-to-br from-purple-400 to-pink-400 rounded-lg flex items-center justify-center text-white font-bold text-lg">
-              S
-            </div>
-            <h1 className="text-2xl font-bold text-gray-900">สรุปรายการค่าสั่งซื้อ</h1>
+            <Image
+              src="/logo.png"
+              alt="UPSkills"
+              width={150}
+              height={80}
+              className="object-contain"
+            />
+            <h1 className="text-2xl font-bold text-gray-900">สรุปรายการคำสั่งซื้อ</h1>
           </div>
         </div>
       </div>
@@ -97,11 +113,14 @@ export default function CheckoutPage() {
               <AlertCircle className="w-5 h-5 text-purple-600 flex-shrink-0 mt-0.5" />
               <div className="flex-1">
                 <p className="text-sm text-gray-700">
-                  <span className="font-semibold">*ท่านบันทึกชั้นบันทึก</span> เพิ่มเติมในแบบฟอร์มได้ที่นี่ก่อนการชำระเงิน
+                  <span className="font-semibold">*กรุณากรอกข้อมูล</span> เพื่อออกใบเสร็จรับเงินหรือใบกำกับภาษี ก่อนการสั่งซื้อ
                 </p>
               </div>
-              <button className="bg-purple-600 text-white px-6 py-2 rounded-full text-sm font-semibold hover:bg-purple-700 transition-colors flex-shrink-0">
-                เพิ่มเพิ่มคอร์ส
+              <button
+                onClick={() => setModalOpen(true)}
+                className="bg-purple-600 text-white px-6 py-2 rounded-full text-sm font-semibold hover:bg-purple-700 transition-colors flex-shrink-0"
+              >
+                เพิ่มข้อมูล
               </button>
             </div>
 
@@ -191,13 +210,13 @@ export default function CheckoutPage() {
                 <div className="flex gap-2">
                   <input
                     type="text"
-                    placeholder="ระหว่างโปรโมชั่นคอร์ด"
+                    placeholder="กรอกคูปองส่วนลด"
                     value={discountCode}
                     onChange={(e) => setDiscountCode(e.target.value)}
                     className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-purple-600"
                   />
                   <button className="bg-purple-600 text-white px-6 py-2 rounded-full text-sm font-semibold hover:bg-purple-700 transition-colors">
-                    ใช้คำ
+                    ใช้คูปอง
                   </button>
                 </div>
               </div>
@@ -213,6 +232,14 @@ export default function CheckoutPage() {
           </div>
         </div>
       </div>
+
+      {/* Contact Info Modal */}
+      <ContactInfoModal
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        onSave={(data) => setContactInfo(data)}
+        initialData={contactInfo || undefined}
+      />
     </div>
   );
 }

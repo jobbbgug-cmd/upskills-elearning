@@ -21,16 +21,39 @@ async function getCourses() {
   await connectDB();
 
   try {
-    // Simple approach: fetch courses and populate category
-    const courses = await Course.find({ isActive: true })
-      .select("_id title description coverImage type instructor price enrollmentCount duration category")
-      .populate({
-        path: "category",
-        select: "name",
-        strictPopulate: false // Allow missing references
-      })
-      .lean()
-      .exec();
+    // Use aggregation with $lookup to resolve category references
+    const courses = await Course.aggregate([
+      { $match: { isActive: true } },
+      {
+        $lookup: {
+          from: "categories",
+          let: { catId: "$category" },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ["$_id", "$$catId"] }
+              }
+            }
+          ],
+          as: "categoryData"
+        }
+      },
+      {
+        $project: {
+          _id: 1,
+          title: 1,
+          description: 1,
+          coverImage: 1,
+          type: 1,
+          instructor: 1,
+          price: 1,
+          enrollmentCount: 1,
+          duration: 1,
+          category: 1,
+          categoryData: 1
+        }
+      }
+    ]);
 
     // Map to include categoryName
     const result = courses.map((course: any) => {
@@ -40,8 +63,11 @@ async function getCourses() {
         if (typeof course.category === "string") {
           // Category is already a string
           categoryName = course.category;
+        } else if (course.categoryData && course.categoryData.length > 0) {
+          // Category was resolved via $lookup
+          categoryName = course.categoryData[0].name;
         } else if (typeof course.category === "object" && course.category.name) {
-          // Category is populated object
+          // Fallback for populated objects
           categoryName = course.category.name;
         }
       }
@@ -55,8 +81,20 @@ async function getCourses() {
     return JSON.parse(JSON.stringify(result)) as (ICourse & { categoryName?: string })[];
   } catch (error) {
     console.error("Error fetching courses:", error);
-    // Fallback: return courses without category filtering
-    return [];
+    // Fallback: get courses without category
+    try {
+      const fallbackCourses = await Course.find({ isActive: true })
+        .select("_id title description coverImage type instructor price enrollmentCount duration category")
+        .lean()
+        .exec();
+
+      return fallbackCourses.map((course: any) => ({
+        ...course,
+        categoryName: typeof course.category === "string" ? course.category : null
+      }));
+    } catch {
+      return [];
+    }
   }
 }
 
