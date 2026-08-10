@@ -369,7 +369,7 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
                   </div>
                   <button
                     onClick={() => setActiveTab("online")}
-                    className="w-full py-3 border-2 border-indigo-600 text-indigo-600 rounded-full font-semibold hover:bg-indigo-50 transition-colors"
+                    className="px-8 py-3 border-2 border-indigo-600 text-indigo-600 rounded-full font-semibold hover:bg-indigo-50 transition-colors"
                   >
                     ดูคอร์สเพิ่มเติม
                   </button>
