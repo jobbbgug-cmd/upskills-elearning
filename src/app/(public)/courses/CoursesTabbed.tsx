@@ -485,12 +485,14 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
                     </Link>
                   ))}
                   </div>
-                  <button
-                    onClick={() => setActiveTab("paths")}
-                    className="w-full py-3 border-2 border-indigo-600 text-indigo-600 rounded-full font-semibold hover:bg-indigo-50 transition-colors"
-                  >
-                    ดูเส้นทางเพิ่มเติม
-                  </button>
+                  <div className="flex justify-center">
+                    <button
+                      onClick={() => setActiveTab("paths")}
+                      className="px-6 py-2 border-2 border-indigo-600 text-indigo-600 rounded-full font-semibold text-sm hover:bg-indigo-50 transition-colors"
+                    >
+                      ดูเส้นทางเพิ่มเติม
+                    </button>
+                  </div>
                 </div>
               ) : null;
             })()}
@@ -586,12 +588,14 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
                       </div>
                     ))}
                   </div>
-                  <button
-                    onClick={() => setActiveTab("live-online")}
-                    className="w-full py-3 border-2 border-indigo-600 text-indigo-600 rounded-full font-semibold hover:bg-indigo-50 transition-colors"
-                  >
-                    ดูคอร์สเพิ่มเติม
-                  </button>
+                  <div className="flex justify-center">
+                    <button
+                      onClick={() => setActiveTab("live-online")}
+                      className="px-6 py-2 border-2 border-indigo-600 text-indigo-600 rounded-full font-semibold text-sm hover:bg-indigo-50 transition-colors"
+                    >
+                      ดูคอร์สเพิ่มเติม
+                    </button>
+                  </div>
                 </div>
               ) : null;
             })()}
@@ -687,12 +691,14 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
                       </div>
                     ))}
                   </div>
-                  <button
-                    onClick={() => setActiveTab("onsite")}
-                    className="w-full py-3 border-2 border-indigo-600 text-indigo-600 rounded-full font-semibold hover:bg-indigo-50 transition-colors"
-                  >
-                    ดูคอร์สเพิ่มเติม
-                  </button>
+                  <div className="flex justify-center">
+                    <button
+                      onClick={() => setActiveTab("onsite")}
+                      className="px-6 py-2 border-2 border-indigo-600 text-indigo-600 rounded-full font-semibold text-sm hover:bg-indigo-50 transition-colors"
+                    >
+                      ดูคอร์สเพิ่มเติม
+                    </button>
+                  </div>
                 </div>
               ) : null;
             })()}
