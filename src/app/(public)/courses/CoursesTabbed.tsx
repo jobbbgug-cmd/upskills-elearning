@@ -273,14 +273,12 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
                 <div className="mb-12">
                   <div className="flex items-center justify-between mb-6">
                     <h2 className="text-2xl font-bold text-gray-900">คอร์สเรียน Online</h2>
-                    {onlineCourses.length > 6 && (
-                      <button
-                        onClick={() => setActiveTab("online")}
-                        className="text-indigo-600 hover:text-indigo-700 font-semibold text-sm"
-                      >
-                        ดูคอร์สเพิ่มเติม
-                      </button>
-                    )}
+                    <button
+                      onClick={() => setActiveTab("online")}
+                      className="text-indigo-600 hover:text-indigo-700 font-semibold text-sm"
+                    >
+                      ดูคอร์สเพิ่มเติม
+                    </button>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-6">
                     {onlineCourses.slice(0, 6).map((course) => (
@@ -387,14 +385,12 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
                 <div className="mb-12">
                   <div className="flex items-center justify-between mb-6">
                     <h2 className="text-2xl font-bold text-gray-900">เส้นทางการเรียน</h2>
-                    {learningPaths.length > 4 && (
-                      <button
-                        onClick={() => setActiveTab("paths")}
-                        className="text-indigo-600 hover:text-indigo-700 font-semibold text-sm"
-                      >
-                        ดูเส้นทางเพิ่มเติม
-                      </button>
-                    )}
+                    <button
+                      onClick={() => setActiveTab("paths")}
+                      className="text-indigo-600 hover:text-indigo-700 font-semibold text-sm"
+                    >
+                      ดูเส้นทางเพิ่มเติม
+                    </button>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
                     {learningPaths.slice(0, 4).map((path) => (
@@ -508,14 +504,12 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
                 <div className="mb-12">
                   <div className="flex items-center justify-between mb-6">
                     <h2 className="text-2xl font-bold text-gray-900">คอร์สเรียน Live</h2>
-                    {liveCourses.length > 3 && (
-                      <button
-                        onClick={() => setActiveTab("live-online")}
-                        className="text-indigo-600 hover:text-indigo-700 font-semibold text-sm"
-                      >
-                        ดูคอร์สเพิ่มเติม
-                      </button>
-                    )}
+                    <button
+                      onClick={() => setActiveTab("live-online")}
+                      className="text-indigo-600 hover:text-indigo-700 font-semibold text-sm"
+                    >
+                      ดูคอร์สเพิ่มเติม
+                    </button>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-6">
                     {liveCourses.slice(0, 3).map((course) => (
@@ -613,14 +607,12 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
                 <div className="mb-12">
                   <div className="flex items-center justify-between mb-6">
                     <h2 className="text-2xl font-bold text-gray-900">คอร์สเรียน Onsite</h2>
-                    {onsiteCourses.length > 3 && (
-                      <button
-                        onClick={() => setActiveTab("onsite")}
-                        className="text-indigo-600 hover:text-indigo-700 font-semibold text-sm"
-                      >
-                        ดูคอร์สเพิ่มเติม
-                      </button>
-                    )}
+                    <button
+                      onClick={() => setActiveTab("onsite")}
+                      className="text-indigo-600 hover:text-indigo-700 font-semibold text-sm"
+                    >
+                      ดูคอร์สเพิ่มเติม
+                    </button>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-6">
                     {onsiteCourses.slice(0, 3).map((course) => (
