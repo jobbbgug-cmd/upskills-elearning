@@ -266,12 +266,24 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
         {/* Content */}
         {activeTab === "all" ? (
           <>
-            {/* Courses Section */}
-            {filteredCourses.length > 0 && (
-              <div className="mb-12">
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">คอร์สเรียน Online & Onsite</h2>
-                <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-6">
-                  {filteredCourses.map((course) => (
+            {/* Online Courses Section */}
+            {(() => {
+              const onlineCourses = courses.filter((c) => (c.type || "online") === "online");
+              return onlineCourses.length > 0 ? (
+                <div className="mb-12">
+                  <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-2xl font-bold text-gray-900">คอร์สเรียน Online</h2>
+                    {onlineCourses.length > 6 && (
+                      <button
+                        onClick={() => setActiveTab("online")}
+                        className="text-indigo-600 hover:text-indigo-700 font-semibold text-sm"
+                      >
+                        ดูคอร์สเพิ่มเติม
+                      </button>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-6">
+                    {onlineCourses.slice(0, 6).map((course) => (
                     <div key={course._id} className="bg-white rounded-xl overflow-hidden hover:shadow-lg transition-shadow group">
                       <Link href={`/courses/${course._id}`}>
                         <div className="relative h-40 bg-gradient-to-br from-indigo-100 to-purple-100 overflow-hidden cursor-pointer">
@@ -364,16 +376,28 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
                       </div>
                     </div>
                   ))}
+                  </div>
                 </div>
-              </div>
-            )}
+              ) : null;
+            })()}
 
             {/* Learning Paths Section */}
-            {learningPaths.length > 0 && (
-              <div>
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">เส้นทางการเรียน</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
-                  {learningPaths.map((path) => (
+            {(() => {
+              return learningPaths.length > 0 ? (
+                <div className="mb-12">
+                  <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-2xl font-bold text-gray-900">เส้นทางการเรียน</h2>
+                    {learningPaths.length > 4 && (
+                      <button
+                        onClick={() => setActiveTab("paths")}
+                        className="text-indigo-600 hover:text-indigo-700 font-semibold text-sm"
+                      >
+                        ดูเส้นทางเพิ่มเติม
+                      </button>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+                    {learningPaths.slice(0, 4).map((path) => (
                     <Link key={path._id} href={`/learning-paths/${path._id}`} className="bg-white rounded-xl overflow-hidden hover:shadow-lg transition-shadow group flex flex-col">
                       <div className="flex gap-4 p-4">
                         <div className="relative w-56 h-32 bg-gradient-to-br from-indigo-100 to-purple-100 overflow-hidden cursor-pointer flex items-center justify-center rounded-lg flex-shrink-0">
@@ -472,9 +496,220 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
                       </div>
                     </Link>
                   ))}
+                  </div>
                 </div>
-              </div>
-            )}
+              ) : null;
+            })()}
+
+            {/* Live Courses Section */}
+            {(() => {
+              const liveCourses = courses.filter((c) => c.type === "live online");
+              return liveCourses.length > 0 ? (
+                <div className="mb-12">
+                  <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-2xl font-bold text-gray-900">คอร์สเรียน Live</h2>
+                    {liveCourses.length > 3 && (
+                      <button
+                        onClick={() => setActiveTab("live-online")}
+                        className="text-indigo-600 hover:text-indigo-700 font-semibold text-sm"
+                      >
+                        ดูคอร์สเพิ่มเติม
+                      </button>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-6">
+                    {liveCourses.slice(0, 3).map((course) => (
+                      <div key={course._id} className="bg-white rounded-xl overflow-hidden hover:shadow-lg transition-shadow group">
+                        <Link href={`/courses/${course._id}`}>
+                          <div className="relative h-40 bg-gradient-to-br from-indigo-100 to-purple-100 overflow-hidden cursor-pointer">
+                            {course.coverImage ? (
+                              <Image
+                                src={course.coverImage}
+                                alt={course.title}
+                                fill
+                                className="object-cover group-hover:scale-105 transition-transform"
+                              />
+                            ) : (
+                              <div className="flex items-center justify-center h-full">
+                                <span className="text-4xl">📚</span>
+                              </div>
+                            )}
+                          </div>
+                        </Link>
+
+                        <div className="px-4 pt-4 pb-3 flex items-center gap-2 min-w-0">
+                          <span className="text-xs font-semibold text-gray-700 whitespace-nowrap">คอร์สเรียน Live</span>
+                          {(course as any).categoryName && (
+                            <span className="text-xs font-medium bg-gray-100 text-gray-700 px-3 py-1 rounded-full truncate">
+                              {(course as any).categoryName}
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="px-4 pb-3">
+                          <h3 className="font-bold text-gray-900 line-clamp-2 text-sm group-hover:text-indigo-600 transition-colors">
+                            {course.title}
+                          </h3>
+                        </div>
+
+                        <div className="px-4 py-3 border-b border-gray-100">
+                          <div className="flex items-center gap-2">
+                            <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-xs font-bold text-indigo-600 flex-shrink-0">
+                              {course.instructor?.[0] || "U"}
+                            </div>
+                            <span className="text-xs text-gray-600 truncate">{course.instructor}</span>
+                          </div>
+                        </div>
+
+                        <div className="px-4 py-3 flex items-center justify-between text-xs text-gray-500 border-b border-gray-100">
+                          <div className="flex items-center gap-1">
+                            <span>👥</span>
+                            <span>{course.enrollmentCount || 0}</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <span>⏱️</span>
+                            <span>{course.duration || 0} นาที</span>
+                          </div>
+                        </div>
+
+                        <div className="px-4 py-3 border-b border-gray-100">
+                          <div className="flex items-baseline gap-2">
+                            <span className="text-3xl font-bold text-red-600">
+                              {(course.price || 0) === 0 ? "ฟรี" : `฿${course.price || "0"}`}
+                            </span>
+                            {(course.price || 0) > 0 && (
+                              <span className="text-lg text-gray-400 line-through">
+                                ฿{Math.round((course.price as number) * 1.3)}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="px-4 py-3 flex gap-2">
+                          <button
+                            onClick={() => handleAddToCart(course)}
+                            className="w-12 py-2 border-2 border-indigo-600 text-indigo-600 rounded-lg font-semibold text-sm hover:bg-indigo-50 transition-colors flex items-center justify-center flex-shrink-0"
+                            title="ใส่ตะกร้า"
+                          >
+                            <ShoppingCart className="w-5 h-5" />
+                          </button>
+                          <Link href={`/courses/${course._id}`} className="flex-1">
+                            <button className="w-full py-2 bg-indigo-600 text-white rounded-lg font-semibold text-sm hover:bg-indigo-700 transition-colors">
+                              จองที่นั่ง
+                            </button>
+                          </Link>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : null;
+            })()}
+
+            {/* Onsite Courses Section */}
+            {(() => {
+              const onsiteCourses = courses.filter((c) => c.type === "onsite");
+              return onsiteCourses.length > 0 ? (
+                <div className="mb-12">
+                  <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-2xl font-bold text-gray-900">คอร์สเรียน Onsite</h2>
+                    {onsiteCourses.length > 3 && (
+                      <button
+                        onClick={() => setActiveTab("onsite")}
+                        className="text-indigo-600 hover:text-indigo-700 font-semibold text-sm"
+                      >
+                        ดูคอร์สเพิ่มเติม
+                      </button>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-6">
+                    {onsiteCourses.slice(0, 3).map((course) => (
+                      <div key={course._id} className="bg-white rounded-xl overflow-hidden hover:shadow-lg transition-shadow group">
+                        <Link href={`/courses/${course._id}`}>
+                          <div className="relative h-40 bg-gradient-to-br from-indigo-100 to-purple-100 overflow-hidden cursor-pointer">
+                            {course.coverImage ? (
+                              <Image
+                                src={course.coverImage}
+                                alt={course.title}
+                                fill
+                                className="object-cover group-hover:scale-105 transition-transform"
+                              />
+                            ) : (
+                              <div className="flex items-center justify-center h-full">
+                                <span className="text-4xl">📚</span>
+                              </div>
+                            )}
+                          </div>
+                        </Link>
+
+                        <div className="px-4 pt-4 pb-3 flex items-center gap-2 min-w-0">
+                          <span className="text-xs font-semibold text-gray-700 whitespace-nowrap">คอร์สเรียน Onsite</span>
+                          {(course as any).categoryName && (
+                            <span className="text-xs font-medium bg-gray-100 text-gray-700 px-3 py-1 rounded-full truncate">
+                              {(course as any).categoryName}
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="px-4 pb-3">
+                          <h3 className="font-bold text-gray-900 line-clamp-2 text-sm group-hover:text-indigo-600 transition-colors">
+                            {course.title}
+                          </h3>
+                        </div>
+
+                        <div className="px-4 py-3 border-b border-gray-100">
+                          <div className="flex items-center gap-2">
+                            <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-xs font-bold text-indigo-600 flex-shrink-0">
+                              {course.instructor?.[0] || "U"}
+                            </div>
+                            <span className="text-xs text-gray-600 truncate">{course.instructor}</span>
+                          </div>
+                        </div>
+
+                        <div className="px-4 py-3 flex items-center justify-between text-xs text-gray-500 border-b border-gray-100">
+                          <div className="flex items-center gap-1">
+                            <span>👥</span>
+                            <span>{course.enrollmentCount || 0}</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <span>⏱️</span>
+                            <span>{course.duration || 0} นาที</span>
+                          </div>
+                        </div>
+
+                        <div className="px-4 py-3 border-b border-gray-100">
+                          <div className="flex items-baseline gap-2">
+                            <span className="text-3xl font-bold text-red-600">
+                              {(course.price || 0) === 0 ? "ฟรี" : `฿${course.price || "0"}`}
+                            </span>
+                            {(course.price || 0) > 0 && (
+                              <span className="text-lg text-gray-400 line-through">
+                                ฿{Math.round((course.price as number) * 1.3)}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="px-4 py-3 flex gap-2">
+                          <button
+                            onClick={() => handleAddToCart(course)}
+                            className="w-12 py-2 border-2 border-indigo-600 text-indigo-600 rounded-lg font-semibold text-sm hover:bg-indigo-50 transition-colors flex items-center justify-center flex-shrink-0"
+                            title="ใส่ตะกร้า"
+                          >
+                            <ShoppingCart className="w-5 h-5" />
+                          </button>
+                          <Link href={`/courses/${course._id}`} className="flex-1">
+                            <button className="w-full py-2 bg-indigo-600 text-white rounded-lg font-semibold text-sm hover:bg-indigo-700 transition-colors">
+                              จองที่นั่ง
+                            </button>
+                          </Link>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : null;
+            })()}
           </>
         ) : activeTab === "paths" ? (
           learningPaths.length > 0 ? (
