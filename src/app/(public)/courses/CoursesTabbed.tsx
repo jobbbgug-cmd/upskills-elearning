@@ -60,6 +60,12 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
+  const [currentPage, setCurrentPage] = useState<Record<string, number>>({
+    online: 1,
+    "live-online": 1,
+    paths: 1,
+    onsite: 1,
+  });
 
   // Sync with URL params after hydration
   useEffect(() => {
@@ -119,7 +125,8 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
           setCategories(data.categories || []);
         }
       } catch (error) {
-        console.error("Failed to fetch data:", error);
+        console.error("Failed to fetch categories:", error);
+        setCategories([]);
       } finally {
         setLoadingCategories(false);
       }
@@ -135,7 +142,7 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
   };
 
   const tabs = [
-    { id: "all", label: "ทั้งหมด", count: courses.length },
+    { id: "all", label: "ทั้งหมด", count: courses.length + learningPaths.length },
     { id: "online", label: "คอร์สเรียน", count: courses.filter((c) => (c.type || "online") === "online").length },
     { id: "live-online", label: "คอร์สเรียน Live", count: courses.filter((c) => c.type === "live online").length },
     { id: "paths", label: "เส้นทางการเรียน", count: learningPaths.length },
@@ -271,17 +278,7 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
               const onlineCourses = courses.filter((c) => (c.type || "online") === "online");
               return onlineCourses.length > 0 ? (
                 <div className="mb-12">
-                  <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-2xl font-bold text-gray-900">คอร์สเรียน Online</h2>
-                    {onlineCourses.length > 6 && (
-                      <button
-                        onClick={() => setActiveTab("online")}
-                        className="text-indigo-600 hover:text-indigo-700 font-semibold text-sm"
-                      >
-                        ดูคอร์สเพิ่มเติม
-                      </button>
-                    )}
-                  </div>
+                  <h2 className="text-2xl font-bold text-gray-900 mb-6">คอร์สเรียน Online</h2>
                   <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-6">
                     {onlineCourses.slice(0, 6).map((course) => (
 
@@ -306,7 +303,7 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
                         </div>
                       </Link>
 
-                      <div className="px-4 pt-4 pb-3 flex items-center gap-2 min-w-0">
+                      <div className="px-4 pt-2 pb-1 flex items-center gap-2 min-w-0">
                         <span className="text-xs font-semibold text-gray-700 whitespace-nowrap">
                           {(course.type || "online") === "online" ? "คอร์สเรียน" : course.type === "live online" ? "คอร์สเรียน Live" : "คอร์สเรียน Onsite"}
                         </span>
@@ -317,13 +314,13 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
                         )}
                       </div>
 
-                      <div className="px-4 pb-3">
+                      <div className="px-4 pb-1">
                         <h3 className="font-bold text-gray-900 line-clamp-2 text-sm group-hover:text-indigo-600 transition-colors">
                           {course.title}
                         </h3>
                       </div>
 
-                      <div className="px-4 py-3 border-b border-gray-100">
+                      <div className="px-4 py-1">
                         <div className="flex items-center gap-2">
                           <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-xs font-bold text-indigo-600 flex-shrink-0">
                             {course.instructor?.[0] || "U"}
@@ -332,7 +329,7 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
                         </div>
                       </div>
 
-                      <div className="px-4 py-3 flex items-center justify-between text-xs text-gray-500 border-b border-gray-100">
+                      <div className="px-4 py-1 flex items-center justify-between text-xs text-gray-500">
                         <div className="flex items-center gap-1">
                           <span>👥</span>
                           <span>{course.enrollmentCount || 0}</span>
@@ -343,7 +340,7 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
                         </div>
                       </div>
 
-                      <div className="px-4 py-3 border-b border-gray-100">
+                      <div className="px-4 py-1">
                         <div className="flex items-baseline gap-2">
                           <span className="text-3xl font-bold text-red-600">
                             {(course.price || 0) === 0 ? "ฟรี" : `฿${course.price || "0"}`}
@@ -380,6 +377,11 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
                       </div>
                     </div>
                   ))}
+                  </div>
+                  <div className="flex justify-center mt-6">
+                    <button onClick={() => setActiveTab("online")} className="px-6 py-2 border-2 border-indigo-600 text-indigo-600 rounded-full font-semibold text-sm hover:bg-indigo-50 transition-colors">
+                      ดูคอร์สเพิ่มเติม
+                    </button>
                   </div>
                 </div>
               ) : null;
@@ -441,13 +443,13 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
                         </div>
                       </div>
 
-                      <div className="px-4 py-3 border-t border-gray-100">
+                      <div className="px-4 py-3">
                         <h3 className="font-bold text-gray-900 line-clamp-2 text-2xl group-hover:text-indigo-600 transition-colors mb-1.5">
                           {path.title}
                         </h3>
                       </div>
 
-                      <div className="flex items-center justify-between gap-2 px-4 py-3 border-t border-gray-100 mt-auto">
+                      <div className="flex items-center justify-between gap-2 px-4 py-3 mt-auto">
                         <div className="flex items-center gap-2">
                           {(() => {
                             const finalPrice = Math.round((path.price || 0) - (path.discountType === "percentage" ? (path.price || 0) * (path.discount || 0) / 100 : (path.discount || 0)));
@@ -491,7 +493,7 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
                     </Link>
                   ))}
                 </div>
-                <div className="flex justify-center">
+                <div className="flex justify-center mt-8">
                   <button
                     onClick={() => setActiveTab("paths")}
                     className="px-6 py-2 border-2 border-indigo-600 text-indigo-600 rounded-full font-semibold text-sm hover:bg-indigo-50 transition-colors"
@@ -521,26 +523,26 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
                             )}
                           </div>
                         </Link>
-                        <div className="px-4 pt-4 pb-3 flex items-center gap-2 min-w-0">
+                        <div className="px-4 pt-2 pb-1 flex items-center gap-2 min-w-0">
                           <span className="text-xs font-semibold text-gray-700 whitespace-nowrap">คอร์สเรียน Live</span>
                           {(course as any).categoryName && (
                             <span className="text-xs font-medium bg-gray-100 text-gray-700 px-3 py-1 rounded-full truncate">{(course as any).categoryName}</span>
                           )}
                         </div>
-                        <div className="px-4 pb-3">
+                        <div className="px-4 pb-1">
                           <h3 className="font-bold text-gray-900 line-clamp-2 text-sm group-hover:text-indigo-600 transition-colors">{course.title}</h3>
                         </div>
-                        <div className="px-4 py-3 border-b border-gray-100">
+                        <div className="px-4 py-1">
                           <div className="flex items-center gap-2">
                             <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-xs font-bold text-indigo-600 flex-shrink-0">{course.instructor?.[0] || "U"}</div>
                             <span className="text-xs text-gray-600 truncate">{course.instructor}</span>
                           </div>
                         </div>
-                        <div className="px-4 py-3 flex items-center justify-between text-xs text-gray-500 border-b border-gray-100">
+                        <div className="px-4 py-1 flex items-center justify-between text-xs text-gray-500">
                           <div className="flex items-center gap-1"><span>👥</span><span>{course.enrollmentCount || 0}</span></div>
                           <div className="flex items-center gap-1"><span>⏱️</span><span>{course.duration || 0} นาที</span></div>
                         </div>
-                        <div className="px-4 py-3 border-b border-gray-100">
+                        <div className="px-4 py-1">
                           <div className="flex items-baseline gap-2">
                             <span className="text-3xl font-bold text-red-600">{(course.price || 0) === 0 ? "ฟรี" : `฿${course.price || "0"}`}</span>
                             {(course.price || 0) > 0 && (
@@ -586,26 +588,26 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
                             )}
                           </div>
                         </Link>
-                        <div className="px-4 pt-4 pb-3 flex items-center gap-2 min-w-0">
+                        <div className="px-4 pt-2 pb-1 flex items-center gap-2 min-w-0">
                           <span className="text-xs font-semibold text-gray-700 whitespace-nowrap">คอร์สเรียน Onsite</span>
                           {(course as any).categoryName && (
                             <span className="text-xs font-medium bg-gray-100 text-gray-700 px-3 py-1 rounded-full truncate">{(course as any).categoryName}</span>
                           )}
                         </div>
-                        <div className="px-4 pb-3">
+                        <div className="px-4 pb-1">
                           <h3 className="font-bold text-gray-900 line-clamp-2 text-sm group-hover:text-indigo-600 transition-colors">{course.title}</h3>
                         </div>
-                        <div className="px-4 py-3 border-b border-gray-100">
+                        <div className="px-4 py-1">
                           <div className="flex items-center gap-2">
                             <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-xs font-bold text-indigo-600 flex-shrink-0">{course.instructor?.[0] || "U"}</div>
                             <span className="text-xs text-gray-600 truncate">{course.instructor}</span>
                           </div>
                         </div>
-                        <div className="px-4 py-3 flex items-center justify-between text-xs text-gray-500 border-b border-gray-100">
+                        <div className="px-4 py-1 flex items-center justify-between text-xs text-gray-500">
                           <div className="flex items-center gap-1"><span>👥</span><span>{course.enrollmentCount || 0}</span></div>
                           <div className="flex items-center gap-1"><span>⏱️</span><span>{course.duration || 0} นาที</span></div>
                         </div>
-                        <div className="px-4 py-3 border-b border-gray-100">
+                        <div className="px-4 py-1">
                           <div className="flex items-baseline gap-2">
                             <span className="text-3xl font-bold text-red-600">{(course.price || 0) === 0 ? "ฟรี" : `฿${course.price || "0"}`}</span>
                             {(course.price || 0) > 0 && (
@@ -635,8 +637,18 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
           </>
         ) : activeTab === "paths" ? (
           learningPaths.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
-              {learningPaths.map((path) => (
+            (() => {
+              const itemsPerPage = 8;
+              const page = currentPage["paths"] || 1;
+              const startIndex = (page - 1) * itemsPerPage;
+              const endIndex = startIndex + itemsPerPage;
+              const paginatedPaths = learningPaths.slice(startIndex, endIndex);
+              const totalPages = Math.ceil(learningPaths.length / itemsPerPage);
+
+              return (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 mb-8">
+                {paginatedPaths.map((path) => (
                 <Link key={path._id} href={`/learning-paths/${path._id}`} className="bg-white rounded-xl overflow-hidden hover:shadow-lg transition-shadow group flex flex-col">
                   <div className="flex gap-4 p-4">
                     <div className="relative w-56 h-32 bg-gradient-to-br from-indigo-100 to-purple-100 overflow-hidden cursor-pointer flex items-center justify-center rounded-lg flex-shrink-0">
@@ -735,108 +747,184 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
                   </div>
                 </Link>
               ))}
-            </div>
+              </div>
+              {totalPages > 1 && (
+                <div className="flex justify-center items-center gap-4 mt-10">
+                  <button
+                    onClick={() => setCurrentPage({ ...currentPage, paths: Math.max(1, page - 1) })}
+                    disabled={page === 1}
+                    className="w-10 h-10 rounded-full border-2 border-gray-300 flex items-center justify-center hover:border-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    &lt;
+                  </button>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="number"
+                      value={page}
+                      onChange={(e) => {
+                        const newPage = Math.max(1, Math.min(totalPages, parseInt(e.target.value) || 1));
+                        setCurrentPage({ ...currentPage, paths: newPage });
+                      }}
+                      className="w-12 h-10 border-2 border-indigo-600 rounded-lg text-center font-semibold focus:outline-none"
+                    />
+                    <span className="text-gray-600">/ {totalPages}</span>
+                  </div>
+                  <button
+                    onClick={() => setCurrentPage({ ...currentPage, paths: Math.min(totalPages, page + 1) })}
+                    disabled={page === totalPages}
+                    className="w-10 h-10 rounded-full border-2 border-gray-300 flex items-center justify-center hover:border-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    &gt;
+                  </button>
+                </div>
+              )}
+            </>
+              );
+            })()
           ) : (
             <div className="text-center py-12">
               <p className="text-gray-600">ไม่มีเส้นทางการเรียน</p>
             </div>
           )
         ) : filteredCourses.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-6">
-            {filteredCourses.map((course) => (
-              <div key={course._id} className="bg-white rounded-xl overflow-hidden hover:shadow-lg transition-shadow group">
-                <Link href={`/courses/${course._id}`}>
-                  <div className="relative h-40 bg-gradient-to-br from-indigo-100 to-purple-100 overflow-hidden cursor-pointer">
-                    {course.coverImage ? (
-                      <Image
-                        src={course.coverImage}
-                        alt={course.title}
-                        fill
-                        className="object-cover group-hover:scale-105 transition-transform"
-                      />
-                    ) : (
-                      <div className="flex items-center justify-center h-full">
-                        <span className="text-4xl">📚</span>
-                      </div>
-                    )}
-                  </div>
-                </Link>
+          (() => {
+            const itemsPerPage = activeTab === "online" ? 6 : activeTab === "live-online" ? 6 : activeTab === "onsite" ? 6 : 6;
+            const page = currentPage[activeTab] || 1;
+            const startIndex = (page - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const paginatedCourses = filteredCourses.slice(startIndex, endIndex);
+            const totalPages = Math.ceil(filteredCourses.length / itemsPerPage);
 
-                <div className="px-4 pt-4 pb-3 flex items-center gap-2 min-w-0">
-                  <span className="text-xs font-semibold text-gray-700 whitespace-nowrap">
-                    {activeTab === "online" ? "คอร์สเรียน" : activeTab === "live-online" ? "คอร์สเรียน Live" : "คอร์สเรียน Onsite"}
-                  </span>
-                  {(course as any).categoryName && (
-                    <span className="text-xs font-medium bg-gray-100 text-gray-700 px-3 py-1 rounded-full truncate">
-                      {(course as any).categoryName}
-                    </span>
-                  )}
-                </div>
-
-                <div className="px-4 pb-3">
-                  <h3 className="font-bold text-gray-900 line-clamp-2 text-sm group-hover:text-indigo-600 transition-colors">
-                    {course.title}
-                  </h3>
-                </div>
-
-                <div className="px-4 py-3 border-b border-gray-100">
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-xs font-bold text-indigo-600 flex-shrink-0">
-                      {course.instructor?.[0] || "U"}
+            return (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-6 mb-8">
+              {paginatedCourses.map((course) => (
+                <div key={course._id} className="bg-white rounded-xl overflow-hidden hover:shadow-lg transition-shadow group">
+                  <Link href={`/courses/${course._id}`}>
+                    <div className="relative h-40 bg-gradient-to-br from-indigo-100 to-purple-100 overflow-hidden cursor-pointer">
+                      {course.coverImage ? (
+                        <Image
+                          src={course.coverImage}
+                          alt={course.title}
+                          fill
+                          className="object-cover group-hover:scale-105 transition-transform"
+                        />
+                      ) : (
+                        <div className="flex items-center justify-center h-full">
+                          <span className="text-4xl">📚</span>
+                        </div>
+                      )}
                     </div>
-                    <span className="text-xs text-gray-600 truncate">{course.instructor}</span>
-                  </div>
-                </div>
+                  </Link>
 
-                <div className="px-4 py-3 flex items-center justify-between text-xs text-gray-500 border-b border-gray-100">
-                  <div className="flex items-center gap-1">
-                    <span>👥</span>
-                    <span>{course.enrollmentCount || 0}</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <span>⏱️</span>
-                    <span>{course.duration || 0} นาที</span>
-                  </div>
-                </div>
-
-                <div className="px-4 py-3 border-b border-gray-100">
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-3xl font-bold text-red-600">
-                      {(course.price || 0) === 0 ? "ฟรี" : `฿${course.price || "0"}`}
+                  <div className="px-4 pt-2 pb-1 flex items-center gap-2 min-w-0">
+                    <span className="text-xs font-semibold text-gray-700 whitespace-nowrap">
+                      {activeTab === "online" ? "คอร์สเรียน" : activeTab === "live-online" ? "คอร์สเรียน Live" : "คอร์สเรียน Onsite"}
                     </span>
-                    {(course.price || 0) > 0 && (
-                      <span className="text-lg text-gray-400 line-through">
-                        ฿{Math.round((course.price as number) * 1.3)}
+                    {(course as any).categoryName && (
+                      <span className="text-xs font-medium bg-gray-100 text-gray-700 px-3 py-1 rounded-full truncate">
+                        {(course as any).categoryName}
                       </span>
                     )}
                   </div>
-                </div>
 
-                <div className="px-4 py-3 flex gap-2">
-                  <button
-                    onClick={() => handleAddToCart(course)}
-                    className="w-12 py-2 border-2 border-indigo-600 text-indigo-600 rounded-lg font-semibold text-sm hover:bg-indigo-50 transition-colors flex items-center justify-center flex-shrink-0"
-                    title="ใส่ตะกร้า"
-                  >
-                    <ShoppingCart className="w-5 h-5" />
-                  </button>
-                  {activeTab === "online" ? (
-                    <Link href={`/checkout/courses/${course._id}`} className="flex-1">
-                      <button className="w-full py-2 bg-indigo-600 text-white rounded-lg font-semibold text-sm hover:bg-indigo-700 transition-colors">
-                        ซื้อเลย
-                      </button>
-                    </Link>
-                  ) : (
-                    <Link href={`/courses/${course._id}`} className="flex-1">
-                      <button className="w-full py-2 bg-indigo-600 text-white rounded-lg font-semibold text-sm hover:bg-indigo-700 transition-colors">
-                        จองที่นั่ง
-                      </button>
-                    </Link>
-                  )}
+                  <div className="px-4 pb-1">
+                    <h3 className="font-bold text-gray-900 line-clamp-2 text-sm group-hover:text-indigo-600 transition-colors">
+                      {course.title}
+                    </h3>
+                  </div>
+
+                  <div className="px-4 py-1">
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-xs font-bold text-indigo-600 flex-shrink-0">
+                        {course.instructor?.[0] || "U"}
+                      </div>
+                      <span className="text-xs text-gray-600 truncate">{course.instructor}</span>
+                    </div>
+                  </div>
+
+                  <div className="px-4 py-1 flex items-center justify-between text-xs text-gray-500">
+                    <div className="flex items-center gap-1">
+                      <span>👥</span>
+                      <span>{course.enrollmentCount || 0}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <span>⏱️</span>
+                      <span>{course.duration || 0} นาที</span>
+                    </div>
+                  </div>
+
+                  <div className="px-4 py-1">
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-3xl font-bold text-red-600">
+                        {(course.price || 0) === 0 ? "ฟรี" : `฿${course.price || "0"}`}
+                      </span>
+                      {(course.price || 0) > 0 && (
+                        <span className="text-lg text-gray-400 line-through">
+                          ฿{Math.round((course.price as number) * 1.3)}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="px-4 py-3 flex gap-2">
+                    <button
+                      onClick={() => handleAddToCart(course)}
+                      className="w-12 py-2 border-2 border-indigo-600 text-indigo-600 rounded-lg font-semibold text-sm hover:bg-indigo-50 transition-colors flex items-center justify-center flex-shrink-0"
+                      title="ใส่ตะกร้า"
+                    >
+                      <ShoppingCart className="w-5 h-5" />
+                    </button>
+                    {activeTab === "online" ? (
+                      <Link href={`/checkout/courses/${course._id}`} className="flex-1">
+                        <button className="w-full py-2 bg-indigo-600 text-white rounded-lg font-semibold text-sm hover:bg-indigo-700 transition-colors">
+                          ซื้อเลย
+                        </button>
+                      </Link>
+                    ) : (
+                      <Link href={`/courses/${course._id}`} className="flex-1">
+                        <button className="w-full py-2 bg-indigo-600 text-white rounded-lg font-semibold text-sm hover:bg-indigo-700 transition-colors">
+                          จองที่นั่ง
+                        </button>
+                      </Link>
+                    )}
+                  </div>
                 </div>
+              ))}
+            </div>
+            {totalPages > 1 && (
+              <div className="flex justify-center items-center gap-4 mt-8">
+                <button
+                  onClick={() => setCurrentPage({ ...currentPage, [activeTab]: Math.max(1, page - 1) })}
+                  disabled={page === 1}
+                  className="w-10 h-10 rounded-full border-2 border-gray-300 flex items-center justify-center hover:border-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  &lt;
+                </button>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="number"
+                    value={page}
+                    onChange={(e) => {
+                      const newPage = Math.max(1, Math.min(totalPages, parseInt(e.target.value) || 1));
+                      setCurrentPage({ ...currentPage, [activeTab]: newPage });
+                    }}
+                    className="w-12 h-10 border-2 border-indigo-600 rounded-lg text-center font-semibold focus:outline-none"
+                  />
+                  <span className="text-gray-600">/ {totalPages}</span>
+                </div>
+                <button
+                  onClick={() => setCurrentPage({ ...currentPage, [activeTab]: Math.min(totalPages, page + 1) })}
+                  disabled={page === totalPages}
+                  className="w-10 h-10 rounded-full border-2 border-gray-300 flex items-center justify-center hover:border-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  &gt;
+                </button>
               </div>
-            ))}
-          </div>
+            )}
+          </>
+            );
+          })()
         ) : (
           <div className="text-center py-12">
             <p className="text-gray-600">ไม่พบคอร์สในแท็บนี้</p>
