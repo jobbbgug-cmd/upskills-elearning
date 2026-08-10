@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Sarabun } from "next/font/google";
+import { Sarabun, IBM_Plex_Sans_Thai } from "next/font/google";
 import "./globals.css";
 import ThemeProvider from "@/components/ThemeProvider";
 import { CartProvider } from "@/context/CartContext";
@@ -8,6 +8,13 @@ const sarabun = Sarabun({
   subsets: ["thai", "latin"],
   weight: ["100", "300", "400", "500", "600", "700", "800"],
   variable: "--font-sarabun",
+  display: "swap",
+});
+
+const ibmPlexSansThai = IBM_Plex_Sans_Thai({
+  subsets: ["thai", "latin"],
+  weight: ["300", "400", "500", "600", "700"],
+  variable: "--font-ibm-plex-sans-thai",
   display: "swap",
 });
 
@@ -35,8 +42,8 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="th" className={sarabun.variable}>
-      <body className="bg-gray-50 min-h-screen" style={{ fontFamily: "'Sarabun', sans-serif" }}>
+    <html lang="th" className={`${sarabun.variable} ${ibmPlexSansThai.variable}`}>
+      <body className="bg-gray-50 min-h-screen" style={{ fontFamily: "'IBM Plex Sans Thai', 'Sarabun', sans-serif" }}>
         <CartProvider>
           <ThemeProvider>{children}</ThemeProvider>
         </CartProvider>

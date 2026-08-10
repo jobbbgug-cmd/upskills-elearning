@@ -15,12 +15,28 @@ import {
   FileText, Play, Download, Lock,
 } from "lucide-react";
 
-async function getCourseWithContent(id: string): Promise<{ course: ICourse; content: ICourseContent | null } | null> {
+async function getCourseWithContent(id: string): Promise<{ course: ICourse & { categoryName?: string }; content: ICourseContent | null } | null> {
   await connectDB();
   try {
     const raw = await Course.findById(id).lean();
     if (!raw) return null;
-    const course = JSON.parse(JSON.stringify(raw)) as ICourse;
+    const course = JSON.parse(JSON.stringify(raw)) as ICourse & { categoryName?: string };
+
+    // Fetch category name if category exists
+    if (course.category) {
+      try {
+        const categoryResult = await import("@/models/Category").then(m => m.default);
+        const cat = await categoryResult.findById(course.category).lean();
+        if (cat) {
+          course.categoryName = (cat as any).name;
+        }
+      } catch {
+        // Fall back to string category if resolution fails
+        if (typeof course.category === 'string') {
+          course.categoryName = course.category;
+        }
+      }
+    }
 
     let content: ICourseContent | null = null;
     if (course.contentId) {
@@ -130,7 +146,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
         <div className="flex items-start justify-between gap-3 mb-6">
           <div className="min-w-0">
             <div className="flex flex-wrap gap-2 mb-2">
-              <Badge variant="info">{course.category}</Badge>
+              {(course as any).categoryName && <Badge variant="info">{(course as any).categoryName}</Badge>}
               {course.gradeLevels.map((g) => <Badge key={g}>{g}</Badge>)}
             </div>
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">{course.title}</h1>

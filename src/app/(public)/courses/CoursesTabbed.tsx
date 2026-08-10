@@ -441,7 +441,7 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
                 {/* Price */}
                 <div className="px-4 py-3 border-b border-gray-100">
                   <div className="flex items-baseline gap-2">
-                    <span className="text-3xl font-bold text-pink-600">
+                    <span className="text-3xl font-bold text-red-600">
                       {(course.price || 0) === 0 ? "ฟรี" : `฿${course.price || "0"}`}
                     </span>
                     {(course.price || 0) > 0 && (
@@ -461,11 +461,19 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
                   >
                     <ShoppingCart className="w-5 h-5" />
                   </button>
-                  <Link href={`/courses/${course._id}`} className="flex-1">
-                    <button className="w-full py-2 bg-indigo-600 text-white rounded-lg font-semibold text-sm hover:bg-indigo-700 transition-colors">
-                      ซื้อเลย
-                    </button>
-                  </Link>
+                  {activeTab === "online" ? (
+                    <Link href={`/checkout/courses/${course._id}`} className="flex-1">
+                      <button className="w-full py-2 bg-indigo-600 text-white rounded-lg font-semibold text-sm hover:bg-indigo-700 transition-colors">
+                        ซื้อเลย
+                      </button>
+                    </Link>
+                  ) : (
+                    <Link href={`/courses/${course._id}`} className="flex-1">
+                      <button className="w-full py-2 bg-indigo-600 text-white rounded-lg font-semibold text-sm hover:bg-indigo-700 transition-colors">
+                        จองที่นั่ง
+                      </button>
+                    </Link>
+                  )}
                 </div>
               </div>
             ))}

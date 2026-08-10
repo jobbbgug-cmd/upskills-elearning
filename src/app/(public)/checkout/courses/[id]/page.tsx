@@ -10,19 +10,13 @@ import ContactInfoModal from "@/components/ContactInfoModal";
 interface Course {
   _id: string;
   title: string;
-}
-
-interface LearningPath {
-  _id: string;
-  title: string;
   description: string;
   coverImage?: string;
   instructor: string;
-  difficulty: string;
-  courses: Course[];
   price?: number;
-  discount?: number;
-  discountType?: "percentage" | "fixed";
+  duration?: number;
+  enrollmentCount?: number;
+  type?: string;
 }
 
 interface ContactInfo {
@@ -35,30 +29,30 @@ interface ContactInfo {
   needsTaxInvoice: boolean;
 }
 
-export default function CheckoutPage() {
+export default function CheckoutCoursePage() {
   const params = useParams();
   const id = params.id as string;
 
-  const [path, setPath] = useState<LearningPath | null>(null);
+  const [course, setCourse] = useState<Course | null>(null);
   const [loading, setLoading] = useState(true);
   const [discountCode, setDiscountCode] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
   const [contactInfo, setContactInfo] = useState<ContactInfo | null>(null);
 
   useEffect(() => {
-    const fetchPath = async () => {
+    const fetchCourse = async () => {
       try {
-        const res = await fetch(`/api/learning-paths/${id}`);
+        const res = await fetch(`/api/courses/${id}`);
         const data = await res.json();
-        setPath(data.path);
+        setCourse(data.course);
       } catch (error) {
-        console.error("Failed to fetch learning path:", error);
+        console.error("Failed to fetch course:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    if (id) fetchPath();
+    if (id) fetchCourse();
   }, [id]);
 
   if (loading) {
@@ -69,21 +63,21 @@ export default function CheckoutPage() {
     );
   }
 
-  if (!path) {
+  if (!course) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <p className="text-gray-500 mb-4">ไม่พบเส้นทางการเรียน</p>
-          <Link href="/courses?tab=paths" className="text-indigo-600 hover:text-indigo-700 font-medium">
-            กลับไปหน้าเส้นทาง
+          <p className="text-gray-500 mb-4">ไม่พบคอร์ส</p>
+          <Link href="/courses?tab=online" className="text-indigo-600 hover:text-indigo-700 font-medium">
+            กลับไปหน้าคอร์ส
           </Link>
         </div>
       </div>
     );
   }
 
-  const price = path.price || 0;
-  const discount = path.discountType === "percentage" ? (price * (path.discount || 0) / 100) : (path.discount || 0);
+  const price = course.price || 0;
+  const discount = 0;
   const finalPrice = price - discount;
   const originalPrice = price;
 
@@ -104,7 +98,7 @@ export default function CheckoutPage() {
               <h1 className="text-2xl font-bold text-gray-900">สรุปรายการคำสั่งซื้อ</h1>
             </div>
             <Link
-              href="/courses?tab=paths"
+              href="/courses?tab=online"
               className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-900 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
             >
               <ArrowLeft className="w-4 h-4" />
@@ -148,10 +142,10 @@ export default function CheckoutPage() {
                   {/* Product Image */}
                   <div className="flex-shrink-0">
                     <div className="w-40 h-32 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-lg overflow-hidden flex items-center justify-center">
-                      {path.coverImage ? (
-                        <img src={path.coverImage} alt={path.title} className="w-full h-full object-cover" />
+                      {course.coverImage ? (
+                        <img src={course.coverImage} alt={course.title} className="w-full h-full object-cover" />
                       ) : (
-                        <span className="text-4xl">🗺️</span>
+                        <span className="text-4xl">📚</span>
                       )}
                     </div>
                   </div>
@@ -159,9 +153,12 @@ export default function CheckoutPage() {
                   {/* Product Details */}
                   <div className="flex-1">
                     <div className="flex items-start justify-between mb-2">
-                      <h3 className="text-lg font-bold text-gray-900">{path.title}</h3>
+                      <h3 className="text-lg font-bold text-gray-900">{course.title}</h3>
                     </div>
-                    <p className="text-sm text-gray-600 mb-4 line-clamp-2">{path.description}</p>
+                    <p className="text-sm text-gray-600 mb-2">
+                      <span className="font-medium">ผู้สอน:</span> {course.instructor}
+                    </p>
+                    <p className="text-sm text-gray-600 mb-4 line-clamp-2">{course.description}</p>
 
                     {/* Price */}
                     <div className="flex items-center gap-3 mb-4">
@@ -176,7 +173,7 @@ export default function CheckoutPage() {
                     </div>
 
                     {/* View Details Button */}
-                    <Link href={`/learning-paths/${path._id}`}>
+                    <Link href={`/courses/${course._id}`}>
                       <button className="border-2 border-purple-600 text-purple-600 px-6 py-2 rounded-full text-sm font-semibold hover:bg-purple-50 transition-colors">
                         ดูรายละเอียด
                       </button>
@@ -233,7 +230,7 @@ export default function CheckoutPage() {
               </div>
 
               {/* Proceed to Payment */}
-              <Link href={`/checkout/payment/${path._id}`} className="block">
+              <Link href={`/checkout/payment/${course._id}`} className="block">
                 <button className="w-full bg-purple-600 text-white py-3 rounded-full font-semibold hover:bg-purple-700 transition-colors flex items-center justify-center gap-2">
                   เลือกวิธีชำระเงินต่อไป
                   <ChevronRight className="w-5 h-5" />
