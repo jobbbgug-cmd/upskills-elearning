@@ -395,8 +395,8 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
                   {learningPaths.map((path) => (
                     <Link key={path._id} href={`/learning-paths/${path._id}`} className="bg-white rounded-xl overflow-hidden hover:shadow-lg transition-shadow group flex flex-col">
-                      <div className="flex gap-4 p-4">
-                        <div className="relative w-56 h-32 bg-gradient-to-br from-indigo-100 to-purple-100 overflow-hidden cursor-pointer flex items-center justify-center rounded-lg flex-shrink-0">
+                      <div className="flex gap-3 p-3">
+                        <div className="relative w-48 h-28 bg-gradient-to-br from-indigo-100 to-purple-100 overflow-hidden cursor-pointer flex items-center justify-center rounded-lg flex-shrink-0">
                           {path.coverImage ? (
                             <Image
                               src={path.coverImage}
@@ -405,27 +405,27 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
                               className="object-cover"
                             />
                           ) : (
-                            <span className="text-5xl">🗺️</span>
+                            <span className="text-4xl">🗺️</span>
                           )}
                         </div>
 
                         <div className="flex-1">
-                          <div className="flex items-center gap-3 text-xs text-gray-600 mb-3">
-                            <div className="flex items-center gap-1.5">
+                          <div className="flex items-center gap-2 text-xs text-gray-600 mb-2">
+                            <div className="flex items-center gap-1">
                               <span>📚</span>
                               <span className="font-medium">{path.courses?.length || 0} คอร์สเรียน</span>
                             </div>
-                            <div className="flex items-center gap-1.5">
+                            <div className="flex items-center gap-1">
                               <span>⏱️</span>
                               <span className="font-medium">{formatDuration(path.estimatedHours || 0)}</span>
                             </div>
                           </div>
 
                           <div className="text-xs">
-                            <p className="text-gray-700 font-semibold mb-2">ประกอบด้วยคอร์สเรียน</p>
-                            <div className="text-gray-600 space-y-1 mb-2">
+                            <p className="text-gray-700 font-semibold mb-1">ประกอบด้วยคอร์สเรียน</p>
+                            <div className="text-gray-600 space-y-0.5 mb-1">
                               {path.courses?.slice(0, 3).map((course: any, idx: number) => (
-                                <p key={idx} className="truncate">
+                                <p key={idx} className="truncate text-xs">
                                   {idx + 1}. {typeof course === 'object' ? course.title : course}
                                 </p>
                               ))}
@@ -435,7 +435,7 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
                                 e.preventDefault();
                                 router.push(`/learning-paths/${path._id}`);
                               }}
-                              className="text-indigo-600 hover:text-indigo-700 font-semibold"
+                              className="text-indigo-600 hover:text-indigo-700 font-semibold text-xs"
                             >
                               ดูเพิ่มเติม
                             </button>
@@ -443,13 +443,13 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
                         </div>
                       </div>
 
-                      <div className="px-4 py-3">
-                        <h3 className="font-bold text-gray-900 line-clamp-2 text-2xl group-hover:text-indigo-600 transition-colors mb-1.5">
+                      <div className="px-3 py-2">
+                        <h3 className="font-bold text-gray-900 line-clamp-2 text-2xl group-hover:text-indigo-600 transition-colors mb-1">
                           {path.title}
                         </h3>
                       </div>
 
-                      <div className="flex items-center justify-between gap-2 px-4 py-3 mt-auto">
+                      <div className="flex items-center justify-between gap-2 px-3 py-2 mt-auto">
                         <div className="flex items-center gap-2">
                           {(() => {
                             const finalPrice = Math.round((path.price || 0) - (path.discountType === "percentage" ? (path.price || 0) * (path.discount || 0) / 100 : (path.discount || 0)));
@@ -650,8 +650,8 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 mb-8">
                 {paginatedPaths.map((path) => (
                 <Link key={path._id} href={`/learning-paths/${path._id}`} className="bg-white rounded-xl overflow-hidden hover:shadow-lg transition-shadow group flex flex-col">
-                  <div className="flex gap-4 p-4">
-                    <div className="relative w-56 h-32 bg-gradient-to-br from-indigo-100 to-purple-100 overflow-hidden cursor-pointer flex items-center justify-center rounded-lg flex-shrink-0">
+                  <div className="flex gap-3 p-3">
+                    <div className="relative w-48 h-28 bg-gradient-to-br from-indigo-100 to-purple-100 overflow-hidden cursor-pointer flex items-center justify-center rounded-lg flex-shrink-0">
                       {path.coverImage ? (
                         <Image
                           src={path.coverImage}
@@ -660,27 +660,27 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
                           className="object-cover"
                         />
                       ) : (
-                        <span className="text-5xl">🗺️</span>
+                        <span className="text-4xl">🗺️</span>
                       )}
                     </div>
 
                     <div className="flex-1">
-                      <div className="flex items-center gap-3 text-xs text-gray-600 mb-3">
-                        <div className="flex items-center gap-1.5">
+                      <div className="flex items-center gap-2 text-xs text-gray-600 mb-2">
+                        <div className="flex items-center gap-1">
                           <span>📚</span>
                           <span className="font-medium">{path.courses?.length || 0} คอร์สเรียน</span>
                         </div>
-                        <div className="flex items-center gap-1.5">
+                        <div className="flex items-center gap-1">
                           <span>⏱️</span>
                           <span className="font-medium">{formatDuration(path.estimatedHours || 0)}</span>
                         </div>
                       </div>
 
                       <div className="text-xs">
-                        <p className="text-gray-700 font-semibold mb-2">ประกอบด้วยคอร์สเรียน</p>
-                        <div className="text-gray-600 space-y-1 mb-2">
+                        <p className="text-gray-700 font-semibold mb-1">ประกอบด้วยคอร์สเรียน</p>
+                        <div className="text-gray-600 space-y-0.5 mb-1">
                           {path.courses?.slice(0, 3).map((course: any, idx: number) => (
-                            <p key={idx} className="truncate">
+                            <p key={idx} className="truncate text-xs">
                               {idx + 1}. {typeof course === 'object' ? course.title : course}
                             </p>
                           ))}
@@ -690,7 +690,7 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
                             e.preventDefault();
                             router.push(`/learning-paths/${path._id}`);
                           }}
-                          className="text-indigo-600 hover:text-indigo-700 font-semibold"
+                          className="text-indigo-600 hover:text-indigo-700 font-semibold text-xs"
                         >
                           ดูเพิ่มเติม
                         </button>
@@ -698,13 +698,13 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
                     </div>
                   </div>
 
-                  <div className="px-4 py-3 border-t border-gray-100">
-                    <h3 className="font-bold text-gray-900 line-clamp-2 text-2xl group-hover:text-indigo-600 transition-colors mb-1.5">
+                  <div className="px-3 py-2">
+                    <h3 className="font-bold text-gray-900 line-clamp-2 text-2xl group-hover:text-indigo-600 transition-colors mb-1">
                       {path.title}
                     </h3>
                   </div>
 
-                  <div className="flex items-center justify-between gap-2 px-4 py-3 border-t border-gray-100 mt-auto">
+                  <div className="flex items-center justify-between gap-2 px-3 py-2 mt-auto">
                     <div className="flex items-center gap-2">
                       {(() => {
                         const finalPrice = Math.round((path.price || 0) - (path.discountType === "percentage" ? (path.price || 0) * (path.discount || 0) / 100 : (path.discount || 0)));
