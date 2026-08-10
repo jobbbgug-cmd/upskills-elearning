@@ -68,6 +68,7 @@ export default function CourseForm({ course, mode, courseType, teacherMode = fal
     ebookPdfUrl: course?.ebookPdfUrl ?? "",
     courseType: (courseType ?? course?.type ?? "online") as "online" | "onsite" | "live online",
     duration: course?.duration ?? 0,
+    difficulty: (course as any)?.difficulty ?? "medium",
   });
 
   const [contentId, setContentId] = useState<string>(course?.contentId ?? "");
@@ -342,6 +343,14 @@ export default function CourseForm({ course, mode, courseType, teacherMode = fal
             placeholder="เช่น 120"
             className={inputClass}
           />
+        </div>
+        <div>
+          <label className="block text-sm font-semibold text-gray-700 mb-1.5">ระดับความยาก</label>
+          <select value={form.difficulty} onChange={(e) => setForm({ ...form, difficulty: e.target.value })} className={inputClass}>
+            <option value="easy">ง่าย</option>
+            <option value="medium">ปานกลาง</option>
+            <option value="hard">ยาก</option>
+          </select>
         </div>
         <div className="flex items-center gap-3 pt-6">
           <input type="checkbox" id="isActive" checked={form.isActive} onChange={(e) => setForm({ ...form, isActive: e.target.checked })} className="w-4 h-4 rounded text-indigo-600" />

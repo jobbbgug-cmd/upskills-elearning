@@ -53,7 +53,7 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
   const router = useRouter();
   const { addToCart } = useCart();
   
-  const [activeTab, setActiveTab] = useState<TabType>("paths");
+  const [activeTab, setActiveTab] = useState<TabType>("all");
   const [categories, setCategories] = useState<Category[]>([]);
   const [learningPaths, setLearningPaths] = useState<LearningPath[]>([]);
   const [loadingCategories, setLoadingCategories] = useState(true);
@@ -72,10 +72,10 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
     const tab = searchParams.get("tab");
     const category = searchParams.get("category");
 
-    if (tab === "online" || tab === "live-online" || tab === "paths" || tab === "onsite") {
+    if (tab === "all" || tab === "online" || tab === "live-online" || tab === "paths" || tab === "onsite") {
       setActiveTab(tab as TabType);
     } else {
-      setActiveTab("paths");
+      setActiveTab("all");
     }
     if (category) {
       setSelectedCategory(category);
@@ -104,13 +104,12 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
       setLoadingCategories(true);
       try {
         if (activeTab === "paths") {
-          // Learning paths already fetched on mount
           setCategories([]);
         } else {
-          let apiUrl = "/api/categories?type=online";
-          if (activeTab === "live-online") apiUrl = "/api/categories?type=live%20online";
+          let apiUrl = "/api/categories";
+          if (activeTab === "online") apiUrl = "/api/categories?type=online";
+          else if (activeTab === "live-online") apiUrl = "/api/categories?type=live%20online";
           else if (activeTab === "onsite") apiUrl = "/api/categories?type=onsite";
-          else if (activeTab === "all") apiUrl = "/api/categories";
 
           const res = await fetch(apiUrl);
           if (!res.ok) {
@@ -143,24 +142,28 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
     { id: "onsite", label: "คอร์สเรียน Onsite", count: courses.filter((c) => c.type === "onsite").length },
   ] as const;
 
-  const filteredCourses = activeTab === "all"
-    ? courses.filter((c) => {
-        if (!selectedCategory) return true;
-        return (c as any).categoryName && (c as any).categoryName.toLowerCase() === selectedCategory.toLowerCase();
-      })
-    : courses.filter((c) => {
-        const typeMatches =
-          (activeTab === "online" && (c.type || "online") === "online") ||
-          (activeTab === "live-online" && c.type === "live online") ||
-          (activeTab === "onsite" && c.type === "onsite");
+  const filteredCourses = courses.filter((c) => {
+    if (activeTab === "paths") {
+      return false;
+    }
 
-        let categoryMatches = true;
-        if (selectedCategory) {
-          categoryMatches = (c as any).categoryName && (c as any).categoryName.toLowerCase() === selectedCategory.toLowerCase();
-        }
+    if (activeTab === "all") {
+      if (!selectedCategory) return true;
+      return (c as any).categoryName && (c as any).categoryName.toLowerCase() === selectedCategory.toLowerCase();
+    }
 
-        return typeMatches && categoryMatches;
-      });
+    const typeMatches =
+      (activeTab === "online" && (c.type || "online") === "online") ||
+      (activeTab === "live-online" && c.type === "live online") ||
+      (activeTab === "onsite" && c.type === "onsite");
+
+    let categoryMatches = true;
+    if (selectedCategory) {
+      categoryMatches = (c as any).categoryName && (c as any).categoryName.toLowerCase() === selectedCategory.toLowerCase();
+    }
+
+    return typeMatches && categoryMatches;
+  });
 
   return (
     <>
@@ -172,6 +175,9 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
           <h3 className="font-bold text-gray-900 mb-4">
             {activeTab === "paths" ? "เส้นทาง" : "หมวดหมู่"} ({activeTab === "paths" ? learningPaths.length : categories.length})
           </h3>
+          {activeTab === "all" && (
+            <p className="text-xs text-gray-500 mb-4">เลือกหมวดหมู่เพื่อกรองคอร์สเรียน</p>
+          )}
 
           <div className="space-y-2 max-h-96 overflow-y-auto">
             {loadingCategories ? (
@@ -258,14 +264,224 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
         </div>
 
         {/* Content */}
-        {activeTab === "paths" ? (
+        {activeTab === "all" ? (
+          <>
+            {/* Courses Section */}
+            {filteredCourses.length > 0 && (
+              <div className="mb-12">
+                <h2 className="text-2xl font-bold text-gray-900 mb-6">คอร์สเรียน</h2>
+                <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-6">
+                  {filteredCourses.map((course) => (
+                    <div key={course._id} className="bg-white rounded-xl overflow-hidden hover:shadow-lg transition-shadow group">
+                      <Link href={`/courses/${course._id}`}>
+                        <div className="relative h-40 bg-gradient-to-br from-indigo-100 to-purple-100 overflow-hidden cursor-pointer">
+                          {course.coverImage ? (
+                            <Image
+                              src={course.coverImage}
+                              alt={course.title}
+                              fill
+                              className="object-cover group-hover:scale-105 transition-transform"
+                            />
+                          ) : (
+                            <div className="flex items-center justify-center h-full">
+                              <span className="text-4xl">📚</span>
+                            </div>
+                          )}
+                        </div>
+                      </Link>
+
+                      <div className="px-4 pt-4 pb-3 flex items-center gap-2 min-w-0">
+                        <span className="text-xs font-semibold text-gray-700 whitespace-nowrap">
+                          {(course.type || "online") === "online" ? "คอร์สเรียน" : course.type === "live online" ? "คอร์สเรียน Live" : "คอร์สเรียน Onsite"}
+                        </span>
+                        {(course as any).categoryName && (
+                          <span className="text-xs font-medium bg-gray-100 text-gray-700 px-3 py-1 rounded-full truncate">
+                            {(course as any).categoryName}
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="px-4 pb-3">
+                        <h3 className="font-bold text-gray-900 line-clamp-2 text-sm group-hover:text-indigo-600 transition-colors">
+                          {course.title}
+                        </h3>
+                      </div>
+
+                      <div className="px-4 py-3 border-b border-gray-100">
+                        <div className="flex items-center gap-2">
+                          <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-xs font-bold text-indigo-600 flex-shrink-0">
+                            {course.instructor?.[0] || "U"}
+                          </div>
+                          <span className="text-xs text-gray-600 truncate">{course.instructor}</span>
+                        </div>
+                      </div>
+
+                      <div className="px-4 py-3 flex items-center justify-between text-xs text-gray-500 border-b border-gray-100">
+                        <div className="flex items-center gap-1">
+                          <span>👥</span>
+                          <span>{course.enrollmentCount || 0}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <span>⏱️</span>
+                          <span>{course.duration || 0} นาที</span>
+                        </div>
+                      </div>
+
+                      <div className="px-4 py-3 border-b border-gray-100">
+                        <div className="flex items-baseline gap-2">
+                          <span className="text-3xl font-bold text-red-600">
+                            {(course.price || 0) === 0 ? "ฟรี" : `฿${course.price || "0"}`}
+                          </span>
+                          {(course.price || 0) > 0 && (
+                            <span className="text-lg text-gray-400 line-through">
+                              ฿{Math.round((course.price as number) * 1.3)}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="px-4 py-3 flex gap-2">
+                        <button
+                          onClick={() => handleAddToCart(course)}
+                          className="w-12 py-2 border-2 border-indigo-600 text-indigo-600 rounded-lg font-semibold text-sm hover:bg-indigo-50 transition-colors flex items-center justify-center flex-shrink-0"
+                          title="ใส่ตะกร้า"
+                        >
+                          <ShoppingCart className="w-5 h-5" />
+                        </button>
+                        {(course.type || "online") === "online" ? (
+                          <Link href={`/checkout/courses/${course._id}`} className="flex-1">
+                            <button className="w-full py-2 bg-indigo-600 text-white rounded-lg font-semibold text-sm hover:bg-indigo-700 transition-colors">
+                              ซื้อเลย
+                            </button>
+                          </Link>
+                        ) : (
+                          <Link href={`/courses/${course._id}`} className="flex-1">
+                            <button className="w-full py-2 bg-indigo-600 text-white rounded-lg font-semibold text-sm hover:bg-indigo-700 transition-colors">
+                              จองที่นั่ง
+                            </button>
+                          </Link>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Learning Paths Section */}
+            {learningPaths.length > 0 && (
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900 mb-6">เส้นทางการเรียน</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+                  {learningPaths.map((path) => (
+                    <Link key={path._id} href={`/learning-paths/${path._id}`} className="bg-white rounded-xl overflow-hidden hover:shadow-lg transition-shadow group flex flex-col">
+                      <div className="flex gap-4 p-4">
+                        <div className="relative w-56 h-32 bg-gradient-to-br from-indigo-100 to-purple-100 overflow-hidden cursor-pointer flex items-center justify-center rounded-lg flex-shrink-0">
+                          {path.coverImage ? (
+                            <Image
+                              src={path.coverImage}
+                              alt={path.title}
+                              fill
+                              className="object-cover"
+                            />
+                          ) : (
+                            <span className="text-5xl">🗺️</span>
+                          )}
+                        </div>
+
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 text-xs text-gray-600 mb-3">
+                            <div className="flex items-center gap-1.5">
+                              <span>📚</span>
+                              <span className="font-medium">{path.courses?.length || 0} คอร์สเรียน</span>
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                              <span>⏱️</span>
+                              <span className="font-medium">{formatDuration(path.estimatedHours || 0)}</span>
+                            </div>
+                          </div>
+
+                          <div className="text-xs">
+                            <p className="text-gray-700 font-semibold mb-2">ประกอบด้วยคอร์สเรียน</p>
+                            <div className="text-gray-600 space-y-1 mb-2">
+                              {path.courses?.slice(0, 3).map((course: any, idx: number) => (
+                                <p key={idx} className="truncate">
+                                  {idx + 1}. {typeof course === 'object' ? course.title : course}
+                                </p>
+                              ))}
+                            </div>
+                            <button
+                              onClick={(e) => {
+                                e.preventDefault();
+                                router.push(`/learning-paths/${path._id}`);
+                              }}
+                              className="text-indigo-600 hover:text-indigo-700 font-semibold"
+                            >
+                              ดูเพิ่มเติม
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="px-4 py-3 border-t border-gray-100">
+                        <h3 className="font-bold text-gray-900 line-clamp-2 text-2xl group-hover:text-indigo-600 transition-colors mb-1.5">
+                          {path.title}
+                        </h3>
+                      </div>
+
+                      <div className="flex items-center justify-between gap-2 px-4 py-3 border-t border-gray-100 mt-auto">
+                        <div className="flex items-center gap-2">
+                          {(() => {
+                            const finalPrice = Math.round((path.price || 0) - (path.discountType === "percentage" ? (path.price || 0) * (path.discount || 0) / 100 : (path.discount || 0)));
+                            return (
+                              <>
+                                <span className="text-3xl font-bold text-red-600">
+                                  {finalPrice <= 0 ? "ฟรี" : `฿${finalPrice.toLocaleString()}`}
+                                </span>
+                                {(path.discount || 0) > 0 && (path.price || 0) > 0 && finalPrice > 0 && (
+                                  <span className="text-xl text-gray-400 line-through">
+                                    ฿{(path.price || 0).toLocaleString()}
+                                  </span>
+                                )}
+                              </>
+                            );
+                          })()}
+                        </div>
+
+                        <div className="flex items-center gap-2 ml-auto" onClick={(e) => e.stopPropagation()}>
+                          <button
+                            onClick={(e) => {
+                              e.preventDefault();
+                              handleAddToCart(path);
+                            }}
+                            className="p-2 border-2 border-indigo-600 text-indigo-600 rounded hover:bg-indigo-50 transition-colors"
+                            title="ใส่ตะกร้า"
+                          >
+                            <ShoppingCart className="w-5 h-5" />
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.preventDefault();
+                              router.push(`/checkout/learning-paths/${path._id}`);
+                            }}
+                            className="flex-1 px-12 py-2 bg-indigo-600 text-white rounded font-semibold text-lg hover:bg-indigo-700 transition-colors"
+                          >
+                            ซื้อเส้นทางนี้
+                          </button>
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+          </>
+        ) : activeTab === "paths" ? (
           learningPaths.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
               {learningPaths.map((path) => (
                 <Link key={path._id} href={`/learning-paths/${path._id}`} className="bg-white rounded-xl overflow-hidden hover:shadow-lg transition-shadow group flex flex-col">
-                  {/* Top Section: Image (Left) + Stats/Courses (Right) */}
                   <div className="flex gap-4 p-4">
-                    {/* Left: Cover Image */}
                     <div className="relative w-56 h-32 bg-gradient-to-br from-indigo-100 to-purple-100 overflow-hidden cursor-pointer flex items-center justify-center rounded-lg flex-shrink-0">
                       {path.coverImage ? (
                         <Image
@@ -279,9 +495,7 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
                       )}
                     </div>
 
-                    {/* Right: Stats + Courses */}
                     <div className="flex-1">
-                      {/* Stats */}
                       <div className="flex items-center gap-3 text-xs text-gray-600 mb-3">
                         <div className="flex items-center gap-1.5">
                           <span>📚</span>
@@ -293,7 +507,6 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
                         </div>
                       </div>
 
-                      {/* Courses List */}
                       <div className="text-xs">
                         <p className="text-gray-700 font-semibold mb-2">ประกอบด้วยคอร์สเรียน</p>
                         <div className="text-gray-600 space-y-1 mb-2">
@@ -316,16 +529,13 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
                     </div>
                   </div>
 
-                  {/* Title - Full Width */}
                   <div className="px-4 py-3 border-t border-gray-100">
                     <h3 className="font-bold text-gray-900 line-clamp-2 text-2xl group-hover:text-indigo-600 transition-colors mb-1.5">
                       {path.title}
                     </h3>
                   </div>
 
-                  {/* Bottom Row: Price + Buttons */}
                   <div className="flex items-center justify-between gap-2 px-4 py-3 border-t border-gray-100 mt-auto">
-                    {/* Price Section */}
                     <div className="flex items-center gap-2">
                       {(() => {
                         const finalPrice = Math.round((path.price || 0) - (path.discountType === "percentage" ? (path.price || 0) * (path.discount || 0) / 100 : (path.discount || 0)));
@@ -344,7 +554,6 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
                       })()}
                     </div>
 
-                    {/* Buttons */}
                     <div className="flex items-center gap-2 ml-auto" onClick={(e) => e.stopPropagation()}>
                       <button
                         onClick={(e) => {
@@ -379,7 +588,6 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
           <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-6">
             {filteredCourses.map((course) => (
               <div key={course._id} className="bg-white rounded-xl overflow-hidden hover:shadow-lg transition-shadow group">
-                {/* Course Image */}
                 <Link href={`/courses/${course._id}`}>
                   <div className="relative h-40 bg-gradient-to-br from-indigo-100 to-purple-100 overflow-hidden cursor-pointer">
                     {course.coverImage ? (
@@ -397,7 +605,6 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
                   </div>
                 </Link>
 
-                {/* Course Type Badge */}
                 <div className="px-4 pt-4 pb-3 flex items-center gap-2 min-w-0">
                   <span className="text-xs font-semibold text-gray-700 whitespace-nowrap">
                     {activeTab === "online" ? "คอร์สเรียน" : activeTab === "live-online" ? "คอร์สเรียน Live" : "คอร์สเรียน Onsite"}
@@ -409,14 +616,12 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
                   )}
                 </div>
 
-                {/* Course Title */}
                 <div className="px-4 pb-3">
                   <h3 className="font-bold text-gray-900 line-clamp-2 text-sm group-hover:text-indigo-600 transition-colors">
                     {course.title}
                   </h3>
                 </div>
 
-                {/* Instructor */}
                 <div className="px-4 py-3 border-b border-gray-100">
                   <div className="flex items-center gap-2">
                     <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-xs font-bold text-indigo-600 flex-shrink-0">
@@ -426,7 +631,6 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
                   </div>
                 </div>
 
-                {/* Stats */}
                 <div className="px-4 py-3 flex items-center justify-between text-xs text-gray-500 border-b border-gray-100">
                   <div className="flex items-center gap-1">
                     <span>👥</span>
@@ -438,7 +642,6 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
                   </div>
                 </div>
 
-                {/* Price */}
                 <div className="px-4 py-3 border-b border-gray-100">
                   <div className="flex items-baseline gap-2">
                     <span className="text-3xl font-bold text-red-600">
@@ -452,7 +655,6 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
                   </div>
                 </div>
 
-                {/* Buttons */}
                 <div className="px-4 py-3 flex gap-2">
                   <button
                     onClick={() => handleAddToCart(course)}
