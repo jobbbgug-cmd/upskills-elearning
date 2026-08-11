@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { useSearchParams, useRouter } from "next/navigation";
-import { ShoppingCart } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { ShoppingCart, X } from "lucide-react";
 import { ICourse } from "@/types";
 import Toast from "@/components/ui/Toast";
 import { useCart } from "@/context/CartContext";
@@ -49,16 +49,13 @@ interface CourseTabbedProps {
 }
 
 export default function CoursesTabbed({ courses }: CourseTabbedProps) {
-  const searchParams = useSearchParams();
   const router = useRouter();
   const { addToCart } = useCart();
-  
+
   const [activeTab, setActiveTab] = useState<TabType>("all");
   const [categories, setCategories] = useState<Category[]>([]);
   const [learningPaths, setLearningPaths] = useState<LearningPath[]>([]);
-  const [loadingCategories, setLoadingCategories] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [mounted, setMounted] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
   const [currentPage, setCurrentPage] = useState<Record<string, number>>({
     online: 1,
@@ -68,73 +65,115 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
   });
   const [selectedDifficulties, setSelectedDifficulties] = useState<Set<string>>(new Set());
   const [selectedDurations, setSelectedDurations] = useState<Set<string>>(new Set());
+  const [debugLogs, setDebugLogs] = useState<Array<{ id: string; message: string; time: string; status: "pending" | "success" | "error" }>>([]);
+  const [showDebug, setShowDebug] = useState(false);
 
-  // Sync with URL params after hydration
+  const addDebugLog = (message: string, status: "pending" | "success" | "error" = "pending") => {
+    const id = Math.random().toString(36);
+    const time = new Date().toLocaleTimeString("th-TH");
+    setDebugLogs((prev) => [...prev.slice(-9), { id, message, time, status }]);
+    console.log(`[DEBUG] ${message}`);
+  };
+
+  // Initialize tab from URL on mount
   useEffect(() => {
-    setMounted(true);
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const tab = params.get("tab");
+      if (tab === "all" || tab === "online" || tab === "live-online" || tab === "paths" || tab === "onsite") {
+        setActiveTab(tab as TabType);
+      }
+    }
   }, []);
 
+  // Update URL when tab changes (but not on initial load)
   useEffect(() => {
-    if (!mounted) return;
-
-    const tab = searchParams.get("tab");
-    const category = searchParams.get("category");
-
-    if (tab === "all" || tab === "online" || tab === "live-online" || tab === "paths" || tab === "onsite") {
-      setActiveTab(tab as TabType);
-    } else {
-      setActiveTab("all");
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const currentTab = params.get("tab") || "all";
+      if (currentTab !== activeTab) {
+        const newParams = new URLSearchParams(window.location.search);
+        newParams.set("tab", activeTab);
+        window.history.replaceState(null, "", `/courses?${newParams.toString()}`);
+      }
     }
-    if (category) {
-      setSelectedCategory(category);
-    }
-  }, [searchParams, mounted]);
+  }, [activeTab]);
 
   // Fetch learning paths on mount
   useEffect(() => {
+    let isMounted = true;
+
     const fetchLearningPaths = async () => {
+      addDebugLog("🔄 Fetching Learning Paths...", "pending");
       try {
         const res = await fetch("/api/learning-paths");
         if (!res.ok) {
           throw new Error(`API error: ${res.status}`);
         }
         const data = await res.json();
-        setLearningPaths(data.paths || []);
+        if (isMounted) {
+          setLearningPaths(data.paths || []);
+          addDebugLog(`✅ Learning Paths: ${(data.paths || []).length} items`, "success");
+        }
       } catch (error) {
-        console.error("Failed to fetch learning paths:", error);
+        if (isMounted) {
+          console.error("Failed to fetch learning paths:", error);
+          addDebugLog(`❌ Learning Paths: ${(error as Error).message}`, "error");
+          setLearningPaths([]);
+        }
       }
     };
+
     fetchLearningPaths();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   useEffect(() => {
-    const fetchData = async () => {
-      setLoadingCategories(true);
-      try {
-        if (activeTab === "paths") {
-          setCategories([]);
-        } else {
-          let apiUrl = "/api/categories";
-          if (activeTab === "online") apiUrl = "/api/categories?type=online";
-          else if (activeTab === "live-online") apiUrl = "/api/categories?type=live%20online";
-          else if (activeTab === "onsite") apiUrl = "/api/categories?type=onsite";
+    let isMounted = true;
 
-          const res = await fetch(apiUrl);
-          if (!res.ok) {
-            throw new Error(`API error: ${res.status}`);
-          }
-          const data = await res.json();
+    const fetchData = async () => {
+      if (activeTab === "paths") {
+        if (isMounted) {
+          setCategories([]);
+          addDebugLog("📂 Categories: Skipped (paths tab)", "success");
+        }
+        return;
+      }
+
+      addDebugLog(`🔄 Fetching Categories (${activeTab})...`, "pending");
+
+      try {
+        let apiUrl = "/api/categories";
+        if (activeTab === "online") apiUrl = "/api/categories?type=online";
+        else if (activeTab === "live-online") apiUrl = "/api/categories?type=live%20online";
+        else if (activeTab === "onsite") apiUrl = "/api/categories?type=onsite";
+
+        const res = await fetch(apiUrl);
+        if (!res.ok) {
+          throw new Error(`API error: ${res.status}`);
+        }
+        const data = await res.json();
+        if (isMounted) {
           setCategories(data.categories || []);
+          addDebugLog(`✅ Categories (${activeTab}): ${(data.categories || []).length} items`, "success");
         }
       } catch (error) {
-        console.error("Failed to fetch categories:", error);
-        setCategories([]);
-      } finally {
-        setLoadingCategories(false);
+        if (isMounted) {
+          console.error("Failed to fetch categories:", error);
+          addDebugLog(`❌ Categories (${activeTab}): ${(error as Error).message}`, "error");
+          setCategories([]);
+        }
       }
     };
 
     fetchData();
+
+    return () => {
+      isMounted = false;
+    };
   }, [activeTab]);
 
   const handleAddToCart = (course: ICourse | LearningPath) => {
@@ -151,78 +190,135 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
     { id: "onsite", label: "คอร์สเรียน Onsite", count: courses.filter((c) => c.type === "onsite").length },
   ] as const;
 
-  const filteredLearningPaths = learningPaths.filter((path) => {
-    // Difficulty filter
-    if (selectedDifficulties.size > 0) {
-      if (!selectedDifficulties.has(path.difficulty || "medium")) {
-        return false;
+  const filteredLearningPaths = useMemo(() => {
+    return learningPaths.filter((path) => {
+      // Difficulty filter
+      if (selectedDifficulties.size > 0) {
+        if (!selectedDifficulties.has(path.difficulty || "medium")) {
+          return false;
+        }
       }
-    }
 
-    // Duration filter (convert estimated hours to minutes for comparison)
-    if (selectedDurations.size > 0) {
-      let durationMatches = false;
-      const durationMinutes = (path.estimatedHours || 0) * 60;
+      // Duration filter (convert estimated hours to minutes for comparison)
+      if (selectedDurations.size > 0) {
+        let durationMatches = false;
+        const durationMinutes = (path.estimatedHours || 0) * 60;
 
-      if (selectedDurations.has("0-60") && durationMinutes >= 0 && durationMinutes <= 60) durationMatches = true;
-      if (selectedDurations.has("60-120") && durationMinutes > 60 && durationMinutes <= 120) durationMatches = true;
-      if (selectedDurations.has("120-240") && durationMinutes > 120 && durationMinutes <= 240) durationMatches = true;
-      if (selectedDurations.has("240+") && durationMinutes > 240) durationMatches = true;
+        if (selectedDurations.has("0-60") && durationMinutes >= 0 && durationMinutes <= 60) durationMatches = true;
+        if (selectedDurations.has("60-120") && durationMinutes > 60 && durationMinutes <= 120) durationMatches = true;
+        if (selectedDurations.has("120-240") && durationMinutes > 120 && durationMinutes <= 240) durationMatches = true;
+        if (selectedDurations.has("240+") && durationMinutes > 240) durationMatches = true;
 
-      if (!durationMatches) return false;
-    }
-
-    return true;
-  });
-
-  const filteredCourses = courses.filter((c) => {
-    if (activeTab === "paths") {
-      return false;
-    }
-
-    // Difficulty filter
-    if (selectedDifficulties.size > 0) {
-      if (!selectedDifficulties.has((c as any).difficulty || "medium")) {
-        return false;
+        if (!durationMatches) return false;
       }
-    }
 
-    // Duration filter (duration is in minutes)
-    if (selectedDurations.size > 0) {
-      let durationMatches = false;
-      const duration = c.duration || 0;
-
-      if (selectedDurations.has("0-60") && duration >= 0 && duration <= 60) durationMatches = true;
-      if (selectedDurations.has("60-120") && duration > 60 && duration <= 120) durationMatches = true;
-      if (selectedDurations.has("120-240") && duration > 120 && duration <= 240) durationMatches = true;
-      if (selectedDurations.has("240+") && duration > 240) durationMatches = true;
-
-      if (!durationMatches) return false;
-    }
-
-    // Category filter
-    if (selectedCategory) {
-      if (!((c as any).categoryName && (c as any).categoryName.toLowerCase() === selectedCategory.toLowerCase())) {
-        return false;
-      }
-    }
-
-    // Type filter
-    if (activeTab === "all") {
       return true;
-    }
+    });
+  }, [learningPaths, selectedDifficulties, selectedDurations]);
 
-    const typeMatches =
-      (activeTab === "online" && (c.type || "online") === "online") ||
-      (activeTab === "live-online" && c.type === "live online") ||
-      (activeTab === "onsite" && c.type === "onsite");
+  const filteredCourses = useMemo(() => {
+    return courses.filter((c) => {
+      if (activeTab === "paths") {
+        return false;
+      }
 
-    return typeMatches;
-  });
+      // Difficulty filter
+      if (selectedDifficulties.size > 0) {
+        if (!selectedDifficulties.has((c as any).difficulty || "medium")) {
+          return false;
+        }
+      }
+
+      // Duration filter (duration is in minutes)
+      if (selectedDurations.size > 0) {
+        let durationMatches = false;
+        const duration = c.duration || 0;
+
+        if (selectedDurations.has("0-60") && duration >= 0 && duration <= 60) durationMatches = true;
+        if (selectedDurations.has("60-120") && duration > 60 && duration <= 120) durationMatches = true;
+        if (selectedDurations.has("120-240") && duration > 120 && duration <= 240) durationMatches = true;
+        if (selectedDurations.has("240+") && duration > 240) durationMatches = true;
+
+        if (!durationMatches) return false;
+      }
+
+      // Category filter
+      if (selectedCategory) {
+        if (!((c as any).categoryName && (c as any).categoryName.toLowerCase() === selectedCategory.toLowerCase())) {
+          return false;
+        }
+      }
+
+      // Type filter
+      if (activeTab === "all") {
+        return true;
+      }
+
+      const typeMatches =
+        (activeTab === "online" && (c.type || "online") === "online") ||
+        (activeTab === "live-online" && c.type === "live online") ||
+        (activeTab === "onsite" && c.type === "onsite");
+
+      return typeMatches;
+    });
+  }, [courses, activeTab, selectedDifficulties, selectedDurations, selectedCategory]);
 
   return (
     <>
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
+
+      {/* Debug Panel */}
+      <div className="fixed bottom-4 right-4 z-40">
+        <button
+          onClick={() => setShowDebug(!showDebug)}
+          className="bg-gray-900 text-white px-3 py-2 rounded-lg text-xs font-mono hover:bg-gray-800 transition"
+        >
+          🐛 Debug ({debugLogs.length})
+        </button>
+
+        {showDebug && (
+          <div className="absolute bottom-12 right-0 bg-gray-900 text-white rounded-lg shadow-xl p-3 w-96 max-h-96 overflow-y-auto font-mono text-xs">
+            <div className="flex justify-between items-center mb-2 pb-2 border-b border-gray-700">
+              <span className="font-bold">API Requests Log</span>
+              <button onClick={() => setShowDebug(false)} className="text-gray-400 hover:text-white">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="space-y-1">
+              {debugLogs.length === 0 ? (
+                <p className="text-gray-500">Waiting for requests...</p>
+              ) : (
+                debugLogs.map((log) => (
+                  <div key={log.id} className="space-y-0.5">
+                    <div className="flex justify-between items-start">
+                      <span className={`${
+                        log.status === "success" ? "text-green-400" :
+                        log.status === "error" ? "text-red-400" :
+                        "text-yellow-400"
+                      }`}>
+                        {log.message}
+                      </span>
+                      <span className="text-gray-500">{log.time}</span>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+            <div className="mt-3 pt-2 border-t border-gray-700">
+              <p className="text-gray-500 text-xs">
+                Active Tab: <span className="text-blue-400">{activeTab}</span>
+              </p>
+              <p className="text-gray-500 text-xs">
+                Learning Paths: <span className="text-blue-400">{learningPaths.length}</span>
+              </p>
+              <p className="text-gray-500 text-xs">
+                Categories: <span className="text-blue-400">{categories.length}</span>
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
       {/* Sidebar */}
       <div className="lg:col-span-1">
@@ -235,9 +331,7 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
           )}
 
           <div className="space-y-2 max-h-96 overflow-y-auto">
-            {loadingCategories ? (
-              <p className="text-sm text-gray-500">กำลังโหลด...</p>
-            ) : activeTab === "paths" ? (
+            {activeTab === "paths" ? (
               learningPaths.length > 0 ? (
                 learningPaths.map((path) => (
                   <Link

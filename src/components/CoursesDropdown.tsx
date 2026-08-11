@@ -38,71 +38,87 @@ export default function CoursesDropdown() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
+
     const fetchData = async () => {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
+
       try {
-        const [categoriesRes, liveOnlineCategoriesRes, coursesRes, pathsRes] = await Promise.all([
-          fetch("/api/categories?type=online"),
-          fetch("/api/categories?type=live online"),
-          fetch("/api/courses?limit=100"),
-          fetch("/api/learning-paths"),
+        const [categoriesRes, liveOnlineCategoriesRes, coursesRes, pathsRes, onsiteRes] = await Promise.all([
+          fetch("/api/categories?type=online", { signal: controller.signal }),
+          fetch("/api/categories?type=live%20online", { signal: controller.signal }),
+          fetch("/api/courses?limit=100", { signal: controller.signal }),
+          fetch("/api/learning-paths", { signal: controller.signal }),
+          fetch("/api/categories?type=onsite", { signal: controller.signal }),
         ]);
 
-        const categoriesData = await categoriesRes.json();
-        const liveOnlineCategoriesData = await liveOnlineCategoriesRes.json();
-        const coursesData = await coursesRes.json();
-        const pathsData = await pathsRes.json();
+        if (!categoriesRes.ok || !liveOnlineCategoriesRes.ok || !coursesRes.ok || !pathsRes.ok || !onsiteRes.ok) {
+          throw new Error("API response error");
+        }
+
+        const [categoriesData, liveOnlineCategoriesData, coursesData, pathsData, onsiteCategoriesData] = await Promise.all([
+          categoriesRes.json(),
+          liveOnlineCategoriesRes.json(),
+          coursesRes.json(),
+          pathsRes.json(),
+          onsiteRes.json(),
+        ]);
+
+        if (!isMounted) return;
 
         const categories = categoriesData.categories || [];
         const liveOnlineCategories = liveOnlineCategoriesData.categories || [];
+        const allCourses = coursesData.courses || [];
+        const onsiteCats = onsiteCategoriesData.categories || [];
 
         const catList = categories.map((cat: any) => cat.name);
         const liveOnlineCatList = liveOnlineCategories.map((cat: any) => cat.name);
+        const onsiteCatList = onsiteCats.map((cat: any) => cat.name);
 
         setCategories(catList);
         setLiveOnlineCategories(liveOnlineCatList);
+        setOnsiteCategories(onsiteCatList);
         if (catList.length > 0) setSelectedCategory(catList[0]);
 
-        const allCourses = coursesData.courses || [];
         setLatestCourses(allCourses.slice(0, 3));
         setLearningPaths(pathsData.paths || []);
 
-        // Group courses by category for online
+        // Group courses by category
         const courseMap: Record<string, Course[]> = {};
         categories.forEach((cat: any) => {
           courseMap[cat.name] = allCourses.filter((c: Course & { category?: string; type?: string }) => c.category === cat._id && (c.type === "online" || !c.type)).slice(0, 5);
         });
         setCategoryCoursesMap(courseMap);
 
-        // Group courses by category for live online
         const liveOnlineCourseMapData: Record<string, Course[]> = {};
         liveOnlineCategories.forEach((cat: any) => {
           liveOnlineCourseMapData[cat.name] = allCourses.filter((c: Course & { category?: string; type?: string }) => c.category === cat._id && c.type === "live online").slice(0, 5);
         });
         setLiveOnlineCourseMap(liveOnlineCourseMapData);
 
-        // Fetch onsite categories
-        const onsiteRes = await fetch("/api/categories?type=onsite");
-        const onsiteCategoriesData = await onsiteRes.json();
-        const onsiteCats = onsiteCategoriesData.categories || [];
-        const onsiteCatList = onsiteCats.map((cat: any) => cat.name);
-        
-        // Group courses by category for onsite
         const onsiteCourseMapData: Record<string, Course[]> = {};
         onsiteCats.forEach((cat: any) => {
           onsiteCourseMapData[cat.name] = allCourses.filter((c: Course & { category?: string; type?: string }) => c.category === cat._id && c.type === "onsite").slice(0, 5);
         });
-        setOnsiteCategories(onsiteCatList);
         setOnsiteCourseMap(onsiteCourseMapData);
-        setCategoryCoursesMap(courseMap);
-        setLiveOnlineCourseMap(liveOnlineCourseMapData);
       } catch (error) {
-        console.error("Failed to fetch dropdown data:", error);
+        if ((error as Error).name !== "AbortError") {
+          console.error("Failed to fetch dropdown data:", error);
+        }
       } finally {
-        setLoading(false);
+        clearTimeout(timeoutId);
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     };
 
     fetchData();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   return (
