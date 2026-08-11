@@ -267,7 +267,8 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
     <>
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
 
-      {/* Debug Panel */}
+      {/* Debug Panel - Only in Development */}
+      {process.env.NODE_ENV === "development" && (
       <div className="fixed bottom-4 right-4 z-40">
         <button
           onClick={() => setShowDebug(!showDebug)}
@@ -318,6 +319,7 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
           </div>
         )}
       </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
       {/* Sidebar */}
