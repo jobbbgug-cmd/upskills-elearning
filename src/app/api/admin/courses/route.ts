@@ -56,6 +56,17 @@ export async function POST(req: NextRequest) {
       instructor,
       isActive,
       contentId,
+      difficulty,
+      duration,
+      linkDigital,
+      linkClip,
+      linkSupplementary,
+      linkFullbook,
+      linkDownload,
+      ebookPdfUrl,
+      whatYouWillLearn,
+      courseDetails,
+      lessons,
     } = body;
 
     if (!title || !description || !gradeLevels) {
@@ -80,6 +91,17 @@ export async function POST(req: NextRequest) {
       institutionId: auth.institutionId || null,
       isActive: isActive !== false,
       contentId: contentId || null,
+      difficulty: difficulty || "medium",
+      duration: duration || 0,
+      linkDigital: linkDigital || "",
+      linkClip: linkClip || "",
+      linkSupplementary: linkSupplementary || "",
+      linkFullbook: linkFullbook || "",
+      linkDownload: linkDownload || "",
+      ebookPdfUrl: ebookPdfUrl || "",
+      whatYouWillLearn: whatYouWillLearn || "",
+      courseDetails: courseDetails || "",
+      lessons: lessons || [],
     });
 
     await course.save();

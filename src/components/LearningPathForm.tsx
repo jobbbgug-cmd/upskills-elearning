@@ -61,7 +61,7 @@ export default function LearningPathForm({ path, mode }: LearningPathFormProps) 
   const router = useRouter();
   const [title, setTitle] = useState(path?.title || "");
   const [description, setDescription] = useState(path?.description || "");
-  const [difficulty, setDifficulty] = useState(path?.difficulty || "beginner");
+  const [difficulty, setDifficulty] = useState(path?.difficulty || "medium");
   const [estimatedHours, setEstimatedHours] = useState(path?.estimatedHours || 0);
   const [price, setPrice] = useState(path?.price || 0);
   const [discount, setDiscount] = useState(path?.discount || 0);
@@ -158,7 +158,7 @@ export default function LearningPathForm({ path, mode }: LearningPathFormProps) 
     if (path && mode === "edit") {
       setTitle(path.title || "");
       setDescription(path.description || "");
-      setDifficulty(path.difficulty || "beginner");
+      setDifficulty(path.difficulty || "medium");
       setEstimatedHours(path.estimatedHours || 0);
       setPrice(path.price || 0);
       setDiscount(path.discount || 0);
@@ -318,9 +318,9 @@ export default function LearningPathForm({ path, mode }: LearningPathFormProps) 
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-1.5">ระดับความยาก *</label>
             <select value={difficulty} onChange={(e) => setDifficulty(e.target.value)} className={inputClass}>
-              <option value="beginner">ระดับเบื้องต้น</option>
-              <option value="intermediate">ระดับกลาง</option>
-              <option value="advanced">ระดับสูง</option>
+              <option value="easy">ง่าย</option>
+              <option value="medium">ปานกลาง</option>
+              <option value="hard">ยาก</option>
             </select>
           </div>
 

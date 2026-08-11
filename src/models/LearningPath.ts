@@ -7,7 +7,7 @@ export interface ILearningPathDocument extends Document {
   coverImage: string;
   courses: mongoose.Types.ObjectId[];
   instructor: string;
-  difficulty: "beginner" | "intermediate" | "advanced";
+  difficulty: "easy" | "medium" | "hard";
   estimatedHours: number;
   price: number;
   discount: number;
@@ -26,7 +26,7 @@ const LearningPathSchema = new Schema<ILearningPathDocument>(
     coverImage: { type: String, default: "" },
     courses: [{ type: Schema.Types.ObjectId, ref: "Course" }],
     instructor: { type: String, required: true },
-    difficulty: { type: String, enum: ["beginner", "intermediate", "advanced"], default: "beginner" },
+    difficulty: { type: String, enum: ["easy", "medium", "hard"], default: "medium" },
     estimatedHours: { type: Number, default: 0 },
     price: { type: Number, default: 0 },
     discount: { type: Number, default: 0 },

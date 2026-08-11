@@ -164,7 +164,7 @@ export default function LearningPathsTable({ paths: initialPaths }: LearningPath
               <tr className="border-b border-gray-200 bg-gray-50">
                 <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700">รูปปก</th>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700">ชื่อเส้นทาง</th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700">ผู้สอน</th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700">ผู้สร้าง</th>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700">จำนวนคอร์ส</th>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700">ระดับ</th>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700">การดำเนิน</th>
@@ -197,13 +197,13 @@ export default function LearningPathsTable({ paths: initialPaths }: LearningPath
                   <td className="px-6 py-4 text-sm text-gray-600">{path.instructor}</td>
                   <td className="px-6 py-4 text-sm text-gray-600">{path.courses?.length || 0}</td>
                   <td className="px-6 py-4">
-                    <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${
-                      path.difficulty === "beginner" ? "bg-green-100 text-green-700" :
-                      path.difficulty === "intermediate" ? "bg-yellow-100 text-yellow-700" :
+                    <span className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap ${
+                      path.difficulty === "easy" ? "bg-green-100 text-green-700" :
+                      path.difficulty === "medium" ? "bg-blue-100 text-blue-700" :
                       "bg-red-100 text-red-700"
                     }`}>
-                      {path.difficulty === "beginner" ? "ระดับเบื้องต้น" :
-                       path.difficulty === "intermediate" ? "ระดับกลาง" : "ระดับสูง"}
+                      {path.difficulty === "easy" ? "ง่าย" :
+                       path.difficulty === "medium" ? "ปานกลาง" : "ยาก"}
                     </span>
                   </td>
                   <td className="px-6 py-4">

@@ -45,7 +45,7 @@ export async function POST(req: NextRequest) {
       title,
       description,
       coverImage: coverImage || "",
-      difficulty: difficulty || "beginner",
+      difficulty: difficulty || "medium",
       price: price || 0,
       discount: discount || 0,
       discountType: discountType || "percentage",

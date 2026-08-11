@@ -66,6 +66,8 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
     paths: 1,
     onsite: 1,
   });
+  const [selectedDifficulties, setSelectedDifficulties] = useState<Set<string>>(new Set());
+  const [selectedDurations, setSelectedDurations] = useState<Set<string>>(new Set());
 
   // Sync with URL params after hydration
   useEffect(() => {
@@ -149,14 +151,65 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
     { id: "onsite", label: "คอร์สเรียน Onsite", count: courses.filter((c) => c.type === "onsite").length },
   ] as const;
 
+  const filteredLearningPaths = learningPaths.filter((path) => {
+    // Difficulty filter
+    if (selectedDifficulties.size > 0) {
+      if (!selectedDifficulties.has(path.difficulty || "medium")) {
+        return false;
+      }
+    }
+
+    // Duration filter (convert estimated hours to minutes for comparison)
+    if (selectedDurations.size > 0) {
+      let durationMatches = false;
+      const durationMinutes = (path.estimatedHours || 0) * 60;
+
+      if (selectedDurations.has("0-60") && durationMinutes >= 0 && durationMinutes <= 60) durationMatches = true;
+      if (selectedDurations.has("60-120") && durationMinutes > 60 && durationMinutes <= 120) durationMatches = true;
+      if (selectedDurations.has("120-240") && durationMinutes > 120 && durationMinutes <= 240) durationMatches = true;
+      if (selectedDurations.has("240+") && durationMinutes > 240) durationMatches = true;
+
+      if (!durationMatches) return false;
+    }
+
+    return true;
+  });
+
   const filteredCourses = courses.filter((c) => {
     if (activeTab === "paths") {
       return false;
     }
 
+    // Difficulty filter
+    if (selectedDifficulties.size > 0) {
+      if (!selectedDifficulties.has((c as any).difficulty || "medium")) {
+        return false;
+      }
+    }
+
+    // Duration filter (duration is in minutes)
+    if (selectedDurations.size > 0) {
+      let durationMatches = false;
+      const duration = c.duration || 0;
+
+      if (selectedDurations.has("0-60") && duration >= 0 && duration <= 60) durationMatches = true;
+      if (selectedDurations.has("60-120") && duration > 60 && duration <= 120) durationMatches = true;
+      if (selectedDurations.has("120-240") && duration > 120 && duration <= 240) durationMatches = true;
+      if (selectedDurations.has("240+") && duration > 240) durationMatches = true;
+
+      if (!durationMatches) return false;
+    }
+
+    // Category filter
+    if (selectedCategory) {
+      if (!((c as any).categoryName && (c as any).categoryName.toLowerCase() === selectedCategory.toLowerCase())) {
+        return false;
+      }
+    }
+
+    // Type filter
     if (activeTab === "all") {
-      if (!selectedCategory) return true;
-      return (c as any).categoryName && (c as any).categoryName.toLowerCase() === selectedCategory.toLowerCase();
+      return true;
     }
 
     const typeMatches =
@@ -164,12 +217,7 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
       (activeTab === "live-online" && c.type === "live online") ||
       (activeTab === "onsite" && c.type === "onsite");
 
-    let categoryMatches = true;
-    if (selectedCategory) {
-      categoryMatches = (c as any).categoryName && (c as any).categoryName.toLowerCase() === selectedCategory.toLowerCase();
-    }
-
-    return typeMatches && categoryMatches;
+    return typeMatches;
   });
 
   return (
@@ -227,13 +275,30 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
             )}
           </div>
 
-          {/* Price Range */}
+          {/* Difficulty Filter */}
           <div className="mt-6 pt-6 border-t">
-            <h4 className="font-semibold text-gray-900 mb-3 text-sm">ระดับ</h4>
-            {["ฟรี", "ปรึกษา", "บาท"].map((price) => (
-              <label key={price} className="flex items-center gap-2 mb-2 cursor-pointer hover:text-indigo-600">
-                <input type="checkbox" className="w-4 h-4 rounded cursor-pointer" />
-                <span className="text-sm text-gray-600">{price}</span>
+            <h4 className="font-semibold text-gray-900 mb-3 text-sm">ระดับความยาก</h4>
+            {[
+              { label: "ง่าย", value: "easy" },
+              { label: "ปานกลาง", value: "medium" },
+              { label: "ยาก", value: "hard" },
+            ].map((diff) => (
+              <label key={diff.value} className="flex items-center gap-2 mb-2 cursor-pointer hover:text-indigo-600">
+                <input
+                  type="checkbox"
+                  className="w-4 h-4 rounded cursor-pointer"
+                  checked={selectedDifficulties.has(diff.value)}
+                  onChange={(e) => {
+                    const newDifficulties = new Set(selectedDifficulties);
+                    if (e.target.checked) {
+                      newDifficulties.add(diff.value);
+                    } else {
+                      newDifficulties.delete(diff.value);
+                    }
+                    setSelectedDifficulties(newDifficulties);
+                  }}
+                />
+                <span className="text-sm text-gray-600">{diff.label}</span>
               </label>
             ))}
           </div>
@@ -241,10 +306,28 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
           {/* Duration */}
           <div className="mt-6 pt-6 border-t">
             <h4 className="font-semibold text-gray-900 mb-3 text-sm">ความยาวคอร์ส</h4>
-            {["0 - 1 ชั่วโมง", "1 - 2 ชั่วโมง", "2 - 4 ชั่วโมง", "4 ชั่วโมงขึ้นไป"].map((duration) => (
-              <label key={duration} className="flex items-center gap-2 mb-2 cursor-pointer hover:text-indigo-600">
-                <input type="checkbox" className="w-4 h-4 rounded cursor-pointer" />
-                <span className="text-sm text-gray-600">{duration}</span>
+            {[
+              { label: "0 - 1 ชั่วโมง", value: "0-60" },
+              { label: "1 - 2 ชั่วโมง", value: "60-120" },
+              { label: "2 - 4 ชั่วโมง", value: "120-240" },
+              { label: "4 ชั่วโมงขึ้นไป", value: "240+" },
+            ].map((dur) => (
+              <label key={dur.value} className="flex items-center gap-2 mb-2 cursor-pointer hover:text-indigo-600">
+                <input
+                  type="checkbox"
+                  className="w-4 h-4 rounded cursor-pointer"
+                  checked={selectedDurations.has(dur.value)}
+                  onChange={(e) => {
+                    const newDurations = new Set(selectedDurations);
+                    if (e.target.checked) {
+                      newDurations.add(dur.value);
+                    } else {
+                      newDurations.delete(dur.value);
+                    }
+                    setSelectedDurations(newDurations);
+                  }}
+                />
+                <span className="text-sm text-gray-600">{dur.label}</span>
               </label>
             ))}
           </div>
@@ -275,7 +358,7 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
           <>
             {/* Online Courses Section */}
             {(() => {
-              const onlineCourses = courses.filter((c) => (c.type || "online") === "online");
+              const onlineCourses = filteredCourses.filter((c) => (c.type || "online") === "online");
               return onlineCourses.length > 0 ? (
                 <div className="mb-12">
                   <h2 className="text-2xl font-bold text-gray-900 mb-6">คอร์สเรียน Online</h2>
@@ -389,11 +472,11 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
 
             {/* Learning Paths Section */}
             {(() => {
-              return learningPaths.length > 0 ? (
+              return filteredLearningPaths.length > 0 ? (
               <div>
                 <h2 className="text-2xl font-bold text-gray-900 mb-6">เส้นทางการเรียน</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
-                  {learningPaths.map((path) => (
+                  {filteredLearningPaths.map((path) => (
                     <Link key={path._id} href={`/learning-paths/${path._id}`} className="bg-white rounded-xl overflow-hidden hover:shadow-lg transition-shadow group flex flex-col">
                       <div className="flex gap-3 p-3">
                         <div className="relative w-48 h-28 bg-gradient-to-br from-indigo-100 to-purple-100 overflow-hidden cursor-pointer flex items-center justify-center rounded-lg flex-shrink-0">
@@ -507,7 +590,7 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
 
             {/* Live Courses Section */}
             {(() => {
-              const liveCourses = courses.filter((c) => c.type === "live online");
+              const liveCourses = filteredCourses.filter((c) => c.type === "live online");
               return liveCourses.length > 0 ? (
                 <div className="mb-12">
                   <h2 className="text-2xl font-bold text-gray-900 mb-6">คอร์สเรียน Live</h2>
@@ -572,7 +655,7 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
 
             {/* Onsite Courses Section */}
             {(() => {
-              const onsiteCourses = courses.filter((c) => c.type === "onsite");
+              const onsiteCourses = filteredCourses.filter((c) => c.type === "onsite");
               return onsiteCourses.length > 0 ? (
                 <div className="mb-12">
                   <h2 className="text-2xl font-bold text-gray-900 mb-6">คอร์สเรียน Onsite</h2>
@@ -636,14 +719,14 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
             })()}
           </>
         ) : activeTab === "paths" ? (
-          learningPaths.length > 0 ? (
+          filteredLearningPaths.length > 0 ? (
             (() => {
               const itemsPerPage = 8;
               const page = currentPage["paths"] || 1;
               const startIndex = (page - 1) * itemsPerPage;
               const endIndex = startIndex + itemsPerPage;
-              const paginatedPaths = learningPaths.slice(startIndex, endIndex);
-              const totalPages = Math.ceil(learningPaths.length / itemsPerPage);
+              const paginatedPaths = filteredLearningPaths.slice(startIndex, endIndex);
+              const totalPages = Math.ceil(filteredLearningPaths.length / itemsPerPage);
 
               return (
             <>
@@ -783,7 +866,7 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
             })()
           ) : (
             <div className="text-center py-12">
-              <p className="text-gray-600">ไม่มีเส้นทางการเรียน</p>
+              <p className="text-gray-600">ไม่มีเส้นทางการเรียนที่ตรงกับตัวกรอง</p>
             </div>
           )
         ) : filteredCourses.length > 0 ? (

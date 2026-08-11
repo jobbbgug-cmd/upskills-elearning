@@ -49,6 +49,7 @@ async function getCourses() {
           price: 1,
           enrollmentCount: 1,
           duration: 1,
+          difficulty: 1,
           category: 1,
           categoryData: 1
         }

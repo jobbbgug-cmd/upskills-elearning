@@ -47,6 +47,7 @@ export interface ICourseDocument extends Document {
   duration?: number;
   averageRating?: number;
   slug?: string;
+  difficulty?: "easy" | "medium" | "hard";
   createdAt: Date;
 }
 
@@ -111,6 +112,7 @@ const CourseSchema = new Schema<ICourseDocument>(
     duration: { type: Number, default: 0 },
     averageRating: { type: Number, default: 0, min: 0, max: 5 },
     slug: { type: String, default: "" },
+    difficulty: { type: String, enum: ["easy", "medium", "hard"], default: "medium" },
   },
   { timestamps: true }
 );
