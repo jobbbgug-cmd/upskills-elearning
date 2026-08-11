@@ -28,7 +28,7 @@ li, table, td, th {
 body {
   background: #ffffff;
   color: #171717;
-  font-family: 'IBM Plex Sans Thai', 'Sarabun', sans-serif;
+  font-family: 'Sarabun', sans-serif;
 }
 
 @keyframes nav-progress {

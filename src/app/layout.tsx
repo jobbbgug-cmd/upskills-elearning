@@ -43,7 +43,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="th" className={`${sarabun.variable} ${ibmPlexSansThai.variable}`}>
-      <body className="bg-gray-50 min-h-screen" style={{ fontFamily: "'IBM Plex Sans Thai', 'Sarabun', sans-serif" }}>
+      <body className="bg-gray-50 min-h-screen" style={{ fontFamily: "'Sarabun', sans-serif" }}>
         <CartProvider>
           <ThemeProvider>{children}</ThemeProvider>
         </CartProvider>
