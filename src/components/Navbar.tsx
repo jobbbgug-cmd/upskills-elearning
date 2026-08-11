@@ -134,12 +134,6 @@ export default function Navbar() {
         if ((e.target as HTMLElement).closest("a[href]")) setIsNavigating(true);
       }}
     >
-      {isNavigating && (
-        <div className="absolute top-0 left-0 right-0 z-[9999] h-[2px] overflow-hidden">
-          <div className="h-full w-[30%] bg-gradient-to-r from-indigo-400 to-indigo-600"
-            style={{ animation: "nav-progress 0.8s ease infinite" }} />
-        </div>
-      )}
       <div className="px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
 

@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { ShoppingCart, X } from "lucide-react";
+import { ShoppingCart, X, Search } from "lucide-react";
 import { ICourse } from "@/types";
 import Toast from "@/components/ui/Toast";
 import { useCart } from "@/context/CartContext";
@@ -65,6 +65,7 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
   });
   const [selectedDifficulties, setSelectedDifficulties] = useState<Set<string>>(new Set());
   const [selectedDurations, setSelectedDurations] = useState<Set<string>>(new Set());
+  const [searchQuery, setSearchQuery] = useState("");
   const [debugLogs, setDebugLogs] = useState<Array<{ id: string; message: string; time: string; status: "pending" | "success" | "error" }>>([]);
   const [showDebug, setShowDebug] = useState(false);
 
@@ -182,16 +183,16 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
     setTimeout(() => setToast(null), 3000);
   };
 
-  const tabs = [
-    { id: "all", label: "ทั้งหมด", count: courses.length + learningPaths.length },
-    { id: "online", label: "คอร์สเรียน", count: courses.filter((c) => (c.type || "online") === "online").length },
-    { id: "live-online", label: "คอร์สเรียน Live", count: courses.filter((c) => c.type === "live online").length },
-    { id: "paths", label: "เส้นทางการเรียน", count: learningPaths.length },
-    { id: "onsite", label: "คอร์สเรียน Onsite", count: courses.filter((c) => c.type === "onsite").length },
-  ] as const;
-
   const filteredLearningPaths = useMemo(() => {
     return learningPaths.filter((path) => {
+      // Search filter
+      if (searchQuery.trim()) {
+        const query = searchQuery.toLowerCase();
+        if (!path.title.toLowerCase().includes(query)) {
+          return false;
+        }
+      }
+
       // Difficulty filter
       if (selectedDifficulties.size > 0) {
         if (!selectedDifficulties.has(path.difficulty || "medium")) {
@@ -214,12 +215,20 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
 
       return true;
     });
-  }, [learningPaths, selectedDifficulties, selectedDurations]);
+  }, [learningPaths, selectedDifficulties, selectedDurations, searchQuery]);
 
   const filteredCourses = useMemo(() => {
     return courses.filter((c) => {
       if (activeTab === "paths") {
         return false;
+      }
+
+      // Search filter
+      if (searchQuery.trim()) {
+        const query = searchQuery.toLowerCase();
+        if (!c.title.toLowerCase().includes(query)) {
+          return false;
+        }
       }
 
       // Difficulty filter
@@ -261,11 +270,33 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
 
       return typeMatches;
     });
-  }, [courses, activeTab, selectedDifficulties, selectedDurations, selectedCategory]);
+  }, [courses, activeTab, selectedDifficulties, selectedDurations, selectedCategory, searchQuery]);
+
+  const tabs = [
+    { id: "all", label: "ทั้งหมด", count: filteredCourses.length + filteredLearningPaths.length },
+    { id: "online", label: "คอร์สเรียน", count: filteredCourses.filter((c) => (c.type || "online") === "online").length },
+    { id: "live-online", label: "คอร์สเรียน Live", count: filteredCourses.filter((c) => c.type === "live online").length },
+    { id: "paths", label: "เส้นทางการเรียน", count: filteredLearningPaths.length },
+    { id: "onsite", label: "คอร์สเรียน Onsite", count: filteredCourses.filter((c) => c.type === "onsite").length },
+  ] as const;
 
   return (
     <>
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
+
+      {/* Search Bar */}
+      <div className="mb-6 max-w-xl">
+        <div className="relative">
+          <Search className="absolute left-4 top-3.5 w-5 h-5 text-gray-400 pointer-events-none" />
+          <input
+            type="text"
+            placeholder="ค้นหาคอร์ส หรือ เส้นทางการเรียน"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          />
+        </div>
+      </div>
 
       {/* Debug Panel - Only in Development */}
       {process.env.NODE_ENV === "development" && (
