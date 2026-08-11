@@ -4,6 +4,7 @@ import "./globals.css";
 import ThemeProvider from "@/components/ThemeProvider";
 import { CartProvider } from "@/context/CartContext";
 import LoadingOverlay from "@/components/LoadingOverlay";
+import { Suspense } from "react";
 
 const sarabun = Sarabun({
   subsets: ["thai", "latin"],
@@ -47,7 +48,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="bg-gray-50 min-h-screen" style={{ fontFamily: "'Sarabun', sans-serif" }}>
         <CartProvider>
           <ThemeProvider>{children}</ThemeProvider>
-          <LoadingOverlay />
+          <Suspense fallback={null}>
+            <LoadingOverlay />
+          </Suspense>
         </CartProvider>
       </body>
     </html>
