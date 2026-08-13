@@ -3,7 +3,7 @@ import { Sarabun, IBM_Plex_Sans_Thai } from "next/font/google";
 import "./globals.css";
 import ThemeProvider from "@/components/ThemeProvider";
 import { CartProvider } from "@/context/CartContext";
-import LoadingOverlay from "@/components/LoadingOverlay";
+import LoadingOverlayWrapper from "@/components/LoadingOverlayWrapper";
 import { Suspense } from "react";
 
 const sarabun = Sarabun({
@@ -49,7 +49,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <CartProvider>
           <ThemeProvider>{children}</ThemeProvider>
           <Suspense fallback={null}>
-            <LoadingOverlay />
+            <LoadingOverlayWrapper />
           </Suspense>
         </CartProvider>
       </body>

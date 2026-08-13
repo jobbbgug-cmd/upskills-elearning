@@ -19,6 +19,14 @@ interface Course {
 interface LearningPath {
   _id: string;
   title: string;
+  description?: string;
+  coverImage?: string;
+  instructor?: string;
+  courses?: any[];
+  estimatedHours?: number;
+  price?: number;
+  discount?: number;
+  discountType?: "percentage" | "fixed";
 }
 
 type MenuSection = "courses" | "courses live" | "new-courses" | "learning-paths" | "onsite";
@@ -81,7 +89,8 @@ export default function CoursesDropdown() {
         setOnsiteCategories(onsiteCatList);
         if (catList.length > 0) setSelectedCategory(catList[0]);
 
-        setLatestCourses(allCourses.slice(0, 3));
+        const onlineCourses = allCourses.filter((c: Course & { type?: string }) => c.type === "online" || !c.type);
+        setLatestCourses(onlineCourses.slice(0, 3));
         setLearningPaths(pathsData.paths || []);
 
         // Group courses by category
@@ -139,7 +148,13 @@ export default function CoursesDropdown() {
             <button
               onClick={() => {
                 setActiveSection("courses");
-                setSelectedCategory(null);
+                if (categories.length > 0) {
+                  setSelectedCategory(categories[0]);
+                  setSelectedCourse(categoryCoursesMap[categories[0]]?.[0] || null);
+                } else {
+                  setSelectedCategory(null);
+                  setSelectedCourse(null);
+                }
               }}
               className={`w-full text-left px-4 py-3 text-sm font-medium transition-colors ${
                 activeSection === "courses"
@@ -156,7 +171,13 @@ export default function CoursesDropdown() {
             <button
               onClick={() => {
                 setActiveSection("courses live");
-                setSelectedCategory(null);
+                if (liveOnlineCategories.length > 0) {
+                  setSelectedCategory(liveOnlineCategories[0]);
+                  setSelectedCourse(liveOnlineCourseMap[liveOnlineCategories[0]]?.[0] || null);
+                } else {
+                  setSelectedCategory(null);
+                  setSelectedCourse(null);
+                }
               }}
               className={`w-full text-left px-4 py-3 text-sm font-medium transition-colors ${
                 activeSection === "courses live"
@@ -186,7 +207,14 @@ export default function CoursesDropdown() {
             </button>
 
             <button
-              onClick={() => setActiveSection("learning-paths")}
+              onClick={() => {
+                setActiveSection("learning-paths");
+                if (learningPaths.length > 0) {
+                  setSelectedCourse(learningPaths[0] as any);
+                } else {
+                  setSelectedCourse(null);
+                }
+              }}
               className={`w-full text-left px-4 py-3 text-sm font-medium transition-colors ${
                 activeSection === "learning-paths"
                   ? "bg-indigo-50 text-indigo-600 border-r-2 border-indigo-600"
@@ -202,7 +230,13 @@ export default function CoursesDropdown() {
             <button
               onClick={() => {
                 setActiveSection("onsite");
-                setSelectedCategory(null);
+                if (onsiteCategories.length > 0) {
+                  setSelectedCategory(onsiteCategories[0]);
+                  setSelectedCourse(onsiteCourseMap[onsiteCategories[0]]?.[0] || null);
+                } else {
+                  setSelectedCategory(null);
+                  setSelectedCourse(null);
+                }
               }}
               className={`w-full text-left px-4 py-3 text-sm font-medium transition-colors ${
                 activeSection === "onsite"
@@ -603,7 +637,7 @@ export default function CoursesDropdown() {
                 <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-200">
                   <div>
                     <h3 className="text-lg font-bold text-gray-900">เส้นทางการเรียน</h3>
-                    <p className="text-sm text-gray-600 mt-0.5">ชุดคอร์สเรียนที่จัดเตรียมไว้</p>
+                    <p className="text-sm text-gray-600 mt-0.5">หลักสูตรที่ออกแบบมาเพื่อคุณ</p>
                   </div>
                   <Link
                     href="/courses?tab=paths"
@@ -614,21 +648,86 @@ export default function CoursesDropdown() {
                   </Link>
                 </div>
 
-                <div className="space-y-3">
+                <div className="flex gap-4 h-full">
+                {/* Left: Learning Paths List */}
+                <div className="w-56 border-r border-gray-200 pr-4 space-y-2 overflow-y-auto">
                   {learningPaths.length > 0 ? (
                     learningPaths.map((path) => (
-                      <Link
+                      <button
                         key={path._id}
-                        href={`/learning-paths/${path._id}`}
-                        className="block p-3 bg-gray-50 rounded-lg hover:bg-indigo-50 transition-colors"
+                        onClick={() => setSelectedCourse(path as any)}
+                        className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${
+                          (selectedCourse as any)?._id === path._id
+                            ? "bg-indigo-50 text-indigo-600 font-medium"
+                            : "text-gray-700 hover:bg-gray-100"
+                        }`}
                       >
-                        <p className="text-sm text-gray-900 font-medium line-clamp-2">{path.title}</p>
-                      </Link>
+                        <p className="text-sm line-clamp-2">{path.title}</p>
+                      </button>
                     ))
                   ) : (
                     <p className="text-xs text-gray-500">ยังไม่มีเส้นทางการเรียน</p>
                   )}
                 </div>
+
+                {/* Right: Courses in Learning Path */}
+                <div className="flex-1 pl-4">
+                  {(selectedCourse as any)?._id ? (
+                    <div>
+                      <h3 className="text-lg font-bold text-gray-900 mb-4">{(selectedCourse as any).title}</h3>
+                      <div className="space-y-4 max-h-96 overflow-y-auto">
+                        {(selectedCourse as any).courses && (selectedCourse as any).courses.length > 0 ? (
+                          (selectedCourse as any).courses.map((course: any, idx: number) => (
+                            <div key={idx} className="flex gap-3 p-3 bg-gray-50 rounded-lg hover:bg-indigo-50 transition-colors">
+                              {/* Course Cover Image */}
+                              <div className="flex-shrink-0 w-48 h-28 bg-gray-200 rounded-lg overflow-hidden">
+                                {typeof course === 'object' && course.coverImage ? (
+                                  <Image
+                                    src={course.coverImage}
+                                    alt={course.title || 'Course'}
+                                    width={192}
+                                    height={112}
+                                    className="w-full h-full object-cover"
+                                  />
+                                ) : (
+                                  <div className="w-full h-full bg-gradient-to-br from-indigo-100 to-violet-100 flex items-center justify-center">
+                                    <span className="text-2xl">📚</span>
+                                  </div>
+                                )}
+                              </div>
+
+                              {/* Course Info */}
+                              <div className="flex-1">
+                                <h4 className="text-sm font-bold text-gray-900 line-clamp-2 mb-2">
+                                  {typeof course === 'object' ? course.title : course}
+                                </h4>
+                                <div className="space-y-1 text-xs text-gray-600">
+                                  {typeof course === 'object' && course.lessons && Array.isArray(course.lessons) && course.lessons.length > 0 && (
+                                    <div className="flex items-center gap-1">
+                                      <span>📖</span>
+                                      <span>{course.lessons.length} บท</span>
+                                    </div>
+                                  )}
+                                  {typeof course === 'object' && course.duration && course.duration > 0 && (
+                                    <div className="flex items-center gap-1">
+                                      <Clock className="w-3 h-3" />
+                                      <span>{course.duration} นาที</span>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          ))
+                        ) : (
+                          <p className="text-sm text-gray-500">ไม่มีคอร์สเรียนในเส้นทางนี้</p>
+                        )}
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="text-sm text-gray-500 text-center py-12">เลือกเส้นทางการเรียนเพื่อดูคอร์สเรียน</p>
+                  )}
+                </div>
+              </div>
               </div>
             ) : null}
           </div>

@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
 
     const paths = await LearningPath.find(query)
       .sort({ createdAt: -1 })
-      .populate("courses", "title slug");
+      .populate("courses", "title slug coverImage duration lessons");
 
     return NextResponse.json({ paths });
   } catch (err) {
