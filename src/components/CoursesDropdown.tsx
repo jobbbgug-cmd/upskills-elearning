@@ -276,20 +276,17 @@ export default function CoursesDropdown() {
                   {/* Left: Live Online Categories List */}
                   <div className="w-56 border-r border-gray-200 pr-4 space-y-2 overflow-y-auto">
                     {liveOnlineCategories.map((cat) => (
-                      <button
+                      <Link
                         key={cat}
-                        onClick={() => {
-                          setSelectedCategory(cat);
-                          setSelectedCourse(null);
-                        }}
-                        className={`w-full text-left px-3 py-2 text-sm rounded-lg transition-colors ${
+                        href={`/courses?tab=live-online&category=${encodeURIComponent(cat)}`}
+                        className={`w-full text-left px-3 py-2 text-sm rounded-lg transition-colors block ${
                           selectedCategory === cat
                             ? "bg-indigo-50 text-indigo-600 font-medium"
                             : "text-gray-700 hover:bg-gray-50"
                         }`}
                       >
                         {cat}
-                      </button>
+                      </Link>
                     ))}
                   </div>
 
@@ -379,20 +376,17 @@ export default function CoursesDropdown() {
                   {/* Left: Categories List */}
                   <div className="w-56 border-r border-gray-200 pr-4 space-y-2 overflow-y-auto">
                     {categories.map((cat) => (
-                      <button
+                      <Link
                         key={cat}
-                        onClick={() => {
-                          setSelectedCategory(cat);
-                          setSelectedCourse(null);
-                        }}
-                        className={`w-full text-left px-3 py-2 text-sm rounded-lg transition-colors ${
+                        href={`/courses?tab=online&category=${encodeURIComponent(cat)}`}
+                        className={`w-full text-left px-3 py-2 text-sm rounded-lg transition-colors block ${
                           selectedCategory === cat
                             ? "bg-indigo-50 text-indigo-600 font-medium"
                             : "text-gray-700 hover:bg-gray-50"
                         }`}
                       >
                         {cat}
-                      </button>
+                      </Link>
                     ))}
                   </div>
 
@@ -549,20 +543,17 @@ export default function CoursesDropdown() {
                   {/* Left: Onsite Categories List */}
                   <div className="w-56 border-r border-gray-200 pr-4 space-y-2 overflow-y-auto">
                     {onsiteCategories.map((cat) => (
-                      <button
+                      <Link
                         key={cat}
-                        onClick={() => {
-                          setSelectedCategory(cat);
-                          setSelectedCourse(null);
-                        }}
-                        className={`w-full text-left px-3 py-2 text-sm rounded-lg transition-colors ${
+                        href={`/courses?tab=onsite&category=${encodeURIComponent(cat)}`}
+                        className={`w-full text-left px-3 py-2 text-sm rounded-lg transition-colors block ${
                           selectedCategory === cat
                             ? "bg-indigo-50 text-indigo-600 font-medium"
                             : "text-gray-700 hover:bg-gray-50"
                         }`}
                       >
                         {cat}
-                      </button>
+                      </Link>
                     ))}
                   </div>
 

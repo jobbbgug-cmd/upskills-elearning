@@ -1,10 +1,6 @@
 "use client";
 
-import dynamic from "next/dynamic";
-
-const LoadingOverlay = dynamic(() => import("@/components/LoadingOverlay"), {
-  ssr: false,
-});
+import LoadingOverlay from "@/components/LoadingOverlay";
 
 export default function LoadingOverlayWrapper() {
   return <LoadingOverlay />;

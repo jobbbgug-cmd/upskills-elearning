@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { ShoppingCart, X, Search } from "lucide-react";
 import { ICourse } from "@/types";
 import Toast from "@/components/ui/Toast";
@@ -51,6 +51,7 @@ interface CourseTabbedProps {
 export default function CoursesTabbed({ courses }: CourseTabbedProps) {
   const router = useRouter();
   const { addToCart } = useCart();
+  const searchParams = useSearchParams();
 
   const [activeTab, setActiveTab] = useState<TabType>("all");
   const [categories, setCategories] = useState<Category[]>([]);
@@ -66,6 +67,7 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
   const [selectedDifficulties, setSelectedDifficulties] = useState<Set<string>>(new Set());
   const [selectedDurations, setSelectedDurations] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState("");
+  const isInitialMount = useRef(true);
   const [debugLogs, setDebugLogs] = useState<Array<{ id: string; message: string; time: string; status: "pending" | "success" | "error" }>>([]);
   const [showDebug, setShowDebug] = useState(false);
 
@@ -76,29 +78,40 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
     console.log(`[DEBUG] ${message}`);
   };
 
-  // Initialize tab from URL on mount
+  // Read URL params on mount and when they change
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const params = new URLSearchParams(window.location.search);
-      const tab = params.get("tab");
+    const tab = searchParams.get("tab");
+    const category = searchParams.get("category");
+
+    // Only run after initial mount to avoid interfering with navigation
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+
+      // Update tab if URL has a valid tab value
       if (tab === "all" || tab === "online" || tab === "live-online" || tab === "paths" || tab === "onsite") {
         setActiveTab(tab as TabType);
       }
-    }
-  }, []);
 
-  // Update URL when tab changes (but not on initial load)
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const params = new URLSearchParams(window.location.search);
-      const currentTab = params.get("tab") || "all";
-      if (currentTab !== activeTab) {
-        const newParams = new URLSearchParams(window.location.search);
-        newParams.set("tab", activeTab);
-        window.history.replaceState(null, "", `/courses?${newParams.toString()}`);
+      // Update category if URL has a category
+      if (category) {
+        setSelectedCategory(decodeURIComponent(category));
       }
     }
-  }, [activeTab]);
+  }, [searchParams]);
+
+  // Update URL when category or filters change (after initial mount)
+  useEffect(() => {
+    if (isInitialMount.current || typeof window === "undefined") return;
+
+    const newParams = new URLSearchParams();
+    newParams.set("tab", activeTab);
+    if (selectedCategory) {
+      newParams.set("category", selectedCategory);
+    }
+
+    window.history.replaceState(null, "", `/courses?${newParams.toString()}`);
+  }, [activeTab, selectedCategory]);
+
 
   // Fetch learning paths on mount
   useEffect(() => {
@@ -213,6 +226,11 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
         if (!durationMatches) return false;
       }
 
+      // Category filter - hide learning paths when category is selected since learning paths don't have categories
+      if (selectedCategory) {
+        return false;
+      }
+
       return true;
     });
   }, [learningPaths, selectedDifficulties, selectedDurations, searchQuery]);
@@ -272,12 +290,13 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
     });
   }, [courses, activeTab, selectedDifficulties, selectedDurations, selectedCategory, searchQuery]);
 
+  // Tab counts show TOTAL counts (always unfiltered)
   const tabs = [
-    { id: "all", label: "ทั้งหมด", count: filteredCourses.length + filteredLearningPaths.length },
-    { id: "online", label: "คอร์สเรียน", count: filteredCourses.filter((c) => (c.type || "online") === "online").length },
-    { id: "live-online", label: "คอร์สเรียน Live", count: filteredCourses.filter((c) => c.type === "live online").length },
-    { id: "paths", label: "เส้นทางการเรียน", count: filteredLearningPaths.length },
-    { id: "onsite", label: "คอร์สเรียน Onsite", count: filteredCourses.filter((c) => c.type === "onsite").length },
+    { id: "all", label: "ทั้งหมด", count: courses.length + learningPaths.length },
+    { id: "online", label: "คอร์สเรียน", count: courses.filter((c) => (c.type || "online") === "online").length },
+    { id: "live-online", label: "คอร์สเรียน Live", count: courses.filter((c) => c.type === "live online").length },
+    { id: "paths", label: "เส้นทางการเรียน", count: learningPaths.length },
+    { id: "onsite", label: "คอร์สเรียน Onsite", count: courses.filter((c) => c.type === "onsite").length },
   ] as const;
 
   return (

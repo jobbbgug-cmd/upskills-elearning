@@ -33,6 +33,7 @@ export default function Navbar() {
   const [pendingMembers, setPendingMembers] = useState(0);
   const [categories, setCategories] = useState<Category[]>([]);
   const [liveOnlineCategories, setLiveOnlineCategories] = useState<Category[]>([]);
+  const [onsiteCategories, setOnsiteCategories] = useState<Category[]>([]);
   const [openNavDropdown, setOpenNavDropdown] = useState<string | null>(null);
   const [cartOpen, setCartOpen] = useState(false);
   const { items } = useCart();
@@ -48,14 +49,18 @@ export default function Navbar() {
 
   useEffect(() => {
     Promise.all([
+      fetch("/api/categories?type=online")
+        .then((r) => r.json())
+        .then((data) => setCategories((data.categories || []).map((cat: any) => ({ name: cat.name, count: cat.count || 0 }))))
+        .catch(() => setCategories([])),
       fetch("/api/categories?type=live online")
         .then((r) => r.json())
         .then((data) => setLiveOnlineCategories((data.categories || []).map((cat: any) => ({ name: cat.name, count: cat.count || 0 }))))
         .catch(() => setLiveOnlineCategories([])),
       fetch("/api/categories?type=onsite")
         .then((r) => r.json())
-        .then((data) => setCategories((data.categories || []).map((cat: any) => ({ name: cat.name, count: cat.count || 0 }))))
-        .catch(() => {}),
+        .then((data) => setOnsiteCategories((data.categories || []).map((cat: any) => ({ name: cat.name, count: cat.count || 0 }))))
+        .catch(() => setOnsiteCategories([])),
     ]);
   }, []);
 
@@ -171,7 +176,7 @@ export default function Navbar() {
                   <ChevronDown className="w-4 h-4" />
                 </button>
                 <div className="absolute left-0 top-full hidden group-hover:block bg-white border border-gray-200 rounded-lg shadow-lg py-2 min-w-72 z-50">
-                  {categories.map((cat) => (
+                  {onsiteCategories.map((cat) => (
                     <Link
                       key={`onsite-${cat.name}`}
                       href={`/courses?tab=onsite&category=${encodeURIComponent(cat.name)}`}
@@ -521,7 +526,7 @@ export default function Navbar() {
             {openNavDropdown === "online" && (
               <div className="pl-3 space-y-1">
                 {categories.map((cat) => (
-                  <Link key={cat.name} href={`/courses?category=${encodeURIComponent(cat.name)}`} onClick={() => setMenuOpen(false)} className="block px-3 py-2 text-sm text-gray-600 hover:bg-indigo-50 rounded-lg">
+                  <Link key={cat.name} href={`/courses?tab=online&category=${encodeURIComponent(cat.name)}`} onClick={() => setMenuOpen(false)} className="block px-3 py-2 text-sm text-gray-600 hover:bg-indigo-50 rounded-lg">
                     {cat.name}
                   </Link>
                 ))}
@@ -534,7 +539,7 @@ export default function Navbar() {
             {openNavDropdown === "live" && (
               <div className="pl-3 space-y-1">
                 {liveOnlineCategories.map((cat) => (
-                  <Link key={`live-${cat.name}`} href={`/courses?type=live online&category=${encodeURIComponent(cat.name)}`} onClick={() => setMenuOpen(false)} className="block px-3 py-2 text-sm text-gray-600 hover:bg-indigo-50 rounded-lg">
+                  <Link key={`live-${cat.name}`} href={`/courses?tab=live-online&category=${encodeURIComponent(cat.name)}`} onClick={() => setMenuOpen(false)} className="block px-3 py-2 text-sm text-gray-600 hover:bg-indigo-50 rounded-lg">
                     {cat.name}
                   </Link>
                 ))}
@@ -546,7 +551,7 @@ export default function Navbar() {
             </button>
             {openNavDropdown === "onsite" && (
               <div className="pl-3 space-y-1">
-                {categories.map((cat) => (
+                {onsiteCategories.map((cat) => (
                   <Link key={`onsite-${cat.name}`} href={`/courses?tab=onsite&category=${encodeURIComponent(cat.name)}`} onClick={() => setMenuOpen(false)} className="block px-3 py-2 text-sm text-gray-600 hover:bg-indigo-50 rounded-lg">
                     {cat.name}
                   </Link>
