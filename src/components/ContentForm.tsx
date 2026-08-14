@@ -1,8 +1,8 @@
 "use client";
 import { useState, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { ICourseContent, ISmartPpt, IYoutubeClip, IDownloadItem } from "@/types";
-import { Plus, Trash2, Upload, BookOpen, FileText } from "lucide-react";
+import { ICourseContent, ISmartPpt, IYoutubeClip, IDownloadItem, ILesson } from "@/types";
+import { Plus, Trash2, Upload, BookOpen, FileText, Play } from "lucide-react";
 import Toast from "@/components/ui/Toast";
 
 interface ContentFormProps {
@@ -28,6 +28,7 @@ export default function ContentForm({ content, mode, defaultType, lockType }: Co
   const [downloadFree, setDownloadFree] = useState<IDownloadItem[]>(content?.downloadFree ?? []);
   const [downloadTeacherCard, setDownloadTeacherCard] = useState<IDownloadItem[]>(content?.downloadTeacherCard ?? []);
   const [downloadAksorn, setDownloadAksorn] = useState<IDownloadItem[]>(content?.downloadAksorn ?? []);
+  const [lessons, setLessons] = useState<ILesson[]>(content?.lessons ?? []);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
@@ -47,7 +48,7 @@ export default function ContentForm({ content, mode, defaultType, lockType }: Co
     setLoading(true);
     setError("");
     try {
-      const payload = { name, description, type, ebookCoverUrl, ebookPdfUrl, smartPpts, teachingClips, summaryClips, downloadFree, downloadTeacherCard, downloadAksorn };
+      const payload = { name, description, type, ebookCoverUrl, ebookPdfUrl, smartPpts, teachingClips, summaryClips, downloadFree, downloadTeacherCard, downloadAksorn, lessons };
       const url = mode === "create" ? "/api/admin/content" : `/api/admin/content/${content?._id}`;
       const method = mode === "create" ? "POST" : "PUT";
       const res = await fetch(url, { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
@@ -265,6 +266,72 @@ export default function ContentForm({ content, mode, defaultType, lockType }: Co
                   { key: "fileUrl", label: "ไฟล์ดาวน์โหลด", placeholder: "https://...", uploadType: "file" as const },
                 ]}
               />
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* บทเรียน */}
+      <div className="border border-blue-200 bg-blue-50 rounded-2xl p-5 space-y-4">
+        <div className="flex items-center gap-2">
+          <Play className="w-4 h-4 text-blue-500" />
+          <h3 className="text-sm font-semibold text-blue-800">บทเรียน</h3>
+        </div>
+
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <p className="text-xs text-gray-600">จำนวนบทเรียน: {lessons.length}</p>
+            <button
+              type="button"
+              onClick={() => setLessons([...lessons, { name: "", videoLink: "", duration: "" }])}
+              className="flex items-center gap-1 text-xs text-blue-700 hover:text-blue-900 font-medium"
+            >
+              <Plus className="w-3.5 h-3.5" /> เพิ่มบทเรียน
+            </button>
+          </div>
+
+          {lessons.length === 0 && (
+            <p className="text-xs text-gray-400 italic py-2">ยังไม่มีบทเรียน กด "+ เพิ่มบทเรียน" เพื่อเริ่มต้น</p>
+          )}
+
+          <div className="space-y-2">
+            {lessons.map((lesson, idx) => (
+              <div key={idx} className="bg-white rounded-xl border border-blue-200 p-3 space-y-2">
+                <div className="flex justify-between items-start gap-2">
+                  <div className="flex-1 space-y-2">
+                    <input
+                      type="text"
+                      value={lesson.name}
+                      onChange={(e) => setLessons(lessons.map((l, i) => i === idx ? { ...l, name: e.target.value } : l))}
+                      className={inputClass}
+                      placeholder="ชื่อบทเรียน เช่น บทที่ 1 บทนำ"
+                    />
+                    <input
+                      type="text"
+                      value={lesson.videoLink}
+                      onChange={(e) => setLessons(lessons.map((l, i) => i === idx ? { ...l, videoLink: e.target.value } : l))}
+                      className={inputClass}
+                      placeholder="ลิงค์วิดีโอ https://youtu.be/..."
+                    />
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={lesson.duration === "" ? "" : lesson.duration}
+                      onChange={(e) => setLessons(lessons.map((l, i) => i === idx ? { ...l, duration: e.target.value } : l))}
+                      className={inputClass}
+                      placeholder="ระยะเวลา (นาที) เช่น 15 หรือ 10.5"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setLessons(lessons.filter((_, i) => i !== idx))}
+                    className="text-red-400 hover:text-red-600 mt-1 shrink-0"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
             ))}
           </div>
         </div>

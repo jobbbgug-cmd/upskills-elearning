@@ -641,7 +641,7 @@ export default function CoursesDropdown() {
 
                 <div className="flex gap-4 h-full">
                 {/* Left: Learning Paths List */}
-                <div className="w-56 border-r border-gray-200 pr-4 space-y-2 overflow-y-auto">
+                <div className="w-64 border-r border-gray-200 pr-4 space-y-2 overflow-y-auto">
                   {learningPaths.length > 0 ? (
                     learningPaths.map((path) => (
                       <button
@@ -671,13 +671,13 @@ export default function CoursesDropdown() {
                           (selectedCourse as any).courses.map((course: any, idx: number) => (
                             <div key={idx} className="flex gap-3 p-3 bg-gray-50 rounded-lg hover:bg-indigo-50 transition-colors">
                               {/* Course Cover Image */}
-                              <div className="flex-shrink-0 w-48 h-28 bg-gray-200 rounded-lg overflow-hidden">
+                              <div className="flex-shrink-0 w-32 h-20 bg-gray-200 rounded-lg overflow-hidden">
                                 {typeof course === 'object' && course.coverImage ? (
                                   <Image
                                     src={course.coverImage}
                                     alt={course.title || 'Course'}
-                                    width={192}
-                                    height={112}
+                                    width={108}
+                                    height={80}
                                     className="w-full h-full object-cover"
                                   />
                                 ) : (

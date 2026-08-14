@@ -13,6 +13,7 @@ export interface ICourseContentDocument extends Document {
   downloadFree: { title: string; thumbnailUrl: string; fileUrl: string }[];
   downloadTeacherCard: { title: string; thumbnailUrl: string; fileUrl: string }[];
   downloadAksorn: { title: string; thumbnailUrl: string; fileUrl: string }[];
+  lessons: { name: string; videoLink: string; duration: string }[];
   createdAt: Date;
 }
 
@@ -31,6 +32,11 @@ const DownloadItemSchema = new Schema(
   { _id: false }
 );
 
+const LessonSchema = new Schema(
+  { name: { type: String, default: "" }, videoLink: { type: String, default: "" }, duration: { type: String, default: "" } },
+  { _id: false }
+);
+
 const CourseContentSchema = new Schema<ICourseContentDocument>(
   {
     institutionId: { type: Schema.Types.ObjectId, ref: "Institution", default: null },
@@ -45,6 +51,7 @@ const CourseContentSchema = new Schema<ICourseContentDocument>(
     downloadFree: [DownloadItemSchema],
     downloadTeacherCard: [DownloadItemSchema],
     downloadAksorn: [DownloadItemSchema],
+    lessons: [LessonSchema],
   },
   { timestamps: true }
 );

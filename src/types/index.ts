@@ -53,6 +53,8 @@ export interface ISession {
 export interface IYoutubeClip { title: string; youtubeUrl: string; group?: string; duration?: string; }
 export interface ISmartPpt { title: string; thumbnailUrl: string; pptUrl: string; }
 export interface IDownloadItem { title: string; thumbnailUrl: string; fileUrl: string; }
+export interface ILesson { name: string; videoLink: string; duration: string; }
+
 export interface ICourseContent {
   _id: string;
   name: string;
@@ -65,6 +67,7 @@ export interface ICourseContent {
   downloadFree: IDownloadItem[];
   downloadTeacherCard: IDownloadItem[];
   downloadAksorn: IDownloadItem[];
+  lessons: ILesson[];
   createdAt: string;
 }
 

@@ -118,6 +118,24 @@ export default function CourseForm({ course, mode, courseType, teacherMode = fal
       .catch((err) => console.error("Failed to load categories:", err));
   }, [form.courseType, teacherMode]);
 
+  useEffect(() => {
+    if (!contentId) return;
+    fetch(`/api/admin/content/${contentId}`)
+      .then((r) => r.json())
+      .then((data) => {
+        if (data && data.lessons && Array.isArray(data.lessons)) {
+          const contentLessons = data.lessons.map((l: any) => ({
+            id: Math.random().toString(36).substr(2, 9),
+            name: l.name || "",
+            videoLink: l.videoLink || "",
+            duration: l.duration || "",
+          }));
+          setLessons(contentLessons);
+        }
+      })
+      .catch((err) => console.error("Failed to load content:", err));
+  }, [contentId]);
+
   const toggleGrade = (grade: GradeLevel) => {
     setForm((f) => ({
       ...f,
@@ -338,9 +356,10 @@ export default function CourseForm({ course, mode, courseType, teacherMode = fal
           <input
             type="number"
             min={0}
+            step="0.01"
             value={form.duration === 0 ? "" : form.duration}
             onChange={(e) => setForm({ ...form, duration: e.target.value === "" ? 0 : Number(e.target.value) })}
-            placeholder="เช่น 120"
+            placeholder="เช่น 120 หรือ 29.36"
             className={inputClass}
           />
         </div>
