@@ -205,7 +205,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
 
                               {/* Right column — course info & booking */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-2xl border border-gray-100 p-6 space-y-6">
+            <div className="sticky top-4 bg-white rounded-2xl border border-gray-100 p-6 space-y-6">
               {/* Price section */}
               <div>
                 <div className="flex items-baseline gap-2 mb-2">
