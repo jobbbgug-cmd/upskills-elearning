@@ -296,41 +296,50 @@ export default function ContentForm({ content, mode, defaultType, lockType }: Co
 
           <div className="space-y-2">
             {lessons.map((lesson, idx) => (
-              <div key={idx} className="bg-white rounded-xl border border-blue-200 p-3 space-y-2">
-                <div className="flex justify-between items-start gap-2">
-                  <div className="flex-1 space-y-2">
+              <div key={idx} className="flex items-start gap-2">
+                <div className="flex-1 space-y-1">
+                  <div>
+                    <label className="text-xs text-gray-500 mb-0.5 block">ชื่อบทเรียน</label>
                     <input
                       type="text"
                       value={lesson.name}
                       onChange={(e) => setLessons(lessons.map((l, i) => i === idx ? { ...l, name: e.target.value } : l))}
                       className={inputClass}
-                      placeholder="ชื่อบทเรียน เช่น บทที่ 1 บทนำ"
-                    />
-                    <input
-                      type="text"
-                      value={lesson.videoLink}
-                      onChange={(e) => setLessons(lessons.map((l, i) => i === idx ? { ...l, videoLink: e.target.value } : l))}
-                      className={inputClass}
-                      placeholder="ลิงค์วิดีโอ https://youtu.be/..."
-                    />
-                    <input
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      value={lesson.duration === "" ? "" : lesson.duration}
-                      onChange={(e) => setLessons(lessons.map((l, i) => i === idx ? { ...l, duration: e.target.value } : l))}
-                      className={inputClass}
-                      placeholder="ระยะเวลา (นาที) เช่น 15 หรือ 10.5"
+                      placeholder="เช่น บทที่ 1: บทนำ"
                     />
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => setLessons(lessons.filter((_, i) => i !== idx))}
-                    className="text-red-400 hover:text-red-600 mt-1 shrink-0"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+                  <div className="flex items-end gap-2">
+                    <div className="flex-1">
+                      <label className="text-xs text-gray-500 mb-0.5 block">ลิงค์วิดีโอ</label>
+                      <input
+                        type="text"
+                        value={lesson.videoLink}
+                        onChange={(e) => setLessons(lessons.map((l, i) => i === idx ? { ...l, videoLink: e.target.value } : l))}
+                        className={inputClass}
+                        placeholder="https://youtu.be/..."
+                      />
+                    </div>
+                    <div className="w-20 shrink-0">
+                      <label className="text-xs text-gray-500 mb-0.5 block">เวลา</label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        value={lesson.duration === "" ? "" : lesson.duration}
+                        onChange={(e) => setLessons(lessons.map((l, i) => i === idx ? { ...l, duration: e.target.value } : l))}
+                        placeholder="15"
+                        className="w-full px-2 py-2.5 border border-gray-300 rounded-xl text-xs text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent text-center"
+                      />
+                    </div>
+                  </div>
                 </div>
+                <button
+                  type="button"
+                  onClick={() => setLessons(lessons.filter((_, i) => i !== idx))}
+                  className="text-red-400 hover:text-red-600 mt-7 shrink-0"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
               </div>
             ))}
           </div>

@@ -423,12 +423,12 @@ export default function CourseForm({ course, mode, courseType, teacherMode = fal
             เพิ่มบทเรียน
           </button>
         </div>
-        <div className="space-y-3">
+        <div className="space-y-2">
           {lessons.map((lesson, idx) => (
-            <div key={lesson.id} className="bg-gray-50 rounded-xl p-4 border border-gray-200">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
+            <div key={lesson.id} className="flex items-start gap-2">
+              <div className="flex-1 space-y-1">
                 <div>
-                  <label className="text-xs text-gray-500 mb-1 block">ชื่อบทเรียน</label>
+                  <label className="text-xs text-gray-500 mb-0.5 block">ชื่อบทเรียน</label>
                   <input
                     type="text"
                     value={lesson.name}
@@ -437,37 +437,37 @@ export default function CourseForm({ course, mode, courseType, teacherMode = fal
                     className={inputClass}
                   />
                 </div>
-                <div>
-                  <label className="text-xs text-gray-500 mb-1 block">ลิงค์วิดีโอ</label>
-                  <input
-                    type="url"
-                    value={lesson.videoLink}
-                    onChange={(e) => setLessons(lessons.map((l, i) => i === idx ? { ...l, videoLink: e.target.value } : l))}
-                    placeholder="https://youtube.com/..."
-                    className={inputClass}
-                  />
+                <div className="flex items-end gap-2">
+                  <div className="flex-1">
+                    <label className="text-xs text-gray-500 mb-0.5 block">ลิงค์วิดีโอ</label>
+                    <input
+                      type="url"
+                      value={lesson.videoLink}
+                      onChange={(e) => setLessons(lessons.map((l, i) => i === idx ? { ...l, videoLink: e.target.value } : l))}
+                      placeholder="https://youtube.com/..."
+                      className={inputClass}
+                    />
+                  </div>
+                  <div className="w-20 shrink-0">
+                    <label className="text-xs text-gray-500 mb-0.5 block">เวลา</label>
+                    <input
+                      type="number"
+                      min={0}
+                      value={lesson.duration}
+                      onChange={(e) => setLessons(lessons.map((l, i) => i === idx ? { ...l, duration: e.target.value } : l))}
+                      placeholder="45"
+                      className="w-full px-2 py-2.5 border border-gray-300 rounded-lg text-xs text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-center"
+                    />
+                  </div>
                 </div>
               </div>
-              <div className="flex items-end gap-3">
-                <div className="flex-1">
-                  <label className="text-xs text-gray-500 mb-1 block">เวลา (นาที)</label>
-                  <input
-                    type="number"
-                    min={0}
-                    value={lesson.duration}
-                    onChange={(e) => setLessons(lessons.map((l, i) => i === idx ? { ...l, duration: e.target.value } : l))}
-                    placeholder="45"
-                    className={inputClass}
-                  />
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setLessons(lessons.filter((_, i) => i !== idx))}
-                  className="px-3 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
+              <button
+                type="button"
+                onClick={() => setLessons(lessons.filter((_, i) => i !== idx))}
+                className="text-red-400 hover:text-red-600 mt-7 shrink-0"
+              >
+                <X className="w-4 h-4" />
+              </button>
             </div>
           ))}
         </div>
