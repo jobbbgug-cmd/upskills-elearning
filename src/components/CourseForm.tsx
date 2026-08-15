@@ -123,8 +123,8 @@ export default function CourseForm({ course, mode, courseType, teacherMode = fal
     fetch(`/api/admin/content/${contentId}`)
       .then((r) => r.json())
       .then((data) => {
-        if (data && data.lessons && Array.isArray(data.lessons)) {
-          const contentLessons = data.lessons.map((l: any) => ({
+        if (data && data.content && data.content.lessons && Array.isArray(data.content.lessons)) {
+          const contentLessons = data.content.lessons.map((l: any) => ({
             id: Math.random().toString(36).substr(2, 9),
             name: l.name || "",
             videoLink: l.videoLink || "",
