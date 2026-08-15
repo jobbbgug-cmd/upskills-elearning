@@ -111,7 +111,7 @@ export default function RevenuePage() {
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="month" />
               <YAxis />
-              <Tooltip formatter={(value) => `฿${value.toLocaleString("th-TH", { maximumFractionDigits: 0 })}`} />
+              <Tooltip formatter={(value: any) => `฿${(value || 0).toLocaleString("th-TH", { maximumFractionDigits: 0 })}`} />
               <Legend />
               <Bar dataKey="revenue" name="รายได้" fill="#8B5CF6" />
               <Bar dataKey="commission" name="ค่าคอมมิชชั่น" fill="#EC4899" />
