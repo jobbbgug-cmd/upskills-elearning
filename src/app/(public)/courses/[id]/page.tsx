@@ -324,7 +324,9 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
       {/* ── คอร์สนี้ได้เรียนอะไรบ้าง — full width ── */}
       {(course as any)?.whatYouWillLearn && (
         <div className="max-w-[1200px] mx-auto px-4 mb-4">
-          <ContentSection
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2">
+              <ContentSection
             icon={<BookOpen className="w-5 h-5 text-blue-500" />}
             title="คอร์สนี้ได้เรียนอะไรบ้าง"
             accentColor="blue"
@@ -332,13 +334,17 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
           >
             <div className="prose prose-sm max-w-none text-gray-700" dangerouslySetInnerHTML={{ __html: (course as any).whatYouWillLearn }} />
           </ContentSection>
+            </div>
+          </div>
         </div>
       )}
 
       {/* ── รายละเอียดคอร์สเรียน — full width ── */}
       {(course as any)?.courseDetails && (
         <div className="max-w-[1200px] mx-auto px-4 mb-4">
-          <ContentSection
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2">
+              <ContentSection
             icon={<FileText className="w-5 h-5 text-blue-500" />}
             title="รายละเอียดคอร์สเรียน"
             accentColor="blue"
@@ -352,7 +358,9 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
                               {/* ── รายละเอียดบทเรียน — full width ── */}
       {lessons && lessons.length > 0 && (
         <div className="max-w-[1200px] mx-auto px-4 mb-4">
-          <ContentSection
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2">
+              <ContentSection
             icon={<Play className="w-5 h-5 text-purple-500" />}
             title="รายละเอียดบทเรียน"
             accentColor="purple"
