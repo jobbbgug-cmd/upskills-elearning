@@ -3,7 +3,7 @@ import { useState, useEffect, useMemo } from "react";
 import {
   User, GraduationCap, Shield, ShieldCheck,
   ChevronDown, Search, Plus, X, Eye, EyeOff,
-  Copy, Check, Pencil, Trash2, ChevronUp, ChevronsUpDown,
+  Copy, Check, Pencil, Trash2, ChevronUp, ChevronsUpDown, Building2,
 } from "lucide-react";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import LoadingSpinner from "@/components/LoadingSpinner";
@@ -20,6 +20,12 @@ interface UserItem {
   status: "pending" | "approved" | "rejected";
   gradeLevel?: string;
   createdAt: string;
+  institutionId?: string;
+}
+
+interface Institution {
+  _id: string;
+  name: string;
 }
 
 const ROLE_DEF = {
@@ -45,17 +51,19 @@ function genPassword(len = 10) {
 function SortIcon({ col, sort }: { col: SortKey; sort: { key: SortKey; dir: SortDir } }) {
   if (sort.key !== col) return <ChevronsUpDown className="w-3 h-3 ml-1 text-gray-300 inline" />;
   return sort.dir === "asc"
-    ? <ChevronUp className="w-3 h-3 ml-1 text-indigo-500 inline" />
-    : <ChevronDown className="w-3 h-3 ml-1 text-indigo-500 inline" />;
+    ? <ChevronUp className="w-3 h-3 ml-1 inline" style={{ color: 'var(--color-primary)' }} />
+    : <ChevronDown className="w-3 h-3 ml-1 inline" style={{ color: 'var(--color-primary)' }} />;
 }
 
-const inputCls = "w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white";
+const getInputCls = () => "w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm text-gray-900 focus:outline-none focus:ring-2 bg-white";
 
-export default function RolesPage() {
+export default function SuperAdminRolesPage() {
   const [users, setUsers]     = useState<UserItem[]>([]);
+  const [institutions, setInstitutions] = useState<Institution[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch]   = useState("");
   const [filterRole, setFilterRole] = useState<Role | "all">("all");
+  const [filterInstitution, setFilterInstitution] = useState("all");
   const [sort, setSort]       = useState<{ key: SortKey; dir: SortDir }>({ key: "createdAt", dir: "desc" });
   const [updating, setUpdating] = useState<string | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<{ open: boolean; id: string; name: string }>({ open: false, id: "", name: "" });
@@ -74,13 +82,21 @@ export default function RolesPage() {
   const [editRole, setEditRole] = useState<Role>("student");
   const [editSaving, setEditSaving] = useState(false);
 
-  const load = async () => {
+  const load = async (institutionId?: string) => {
     setLoading(true);
-    const res = await fetch("/api/super-admin/users");
-    if (res.ok) setUsers(await res.json());
+    const qs = institutionId && institutionId !== "all" ? `?institutionId=${institutionId}` : "";
+    const [usersRes, instRes] = await Promise.all([
+      fetch(`/api/super-admin/users${qs}`),
+      fetch("/api/super-admin/institutions"),
+    ]);
+    if (usersRes.ok) setUsers(await usersRes.json());
+    if (instRes.ok) setInstitutions(await instRes.json());
     setLoading(false);
   };
   useEffect(() => { load(); }, []);
+
+  const institutionNames: Record<string, string> = {};
+  institutions.forEach((i) => { institutionNames[i._id] = i.name; });
 
   const counts = useMemo(() => {
     const c = { student: 0, teacher: 0, admin: 0, super_admin: 0 };
@@ -96,7 +112,7 @@ export default function RolesPage() {
       return matchRole && matchSearch;
     });
     list = [...list].sort((a, b) => {
-      let av = a[sort.key] ?? "", bv = b[sort.key] ?? "";
+      let av: string = a[sort.key] ?? "", bv: string = b[sort.key] ?? "";
       if (typeof av === "string") av = av.toLowerCase();
       if (typeof bv === "string") bv = bv.toLowerCase();
       if (av < bv) return sort.dir === "asc" ? -1 : 1;
@@ -148,7 +164,7 @@ export default function RolesPage() {
     });
     const data = await res.json();
     if (!res.ok) setCreateError(data.error ?? "เกิดข้อผิดพลาด");
-    else { setShowCreate(false); setCf({ name: "", email: "", password: "", gradeLevel: "" }); load(); }
+    else { setShowCreate(false); setCf({ name: "", email: "", password: "", gradeLevel: "" }); load(filterInstitution); }
     setCreating(false);
   };
 
@@ -164,19 +180,18 @@ export default function RolesPage() {
         onCancel={() => setDeleteConfirm((d) => ({ ...d, open: false }))}
       />
 
-      {/* ── Header ── */}
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">จัดการ Role</h1>
           <p className="text-gray-500 text-sm mt-1">ตาราง Master สิทธิ์การใช้งานของผู้ใช้ทั้งหมดในระบบ</p>
         </div>
         <button onClick={() => { setShowCreate(true); setCf({ name: "", email: "", password: "", gradeLevel: "" }); setCreateError(""); setCreateRole("admin"); }}
-          className="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 text-white text-sm font-semibold rounded-xl hover:bg-indigo-700 transition-colors shadow-sm">
+          className="flex items-center gap-2 px-4 py-2.5 text-white text-sm font-semibold rounded-xl transition-colors shadow-sm theme-button">
           <Plus className="w-4 h-4" /> สร้างผู้ใช้ใหม่
         </button>
       </div>
 
-      {/* ── Role summary strip ── */}
+      {/* Role summary strip */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {(Object.entries(ROLE_DEF) as [Role, typeof ROLE_DEF[Role]][]).map(([key, r]) => {
           const Icon = r.icon;
@@ -196,28 +211,47 @@ export default function RolesPage() {
         })}
       </div>
 
-      {/* ── Filter bar ── */}
+      {/* Filter bar */}
       <div className="flex gap-3 flex-wrap items-center">
         <div className="relative flex-1 min-w-52">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
           <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="ค้นหาชื่อ หรืออีเมล..."
-            className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white" />
+            className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm text-gray-900 focus:outline-none focus:ring-2 bg-white"
+            style={{ '--tw-ring-color': 'rgba(var(--color-primary-rgb), 0.5)' } as any} />
           {search && (
             <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
               <X className="w-4 h-4" />
             </button>
           )}
         </div>
+
+        {/* Institution filter */}
+        <div className="relative">
+          <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none" style={{ color: 'var(--color-primary)' }} />
+          <select
+            value={filterInstitution}
+            onChange={(e) => { setFilterInstitution(e.target.value); load(e.target.value); }}
+            className="pl-9 pr-8 py-2.5 border rounded-xl text-sm appearance-none cursor-pointer"
+            style={{ borderColor: 'rgba(var(--color-primary-rgb), 0.3)', backgroundColor: 'rgba(var(--color-primary-rgb), 0.1)', color: 'var(--color-primary)', '--tw-ring-color': 'rgba(var(--color-primary-rgb), 0.4)' } as any}
+          >
+            <option value="all">ทุกสถาบัน</option>
+            {institutions.map((i) => (
+              <option key={i._id} value={i._id}>{i.name}</option>
+            ))}
+          </select>
+          <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 pointer-events-none" style={{ color: 'var(--color-primary)' }} />
+        </div>
+
         <div className="flex gap-2 flex-wrap">
           <button onClick={() => setFilterRole("all")}
-            className={`px-4 py-2.5 rounded-xl text-sm font-medium transition-colors ${filterRole === "all" ? "bg-indigo-600 text-white shadow-sm" : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"}`}>
+            className={`px-4 py-2.5 rounded-xl text-sm font-medium transition-colors ${filterRole === "all" ? "text-white shadow-sm theme-button" : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"}`}>
             ทั้งหมด <span className="ml-1 opacity-70">{users.length}</span>
           </button>
           {(Object.entries(ROLE_DEF) as [Role, typeof ROLE_DEF[Role]][]).map(([key, r]) => {
             const Icon = r.icon;
             return (
               <button key={key} onClick={() => setFilterRole(filterRole === key ? "all" : key)}
-                className={`flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors ${filterRole === key ? "bg-indigo-600 text-white shadow-sm" : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"}`}>
+                className={`flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors shadow-sm ${filterRole === key ? `${r.badge} ${r.border}` : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"}`}>
                 <Icon className="w-3.5 h-3.5" />{r.label} <span className="opacity-70">{counts[key]}</span>
               </button>
             );
@@ -226,7 +260,7 @@ export default function RolesPage() {
         <span className="text-xs text-gray-400 ml-auto whitespace-nowrap">แสดง {filtered.length} / {users.length} รายการ</span>
       </div>
 
-      {/* ── Master Table ── */}
+      {/* Master Table */}
       <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
         <table className="w-full">
           <thead>
@@ -236,6 +270,9 @@ export default function RolesPage() {
               </th>
               <th className={thCls} onClick={() => toggleSort("email")}>
                 อีเมล <SortIcon col="email" sort={sort} />
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide whitespace-nowrap">
+                สถาบัน
               </th>
               <th className={thCls} onClick={() => toggleSort("role")}>
                 Role <SortIcon col="role" sort={sort} />
@@ -256,17 +293,16 @@ export default function RolesPage() {
           </thead>
           <tbody className="divide-y divide-gray-50">
             {loading ? (
-              <tr><td colSpan={7} className="text-center py-16 text-gray-400"><LoadingSpinner /></td></tr>
+              <tr><td colSpan={8} className="text-center py-16 text-gray-400"><LoadingSpinner /></td></tr>
             ) : filtered.length === 0 ? (
-              <tr><td colSpan={7} className="text-center py-16 text-gray-400">ไม่พบผู้ใช้</td></tr>
+              <tr><td colSpan={8} className="text-center py-16 text-gray-400">ไม่พบผู้ใช้</td></tr>
             ) : filtered.map((u) => {
               const rd = ROLE_DEF[u.role];
               const sd = STATUS_DEF[u.status];
-              if (!rd || !sd) return null;
+              if (!rd) return null;
               const Icon = rd.icon;
               return (
-                <tr key={u._id} className="hover:bg-indigo-50/30 transition-colors group">
-                  {/* Name */}
+                <tr key={u._id} className="transition-colors group" style={{ backgroundColor: 'transparent' }} onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'rgba(var(--color-primary-rgb), 0.05)'; }} onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; }}>
                   <td className="px-4 py-3.5">
                     <div className="flex items-center gap-3">
                       <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${rd.badge}`}>
@@ -278,22 +314,31 @@ export default function RolesPage() {
                       </div>
                     </div>
                   </td>
-                  {/* Email */}
                   <td className="px-4 py-3.5">
                     <p className="text-sm text-gray-600">{u.email}</p>
                   </td>
-                  {/* Role badge */}
+                  <td className="px-4 py-3.5">
+                    {u.role === "super_admin" ? (
+                      <span className="inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full" style={{ color: 'var(--color-primary)', backgroundColor: 'rgba(var(--color-primary-rgb), 0.1)' }}>
+                        <Building2 className="w-3 h-3" />ทุกสถาบัน
+                      </span>
+                    ) : u.institutionId ? (
+                      <span className="inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full" style={{ color: 'var(--color-primary)', backgroundColor: 'rgba(var(--color-primary-rgb), 0.1)' }}>
+                        <Building2 className="w-3 h-3" />{institutionNames[u.institutionId] ?? "สถาบัน"}
+                      </span>
+                    ) : <span className="text-gray-300 text-xs">—</span>}
+                  </td>
                   <td className="px-4 py-3.5">
                     <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${rd.badge}`}>
                       <Icon className="w-3 h-3" />{rd.label}
                     </span>
                   </td>
-                  {/* Quick role change */}
                   <td className="px-4 py-3.5">
                     <div className="relative inline-block">
                       <select value={u.role} disabled={updating === u._id}
                         onChange={(e) => changeRole(u._id, e.target.value as Role)}
-                        className={`appearance-none pl-3 pr-7 py-1.5 rounded-lg text-xs font-semibold border-2 cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-400 disabled:opacity-40 transition-colors ${rd.badge} ${rd.border}`}>
+                        className={`appearance-none pl-3 pr-7 py-1.5 rounded-lg text-xs font-semibold border-2 cursor-pointer focus:outline-none focus:ring-2 disabled:opacity-40 transition-colors ${rd.badge} ${rd.border}`}
+                        style={{ '--tw-ring-color': 'rgba(var(--color-primary-rgb), 0.4)' } as any}>
                         {(Object.entries(ROLE_DEF) as [Role, typeof ROLE_DEF[Role]][]).map(([k, r]) => (
                           <option key={k} value={k}>{r.label}</option>
                         ))}
@@ -301,21 +346,18 @@ export default function RolesPage() {
                       <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 pointer-events-none" />
                     </div>
                   </td>
-                  {/* Status */}
                   <td className="px-4 py-3.5">
                     <span className={`inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full font-semibold ${sd.cls}`}>
                       {sd.label}
                     </span>
                   </td>
-                  {/* Date */}
                   <td className="px-4 py-3.5 text-sm text-gray-400 whitespace-nowrap">
                     {new Date(u.createdAt).toLocaleDateString("th-TH", { day: "numeric", month: "short", year: "numeric" })}
                   </td>
-                  {/* Actions */}
                   <td className="px-4 py-3.5 text-right">
                     <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                       <button onClick={() => { setEditUser(u); setEditRole(u.role); }}
-                        className="p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-100 rounded-lg transition-colors" title="แก้ไข Role">
+                        className="p-1.5 text-gray-400 rounded-lg transition-colors" style={{ color: 'var(--color-primary)' }} onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--color-primary)'; e.currentTarget.style.backgroundColor = 'rgba(var(--color-primary-rgb), 0.1)'; }} onMouseLeave={(e) => { e.currentTarget.style.color = 'rgb(156, 163, 175)'; e.currentTarget.style.backgroundColor = 'transparent'; }} title="แก้ไข Role">
                         <Pencil className="w-3.5 h-3.5" />
                       </button>
                       <button onClick={() => setDeleteConfirm({ open: true, id: u._id, name: u.name })}
@@ -330,7 +372,6 @@ export default function RolesPage() {
           </tbody>
         </table>
 
-        {/* Table footer */}
         {!loading && filtered.length > 0 && (
           <div className="border-t border-gray-100 px-5 py-3 bg-gray-50/50 flex items-center justify-between">
             <p className="text-xs text-gray-400">แสดง {filtered.length} จาก {users.length} รายการ</p>
@@ -345,7 +386,7 @@ export default function RolesPage() {
         )}
       </div>
 
-      {/* ── Create User Modal ── */}
+      {/* Create User Modal */}
       {showCreate && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
           <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md">
@@ -360,7 +401,6 @@ export default function RolesPage() {
             </div>
             <form onSubmit={handleCreate}>
               <div className="px-6 py-5 space-y-4">
-                {/* Role selector */}
                 <div>
                   <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">เลือก Role</label>
                   <div className="grid grid-cols-2 gap-2">
@@ -375,22 +415,22 @@ export default function RolesPage() {
                       );
                     })}
                   </div>
-                  <p className="text-xs text-indigo-500 mt-2 bg-indigo-50 px-3 py-2 rounded-xl">
+                  <p className="text-xs mt-2 px-3 py-2 rounded-xl" style={{ color: 'var(--color-primary)', backgroundColor: 'rgba(var(--color-primary-rgb), 0.1)' }}>
                     {ROLE_DEF[createRole].desc}
                   </p>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1.5">ชื่อ-นามสกุล</label>
-                  <input required value={cf.name} onChange={(e) => setCf({ ...cf, name: e.target.value })} className={inputCls} placeholder="ชื่อ-นามสกุล" />
+                  <input required value={cf.name} onChange={(e) => setCf({ ...cf, name: e.target.value })} className={getInputCls()} style={{ '--tw-ring-color': 'rgba(var(--color-primary-rgb), 0.5)' } as any} placeholder="ชื่อ-นามสกุล" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1.5">อีเมล</label>
-                  <input required type="email" value={cf.email} onChange={(e) => setCf({ ...cf, email: e.target.value })} className={inputCls} placeholder="อีเมล" />
+                  <input required type="email" value={cf.email} onChange={(e) => setCf({ ...cf, email: e.target.value })} className={getInputCls()} style={{ '--tw-ring-color': 'rgba(var(--color-primary-rgb), 0.5)' } as any} placeholder="อีเมล" />
                 </div>
                 {createRole === "student" && (
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1.5">ระดับชั้น</label>
-                    <select value={cf.gradeLevel} onChange={(e) => setCf({ ...cf, gradeLevel: e.target.value })} className={inputCls}>
+                    <select value={cf.gradeLevel} onChange={(e) => setCf({ ...cf, gradeLevel: e.target.value })} className={getInputCls()} style={{ '--tw-ring-color': 'rgba(var(--color-primary-rgb), 0.5)' } as any}>
                       <option value="">— ไม่ระบุ —</option>
                       {GRADE_LEVELS.map((g) => <option key={g} value={g}>{g}</option>)}
                     </select>
@@ -401,7 +441,7 @@ export default function RolesPage() {
                   <div className="flex gap-2">
                     <div className="relative flex-1">
                       <input required type={showCPass ? "text" : "password"} value={cf.password}
-                        onChange={(e) => setCf({ ...cf, password: e.target.value })} placeholder="รหัสผ่าน" className={`${inputCls} pr-10`} />
+                        onChange={(e) => setCf({ ...cf, password: e.target.value })} placeholder="รหัสผ่าน" className={`${getInputCls()} pr-10`} style={{ '--tw-ring-color': 'rgba(var(--color-primary-rgb), 0.5)' } as any} />
                       <button type="button" onClick={() => setShowCPass(!showCPass)}
                         className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
                         {showCPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -414,19 +454,19 @@ export default function RolesPage() {
                       </button>
                     )}
                     <button type="button" onClick={() => { setCf({ ...cf, password: genPassword() }); setShowCPass(true); }}
-                      className="px-3 py-2.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 text-xs font-semibold rounded-xl whitespace-nowrap">
+                      className="px-3 py-2.5 text-xs font-semibold rounded-xl whitespace-nowrap" style={{ backgroundColor: 'rgba(var(--color-primary-rgb), 0.1)', color: 'var(--color-primary)' }} onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'rgba(var(--color-primary-rgb), 0.2)'; }} onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'rgba(var(--color-primary-rgb), 0.1)'; }}>
                       Auto
                     </button>
                   </div>
                   {cf.password && (
-                    <p className="text-xs text-indigo-600 mt-1.5 font-mono bg-indigo-50 px-3 py-1.5 rounded-lg">{cf.password}</p>
+                    <p className="text-xs mt-1.5 font-mono px-3 py-1.5 rounded-lg" style={{ color: 'var(--color-primary)', backgroundColor: 'rgba(var(--color-primary-rgb), 0.1)' }}>{cf.password}</p>
                   )}
                 </div>
                 {createError && <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded-xl">{createError}</p>}
               </div>
               <div className="flex gap-3 px-6 py-5 border-t border-gray-100">
                 <button type="submit" disabled={creating}
-                  className="flex-1 py-2.5 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 disabled:opacity-50 transition-colors text-sm">
+                  className="flex-1 py-2.5 text-white font-semibold rounded-xl disabled:opacity-50 transition-colors text-sm theme-button">
                   {creating ? "กำลังสร้าง..." : "สร้างผู้ใช้"}
                 </button>
                 <button type="button" onClick={() => setShowCreate(false)}
@@ -439,7 +479,7 @@ export default function RolesPage() {
         </div>
       )}
 
-      {/* ── Edit Role Modal ── */}
+      {/* Edit Role Modal */}
       {editUser && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
           <div className="bg-white rounded-3xl shadow-2xl w-full max-w-sm">
@@ -450,7 +490,6 @@ export default function RolesPage() {
               </button>
             </div>
             <div className="px-6 py-5 space-y-4">
-              {/* User info */}
               <div className={`flex items-center gap-3 p-4 rounded-2xl border-2 ${ROLE_DEF[editUser.role].border} ${ROLE_DEF[editUser.role].badge}`}>
                 {(() => { const Icon = ROLE_DEF[editUser.role].icon; return <Icon className="w-5 h-5 shrink-0" />; })()}
                 <div>
@@ -459,7 +498,6 @@ export default function RolesPage() {
                 </div>
                 <span className="ml-auto text-xs font-bold opacity-70">{ROLE_DEF[editUser.role].label}</span>
               </div>
-              {/* Role options */}
               <div className="space-y-2">
                 {(Object.entries(ROLE_DEF) as [Role, typeof ROLE_DEF[Role]][]).map(([key, r]) => {
                   const Icon = r.icon;
@@ -480,7 +518,7 @@ export default function RolesPage() {
             </div>
             <div className="flex gap-3 px-6 py-5 border-t border-gray-100">
               <button onClick={saveEdit} disabled={editSaving}
-                className="flex-1 py-2.5 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 disabled:opacity-50 transition-colors text-sm">
+                className="flex-1 py-2.5 text-white font-semibold rounded-xl disabled:opacity-50 transition-colors text-sm theme-button">
                 {editSaving ? "กำลังบันทึก..." : "บันทึก"}
               </button>
               <button onClick={() => setEditUser(null)}
