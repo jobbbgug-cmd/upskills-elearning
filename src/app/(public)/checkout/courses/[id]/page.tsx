@@ -44,7 +44,7 @@ export default function CheckoutPage() {
       try {
         const res = await fetch(`/api/courses/${id}`);
         const data = await res.json();
-        setCourse(data);
+        setCourse(data.course);
       } catch (error) {
         console.error("Failed to fetch course:", error);
       } finally {
@@ -87,7 +87,8 @@ export default function CheckoutPage() {
   }
 
   const price = course.price || 0;
-  const discount = course.discountType === "percentage" ? (price * (course.discount || 0) / 100) : (course.discount || 0);
+  const discountType = course.discountType || "percentage";
+  const discount = discountType === "percentage" ? (price * (course.discount || 0) / 100) : (course.discount || 0);
   const finalPrice = price - discount;
   const originalPrice = price;
 
