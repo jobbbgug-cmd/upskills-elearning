@@ -12,7 +12,7 @@ import CourseBooking from "./CourseBooking";
 import VideoPlayerSection from "@/components/VideoPlayerSection";
 import {
   BookOpen, Users, Calendar, Clock, Video,
-  FileText, Play, Download, Lock,
+  FileText, Play, Download, Lock, ChevronDown,
 } from "lucide-react";
 
 async function getCourseWithContent(id: string): Promise<{ course: ICourse & { categoryName?: string }; content: ICourseContent | null } | null> {
@@ -325,7 +325,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
                         <details key={section} className="border border-gray-200 rounded-lg overflow-hidden" open>
                           <summary className="cursor-pointer flex items-center justify-between p-4 hover:bg-purple-50 transition-colors bg-white list-none">
                             <div className="flex items-center gap-3 flex-1">
-                              <span className="text-purple-600 text-lg">▼</span>
+                              <ChevronDown className="w-5 h-5 text-purple-600" />
                               <span className="font-medium text-gray-900">{section}</span>
                               <span className="text-xs text-gray-500">ต้องแสดง {sectionLessons.length} บทเรียน</span>
                             </div>
