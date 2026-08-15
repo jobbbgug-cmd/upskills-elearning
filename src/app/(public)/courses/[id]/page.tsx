@@ -282,7 +282,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
         </div>
       )}
 
-            {/* ── รายละเอียดบทเรียน — full width ── */}
+                  {/* ── รายละเอียดบทเรียน — full width ── */}
       {lessons && lessons.length > 0 && (
         <div className="max-w-[1200px] mx-auto px-4 mb-4">
           <ContentSection
@@ -300,35 +300,57 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
               const mins = Math.round(totalMinutes % 60);
               const durationStr = hours > 0 ? `${hours} ชั่วโมง ${mins} นาที` : `${Math.round(totalMinutes)} นาที`;
               
+              // Group lessons by section
+              const sections = new Map<string, any[]>();
+              lessons.forEach((lesson: any) => {
+                const section = lesson.section || "บทเรียนทั่วไป";
+                if (!sections.has(section)) {
+                  sections.set(section, []);
+                }
+                sections.get(section)!.push(lesson);
+              });
+              
               return (
                 <div className="space-y-3">
                   <p className="text-sm text-gray-600">{lessons.length} บทเรียน • ความยาวทั้งหมด {durationStr}</p>
-                  <div className="space-y-2">
-                    {lessons.map((lesson: any, idx: number) => (
-                      <div key={lesson.id || idx} className="border border-gray-200 rounded-lg overflow-hidden hover:border-purple-300 transition-colors">
-                        <button className="w-full p-4 flex items-start gap-3 hover:bg-purple-50 transition-colors text-left">
-                          <div className="flex-shrink-0 w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 font-semibold text-sm">
-                            {idx + 1}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center justify-between gap-2">
-                              <h4 className="font-semibold text-gray-900">{lesson.name}</h4>
-                              <span className="text-xs text-gray-500 shrink-0">
-                                {lesson.duration && `${lesson.duration} นาที`}
-                              </span>
+                  <div className="space-y-1">
+                    {Array.from(sections.entries()).map(([section, sectionLessons]: [string, any[]]) => {
+                      const sectionMinutes = sectionLessons.reduce((sum, l) => {
+                        const mins = parseFloat(l.duration as string) || 0;
+                        return sum + mins;
+                      }, 0);
+                      
+                      return (
+                        <details key={section} className="border border-gray-200 rounded-lg overflow-hidden" open>
+                          <summary className="cursor-pointer flex items-center justify-between p-4 hover:bg-purple-50 transition-colors bg-white">
+                            <div className="flex items-center gap-2 flex-1">
+                              <span className="text-purple-600">▼</span>
+                              <h4 className="font-semibold text-gray-900">{section}</h4>
                             </div>
+                            <span className="text-xs text-gray-600 shrink-0">{sectionLessons.length} บทเรียน • {Math.round(sectionMinutes)} นาที</span>
+                          </summary>
+                          <div className="bg-purple-50/50 p-4 space-y-2 border-t border-gray-200">
+                            {sectionLessons.map((lesson: any, idx: number) => (
+                              <div key={lesson.id || idx} className="bg-white rounded-lg p-3 border border-gray-200">
+                                <div className="flex items-start justify-between gap-2">
+                                  <div className="flex-1">
+                                    <h5 className="font-medium text-gray-900 mb-1">{lesson.name}</h5>
+                                    {lesson.videoLink && (
+                                      <a href={lesson.videoLink} target="_blank" rel="noopener noreferrer" className="text-xs text-indigo-600 hover:text-indigo-700 inline-flex items-center gap-1">
+                                        <Play className="w-3 h-3" /> ดูวิดีโอ
+                                      </a>
+                                    )}
+                                  </div>
+                                  <span className="text-xs text-gray-500 shrink-0 whitespace-nowrap">
+                                    {lesson.duration && `${lesson.duration} นาที`}
+                                  </span>
+                                </div>
+                              </div>
+                            ))}
                           </div>
-                          <Play className="w-4 h-4 text-purple-400 flex-shrink-0 mt-0.5" />
-                        </button>
-                        {lesson.videoLink && (
-                          <div className="px-4 pb-3 bg-purple-50/50">
-                            <a href={lesson.videoLink} target="_blank" rel="noopener noreferrer" className="text-xs text-indigo-600 hover:text-indigo-700 inline-flex items-center gap-1">
-                              <Play className="w-3 h-3" /> ดูวิดีโอ
-                            </a>
-                          </div>
-                        )}
-                      </div>
-                    ))}
+                        </details>
+                      );
+                    })}
                   </div>
                 </div>
               );
@@ -336,7 +358,6 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
           </ContentSection>
         </div>
       )}
-
       {/* ── สื่อการเรียนการสอน — full width ── */}
       {hasPaidAccess && (
       <div className="max-w-[1200px] mx-auto px-4 space-y-4">

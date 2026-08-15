@@ -296,43 +296,52 @@ export default function ContentForm({ content, mode, defaultType, lockType }: Co
 
           <div className="space-y-2">
             {lessons.map((lesson, idx) => (
-              <div key={idx} className="flex items-end gap-2">
-                <div style={{ flex: "1.5" }} className="min-w-0">
-                  <input
-                    type="text"
-                    value={lesson.name}
-                    onChange={(e) => setLessons(lessons.map((l, i) => i === idx ? { ...l, name: e.target.value } : l))}
-                    className={inputClass}
-                    placeholder="ชื่อบทเรียน"
-                  />
+              <div key={idx} className="space-y-1.5">
+                <div className="flex items-end gap-2">
+                  <div style={{ flex: "1.5" }} className="min-w-0">
+                    <input
+                      type="text"
+                      value={lesson.name}
+                      onChange={(e) => setLessons(lessons.map((l, i) => i === idx ? { ...l, name: e.target.value } : l))}
+                      className={inputClass}
+                      placeholder="ชื่อบทเรียน"
+                    />
+                  </div>
+                  <div style={{ flex: "1" }} className="min-w-0">
+                    <input
+                      type="text"
+                      value={lesson.videoLink}
+                      onChange={(e) => setLessons(lessons.map((l, i) => i === idx ? { ...l, videoLink: e.target.value } : l))}
+                      className={inputClass}
+                      placeholder="ลิงค์วิดีโอ"
+                    />
+                  </div>
+                  <div className="w-20 shrink-0">
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={lesson.duration === "" ? "" : lesson.duration}
+                      onChange={(e) => setLessons(lessons.map((l, i) => i === idx ? { ...l, duration: e.target.value } : l))}
+                      placeholder="เวลา"
+                      className="w-full px-2 py-2.5 border border-gray-300 rounded-xl text-xs text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent text-center"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setLessons(lessons.filter((_, i) => i !== idx))}
+                    className="text-red-400 hover:text-red-600 shrink-0"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
                 </div>
-                <div style={{ flex: "1" }} className="min-w-0">
-                  <input
-                    type="text"
-                    value={lesson.videoLink}
-                    onChange={(e) => setLessons(lessons.map((l, i) => i === idx ? { ...l, videoLink: e.target.value } : l))}
-                    className={inputClass}
-                    placeholder="ลิงค์วิดีโอ"
-                  />
-                </div>
-                <div className="w-20 shrink-0">
-                  <input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    value={lesson.duration === "" ? "" : lesson.duration}
-                    onChange={(e) => setLessons(lessons.map((l, i) => i === idx ? { ...l, duration: e.target.value } : l))}
-                    placeholder="เวลา"
-                    className="w-full px-2 py-2.5 border border-gray-300 rounded-xl text-xs text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent text-center"
-                  />
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setLessons(lessons.filter((_, i) => i !== idx))}
-                  className="text-red-400 hover:text-red-600 shrink-0"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
+                <input
+                  type="text"
+                  value={lesson.section || ""}
+                  onChange={(e) => setLessons(lessons.map((l, i) => i === idx ? { ...l, section: e.target.value } : l))}
+                  className={`${inputClass} text-xs`}
+                  placeholder="หมวดเนื้อหา (เช่น บทที่ 1, Introduction)"
+                />
               </div>
             ))}
           </div>

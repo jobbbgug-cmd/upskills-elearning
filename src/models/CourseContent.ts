@@ -13,7 +13,7 @@ export interface ICourseContentDocument extends Document {
   downloadFree: { title: string; thumbnailUrl: string; fileUrl: string }[];
   downloadTeacherCard: { title: string; thumbnailUrl: string; fileUrl: string }[];
   downloadAksorn: { title: string; thumbnailUrl: string; fileUrl: string }[];
-  lessons: { name: string; videoLink: string; duration: string }[];
+  lessons: { name: string; videoLink: string; duration: string; section?: string }[];
   createdAt: Date;
 }
 
@@ -33,7 +33,7 @@ const DownloadItemSchema = new Schema(
 );
 
 const LessonSchema = new Schema(
-  { name: { type: String, default: "" }, videoLink: { type: String, default: "" }, duration: { type: String, default: "" } },
+  { name: { type: String, default: "" }, videoLink: { type: String, default: "" }, duration: { type: String, default: "" }, section: { type: String, default: "" } },
   { _id: false }
 );
 
