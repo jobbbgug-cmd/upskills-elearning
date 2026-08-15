@@ -201,33 +201,34 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
 
           </div>
 
-                    {/* Right column — course info & booking */}
+                              {/* Right column — course info & booking */}
           <div className="lg:col-span-1">
-            <div className="space-y-4">
+            <div className="bg-white rounded-2xl border border-gray-100 p-6 space-y-6">
               {/* Price section */}
-              <div className="bg-white rounded-2xl border border-gray-100 p-6">
-                <div className="mb-6">
-                  <div className="text-4xl font-bold text-purple-600 mb-2">
-                    ฿{course.price === 0 ? "0" : course.price.toLocaleString()}
-                  </div>
-                  {course.price > 0 && (
-                    <p className="text-sm text-gray-500 line-through">฿{(course.price * 1.5).toLocaleString()}</p>
-                  )}
+              <div>
+                <div className="text-4xl font-bold text-purple-600 mb-2">
+                  ฿{course.price === 0 ? "0" : course.price.toLocaleString()}
                 </div>
-
-                {/* Buttons */}
-                <div className="space-y-3">
-                  <button className="w-full bg-purple-600 text-white font-semibold py-3 rounded-xl hover:bg-purple-700 transition-colors">
-                    ซื้อคอร์สนี้
-                  </button>
-                  <button className="w-full border-2 border-purple-600 text-purple-600 font-semibold py-3 rounded-xl hover:bg-purple-50 transition-colors flex items-center justify-center gap-2">
-                    🛒 เพิ่มลงตะกร้า
-                  </button>
-                </div>
+                {course.price > 0 && (
+                  <p className="text-sm text-gray-500 line-through">฿{(course.price * 1.5).toLocaleString()}</p>
+                )}
               </div>
 
+              {/* Buttons */}
+              <div className="space-y-3">
+                <button className="w-full bg-purple-600 text-white font-semibold py-3 rounded-xl hover:bg-purple-700 transition-colors">
+                  ซื้อคอร์สนี้
+                </button>
+                <button className="w-full border-2 border-purple-600 text-purple-600 font-semibold py-3 rounded-xl hover:bg-purple-50 transition-colors flex items-center justify-center gap-2">
+                  🛒 เพิ่มลงตะกร้า
+                </button>
+              </div>
+
+              {/* Divider */}
+              <div className="border-t border-gray-200"></div>
+
               {/* Course info section */}
-              <div className="bg-white rounded-2xl border border-gray-100 p-6">
+              <div>
                 <h3 className="font-semibold text-gray-900 mb-4">ข้อมูลคอร์สเรียน</h3>
                 <div className="space-y-3">
                   <div className="flex items-center gap-2 text-gray-700">
@@ -258,12 +259,15 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
                 </div>
               </div>
 
+              {/* Divider */}
+              <div className="border-t border-gray-200"></div>
+
               {/* Certificate section */}
-              <div className="bg-blue-50 rounded-2xl border border-blue-200 p-6">
-                <div className="flex items-start gap-3">
+              <div className="space-y-2">
+                <div className="flex items-start gap-2">
                   <span className="text-2xl">📜</span>
                   <div>
-                    <h4 className="font-semibold text-gray-900 mb-1">Certificate of Completion</h4>
+                    <h4 className="font-semibold text-gray-900">Certificate of Completion</h4>
                     <p className="text-xs text-gray-600">คอร์สนี้มีใบรับรองหลังเรียนจบ</p>
                   </div>
                 </div>
