@@ -448,6 +448,7 @@ export default function CourseForm({ course, mode, courseType, teacherMode = fal
                 <input
                   type="number"
                   min={0}
+                  step="0.01"
                   value={lesson.duration}
                   onChange={(e) => setLessons(lessons.map((l, i) => i === idx ? { ...l, duration: e.target.value } : l))}
                   placeholder="เวลา"
