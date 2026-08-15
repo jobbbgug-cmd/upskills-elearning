@@ -344,11 +344,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
                             {sectionLessons.map((lesson: any, idx: number) => (
                               <div key={lesson.id || idx} className="bg-white rounded-lg p-3 border border-gray-200">
                                 <div className="flex items-center gap-2 text-sm">
-                                  {lesson.videoLink && (
-                                    <a href={lesson.videoLink} target="_blank" rel="noopener noreferrer" className="text-xs text-indigo-600 hover:text-indigo-700 inline-flex items-center gap-1 font-medium shrink-0">
-                                      <Play className="w-3 h-3" /> ดูวิดีโอ
-                                    </a>
-                                  )}
+                                  <span className="text-xs text-gray-600 font-medium shrink-0">{idx + 1} บทเรียน</span>
                                   <span className="text-gray-900 font-medium">{lesson.name}</span>
                                   <span className="text-gray-500 text-xs shrink-0 ml-auto">
                                     {lesson.duration && `${lesson.duration} นาที`}
