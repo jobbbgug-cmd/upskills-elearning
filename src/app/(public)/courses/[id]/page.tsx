@@ -12,7 +12,7 @@ import CourseBooking from "./CourseBooking";
 import VideoPlayerSection from "@/components/VideoPlayerSection";
 import {
   BookOpen, Users, Calendar, Clock, Video,
-  FileText, Play, Download, Lock, ChevronDown,
+  FileText, Play, Download, Lock, ChevronDown, TrendingUp, BarChart3,
 } from "lucide-react";
 
 async function getCourseWithContent(id: string): Promise<{ course: ICourse & { categoryName?: string }; content: ICourseContent | null } | null> {
@@ -254,11 +254,24 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
                     </span>
                   </div>
                   <div className="flex items-center gap-2 text-gray-700">
-                    <span className="text-sm">
-                      {(course as any).difficulty === "easy" && "ง่าย"}
-                      {(course as any).difficulty === "medium" && "ปานกลาง"}
-                      {(course as any).difficulty === "hard" && "ยาก"}
-                    </span>
+                    {(course as any).difficulty === "easy" && (
+                      <>
+                        <TrendingUp className="w-4 h-4 text-green-500" />
+                        <span className="text-sm">ง่าย</span>
+                      </>
+                    )}
+                    {(course as any).difficulty === "medium" && (
+                      <>
+                        <BarChart3 className="w-4 h-4 text-yellow-500" />
+                        <span className="text-sm">ปานกลาง</span>
+                      </>
+                    )}
+                    {(course as any).difficulty === "hard" && (
+                      <>
+                        <TrendingUp className="w-4 h-4 text-red-500" style={{transform: 'scaleY(-1)'}} />
+                        <span className="text-sm">ยาก</span>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>
