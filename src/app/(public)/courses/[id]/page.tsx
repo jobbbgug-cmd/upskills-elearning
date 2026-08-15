@@ -291,6 +291,16 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
             accentColor="purple"
             locked={!hasPaidAccess}
           >
+            <>
+          <style>{`
+            details summary svg {
+              transition: transform 0.3s ease;
+            }
+            details[open] summary svg {
+              transform: rotate(180deg);
+            }
+          `}</style>
+
             {(() => {
               const totalMinutes = lessons.reduce((sum, l) => {
                 const mins = parseFloat(l.duration as string) || 0;
@@ -357,6 +367,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
                 </div>
               );
             })()}
+            </>
           </ContentSection>
         </div>
       )}
