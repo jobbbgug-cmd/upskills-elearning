@@ -298,7 +298,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
 
       {/* ── รายละเอียดคอร์ส — full width ── */}
       <div className="max-w-[1200px] mx-auto px-4 mb-4">
-        <div className="bg-white rounded-2xl p-5 border border-gray-100">
+        <div className="bg-white rounded-2xl p-5 border border-gray-100 max-w-2xl">
           <h2 className="font-semibold text-gray-900 mb-4">รายละเอียดคอร์ส</h2>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
             <div className="flex items-center gap-2 text-gray-600">
