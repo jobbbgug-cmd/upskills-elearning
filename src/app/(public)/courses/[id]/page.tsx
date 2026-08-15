@@ -330,11 +330,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
                               <span className="text-xs text-gray-500">ต้องแสดง {sectionLessons.length} บทเรียน</span>
                             </div>
                             <div className="flex items-center gap-2 shrink-0 border border-purple-400 rounded-lg px-3 py-1.5 bg-white">
-                              {firstLesson.videoLink && (
-                                <a href={firstLesson.videoLink} target="_blank" rel="noopener noreferrer" className="text-xs text-indigo-600 hover:text-indigo-700 flex items-center gap-1 font-medium">
-                                  <Play className="w-3 h-3" /> ดูวิดีโอ
-                                </a>
-                              )}
+                              <span className="text-xs text-gray-700 font-medium">{sectionLessons.length} บทเรียน</span>
                               <span className="text-xs text-gray-600 whitespace-nowrap">
                                 {Math.round(sectionMinutes)} นาที
                               </span>
@@ -344,7 +340,9 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
                             {sectionLessons.map((lesson: any, idx: number) => (
                               <div key={lesson.id || idx} className="bg-white rounded-lg p-3 border border-gray-200">
                                 <div className="flex items-center gap-2 text-sm">
-                                  <span className="text-xs text-gray-600 font-medium shrink-0">{idx + 1} บทเรียน</span>
+                                  {firstLesson.videoLink && (
+                                    <Play className="w-4 h-4 text-indigo-600 shrink-0" />
+                                  )}
                                   <span className="text-gray-900 font-medium">{lesson.name}</span>
                                   <span className="text-gray-500 text-xs shrink-0 ml-auto">
                                     {lesson.duration && `${lesson.duration} นาที`}
