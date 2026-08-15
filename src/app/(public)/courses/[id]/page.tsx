@@ -282,7 +282,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
         </div>
       )}
 
-                  {/* ── รายละเอียดบทเรียน — full width ── */}
+                        {/* ── รายละเอียดบทเรียน — full width ── */}
       {lessons && lessons.length > 0 && (
         <div className="max-w-[1200px] mx-auto px-4 mb-4">
           <ContentSection
@@ -322,28 +322,37 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
                       
                       return (
                         <details key={section} className="border border-gray-200 rounded-lg overflow-hidden" open>
-                          <summary className="cursor-pointer flex items-center justify-between p-4 hover:bg-purple-50 transition-colors bg-white">
-                            <div className="flex items-center gap-2 flex-1">
-                              <span className="text-purple-600">▼</span>
-                              <h4 className="font-semibold text-gray-900">{section}</h4>
+                          <summary className="cursor-pointer flex items-center justify-between p-4 hover:bg-purple-50 transition-colors bg-white list-none">
+                            <div className="flex items-center gap-3 flex-1">
+                              <span className="text-purple-600 text-lg">▼</span>
+                              <span className="font-medium text-gray-900">{section}</span>
                             </div>
-                            <span className="text-xs text-gray-600 shrink-0">{sectionLessons.length} บทเรียน • {Math.round(sectionMinutes)} นาที</span>
+                            <div className="flex items-center gap-2 shrink-0">
+                              {sectionLessons.length === 1 && sectionLessons[0].videoLink && (
+                                <a href={sectionLessons[0].videoLink} target="_blank" rel="noopener noreferrer" className="text-xs text-indigo-600 hover:text-indigo-700 flex items-center gap-1 px-2 py-1">
+                                  <Play className="w-3 h-3" /> ดูวิดีโอ
+                                </a>
+                              )}
+                              <span className="text-xs text-gray-600 whitespace-nowrap">
+                                {Math.round(sectionMinutes)} นาที
+                              </span>
+                            </div>
                           </summary>
                           <div className="bg-purple-50/50 p-4 space-y-2 border-t border-gray-200">
                             {sectionLessons.map((lesson: any, idx: number) => (
                               <div key={lesson.id || idx} className="bg-white rounded-lg p-3 border border-gray-200">
-                                <div className="flex items-start justify-between gap-2">
-                                  <div className="flex-1">
-                                    <h5 className="font-medium text-gray-900 mb-1">{lesson.name}</h5>
-                                    {lesson.videoLink && (
-                                      <a href={lesson.videoLink} target="_blank" rel="noopener noreferrer" className="text-xs text-indigo-600 hover:text-indigo-700 inline-flex items-center gap-1">
-                                        <Play className="w-3 h-3" /> ดูวิดีโอ
-                                      </a>
-                                    )}
+                                <div className="space-y-2">
+                                  {lesson.videoLink && (
+                                    <a href={lesson.videoLink} target="_blank" rel="noopener noreferrer" className="text-xs text-indigo-600 hover:text-indigo-700 inline-flex items-center gap-1 font-medium">
+                                      <Play className="w-3 h-3" /> ดูวิดีโอ
+                                    </a>
+                                  )}
+                                  <div className="flex items-start justify-between gap-2">
+                                    <h5 className="text-sm font-medium text-gray-900">{lesson.name}</h5>
+                                    <span className="text-xs text-gray-500 shrink-0 whitespace-nowrap">
+                                      {lesson.duration && `${lesson.duration} นาที`}
+                                    </span>
                                   </div>
-                                  <span className="text-xs text-gray-500 shrink-0 whitespace-nowrap">
-                                    {lesson.duration && `${lesson.duration} นาที`}
-                                  </span>
                                 </div>
                               </div>
                             ))}
