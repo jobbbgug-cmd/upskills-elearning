@@ -152,20 +152,22 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
             </div>
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">{course.title}</h1>
           </div>
-          <div className="flex gap-3 sm:gap-4 shrink-0">
-            <a href="#clips" className="flex flex-col items-center gap-1 group">
-              <div className="w-11 h-11 sm:w-14 sm:h-14 rounded-full bg-amber-400 group-hover:bg-amber-500 transition-colors flex items-center justify-center shadow">
-                <Play className="w-5 h-5 sm:w-6 sm:h-6 text-white fill-white" />
-              </div>
-              <span className="text-xs font-medium text-gray-600 text-center leading-tight">คลิป</span>
-            </a>
-            <a href="#downloads" className="flex flex-col items-center gap-1 group">
-              <div className="w-11 h-11 sm:w-14 sm:h-14 rounded-full bg-amber-400 group-hover:bg-amber-500 transition-colors flex items-center justify-center shadow">
-                <Download className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-              </div>
-              <span className="text-xs font-medium text-gray-600 text-center leading-tight">สื่อ<br/>ประกอบ</span>
-            </a>
-          </div>
+          {course.type !== "online" && (
+            <div className="flex gap-3 sm:gap-4 shrink-0">
+              <a href="#clips" className="flex flex-col items-center gap-1 group">
+                <div className="w-11 h-11 sm:w-14 sm:h-14 rounded-full bg-amber-400 group-hover:bg-amber-500 transition-colors flex items-center justify-center shadow">
+                  <Play className="w-5 h-5 sm:w-6 sm:h-6 text-white fill-white" />
+                </div>
+                <span className="text-xs font-medium text-gray-600 text-center leading-tight">คลิป</span>
+              </a>
+              <a href="#downloads" className="flex flex-col items-center gap-1 group">
+                <div className="w-11 h-11 sm:w-14 sm:h-14 rounded-full bg-amber-400 group-hover:bg-amber-500 transition-colors flex items-center justify-center shadow">
+                  <Download className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                </div>
+                <span className="text-xs font-medium text-gray-600 text-center leading-tight">สื่อ<br/>ประกอบ</span>
+              </a>
+            </div>
+          )}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -437,7 +439,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
         </div>
       )}
       {/* ── สื่อการเรียนการสอน — full width ── */}
-      {hasPaidAccess && (
+      {hasPaidAccess && course.type !== "online" && (
       <div className="max-w-[1200px] mx-auto px-4 space-y-4">
         <h2 className="text-lg font-bold text-gray-900">สื่อการเรียนการสอน</h2>
 
