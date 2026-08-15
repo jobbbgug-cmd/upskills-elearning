@@ -89,7 +89,7 @@ export default function SuperAdminDashboard() {
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="month" />
                 <YAxis />
-                <Tooltip formatter={(value) => `฿${value.toLocaleString("th-TH", { maximumFractionDigits: 0 })}`} />
+                <Tooltip formatter={(value: any) => `฿${(value || 0).toLocaleString("th-TH", { maximumFractionDigits: 0 })}`} />
                 <Bar dataKey="revenue" fill="#8B5CF6" name="รายได้" />
               </BarChart>
             </ResponsiveContainer>
@@ -102,7 +102,7 @@ export default function SuperAdminDashboard() {
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="month" />
                 <YAxis />
-                <Tooltip />
+                <Tooltip formatter={(value: any) => (value || 0).toLocaleString()} />
                 <Line type="monotone" dataKey="users" stroke="#EC4899" name="ผู้ใช้งาน" />
               </LineChart>
             </ResponsiveContainer>
