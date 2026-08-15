@@ -79,12 +79,12 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
   }, []);
 
   useEffect(() => {
-    fetch("/api/admin/menu-config/super_admin")
+    // Menu config endpoint is optional - uses hardcoded menu if not available
+    fetch("/api/super-admin/menu-config")
       .then((r) => r.ok ? r.json() : null)
       .then((d) => {
         console.log("Fetched menu config:", d);
         if (d?.items && Array.isArray(d.items) && d.items.length > 0) {
-          // Convert items to MenuGroup format
           const groups: MenuItem[] = d.items.map((item: any) => ({
             id: item.id,
             label: item.label,
@@ -96,12 +96,12 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
           setMenuConfig(groups);
         }
       })
-      .catch((err) => console.error("Error fetching menu config:", err));
+      .catch((err) => console.warn("Menu config unavailable (using default):", err));
   }, []);
 
   useEffect(() => {
-    fetch("/api/admin/users/pending")
-      .then((r) => r.json())
+    fetch("/api/super-admin/users?status=pending")
+      .then((r) => r.ok ? r.json() : [])
       .then((data) => setPendingMembers(Array.isArray(data) ? data.length : 0))
       .catch(() => {
         // Test/demo: show badge
