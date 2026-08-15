@@ -58,7 +58,7 @@ export default function ContactInfoModal({
       <div className="bg-white rounded-lg p-6 max-w-2xl w-full">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-lg font-bold text-gray-900">ข้อมูลติดต่อ</h2>
+          <h2 className="text-lg font-bold text-gray-900">ข้อมูลติดต่อ / ขอใบกำกับภาษี</h2>
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600"

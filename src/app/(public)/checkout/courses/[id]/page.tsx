@@ -13,10 +13,10 @@ interface Course {
   description: string;
   coverImage?: string;
   instructor: string;
+  difficulty?: string;
   price?: number;
-  duration?: number;
-  enrollmentCount?: number;
-  type?: string;
+  discount?: number;
+  discountType?: "percentage" | "fixed";
 }
 
 interface ContactInfo {
@@ -29,7 +29,7 @@ interface ContactInfo {
   needsTaxInvoice: boolean;
 }
 
-export default function CheckoutCoursePage() {
+export default function CheckoutPage() {
   const params = useParams();
   const id = params.id as string;
 
@@ -44,7 +44,7 @@ export default function CheckoutCoursePage() {
       try {
         const res = await fetch(`/api/courses/${id}`);
         const data = await res.json();
-        setCourse(data.course);
+        setCourse(data);
       } catch (error) {
         console.error("Failed to fetch course:", error);
       } finally {
@@ -53,6 +53,16 @@ export default function CheckoutCoursePage() {
     };
 
     if (id) fetchCourse();
+
+    // Load contact info from localStorage
+    const savedContactInfo = localStorage.getItem("contactInfo");
+    if (savedContactInfo) {
+      try {
+        setContactInfo(JSON.parse(savedContactInfo));
+      } catch (error) {
+        console.error("Failed to parse saved contact info:", error);
+      }
+    }
   }, [id]);
 
   if (loading) {
@@ -68,7 +78,7 @@ export default function CheckoutCoursePage() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <p className="text-gray-500 mb-4">ไม่พบคอร์ส</p>
-          <Link href="/courses?tab=online" className="text-indigo-600 hover:text-indigo-700 font-medium">
+          <Link href="/courses" className="text-indigo-600 hover:text-indigo-700 font-medium">
             กลับไปหน้าคอร์ส
           </Link>
         </div>
@@ -77,7 +87,7 @@ export default function CheckoutCoursePage() {
   }
 
   const price = course.price || 0;
-  const discount = 0;
+  const discount = course.discountType === "percentage" ? (price * (course.discount || 0) / 100) : (course.discount || 0);
   const finalPrice = price - discount;
   const originalPrice = price;
 
@@ -98,7 +108,7 @@ export default function CheckoutCoursePage() {
               <h1 className="text-2xl font-bold text-gray-900">สรุปรายการคำสั่งซื้อ</h1>
             </div>
             <Link
-              href="/courses?tab=online"
+              href="/courses"
               className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-900 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
             >
               <ArrowLeft className="w-4 h-4" />
@@ -117,15 +127,26 @@ export default function CheckoutCoursePage() {
             <div className="bg-blue-50 border-2 border-dashed border-blue-300 rounded-lg p-4 mb-8 flex items-start gap-3">
               <AlertCircle className="w-5 h-5 text-purple-600 flex-shrink-0 mt-0.5" />
               <div className="flex-1">
-                <p className="text-sm text-gray-700">
-                  <span className="font-semibold">*กรุณากรอกข้อมูล</span> เพื่อออกใบเสร็จรับเงินหรือใบกำกับภาษี ก่อนการสั่งซื้อ
-                </p>
+                {contactInfo ? (
+                  <div className="text-sm text-gray-700 space-y-1">
+                    <p className="font-semibold mb-3">ข้อมูลติดต่อ / ขอใบกำกับภาษี</p>
+                    <p><span className="font-medium">ชื่อ - สกุล</span> : {contactInfo.firstName} {contactInfo.lastName}</p>
+                    <p><span className="font-medium">อีเมล</span> : {contactInfo.email}</p>
+                    <p><span className="font-medium">เบอร์โทรศัพท์</span> : {contactInfo.phone}</p>
+                    <p><span className="font-medium">ที่อยู่</span> : {contactInfo.address}</p>
+                    {contactInfo.taxId && <p><span className="font-medium">เลขประจำตัวผู้เสียภาษี</span> : {contactInfo.taxId}</p>}
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-700">
+                    <span className="font-semibold">*กรุณากรอกข้อมูล</span> เพื่อออกใบเสร็จรับเงินหรือใบกำกับภาษี ก่อนการสั่งซื้อ
+                  </p>
+                )}
               </div>
               <button
                 onClick={() => setModalOpen(true)}
                 className="bg-purple-600 text-white px-6 py-2 rounded-full text-sm font-semibold hover:bg-purple-700 transition-colors flex-shrink-0"
               >
-                เพิ่มข้อมูล
+                {contactInfo ? "แก้ไข" : "เพิ่มข้อมูล"}
               </button>
             </div>
 
@@ -141,7 +162,7 @@ export default function CheckoutCoursePage() {
                 <div className="flex gap-6">
                   {/* Product Image */}
                   <div className="flex-shrink-0">
-                    <div className="w-40 h-32 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-lg overflow-hidden flex items-center justify-center">
+                    <div className="w-60 h-40 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-lg overflow-hidden flex items-center justify-center">
                       {course.coverImage ? (
                         <img src={course.coverImage} alt={course.title} className="w-full h-full object-cover" />
                       ) : (
@@ -155,9 +176,6 @@ export default function CheckoutCoursePage() {
                     <div className="flex items-start justify-between mb-2">
                       <h3 className="text-lg font-bold text-gray-900">{course.title}</h3>
                     </div>
-                    <p className="text-sm text-gray-600 mb-2">
-                      <span className="font-medium">ผู้สอน:</span> {course.instructor}
-                    </p>
                     <p className="text-sm text-gray-600 mb-4 line-clamp-2">{course.description}</p>
 
                     {/* Price */}
@@ -245,7 +263,10 @@ export default function CheckoutCoursePage() {
       <ContactInfoModal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
-        onSave={(data) => setContactInfo(data)}
+        onSave={(data) => {
+          setContactInfo(data);
+          localStorage.setItem("contactInfo", JSON.stringify(data));
+        }}
         initialData={contactInfo || undefined}
       />
     </div>

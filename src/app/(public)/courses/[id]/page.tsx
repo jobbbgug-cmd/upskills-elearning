@@ -10,6 +10,7 @@ import { cleanupExpiredBookings } from "@/lib/cleanupExpiredBookings";
 import Badge from "@/components/ui/Badge";
 import CourseBooking from "./CourseBooking";
 import VideoPlayerSection from "@/components/VideoPlayerSection";
+import BuyCourseButton from "@/components/BuyCourseButton";
 import {
   BookOpen, Users, Calendar, Clock, Video,
   FileText, Play, Download, Lock, ChevronDown, TrendingUp, BarChart3,
@@ -138,74 +139,11 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
   const isTeacherOrAdmin = isAdminOrTeacher;
 
   return (
-    <div className="py-10">
+    <div className="py-10 relative">
 
-      {/* ── Top section: info + booking (constrained width) ── */}
-      <div className="max-w-[1200px] mx-auto px-4 mb-10">
-
-        {/* Title row — full width with shortcut buttons at far right */}
-        <div className="flex items-start justify-between gap-3 mb-6">
-          <div className="min-w-0">
-            <div className="flex flex-wrap gap-2 mb-2">
-              {(course as any).categoryName && <Badge variant="info">{(course as any).categoryName}</Badge>}
-              {course.gradeLevels.map((g) => <Badge key={g}>{g}</Badge>)}
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">{course.title}</h1>
-          </div>
-          {course.type !== "online" && (
-            <div className="flex gap-3 sm:gap-4 shrink-0">
-              <a href="#clips" className="flex flex-col items-center gap-1 group">
-                <div className="w-11 h-11 sm:w-14 sm:h-14 rounded-full bg-amber-400 group-hover:bg-amber-500 transition-colors flex items-center justify-center shadow">
-                  <Play className="w-5 h-5 sm:w-6 sm:h-6 text-white fill-white" />
-                </div>
-                <span className="text-xs font-medium text-gray-600 text-center leading-tight">คลิป</span>
-              </a>
-              <a href="#downloads" className="flex flex-col items-center gap-1 group">
-                <div className="w-11 h-11 sm:w-14 sm:h-14 rounded-full bg-amber-400 group-hover:bg-amber-500 transition-colors flex items-center justify-center shadow">
-                  <Download className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-                </div>
-                <span className="text-xs font-medium text-gray-600 text-center leading-tight">สื่อ<br/>ประกอบ</span>
-              </a>
-            </div>
-          )}
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-
-          {/* Left column */}
-          <div className="lg:col-span-2 space-y-6">
-
-            {/* Cover image */}
-            <div className="bg-gradient-to-br from-indigo-100 to-purple-100 rounded-2xl overflow-hidden">
-              {course.coverImage ? (
-                <Image
-                  src={course.coverImage}
-                  alt={course.title}
-                  width={800}
-                  height={600}
-                  className="w-full h-auto object-contain"
-                />
-              ) : (
-                <div className="flex items-center justify-center h-64">
-                  <BookOpen className="w-20 h-20 text-indigo-300" />
-                </div>
-              )}
-            </div>
-
-            {/* Course info */}
-            <div>
-              <div className="flex items-center gap-2 text-gray-500 text-sm mb-4">
-                <Users className="w-4 h-4" />
-                <span>สอนโดย {course.instructor}</span>
-              </div>
-              <p className="text-gray-600 leading-relaxed">{course.description}</p>
-            </div>
-
-          </div>
-
-                              {/* Right column — course info & booking */}
-          <div className="lg:col-span-1">
-            <div className="sticky top-8 bg-white rounded-2xl border border-gray-100 p-6 space-y-6 max-h-[calc(100vh-4rem)] overflow-y-auto">
+      {/* ── Page Sidebar (fixed to viewport) ── */}
+      <div className="fixed right-4 top-20 w-[460px] z-40 hidden lg:block">
+        <div className="bg-white rounded-2xl border border-gray-100 p-6 space-y-6 shadow-2xl" style={{height: 'fit-content'}}>
               {/* Price section */}
               <div>
                 <div className="flex items-baseline gap-2 mb-2">
@@ -222,9 +160,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
 
               {/* Buttons */}
               <div className="space-y-3">
-                <button className="w-full bg-purple-600 text-white font-semibold py-3 rounded-xl hover:bg-purple-700 transition-colors">
-                  ซื้อคอร์สนี้
-                </button>
+                <BuyCourseButton courseId={course._id} />
                 <button className="w-full border-2 border-purple-600 text-purple-600 font-semibold py-3 rounded-xl hover:bg-purple-50 transition-colors flex items-center justify-center gap-2">
                   🛒 เพิ่มลงตะกร้า
                 </button>
@@ -293,29 +229,60 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
               </div>
             </div>
           </div>
+
+      {/* ── Top section: info (constrained width) ── */}
+      <div className="max-w-[1200px] mx-auto px-4 mb-10">
+
+        {/* Content area - left side only (sidebar is fixed on right) */}
+        <div className="space-y-6">
+          {/* Cover image */}
+          {course.coverImage && (
+            <div className="bg-gradient-to-br from-indigo-100 to-purple-100 rounded-2xl overflow-hidden lg:max-w-[calc(66.67%-1rem)]">
+              <Image
+                src={course.coverImage}
+                alt={course.title}
+                width={800}
+                height={540}
+                className="w-full h-auto object-contain max-h-[450px]"
+              />
+            </div>
+          )}
+
+          {/* Course info */}
+          <div>
+            <p className="text-2xl font-semibold text-gray-900 leading-relaxed mb-4">{course.description}</p>
+            <div className="flex items-center gap-2 text-gray-500 text-sm">
+              <Users className="w-4 h-4" />
+              <span>สอนโดย {course.instructor}</span>
+            </div>
+          </div>
         </div>
       </div>
 
       {/* ── รายละเอียดคอร์ส — full width ── */}
       <div className="max-w-[1200px] mx-auto px-4 mb-4">
-        <div className="bg-white rounded-2xl p-5 border border-gray-100">
-          <h2 className="font-semibold text-gray-900 mb-4">รายละเอียดคอร์ส</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
-            <div className="flex items-center gap-2 text-gray-600">
-              <Calendar className="w-4 h-4 text-indigo-500" />
-              <span>{course.sessions.length} รอบเรียน</span>
-            </div>
-            <div className="flex items-center gap-2 text-gray-600">
-              <Users className="w-4 h-4 text-indigo-500" />
-              <span>สูงสุด {course.sessions[0]?.maxCapacity ?? 10} คน/รอบ</span>
-            </div>
-            <div className="flex items-center gap-2 text-gray-600">
-              <Video className="w-4 h-4 text-indigo-500" />
-              <span>สอนสดผ่าน Jitsi Meet</span>
-            </div>
-            <div className="flex items-center gap-2 text-gray-600">
-              <Clock className="w-4 h-4 text-indigo-500" />
-              <span>{course.sessions[0] ? `${course.sessions[0].startTime} - ${course.sessions[0].endTime}` : "-"}</span>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2">
+            <div className="bg-white rounded-2xl p-5 border border-gray-100">
+              <h2 className="font-semibold text-gray-900 mb-4">รายละเอียดคอร์ส</h2>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
+                <div className="flex items-center gap-2 text-gray-600">
+                  <Calendar className="w-4 h-4 text-indigo-500" />
+                  <span>{course.sessions.length} รอบเรียน</span>
+                </div>
+                <div className="flex items-center gap-2 text-gray-600">
+                  <Users className="w-4 h-4 text-indigo-500" />
+                  <span>สูงสุด {course.sessions[0]?.maxCapacity ?? 10} คน/รอบ</span>
+                </div>
+                <div className="flex items-center gap-2 text-gray-600">
+                  <Video className="w-4 h-4 text-indigo-500" />
+                  <span>สอนสดผ่าน Jitsi Meet</span>
+                </div>
+                <div className="flex items-center gap-2 text-gray-600">
+                  <Clock className="w-4 h-4 text-indigo-500" />
+                  <span>{course.sessions[0] ? `${course.sessions[0].startTime} - ${course.sessions[0].endTime}` : "-"}</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>

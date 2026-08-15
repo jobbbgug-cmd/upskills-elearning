@@ -150,7 +150,7 @@ export default function LearningPathDetail() {
     );
   }
 
-  const diff = difficultyColors[path.difficulty];
+  const diff = difficultyColors[path.difficulty as keyof typeof difficultyColors] || { bg: "bg-gray-50", text: "text-gray-700", label: "Unknown" };
   const suitableForItems = extractBulletPoints(path.whoIsItSuitableFor || '');
   const whatYouWillLearnItems = extractBulletPoints(path.whatYouWillLearn || '');
 
