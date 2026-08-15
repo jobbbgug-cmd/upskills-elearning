@@ -129,6 +129,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
   const downloadFree    = content?.downloadFree    ?? course.downloadFree    ?? [];
   const downloadTeacherCard = content?.downloadTeacherCard ?? course.downloadTeacherCard ?? [];
   const downloadAksorn  = content?.downloadAksorn  ?? course.downloadAksorn  ?? [];
+  const lessons         = content?.lessons         ?? (course as any)?.lessons        ?? [];
 
   // Access control
   const isAdminOrTeacher = auth?.role === "admin" || auth?.role === "teacher";
@@ -281,8 +282,8 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
         </div>
       )}
 
-      {/* ── รายละเอียดบทเรียน — full width ── */}
-      {(course as any)?.lessons && (course as any).lessons.length > 0 && (
+            {/* ── รายละเอียดบทเรียน — full width ── */}
+      {lessons && lessons.length > 0 && (
         <div className="max-w-[1200px] mx-auto px-4 mb-4">
           <ContentSection
             icon={<Play className="w-5 h-5 text-purple-500" />}
@@ -290,26 +291,48 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
             accentColor="purple"
             locked={!hasPaidAccess}
           >
-            <div className="space-y-3">
-              {(course as any).lessons.map((lesson: any, idx: number) => (
-                <div key={lesson.id || idx} className="p-4 border border-gray-200 rounded-lg">
-                  <div className="flex items-start gap-3">
-                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 font-semibold text-sm">
-                      {idx + 1}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h4 className="font-semibold text-gray-900 mb-1">{lesson.name}</h4>
-                      {lesson.duration && <p className="text-xs text-gray-500">⏱️ {lesson.duration}</p>}
-                      {lesson.videoLink && (
-                        <a href={lesson.videoLink} target="_blank" rel="noopener noreferrer" className="text-xs text-indigo-600 hover:text-indigo-700 mt-2 inline-flex items-center gap-1">
-                          <Play className="w-3 h-3" /> ดูวิดีโอ
-                        </a>
-                      )}
-                    </div>
+            {(() => {
+              const totalMinutes = lessons.reduce((sum, l) => {
+                const mins = parseFloat(l.duration as string) || 0;
+                return sum + mins;
+              }, 0);
+              const hours = Math.floor(totalMinutes / 60);
+              const mins = Math.round(totalMinutes % 60);
+              const durationStr = hours > 0 ? `${hours} ชั่วโมง ${mins} นาที` : `${Math.round(totalMinutes)} นาที`;
+              
+              return (
+                <div className="space-y-3">
+                  <p className="text-sm text-gray-600">{lessons.length} บทเรียน • ความยาวทั้งหมด {durationStr}</p>
+                  <div className="space-y-2">
+                    {lessons.map((lesson: any, idx: number) => (
+                      <div key={lesson.id || idx} className="border border-gray-200 rounded-lg overflow-hidden hover:border-purple-300 transition-colors">
+                        <button className="w-full p-4 flex items-start gap-3 hover:bg-purple-50 transition-colors text-left">
+                          <div className="flex-shrink-0 w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 font-semibold text-sm">
+                            {idx + 1}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between gap-2">
+                              <h4 className="font-semibold text-gray-900">{lesson.name}</h4>
+                              <span className="text-xs text-gray-500 shrink-0">
+                                {lesson.duration && `${lesson.duration} นาที`}
+                              </span>
+                            </div>
+                          </div>
+                          <Play className="w-4 h-4 text-purple-400 flex-shrink-0 mt-0.5" />
+                        </button>
+                        {lesson.videoLink && (
+                          <div className="px-4 pb-3 bg-purple-50/50">
+                            <a href={lesson.videoLink} target="_blank" rel="noopener noreferrer" className="text-xs text-indigo-600 hover:text-indigo-700 inline-flex items-center gap-1">
+                              <Play className="w-3 h-3" /> ดูวิดีโอ
+                            </a>
+                          </div>
+                        )}
+                      </div>
+                    ))}
                   </div>
                 </div>
-              ))}
-            </div>
+              );
+            })()}
           </ContentSection>
         </div>
       )}
