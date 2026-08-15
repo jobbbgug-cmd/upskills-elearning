@@ -201,29 +201,73 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
 
           </div>
 
-          {/* Right column — booking */}
+                    {/* Right column — course info & booking */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-2xl border border-gray-100 p-5">
-              <div className="text-center mb-5">
-                <div className="text-3xl font-bold text-indigo-600 mb-1">
-                  {course.price === 0 ? "ฟรี" : `฿${course.price.toLocaleString()}`}
+            <div className="space-y-4">
+              {/* Price section */}
+              <div className="bg-white rounded-2xl border border-gray-100 p-6">
+                <div className="mb-6">
+                  <div className="text-4xl font-bold text-purple-600 mb-2">
+                    ฿{course.price === 0 ? "0" : course.price.toLocaleString()}
+                  </div>
+                  {course.price > 0 && (
+                    <p className="text-sm text-gray-500 line-through">฿{(course.price * 1.5).toLocaleString()}</p>
+                  )}
                 </div>
-                <p className="text-sm text-gray-500">ต่อคน ต่อรอบ</p>
+
+                {/* Buttons */}
+                <div className="space-y-3">
+                  <button className="w-full bg-purple-600 text-white font-semibold py-3 rounded-xl hover:bg-purple-700 transition-colors">
+                    ซื้อคอร์สนี้
+                  </button>
+                  <button className="w-full border-2 border-purple-600 text-purple-600 font-semibold py-3 rounded-xl hover:bg-purple-50 transition-colors flex items-center justify-center gap-2">
+                    🛒 เพิ่มลงตะกร้า
+                  </button>
+                </div>
               </div>
 
-              {futureSessions.length === 0 ? (
-                <div className="text-center py-8 text-gray-400">
-                  <Calendar className="w-10 h-10 mx-auto mb-2 opacity-50" />
-                  <p className="text-sm">ยังไม่มีรอบเรียนที่เปิด</p>
+              {/* Course info section */}
+              <div className="bg-white rounded-2xl border border-gray-100 p-6">
+                <h3 className="font-semibold text-gray-900 mb-4">ข้อมูลคอร์สเรียน</h3>
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2 text-gray-700">
+                    <BookOpen className="w-4 h-4 text-indigo-500" />
+                    <span className="text-sm">{lessons.length} บทเรียน</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-gray-700">
+                    <Clock className="w-4 h-4 text-indigo-500" />
+                    <span className="text-sm">
+                      {(() => {
+                        const totalMinutes = lessons.reduce((sum, l) => {
+                          const mins = parseFloat(l.duration as string) || 0;
+                          return sum + mins;
+                        }, 0);
+                        const hours = Math.floor(totalMinutes / 60);
+                        const mins = Math.round(totalMinutes % 60);
+                        return hours > 0 ? `${hours} ชั่วโมง ${mins} นาที` : `${Math.round(totalMinutes)} นาที`;
+                      })()}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 text-gray-700">
+                    <span className="text-sm">
+                      {(course as any).difficulty === "easy" && "ง่าย"}
+                      {(course as any).difficulty === "medium" && "ปานกลาง"}
+                      {(course as any).difficulty === "hard" && "ยาก"}
+                    </span>
+                  </div>
                 </div>
-              ) : (
-                <CourseBooking
-                  course={course}
-                  sessions={futureSessions}
-                  myBookings={myBookings}
-                  isLoggedIn={!!auth}
-                />
-              )}
+              </div>
+
+              {/* Certificate section */}
+              <div className="bg-blue-50 rounded-2xl border border-blue-200 p-6">
+                <div className="flex items-start gap-3">
+                  <span className="text-2xl">📜</span>
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-1">Certificate of Completion</h4>
+                    <p className="text-xs text-gray-600">คอร์สนี้มีใบรับรองหลังเรียนจบ</p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
