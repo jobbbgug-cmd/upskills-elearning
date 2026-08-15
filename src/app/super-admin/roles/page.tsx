@@ -262,6 +262,7 @@ export default function RolesPage() {
             ) : filtered.map((u) => {
               const rd = ROLE_DEF[u.role];
               const sd = STATUS_DEF[u.status];
+              if (!rd || !sd) return null;
               const Icon = rd.icon;
               return (
                 <tr key={u._id} className="hover:bg-indigo-50/30 transition-colors group">
