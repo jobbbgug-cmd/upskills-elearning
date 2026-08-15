@@ -300,14 +300,15 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
               const mins = Math.round(totalMinutes % 60);
               const durationStr = hours > 0 ? `${hours} ชั่วโมง ${mins} นาที` : `${Math.round(totalMinutes)} นาที`;
               
-              // Group lessons by section
+              // Group lessons by section (only include lessons with sections)
               const sections = new Map<string, any[]>();
               lessons.forEach((lesson: any) => {
-                const section = lesson.section || "บทเรียนทั่วไป";
-                if (!sections.has(section)) {
-                  sections.set(section, []);
+                if (lesson.section) {
+                  if (!sections.has(lesson.section)) {
+                    sections.set(lesson.section, []);
+                  }
+                  sections.get(lesson.section)!.push(lesson);
                 }
-                sections.get(section)!.push(lesson);
               });
               
               return (
