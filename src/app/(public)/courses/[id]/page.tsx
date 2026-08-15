@@ -352,10 +352,12 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
           >
             <div className="prose prose-sm max-w-none text-gray-700" dangerouslySetInnerHTML={{ __html: (course as any).courseDetails }} />
           </ContentSection>
+            </div>
+          </div>
         </div>
       )}
 
-                              {/* ── รายละเอียดบทเรียน — full width ── */}
+      {/* ── รายละเอียดบทเรียน — full width ── */}
       {lessons && lessons.length > 0 && (
         <div className="max-w-[1200px] mx-auto px-4 mb-4">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -444,8 +446,11 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
             })()}
             </>
           </ContentSection>
+            </div>
+          </div>
         </div>
       )}
+
       {/* ── สื่อการเรียนการสอน — full width ── */}
       {hasPaidAccess && course.type !== "online" && (
       <div className="max-w-[1200px] mx-auto px-4 space-y-4">
