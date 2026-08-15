@@ -322,7 +322,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
                       const firstLesson = sectionLessons[0];
                       
                       return (
-                        <details key={section} className="border border-gray-200 rounded-lg overflow-hidden" open>
+                        <details key={section} className="border border-gray-200 rounded-lg overflow-hidden">
                           <summary className="cursor-pointer flex items-center justify-between p-4 hover:bg-purple-50 transition-colors bg-white list-none">
                             <div className="flex items-center gap-3 flex-1">
                               <ChevronDown className="w-5 h-5 text-purple-600" />
