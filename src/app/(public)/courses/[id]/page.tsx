@@ -245,7 +245,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
                     <Clock className="w-4 h-4 text-indigo-500" />
                     <span className="text-sm">
                       {(() => {
-                        const totalMinutes = lessons.reduce((sum: number, l) => {
+                        const totalMinutes = lessons.reduce((sum: number, l: any) => {
                           const mins = parseFloat(l.duration as string) || 0;
                           return sum + mins;
                         }, 0);
@@ -369,7 +369,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
           `}</style>
 
             {(() => {
-              const totalMinutes = lessons.reduce((sum: number, l) => {
+              const totalMinutes = lessons.reduce((sum: number, l: any) => {
                 const mins = parseFloat(l.duration as string) || 0;
                 return sum + mins;
               }, 0);
