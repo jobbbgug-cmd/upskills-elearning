@@ -206,12 +206,16 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
             <div className="bg-white rounded-2xl border border-gray-100 p-6 space-y-6">
               {/* Price section */}
               <div>
-                <div className="text-4xl font-bold text-purple-600 mb-2">
-                  ฿{course.price === 0 ? "0" : course.price.toLocaleString()}
+                <div className="flex items-baseline gap-2 mb-2">
+                  <span className="text-4xl font-bold text-red-600">
+                    ฿{course.price === 0 ? "0" : course.price.toLocaleString()}
+                  </span>
+                  {course.price > 0 && (
+                    <span className="text-lg text-gray-400 line-through">
+                      ฿{(course.price * 1.5).toLocaleString()}
+                    </span>
+                  )}
                 </div>
-                {course.price > 0 && (
-                  <p className="text-sm text-gray-500 line-through">฿{(course.price * 1.5).toLocaleString()}</p>
-                )}
               </div>
 
               {/* Buttons */}
