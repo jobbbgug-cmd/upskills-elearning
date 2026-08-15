@@ -34,7 +34,12 @@ export default function RevenuePage() {
   useEffect(() => {
     const fetchRevenue = async () => {
       try {
-        const res = await fetch("/api/admin/revenue");
+        const res = await fetch("/api/super-admin/revenue");
+        if (!res.ok) {
+          // Fallback to empty data on error
+          setData(null);
+          return;
+        }
         const result = await res.json();
         setData(result);
       } catch (error) {
