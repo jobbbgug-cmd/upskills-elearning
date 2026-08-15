@@ -1,252 +1,204 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
-import Image from "next/image";
-import { Upload, Save, QrCode, Building2, CreditCard, Phone, ChevronDown } from "lucide-react";
-import LoadingSpinner from "@/components/LoadingSpinner";
 
-const THAI_BANKS = [
-  { value: "", label: "-- เลือกธนาคาร --", color: "" },
-  { value: "ธนาคารกรุงเทพ", label: "ธนาคารกรุงเทพ (BBL)", color: "#1e3a8a" },
-  { value: "ธนาคารกสิกรไทย", label: "ธนาคารกสิกรไทย (KBank)", color: "#166534" },
-  { value: "ธนาคารไทยพาณิชย์", label: "ธนาคารไทยพาณิชย์ (SCB)", color: "#6b21a8" },
-  { value: "ธนาคารกรุงไทย", label: "ธนาคารกรุงไทย (KTB)", color: "#1d4ed8" },
-  { value: "ธนาคารกรุงศรีอยุธยา", label: "ธนาคารกรุงศรีอยุธยา (BAY)", color: "#fbbf24" },
-  { value: "ธนาคารทหารไทยธนชาต", label: "ธนาคารทหารไทยธนชาต (TTB)", color: "#0369a1" },
-  { value: "ธนาคารออมสิน", label: "ธนาคารออมสิน", color: "#15803d" },
-  { value: "ธนาคารอาคารสงเคราะห์", label: "ธนาคารอาคารสงเคราะห์ (GHB)", color: "#f97316" },
-  { value: "ธนาคารเพื่อการเกษตรและสหกรณ์", label: "ธ.ก.ส.", color: "#84cc16" },
-  { value: "ธนาคารซิตี้แบงก์", label: "Citibank", color: "#1d4ed8" },
-  { value: "ธนาคารยูโอบี", label: "UOB", color: "#1e3a8a" },
-];
+import { useState, useEffect } from "react";
+import { TrendingUp, TrendingDown, DollarSign, PieChart } from "lucide-react";
 
-interface FinanceForm {
-  bankName:    string;
-  bankAccount: string;
-  bankBrand:   string;
-  promptpay:   string;
-  qrCodeImage: string;
+interface FinanceData {
+  _id: string;
+  category: string;
+  amount: number;
+  date: string;
+  type: "income" | "expense";
+  description: string;
 }
 
-const EMPTY: FinanceForm = {
-  bankName:    "",
-  bankAccount: "",
-  bankBrand:   "",
-  promptpay:   "",
-  qrCodeImage: "",
-};
-
-const inputClass =
-  "w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500";
-
 export default function FinancePage() {
-  const [form, setForm]       = useState<FinanceForm>(EMPTY);
+  const [finances, setFinances] = useState<FinanceData[]>([]);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving]   = useState(false);
-  const [uploading, setUploading] = useState(false);
-  const [saved, setSaved]     = useState(false);
-  const [authorized, setAuthorized] = useState(false);
-  const qrRef   = useRef<HTMLInputElement>(null);
-  const router  = useRouter();
+  const [filter, setFilter] = useState<"all" | "income" | "expense">("all");
 
   useEffect(() => {
-    const init = async () => {
-      const meRes = await fetch("/api/auth/me");
-      const me    = await meRes.json();
-      if (!me.user || me.user.role !== "admin") {
-        router.replace("/");
-        return;
+    const fetchFinances = async () => {
+      try {
+        const res = await fetch("/api/super-admin/finance");
+        if (res.ok) {
+          const data = await res.json();
+          setFinances(Array.isArray(data) ? data : []);
+        }
+      } catch (error) {
+        console.error("Failed to fetch finance data:", error);
+      } finally {
+        setLoading(false);
       }
-      setAuthorized(true);
-      const res = await fetch("/api/super-admin/finance");
-      const d   = await res.json();
-      if (d && !d.error) {
-        setForm({
-          bankName:    d.bankName    ?? "",
-          bankAccount: d.bankAccount ?? "",
-          bankBrand:   d.bankBrand   ?? "",
-          promptpay:   d.promptpay   ?? "",
-          qrCodeImage: d.qrCodeImage ?? "",
-        });
-      }
-      setLoading(false);
     };
-    init();
-  }, [router]);
 
-  const handleQrUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setUploading(true);
-    const fd = new FormData();
-    fd.append("file", file);
-    const res  = await fetch("/api/upload", { method: "POST", body: fd });
-    const data = await res.json();
-    if (res.ok) setForm((f) => ({ ...f, qrCodeImage: data.url }));
-    setUploading(false);
-    e.target.value = "";
-  };
+    fetchFinances();
+  }, []);
 
-  const handleSave = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSaving(true);
-    const res = await fetch("/api/super-admin/finance", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
-    });
-    setSaving(false);
-    if (res.ok) {
-      setSaved(true);
-      setTimeout(() => setSaved(false), 2500);
-    }
-  };
+  const filtered = finances.filter((item) => filter === "all" || item.type === filter);
 
-  if (!authorized || loading) return <LoadingSpinner />;
+  const income = finances
+    .filter((item) => item.type === "income")
+    .reduce((sum, item) => sum + item.amount, 0);
+
+  const expense = finances
+    .filter((item) => item.type === "expense")
+    .reduce((sum, item) => sum + item.amount, 0);
+
+  const balance = income - expense;
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <h1 className="text-2xl font-bold">การเงิน</h1>
+        <div className="flex items-center justify-center h-96">
+          <p className="text-gray-500">กำลังโหลด...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="max-w-2xl">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">ข้อมูลทางการเงิน</h1>
-        <p className="text-gray-500 text-sm mt-1">ข้อมูลบัญชีและ QR Code ที่นักเรียนเห็นเมื่อจองคอร์ส</p>
+    <div className="space-y-6">
+      <h1 className="text-2xl font-bold">การเงิน</h1>
+
+      {/* Summary Cards */}
+      <div className="grid grid-cols-4 gap-4">
+        <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600 mb-2">รายได้</p>
+              <p className="text-2xl font-bold text-green-600">
+                ฿{income.toLocaleString("th-TH", { maximumFractionDigits: 0 })}
+              </p>
+            </div>
+            <TrendingUp className="w-8 h-8 text-green-600 opacity-20" />
+          </div>
+        </div>
+
+        <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600 mb-2">ค่าใช้จ่าย</p>
+              <p className="text-2xl font-bold text-red-600">
+                ฿{expense.toLocaleString("th-TH", { maximumFractionDigits: 0 })}
+              </p>
+            </div>
+            <TrendingDown className="w-8 h-8 text-red-600 opacity-20" />
+          </div>
+        </div>
+
+        <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600 mb-2">ยอดคงเหลือ</p>
+              <p
+                className={`text-2xl font-bold ${balance >= 0 ? "text-blue-600" : "text-red-600"}`}
+              >
+                ฿{Math.abs(balance).toLocaleString("th-TH", { maximumFractionDigits: 0 })}
+              </p>
+            </div>
+            <DollarSign className="w-8 h-8 text-blue-600 opacity-20" />
+          </div>
+        </div>
+
+        <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600 mb-2">จำนวนรายการ</p>
+              <p className="text-2xl font-bold text-purple-600">{finances.length}</p>
+            </div>
+            <PieChart className="w-8 h-8 text-purple-600 opacity-20" />
+          </div>
+        </div>
       </div>
 
-      <form onSubmit={handleSave} className="space-y-6">
+      {/* Filter Buttons */}
+      <div className="bg-white rounded-lg border border-gray-200 p-4 flex gap-2">
+        <button
+          onClick={() => setFilter("all")}
+          className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+            filter === "all"
+              ? "bg-purple-600 text-white"
+              : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+          }`}
+        >
+          ทั้งหมด
+        </button>
+        <button
+          onClick={() => setFilter("income")}
+          className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+            filter === "income"
+              ? "bg-green-600 text-white"
+              : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+          }`}
+        >
+          รายได้
+        </button>
+        <button
+          onClick={() => setFilter("expense")}
+          className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+            filter === "expense"
+              ? "bg-red-600 text-white"
+              : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+          }`}
+        >
+          ค่าใช้จ่าย
+        </button>
+      </div>
 
-        {/* QR Code */}
-        <div className="bg-white rounded-2xl border border-gray-200 p-6 space-y-4">
-          <div className="flex items-center gap-2">
-            <QrCode className="w-5 h-5 text-indigo-500" />
-            <h2 className="font-semibold text-gray-900">QR Code การชำระเงิน</h2>
-          </div>
-
-          <div className="flex gap-6 items-start">
-            <div className="relative w-40 h-40 rounded-2xl border-2 border-dashed border-gray-300 bg-gray-50 overflow-hidden flex items-center justify-center shrink-0">
-              {form.qrCodeImage ? (
-                <Image src={form.qrCodeImage} alt="QR Code" fill className="object-contain p-2" />
-              ) : (
-                <div className="text-center text-gray-400">
-                  <QrCode className="w-10 h-10 mx-auto mb-1 opacity-40" />
-                  <span className="text-xs">ยังไม่มี QR</span>
-                </div>
-              )}
-            </div>
-
-            <div className="space-y-3 flex-1">
-              <input ref={qrRef} type="file" accept="image/*" className="hidden" onChange={handleQrUpload} />
-              <button
-                type="button"
-                onClick={() => qrRef.current?.click()}
-                disabled={uploading}
-                className="flex items-center gap-2 px-4 py-2.5 border-2 border-dashed border-indigo-300 rounded-xl text-sm text-indigo-600 hover:border-indigo-500 hover:bg-indigo-50 transition-colors disabled:opacity-50 w-full justify-center"
-              >
-                <Upload className="w-4 h-4" />
-                {uploading ? "กำลังอัปโหลด..." : "อัปโหลด QR Code"}
-              </button>
-              {form.qrCodeImage && (
-                <button
-                  type="button"
-                  onClick={() => setForm((f) => ({ ...f, qrCodeImage: "" }))}
-                  className="text-xs text-red-500 hover:text-red-700 w-full text-center"
-                >
-                  ลบรูป QR
-                </button>
-              )}
-              <p className="text-xs text-gray-400">รองรับ JPG, PNG ขนาดไม่เกิน 10MB</p>
-            </div>
-          </div>
+      {/* Finance Table */}
+      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead className="bg-gray-50 border-b border-gray-200">
+              <tr>
+                <th className="text-left py-3 px-4 font-semibold">วันที่</th>
+                <th className="text-left py-3 px-4 font-semibold">หมวดหมู่</th>
+                <th className="text-left py-3 px-4 font-semibold">รายละเอียด</th>
+                <th className="text-left py-3 px-4 font-semibold">ประเภท</th>
+                <th className="text-right py-3 px-4 font-semibold">จำนวนเงิน</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.map((item) => (
+                <tr key={item._id} className="border-b border-gray-100 hover:bg-gray-50">
+                  <td className="py-3 px-4 text-gray-600">
+                    {new Date(item.date).toLocaleDateString("th-TH")}
+                  </td>
+                  <td className="py-3 px-4 font-medium">{item.category}</td>
+                  <td className="py-3 px-4">{item.description}</td>
+                  <td className="py-3 px-4">
+                    <span
+                      className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        item.type === "income"
+                          ? "bg-green-100 text-green-700"
+                          : "bg-red-100 text-red-700"
+                      }`}
+                    >
+                      {item.type === "income" ? "รายได้" : "ค่าใช้จ่าย"}
+                    </span>
+                  </td>
+                  <td
+                    className={`py-3 px-4 text-right font-semibold ${
+                      item.type === "income" ? "text-green-600" : "text-red-600"
+                    }`}
+                  >
+                    {item.type === "income" ? "+" : "-"}฿
+                    {item.amount.toLocaleString("th-TH", { maximumFractionDigits: 0 })}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
+      </div>
 
-        {/* Bank account */}
-        <div className="bg-white rounded-2xl border border-gray-200 p-6 space-y-4">
-          <div className="flex items-center gap-2">
-            <Building2 className="w-5 h-5 text-indigo-500" />
-            <h2 className="font-semibold text-gray-900">บัญชีธนาคาร</h2>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                <CreditCard className="w-3.5 h-3.5 inline mr-1" />
-                เลขที่บัญชี
-              </label>
-              <input
-                value={form.bankAccount}
-                onChange={(e) => setForm({ ...form, bankAccount: e.target.value })}
-                className={inputClass}
-                placeholder="เช่น 000-0-00000-0"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">ชื่อบัญชี</label>
-              <input
-                value={form.bankName}
-                onChange={(e) => setForm({ ...form, bankName: e.target.value })}
-                className={inputClass}
-                placeholder="เช่น นาย สมชาย ใจดี"
-              />
-            </div>
-            <div className="sm:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">ธนาคาร</label>
-              <div className="relative">
-                <select
-                  value={form.bankBrand}
-                  onChange={(e) => setForm({ ...form, bankBrand: e.target.value })}
-                  className={`${inputClass} appearance-none pr-10`}
-                >
-                  {THAI_BANKS.map((b) => (
-                    <option key={b.value} value={b.value}>{b.label}</option>
-                  ))}
-                </select>
-                <ChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-              </div>
-              {form.bankBrand && (
-                <div className="mt-2 flex items-center gap-2">
-                  <span
-                    className="inline-block w-3 h-3 rounded-full shrink-0"
-                    style={{ background: THAI_BANKS.find((b) => b.value === form.bankBrand)?.color ?? "#6b7280" }}
-                  />
-                  <span className="text-xs text-gray-500">{form.bankBrand}</span>
-                </div>
-              )}
-            </div>
-          </div>
+      {filtered.length === 0 && (
+        <div className="bg-white rounded-lg border border-gray-200 p-6 text-center">
+          <p className="text-gray-500">ไม่พบข้อมูลการเงิน</p>
         </div>
-
-        {/* Promptpay */}
-        <div className="bg-white rounded-2xl border border-gray-200 p-6 space-y-4">
-          <div className="flex items-center gap-2">
-            <Phone className="w-5 h-5 text-indigo-500" />
-            <h2 className="font-semibold text-gray-900">พร้อมเพย์</h2>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">เบอร์โทร / เลขบัตรประชาชน</label>
-            <input
-              value={form.promptpay}
-              onChange={(e) => setForm({ ...form, promptpay: e.target.value })}
-              className={inputClass}
-              placeholder="เช่น 0812345678"
-            />
-          </div>
-        </div>
-
-        {/* Save */}
-        <div className="flex items-center gap-4">
-          <button
-            type="submit"
-            disabled={saving}
-            className="flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 transition-colors disabled:opacity-50"
-          >
-            <Save className="w-4 h-4" />
-            {saving ? "กำลังบันทึก..." : "บันทึก"}
-          </button>
-          {saved && (
-            <span className="text-sm text-green-600 font-medium animate-pulse">
-              บันทึกเรียบร้อย ✓
-            </span>
-          )}
-        </div>
-      </form>
+      )}
     </div>
   );
 }
