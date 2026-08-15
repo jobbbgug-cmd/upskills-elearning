@@ -426,7 +426,7 @@ export default function CourseForm({ course, mode, courseType, teacherMode = fal
         <div className="space-y-2">
           {lessons.map((lesson, idx) => (
             <div key={lesson.id} className="flex items-end gap-2">
-              <div className="flex-1 min-w-0">
+              <div style={{ flex: "1.5" }} className="min-w-0">
                 <input
                   type="text"
                   value={lesson.name}
@@ -435,7 +435,7 @@ export default function CourseForm({ course, mode, courseType, teacherMode = fal
                   className={inputClass}
                 />
               </div>
-              <div className="flex-1 min-w-0">
+              <div style={{ flex: "1" }} className="min-w-0">
                 <input
                   type="url"
                   value={lesson.videoLink}
