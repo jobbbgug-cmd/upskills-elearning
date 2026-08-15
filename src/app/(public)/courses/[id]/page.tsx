@@ -327,7 +327,6 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
                             <div className="flex items-center gap-3 flex-1">
                               <ChevronDown className="w-5 h-5 text-purple-600" />
                               <span className="font-medium text-gray-900">{section}</span>
-                              <span className="text-xs text-gray-500">ต้องแสดง {sectionLessons.length} บทเรียน</span>
                             </div>
                             <div className="flex items-center gap-2 shrink-0 border border-purple-400 rounded-lg px-3 py-1.5 bg-white">
                               <span className="text-xs text-gray-700 font-medium">{sectionLessons.length} บทเรียน</span>
