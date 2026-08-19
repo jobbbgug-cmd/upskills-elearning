@@ -1,4 +1,4 @@
-import SuperAdminLayout from "@/app/super-admin/layout";
+import SuperAdminLayout from "@/app/(super-admin)/super-admin/layout";
 
 export default function SuperAdminDashboardLayout({
   children,
