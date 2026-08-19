@@ -42,6 +42,8 @@ export default function RegisterPage() {
   const [success, setSuccess] = useState(false);
   const [teachers, setTeachers] = useState<Teacher[]>([]);
   const [institutions, setInstitutions] = useState<Institution[]>([]);
+  const [emailError, setEmailError] = useState("");
+  const [checkingEmail, setCheckingEmail] = useState(false);
 
   useEffect(() => {
     fetch("/api/teachers").then((r) => r.json()).then((data) => {
@@ -54,12 +56,34 @@ export default function RegisterPage() {
 
   const selectedChannel = CONTACT_CHANNELS.find((c) => c.value === form.contactChannel);
 
+  const checkEmailExists = async (email: string) => {
+    if (!email.trim()) {
+      setEmailError("");
+      return;
+    }
+    setCheckingEmail(true);
+    try {
+      const res = await fetch(`/api/auth/check-email?email=${encodeURIComponent(email)}`);
+      const data = await res.json();
+      if (data.exists) {
+        setEmailError("อีเมลซ้ำกับในระบบ กรุณาสมัครโดยใช้อีเมลอื่น");
+      } else {
+        setEmailError("");
+      }
+    } catch (error) {
+      console.error("Failed to check email:", error);
+    } finally {
+      setCheckingEmail(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
     if (!form.name.trim()) { setError("กรุณากรอกชื่อ-นามสกุล"); return; }
     if (!form.email.trim()) { setError("กรุณากรอกอีเมล"); return; }
+    if (emailError) { setError(emailError); return; }
     if (!form.contactChannel) { setError("กรุณาเลือกช่องทางการรับ Username/Password"); return; }
     if (!form.contactId.trim()) { setError("กรุณาระบุรายละเอียดช่องทางการติดต่อ"); return; }
 
@@ -242,12 +266,19 @@ export default function RegisterPage() {
               />
 
               {/* Email */}
-              <input
-                type="email" required value={form.email}
-                onChange={(e) => setForm({ ...form, email: e.target.value })}
-                placeholder="อีเมล"
-                className="w-full bg-gray-100 rounded-2xl px-4 py-3.5 text-sm text-gray-700 placeholder-gray-400 outline-none focus:ring-2 focus:ring-violet-400"
-              />
+              <div>
+                <input
+                  type="email" required value={form.email}
+                  onChange={(e) => setForm({ ...form, email: e.target.value })}
+                  onBlur={(e) => checkEmailExists(e.target.value)}
+                  placeholder="อีเมล"
+                  className={`w-full bg-gray-100 rounded-2xl px-4 py-3.5 text-sm text-gray-700 placeholder-gray-400 outline-none focus:ring-2 ${
+                    emailError ? "focus:ring-red-400" : "focus:ring-violet-400"
+                  }`}
+                />
+                {emailError && <p className="text-red-600 text-sm mt-2">{emailError}</p>}
+                {checkingEmail && <p className="text-gray-400 text-sm mt-2">กำลังตรวจสอบ...</p>}
+              </div>
 
               {/* Contact channel */}
               <div className="space-y-3">
@@ -330,12 +361,19 @@ export default function RegisterPage() {
               />
 
               {/* Email */}
-              <input
-                type="email" required value={form.email}
-                onChange={(e) => setForm({ ...form, email: e.target.value })}
-                placeholder="อีเมล"
-                className="w-full bg-gray-100 rounded-2xl px-4 py-3.5 text-sm text-gray-700 placeholder-gray-400 outline-none focus:ring-2 focus:ring-violet-400"
-              />
+              <div>
+                <input
+                  type="email" required value={form.email}
+                  onChange={(e) => setForm({ ...form, email: e.target.value })}
+                  onBlur={(e) => checkEmailExists(e.target.value)}
+                  placeholder="อีเมล"
+                  className={`w-full bg-gray-100 rounded-2xl px-4 py-3.5 text-sm text-gray-700 placeholder-gray-400 outline-none focus:ring-2 ${
+                    emailError ? "focus:ring-red-400" : "focus:ring-violet-400"
+                  }`}
+                />
+                {emailError && <p className="text-red-600 text-sm mt-2">{emailError}</p>}
+                {checkingEmail && <p className="text-gray-400 text-sm mt-2">กำลังตรวจสอบ...</p>}
+              </div>
 
               {/* Institution */}
               {institutions.length > 0 && (
