@@ -27,6 +27,8 @@ export default function OnlineRegistrationsPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [copied, setCopied] = useState(false);
   const [approving, setApproving] = useState(false);
+  const [successModal, setSuccessModal] = useState<{ open: boolean; username: string; password: string }>({ open: false, username: "", password: "" });
+  const [successCopied, setSuccessCopied] = useState(false);
 
   useEffect(() => {
     fetchRegistrations();
@@ -67,6 +69,7 @@ export default function OnlineRegistrationsPage() {
         }),
       });
       if (res.ok) {
+        setSuccessModal({ open: true, username: approvalModal.email, password: approvalModal.password });
         setApprovalModal({ open: false, id: "", email: "", password: "" });
         fetchRegistrations();
       }
@@ -324,13 +327,73 @@ export default function OnlineRegistrationsPage() {
                 disabled={approving || !approvalModal.password}
                 className="flex-1 py-2.5 text-white font-semibold rounded-xl bg-green-600 hover:bg-green-700 disabled:opacity-50 transition-colors text-sm"
               >
-                {approving ? "กำลังประมวลผล..." : "อนุมัติ"}
+                {approving ? "กำลังประมวลผล..." : "บันทึก"}
               </button>
               <button
                 onClick={() => setApprovalModal({ open: false, id: "", email: "", password: "" })}
                 className="flex-1 py-2.5 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 transition-colors text-sm"
               >
                 ยกเลิก
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Success Modal */}
+      {successModal.open && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md">
+            <div className="px-6 py-5 text-center border-b border-gray-100">
+              <h2 className="text-2xl font-bold text-gray-900">ยินดีต้อนรับสู่ UPSkills! 🎉</h2>
+              <p className="text-xs text-gray-400 mt-1">อนุมัติสำเร็จ</p>
+            </div>
+
+            <div className="px-6 py-6 space-y-4">
+              <div className="bg-gray-50 rounded-2xl p-4 space-y-3">
+                <div>
+                  <p className="text-xs text-gray-500 font-semibold mb-1">ชื่อผู้ใช้:</p>
+                  <p className="text-sm font-mono text-gray-900">{successModal.username}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500 font-semibold mb-1">รหัสผ่าน:</p>
+                  <p className="text-sm font-mono text-gray-900">{successModal.password}</p>
+                </div>
+                <div className="border-t border-gray-200 pt-3">
+                  <p className="text-xs text-gray-500 font-semibold mb-1">เข้าสู่ระบบ:</p>
+                  <p className="text-sm font-mono text-blue-600">{typeof window !== "undefined" ? `${window.location.origin}/login` : "http://localhost:3000/login"}</p>
+                </div>
+              </div>
+
+              <button
+                onClick={() => {
+                  const text = `ยินดีต้อนรับสู่ UPSkills! 🎉\nชื่อผู้ใช้: ${successModal.username}\nรหัสผ่าน: ${successModal.password}\nเข้าสู่ระบบ: ${typeof window !== "undefined" ? `${window.location.origin}/login` : "http://localhost:3000/login"}`;
+                  navigator.clipboard.writeText(text);
+                  setSuccessCopied(true);
+                  setTimeout(() => setSuccessCopied(false), 2000);
+                }}
+                className="w-full py-2.5 text-white font-semibold rounded-xl bg-blue-600 hover:bg-blue-700 transition-colors text-sm flex items-center justify-center gap-2"
+              >
+                {successCopied ? (
+                  <>
+                    <Check className="w-4 h-4" />
+                    คัดลอกแล้ว
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-4 h-4" />
+                    คัดลอกข้อมูล
+                  </>
+                )}
+              </button>
+            </div>
+
+            <div className="px-6 py-5 border-t border-gray-100">
+              <button
+                onClick={() => setSuccessModal({ open: false, username: "", password: "" })}
+                className="w-full py-2.5 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 transition-colors text-sm"
+              >
+                ปิด
               </button>
             </div>
           </div>
