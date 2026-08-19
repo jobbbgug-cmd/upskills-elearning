@@ -28,6 +28,7 @@ export default function RegisterPage() {
     name: "",
     email: "",
     role: "student" as "student" | "teacher" | "parent",
+    learningType: "" as "online" | "onsite" | "both" | "",
     gradeLevel: "" as GradeLevel | "",
     teacherId: "",
     teacherName: "",
@@ -56,6 +57,7 @@ export default function RegisterPage() {
     e.preventDefault();
     setError("");
     if (institutions.length > 0 && !form.institutionId) { setError("กรุณาเลือกสถาบัน"); return; }
+    if (form.role === "student" && !form.learningType) { setError("กรุณาเลือกประเภทการเรียน"); return; }
     if (!form.contactChannel) { setError("กรุณาเลือกช่องทางการรับ Username/Password"); return; }
     if (!form.contactId.trim()) { setError("กรุณาระบุรายละเอียดช่องทางการติดต่อ"); return; }
     setLoading(true);
@@ -138,6 +140,39 @@ export default function RegisterPage() {
               );
             })}
           </div>
+
+          {/* Learning Type — student only */}
+          {form.role === "student" && (
+            <div className="space-y-2">
+              <label className="block text-sm font-semibold text-gray-700">
+                ประเภทการเรียน <span className="text-red-500">*</span>
+              </label>
+              <div className="grid grid-cols-3 gap-2">
+                {([
+                  { value: "online", label: "คอร์สออนไลน์", emoji: "💻" },
+                  { value: "onsite", label: "คอร์ส Onsite", emoji: "🏫" },
+                  { value: "both", label: "ทั้งสอง", emoji: "📚" },
+                ] as const).map((type) => {
+                  const active = form.learningType === type.value;
+                  return (
+                    <button
+                      key={type.value}
+                      type="button"
+                      onClick={() => setForm({ ...form, learningType: type.value })}
+                      className={`flex flex-col items-center gap-2 py-3 px-2 rounded-xl border-2 transition-all text-center ${
+                        active ? "border-violet-500 bg-violet-50" : "border-gray-200 hover:border-gray-300 bg-white"
+                      }`}
+                    >
+                      <span className="text-xl">{type.emoji}</span>
+                      <span className={`text-xs font-semibold ${active ? "text-violet-700" : "text-gray-600"}`}>
+                        {type.label}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
           {/* Name */}
           <input
