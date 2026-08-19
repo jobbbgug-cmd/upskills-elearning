@@ -66,9 +66,12 @@ export async function PATCH(
     // If approving, create user with "online" role
     if (status === "approved" && username && password) {
       try {
+        console.log("Creating user with:", { name: updated.name, email: updated.email, username, role: "online" });
         const existingUser = await User.findOne({ email: updated.email });
-        if (!existingUser) {
-          await User.create({
+        if (existingUser) {
+          console.log("User already exists:", existingUser.email);
+        } else {
+          const newUser = await User.create({
             name: updated.name,
             email: updated.email,
             username,
@@ -77,6 +80,7 @@ export async function PATCH(
             status: "approved",
             createdAt: new Date(),
           });
+          console.log("User created successfully:", newUser._id, newUser.email);
         }
       } catch (userError) {
         console.error("Error creating user:", userError);
