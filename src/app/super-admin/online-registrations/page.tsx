@@ -308,9 +308,6 @@ export default function OnlineRegistrationsPage() {
                     Gen
                   </button>
                 </div>
-                {approvalModal.password && (
-                  <p className="text-xs mt-2 font-mono px-3 py-1.5 rounded-lg bg-green-50 text-green-700">{approvalModal.password}</p>
-                )}
               </div>
 
               <div>
