@@ -293,22 +293,9 @@ export default function RegisterPage() {
           {/* Institution Mode Form */}
           {learningMode === "institution" && (
             <>
-              {/* Role Selection with Visual */}
-              <div className="space-y-6">
-                {/* Visual */}
-                <div className="flex items-center justify-center">
-                  <div className="w-64 h-64 bg-gradient-to-br from-violet-100 to-indigo-100 rounded-3xl border-4 border-gray-300 flex items-center justify-center shadow-lg">
-                    <div className="text-center">
-                      <p className="text-3xl font-bold text-gray-700 text-center leading-tight">
-                        {form.role === "student" ? "เรียน\nออนไลน์" : form.role === "teacher" ? "สอน\nออนไลน์" : "ติดตาม\nลูก"}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Role Buttons */}
-                <div className="space-y-3 flex flex-col">
-                  <p className="text-sm font-semibold text-gray-600">เรียนในสถาบัน</p>
+              {/* Role Selection */}
+              <div className="space-y-3 flex flex-col">
+                <p className="text-sm font-semibold text-gray-600">เลือกบทบาท</p>
                   {([
                     { value: "student", label: "นักเรียน", icon: User },
                     { value: "parent", label: "ผู้ปกครอง", icon: Heart },
@@ -333,7 +320,6 @@ export default function RegisterPage() {
                     );
                   })}
                 </div>
-              </div>
 
               {/* Name */}
               <input
