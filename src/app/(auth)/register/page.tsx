@@ -24,6 +24,7 @@ const CONTACT_CHANNELS = [
 ];
 
 export default function RegisterPage() {
+  const [learningMode, setLearningMode] = useState<"selection" | "online" | "institution">("selection");
   const [form, setForm] = useState({
     name: "",
     email: "",
