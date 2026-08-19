@@ -124,18 +124,18 @@ export default function OnlineRegistrationsPage() {
         {/* Filter Buttons */}
         <div className="flex gap-2 flex-wrap">
           {([
-            { value: "all", label: "ทั้งหมด", color: "gray" },
-            { value: "pending", label: "รอตรวจสอบ", color: "yellow" },
-            { value: "approved", label: "อนุมัติแล้ว", color: "green" },
-            { value: "rejected", label: "ปฏิเสธ", color: "red" },
+            { value: "all" as const, label: "ทั้งหมด", bgActive: "bg-gray-600", bgInactive: "bg-gray-100" },
+            { value: "pending" as const, label: "รอตรวจสอบ", bgActive: "bg-yellow-600", bgInactive: "bg-yellow-50" },
+            { value: "approved" as const, label: "อนุมัติแล้ว", bgActive: "bg-green-600", bgInactive: "bg-green-50" },
+            { value: "rejected" as const, label: "ปฏิเสธ", bgActive: "bg-red-600", bgInactive: "bg-red-50" },
           ] as const).map((f) => (
             <button
               key={f.value}
               onClick={() => setFilter(f.value)}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                 filter === f.value
-                  ? `bg-${f.color}-600 text-white`
-                  : `bg-gray-100 text-gray-700 hover:bg-gray-200`
+                  ? `${f.bgActive} text-white`
+                  : `${f.bgInactive} text-gray-700 hover:text-gray-900`
               }`}
             >
               {f.label}
