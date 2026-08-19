@@ -333,11 +333,11 @@ export default function RegisterPage() {
                       <button
                         key={ch.value} type="button"
                         onClick={() => setForm({ ...form, contactChannel: ch.value, contactId: "" })}
-                        className={`flex flex-col items-center gap-1 py-3 px-2 rounded-2xl border-2 transition-all text-center ${
+                        className={`flex flex-col items-center gap-2 py-4 px-3 rounded-3xl border-2 transition-all text-center ${
                           active ? "border-violet-500 bg-violet-50" : "border-gray-200 hover:border-gray-300 bg-white"
                         }`}
                       >
-                        <span className="text-lg">{ch.emoji}</span>
+                        <img src={ch.logo} alt={ch.label} className="w-8 h-8 object-contain" />
                         <span className={`text-xs font-semibold ${active ? "text-violet-700" : "text-gray-600"}`}>
                           {ch.label}
                         </span>
@@ -505,11 +505,11 @@ export default function RegisterPage() {
                       <button
                         key={ch.value} type="button"
                         onClick={() => setForm({ ...form, contactChannel: ch.value, contactId: "" })}
-                        className={`flex flex-col items-center gap-1 py-3 px-2 rounded-2xl border-2 transition-all text-center ${
+                        className={`flex flex-col items-center gap-2 py-4 px-3 rounded-3xl border-2 transition-all text-center ${
                           active ? "border-violet-500 bg-violet-50" : "border-gray-200 hover:border-gray-300 bg-white"
                         }`}
                       >
-                        <span className="text-lg">{ch.emoji}</span>
+                        <img src={ch.logo} alt={ch.label} className="w-8 h-8 object-contain" />
                         <span className={`text-xs font-semibold ${active ? "text-violet-700" : "text-gray-600"}`}>
                           {ch.label}
                         </span>
