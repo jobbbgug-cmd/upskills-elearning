@@ -270,7 +270,7 @@ export default function RegisterPage() {
                 <label className="block text-sm font-semibold text-gray-700">
                   เลือกบทบาท <span className="text-red-500">*</span>
                 </label>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="flex gap-3">
                   {([
                     { value: "student", label: "นักเรียน", icon: User },
                     { value: "teacher", label: "ครู", icon: GraduationCap },
@@ -282,7 +282,7 @@ export default function RegisterPage() {
                         key={r.value}
                         type="button"
                         onClick={() => setForm({ ...form, onlineRole: r.value })}
-                        className={`flex items-center justify-center gap-2 px-4 py-3.5 rounded-2xl border-2 transition-all font-semibold ${
+                        className={`flex-1 flex items-center justify-center gap-2 px-4 py-3.5 rounded-2xl border-2 transition-all font-semibold ${
                           active
                             ? "border-violet-500 bg-violet-50 text-violet-700"
                             : "border-gray-300 bg-white text-gray-700 hover:border-gray-400"
@@ -364,8 +364,9 @@ export default function RegisterPage() {
           {learningMode === "institution" && (
             <>
               {/* Role Selection */}
-              <div className="space-y-3 flex flex-col">
-                <p className="text-sm font-semibold text-gray-600">เลือกบทบาท</p>
+              <div>
+                <p className="text-sm font-semibold text-gray-600 mb-3">เลือกบทบาท</p>
+                <div className="flex gap-3">
                   {([
                     { value: "student", label: "นักเรียน", icon: User },
                     { value: "parent", label: "ผู้ปกครอง", icon: Heart },
@@ -378,7 +379,7 @@ export default function RegisterPage() {
                         key={r.value}
                         type="button"
                         onClick={() => setForm({ ...form, role: r.value })}
-                        className={`flex items-center gap-3 w-full px-6 py-4 rounded-2xl border-2 transition-all font-semibold ${
+                        className={`flex-1 flex items-center justify-center gap-2 px-4 py-3.5 rounded-2xl border-2 transition-all font-semibold ${
                           active
                             ? "border-violet-500 bg-violet-50 text-violet-700 shadow-md"
                             : "border-gray-300 bg-white text-gray-700 hover:border-gray-400"
@@ -390,6 +391,7 @@ export default function RegisterPage() {
                     );
                   })}
                 </div>
+              </div>
 
               {/* Name */}
               <input
