@@ -290,13 +290,59 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
     });
   }, [courses, activeTab, selectedDifficulties, selectedDurations, selectedCategory, searchQuery]);
 
-  // Tab counts show TOTAL counts (always unfiltered)
+  // Calculate dynamic tab counts based on selected filters
+  const getFilteredCourses = (filterType?: string) => {
+    return courses.filter((c) => {
+      // Apply search filter
+      if (searchQuery.trim()) {
+        const query = searchQuery.toLowerCase();
+        if (!c.title.toLowerCase().includes(query)) {
+          return false;
+        }
+      }
+
+      // Apply difficulty filter
+      if (selectedDifficulties.size > 0) {
+        if (!selectedDifficulties.has((c as any).difficulty || "medium")) {
+          return false;
+        }
+      }
+
+      // Apply duration filter
+      if (selectedDurations.size > 0) {
+        let durationMatches = false;
+        const duration = c.duration || 0;
+
+        if (selectedDurations.has("0-60") && duration >= 0 && duration <= 60) durationMatches = true;
+        if (selectedDurations.has("60-120") && duration > 60 && duration <= 120) durationMatches = true;
+        if (selectedDurations.has("120-240") && duration > 120 && duration <= 240) durationMatches = true;
+        if (selectedDurations.has("240+") && duration > 240) durationMatches = true;
+
+        if (!durationMatches) return false;
+      }
+
+      // Apply category filter
+      if (selectedCategory) {
+        if (!((c as any).categoryName && (c as any).categoryName.toLowerCase() === selectedCategory.toLowerCase())) {
+          return false;
+        }
+      }
+
+      // Apply type filter if specified
+      if (filterType === "online" && (c.type || "online") !== "online") return false;
+      if (filterType === "live-online" && c.type !== "live online") return false;
+      if (filterType === "onsite" && c.type !== "onsite") return false;
+
+      return true;
+    });
+  };
+
   const tabs = [
-    { id: "all", label: "ทั้งหมด", count: courses.length + learningPaths.length },
-    { id: "online", label: "คอร์สเรียน", count: courses.filter((c) => (c.type || "online") === "online").length },
-    { id: "live-online", label: "คอร์สเรียน Live", count: courses.filter((c) => c.type === "live online").length },
-    { id: "paths", label: "เส้นทางการเรียน", count: learningPaths.length },
-    { id: "onsite", label: "คอร์สเรียน Onsite", count: courses.filter((c) => c.type === "onsite").length },
+    { id: "all", label: "ทั้งหมด", count: getFilteredCourses().length + filteredLearningPaths.length },
+    { id: "online", label: "คอร์สเรียน", count: getFilteredCourses("online").length },
+    { id: "live-online", label: "คอร์สเรียน Live", count: getFilteredCourses("live-online").length },
+    { id: "paths", label: "เส้นทางการเรียน", count: filteredLearningPaths.length },
+    { id: "onsite", label: "คอร์สเรียน Onsite", count: getFilteredCourses("onsite").length },
   ] as const;
 
   return (
