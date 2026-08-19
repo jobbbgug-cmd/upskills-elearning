@@ -19,7 +19,7 @@ export default function StudentOnlineDashboard() {
 
   if (loading) return <div className="text-center py-20">กำลังโหลด...</div>;
 
-  if (!user || user.role !== "online") {
+  if (!user || user.role !== "student-online") {
     return <div className="text-center py-20 text-red-500">คุณไม่มีสิทธิ์เข้าถึงหน้านี้</div>;
   }
 

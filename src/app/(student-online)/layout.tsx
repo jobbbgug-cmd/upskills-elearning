@@ -10,7 +10,7 @@ export default async function StudentOnlineLayout({
   children: React.ReactNode;
 }) {
   const auth = await getAuthUser();
-  if (!auth || auth.role !== "online") {
+  if (!auth || auth.role !== "student-online") {
     redirect("/login");
   }
 
