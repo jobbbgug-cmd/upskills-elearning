@@ -14,7 +14,7 @@ export interface IUserDocument extends Document {
   email: string;
   username?: string;
   password: string;
-  role: "student" | "teacher" | "parent" | "admin" | "owner" | "super_admin" | "online" | "teacher_online";
+  role: "student" | "teacher" | "parent" | "admin" | "owner" | "super_admin" | "online" | "teacher_online" | "student-online" | "teacher-online";
   status: "pending" | "approved" | "rejected";
   gradeLevel?: string;
   profileImage?: string;
@@ -61,7 +61,7 @@ const UserSchema = new Schema<IUserDocument>(
     email:          { type: String, required: true, unique: true, lowercase: true, trim: true },
     username:       { type: String, default: "" },
     password:       { type: String, default: "" },
-    role:           { type: String, enum: ["student", "teacher", "parent", "admin", "owner", "super_admin", "online", "teacher_online"], default: "student" },
+    role:           { type: String, enum: ["student", "teacher", "parent", "admin", "owner", "super_admin", "online", "teacher_online", "student-online", "teacher-online"], default: "student" },
     status:         { type: String, enum: ["pending", "approved", "rejected"], default: "pending" },
     gradeLevel:     { type: String },
     profileImage:   { type: String, default: "" },
