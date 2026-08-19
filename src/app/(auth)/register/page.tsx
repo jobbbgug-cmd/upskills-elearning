@@ -23,6 +23,12 @@ const CONTACT_CHANNELS = [
   { value: "SMS",       label: "SMS",       logo: "/logos/sms.png",       emoji: "📱", placeholder: "เบอร์โทรศัพท์ เช่น 0812345678" },
 ];
 
+const ONLINE_CONTACT_CHANNELS = [
+  { value: "LINE",      label: "LINE",      logo: "/logos/LINE.png",      emoji: "💬", placeholder: "LINE ID เช่น @username หรือ 0812345678" },
+  { value: "Email",     label: "Email",     logo: "/logos/Email.png",     emoji: "✉️", placeholder: "อีเมลสำรอง เช่น name@gmail.com" },
+  { value: "Instagram", label: "Instagram", logo: "/logos/Instagram.png", emoji: "📸", placeholder: "Instagram @username" },
+];
+
 export default function RegisterPage() {
   const [learningMode, setLearningMode] = useState<"selection" | "online" | "institution">("selection");
   const [form, setForm] = useState({
@@ -321,7 +327,7 @@ export default function RegisterPage() {
 
                 {/* Channel grid */}
                 <div className="grid grid-cols-3 gap-2">
-                  {CONTACT_CHANNELS.map((ch) => {
+                  {ONLINE_CONTACT_CHANNELS.map((ch) => {
                     const active = form.contactChannel === ch.value;
                     return (
                       <button
