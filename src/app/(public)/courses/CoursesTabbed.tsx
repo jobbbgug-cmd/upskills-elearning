@@ -57,6 +57,7 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
   const [categories, setCategories] = useState<Category[]>([]);
   const [learningPaths, setLearningPaths] = useState<LearningPath[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedLearningPath, setSelectedLearningPath] = useState<string | null>(null);
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
   const [currentPage, setCurrentPage] = useState<Record<string, number>>({
     online: 1,
@@ -231,9 +232,16 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
         return false;
       }
 
+      // Learning path selection filter
+      if (selectedLearningPath) {
+        if (path._id !== selectedLearningPath) {
+          return false;
+        }
+      }
+
       return true;
     });
-  }, [learningPaths, selectedDifficulties, selectedDurations, searchQuery, selectedCategory]);
+  }, [learningPaths, selectedDifficulties, selectedDurations, searchQuery, selectedCategory, selectedLearningPath]);
 
   const filteredCourses = useMemo(() => {
     return courses.filter((c) => {
@@ -432,14 +440,20 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
             {activeTab === "paths" ? (
               learningPaths.length > 0 ? (
                 learningPaths.map((path) => (
-                  <Link
+                  <div
                     key={path._id}
-                    href={`/learning-paths/${path._id}`}
-                    className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-indigo-50 hover:text-indigo-600 transition-colors group"
+                    className="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-indigo-50 transition-colors group"
                   >
-                    <input type="checkbox" className="w-4 h-4 rounded cursor-pointer" readOnly />
-                    <span className="text-sm text-gray-700 group-hover:text-indigo-600 flex-1">{path.title}</span>
-                  </Link>
+                    <span className="flex items-center gap-2">
+                      <input 
+                        type="checkbox" 
+                        className="w-4 h-4 rounded cursor-pointer" 
+                        checked={selectedLearningPath === path._id}
+                        onChange={() => setSelectedLearningPath(selectedLearningPath === path._id ? null : path._id)}
+                      />
+                      <span className="text-sm text-gray-700 group-hover:text-indigo-600">{path.title}</span>
+                    </span>
+                  </div>
                 ))
               ) : (
                 <p className="text-sm text-gray-500">ไม่มีเส้นทาง</p>
