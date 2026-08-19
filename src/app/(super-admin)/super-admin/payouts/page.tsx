@@ -3,10 +3,19 @@
 import { useState, useEffect } from "react";
 import { DollarSign } from "lucide-react";
 
+interface Institution {
+  _id: string;
+  name: string;
+  slug: string;
+}
+
 interface Payout {
   _id: string;
-  institutionId: string;
-  amount: number;
+  institutionId: Institution | string;
+  periodLabel?: string;
+  grossRevenue?: number;
+  netPayout?: number;
+  amount?: number;
   status: string;
   createdAt: string;
 }
@@ -60,22 +69,29 @@ export default function PayoutsPage() {
               </tr>
             </thead>
             <tbody>
-              {payouts.map((payout) => (
-                <tr key={payout._id} className="border-b border-gray-100 hover:bg-gray-50">
-                  <td className="py-3 px-4 font-medium">{payout.institutionId}</td>
-                  <td className="py-3 px-4 text-right">฿{(payout.amount || 0).toLocaleString()}</td>
-                  <td className="py-3 px-4">
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                      payout.status === "paid" ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"
-                    }`}>
-                      {payout.status === "paid" ? "เบิกแล้ว" : "รอเบิก"}
-                    </span>
-                  </td>
-                  <td className="py-3 px-4 text-gray-600">
-                    {new Date(payout.createdAt).toLocaleDateString("th-TH")}
-                  </td>
-                </tr>
-              ))}
+              {payouts.map((payout) => {
+                const institutionName = typeof payout.institutionId === "object"
+                  ? payout.institutionId.name
+                  : payout.institutionId;
+                const amount = payout.netPayout || payout.amount || 0;
+
+                return (
+                  <tr key={payout._id} className="border-b border-gray-100 hover:bg-gray-50">
+                    <td className="py-3 px-4 font-medium">{institutionName}</td>
+                    <td className="py-3 px-4 text-right">฿{amount.toLocaleString()}</td>
+                    <td className="py-3 px-4">
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        payout.status === "paid" ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"
+                      }`}>
+                        {payout.status === "paid" ? "เบิกแล้ว" : "รอเบิก"}
+                      </span>
+                    </td>
+                    <td className="py-3 px-4 text-gray-600">
+                      {new Date(payout.createdAt).toLocaleDateString("th-TH")}
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
