@@ -19,13 +19,13 @@ const CONTACT_CHANNELS = [
   { value: "Facebook",  label: "Facebook",  logo: "/logos/Facebook.png",  emoji: "📘", placeholder: "ชื่อ Facebook หรือ URL โปรไฟล์" },
   { value: "Instagram", label: "Instagram", logo: "/logos/Instagram.png", emoji: "📸", placeholder: "Instagram @username" },
   { value: "WhatsApp",  label: "WhatsApp",  logo: "/logos/WhatsApp.png",  emoji: "📞", placeholder: "เบอร์โทร WhatsApp เช่น 0812345678" },
-  { value: "Email",     label: "Email",     logo: "/logos/Email.png",     emoji: "✉️", placeholder: "อีเมลสำรอง เช่น name@gmail.com" },
+  { value: "Email",     label: "Email",     logo: "/logos/Email.svg",     emoji: "✉️", placeholder: "อีเมลสำรอง เช่น name@gmail.com" },
   { value: "SMS",       label: "SMS",       logo: "/logos/sms.png",       emoji: "📱", placeholder: "เบอร์โทรศัพท์ เช่น 0812345678" },
 ];
 
 const ONLINE_CONTACT_CHANNELS = [
   { value: "LINE",      label: "LINE",      logo: "/logos/LINE.png",      emoji: "💬", placeholder: "LINE ID เช่น @username หรือ 0812345678" },
-  { value: "Email",     label: "Email",     logo: "/logos/Email.png",     emoji: "✉️", placeholder: "อีเมลสำรอง เช่น name@gmail.com" },
+  { value: "Email",     label: "Email",     logo: "/logos/Email.svg",     emoji: "✉️", placeholder: "อีเมลสำรอง เช่น name@gmail.com" },
   { value: "Instagram", label: "Instagram", logo: "/logos/Instagram.png", emoji: "📸", placeholder: "Instagram @username" },
 ];
 
