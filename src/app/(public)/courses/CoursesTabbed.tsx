@@ -233,7 +233,7 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
 
       return true;
     });
-  }, [learningPaths, selectedDifficulties, selectedDurations, searchQuery]);
+  }, [learningPaths, selectedDifficulties, selectedDurations, searchQuery, selectedCategory]);
 
   const filteredCourses = useMemo(() => {
     return courses.filter((c) => {
