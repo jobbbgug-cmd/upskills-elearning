@@ -394,11 +394,13 @@ export default function OnlineRegistrationsPage() {
       {/* Delete Confirmation */}
       <ConfirmDialog
         open={deleteConfirm.open}
-        onOpenChange={(open) => setDeleteConfirm({ ...deleteConfirm, open })}
         title="ยืนยันการลบ"
-        description={`ลบการสมัครของ ${deleteConfirm.name}?`}
+        message={`ลบการสมัครของ ${deleteConfirm.name}?`}
+        type="danger"
+        confirmLabel="ลบ"
+        cancelLabel="ยกเลิก"
         onConfirm={() => handleDelete(deleteConfirm.id)}
-        loading={updating === deleteConfirm.id}
+        onCancel={() => setDeleteConfirm({ ...deleteConfirm, open: false })}
       />
     </div>
   );
