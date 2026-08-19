@@ -128,21 +128,21 @@ export default function RegisterPage() {
 
         <form onSubmit={handleSubmit} className="space-y-8">
           {/* Role Selection with Visual */}
-          <div className="grid md:grid-cols-2 gap-8 items-start">
-            {/* Left: Visual */}
+          <div className="space-y-6">
+            {/* Visual */}
             <div className="flex items-center justify-center">
-              <div className="w-48 h-48 bg-gradient-to-br from-violet-100 to-indigo-100 rounded-2xl border-4 border-gray-300 flex items-center justify-center">
+              <div className="w-64 h-64 bg-gradient-to-br from-violet-100 to-indigo-100 rounded-3xl border-4 border-gray-300 flex items-center justify-center shadow-lg">
                 <div className="text-center">
-                  <p className="text-lg font-bold text-gray-700 text-center">
+                  <p className="text-3xl font-bold text-gray-700 text-center leading-tight">
                     {form.role === "student" ? "เรียน\nออนไลน์" : form.role === "teacher" ? "สอน\nออนไลน์" : "ติดตาม\nลูก"}
                   </p>
                 </div>
               </div>
             </div>
 
-            {/* Right: Role Buttons */}
+            {/* Role Buttons */}
             <div className="space-y-3 flex flex-col">
-              <p className="text-sm font-semibold text-gray-600 mb-2">เรียนในสถาบัน</p>
+              <p className="text-sm font-semibold text-gray-600">เรียนในสถาบัน</p>
               {([
                 { value: "student", label: "นักเรียน", icon: User },
                 { value: "parent", label: "ผู้ปกครอง", icon: Heart },
