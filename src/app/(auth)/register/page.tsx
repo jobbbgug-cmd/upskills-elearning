@@ -201,7 +201,7 @@ export default function RegisterPage() {
                   <Building2 className="w-6 h-6 text-purple-600" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-gray-900 text-lg">เรียนภายใต้สถาบัน</h3>
+                  <h3 className="font-bold text-gray-900 text-lg">คอร์สเรียนภายใต้สถาบันสอนพิเศษ</h3>
                   <p className="text-sm text-gray-600 mt-1">การ สอน&เรียน กับคณะครูในสถาบันทั้ง online และ offline</p>
                 </div>
               </div>
@@ -228,9 +228,9 @@ export default function RegisterPage() {
       </div>
 
       <div className="bg-white rounded-3xl shadow-xl p-8 md:p-12">
-        {/* Header with back button for online mode */}
+        {/* Header with back button */}
         <div className="text-center mb-10">
-          {learningMode === "online" && (
+          {(learningMode === "online" || learningMode === "institution") && (
             <button
               onClick={() => setLearningMode("selection")}
               className="mb-4 inline-flex items-center gap-2 text-violet-600 hover:text-violet-700 font-medium"
