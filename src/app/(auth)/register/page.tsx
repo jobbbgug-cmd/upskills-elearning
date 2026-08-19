@@ -282,14 +282,14 @@ export default function RegisterPage() {
                         key={r.value}
                         type="button"
                         onClick={() => setForm({ ...form, onlineRole: r.value })}
-                        className={`flex-1 flex items-center justify-center gap-2 px-4 py-3.5 rounded-2xl border-2 transition-all font-semibold ${
+                        className={`flex-1 flex flex-col items-center justify-center gap-3 px-4 py-5 rounded-3xl border-2 transition-all font-semibold ${
                           active
                             ? "border-violet-500 bg-violet-50 text-violet-700"
                             : "border-gray-300 bg-white text-gray-700 hover:border-gray-400"
                         }`}
                       >
-                        <Icon className={`w-5 h-5 ${active ? "text-violet-600" : "text-gray-400"}`} />
-                        {r.label}
+                        <Icon className={`w-6 h-6 ${active ? "text-violet-600" : "text-gray-400"}`} />
+                        <span className="text-sm">{r.label}</span>
                       </button>
                     );
                   })}
@@ -379,14 +379,14 @@ export default function RegisterPage() {
                         key={r.value}
                         type="button"
                         onClick={() => setForm({ ...form, role: r.value })}
-                        className={`flex-1 flex items-center justify-center gap-2 px-4 py-3.5 rounded-2xl border-2 transition-all font-semibold ${
+                        className={`flex-1 flex flex-col items-center justify-center gap-3 px-4 py-5 rounded-3xl border-2 transition-all font-semibold ${
                           active
                             ? "border-violet-500 bg-violet-50 text-violet-700 shadow-md"
                             : "border-gray-300 bg-white text-gray-700 hover:border-gray-400"
                         }`}
                       >
-                        <Icon className={`w-5 h-5 ${active ? "text-violet-600" : "text-gray-400"}`} />
-                        {r.label}
+                        <Icon className={`w-6 h-6 ${active ? "text-violet-600" : "text-gray-400"}`} />
+                        <span className="text-sm">{r.label}</span>
                       </button>
                     );
                   })}
