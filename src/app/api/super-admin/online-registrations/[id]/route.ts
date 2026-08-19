@@ -29,8 +29,8 @@ async function initializeModel() {
 }
 
 export async function PATCH(
-  req: NextRequest,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  { params }: any
 ) {
   try {
     const auth = await getAuthUser();
@@ -41,7 +41,7 @@ export async function PATCH(
     await connectDB();
     await initializeModel();
 
-    const body = await req.json();
+    const body = await request.json();
     const { status, username, password } = body;
 
     if (!status || !["pending", "approved", "rejected"].includes(status)) {
@@ -100,8 +100,8 @@ export async function PATCH(
 }
 
 export async function DELETE(
-  req: NextRequest,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  { params }: any
 ) {
   try {
     const auth = await getAuthUser();
