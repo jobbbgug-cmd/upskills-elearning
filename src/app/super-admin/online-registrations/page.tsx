@@ -17,7 +17,7 @@ export default function OnlineRegistrationsPage() {
   const [registrations, setRegistrations] = useState<OnlineRegistration[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [filter, setFilter] = useState<"all" | "pending" | "approved" | "rejected">("all");
+  const [filter, setFilter] = useState<"all" | "pending" | "approved" | "rejected">("pending");
 
   useEffect(() => {
     fetchRegistrations();
