@@ -9,6 +9,12 @@ async function initializeModel() {
   if (OnlineRegistrationModel) return;
 
   const db = await connectDB();
+
+  if (db.models.OnlineRegistration) {
+    OnlineRegistrationModel = db.models.OnlineRegistration;
+    return;
+  }
+
   const schema = new (await import("mongoose")).Schema({
     name: String,
     email: String,
