@@ -8,7 +8,7 @@ import {
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import LoadingSpinner from "@/components/LoadingSpinner";
 
-type Role = "student" | "teacher" | "admin" | "super_admin" | "online";
+type Role = "student" | "teacher" | "admin" | "super_admin" | "student-online" | "teacher-online";
 type SortKey = "name" | "email" | "role" | "status" | "createdAt";
 type SortDir = "asc" | "desc";
 
@@ -29,11 +29,12 @@ interface Institution {
 }
 
 const ROLE_DEF = {
-  student:     { label: "นักเรียน",    badge: "bg-blue-100 text-blue-700",    border: "border-blue-300",   icon: User,         desc: "ดูคอร์ส · จองที่นั่ง · อัปโหลดสลิป",      path: "/dashboard" },
-  teacher:     { label: "ครู",          badge: "bg-green-100 text-green-700",  border: "border-green-300",  icon: GraduationCap,desc: "ดูคอร์ส · ตารางสอน (Admin panel)",         path: "/admin" },
-  admin:       { label: "Admin",        badge: "bg-purple-100 text-purple-700",border: "border-purple-300", icon: Shield,       desc: "จัดการคอร์ส · อนุมัติ · รายได้ · Branding",path: "/admin/*" },
-  super_admin: { label: "Super Admin",  badge: "bg-rose-100 text-rose-700",    border: "border-rose-300",   icon: ShieldCheck,  desc: "จัดการทุกสถาบัน · Commission · Payout",    path: "/super-admin/*" },
-  online:      { label: "Online",       badge: "bg-orange-100 text-orange-700",border: "border-orange-300", icon: Laptop,       desc: "ดูคอร์สออนไลน์ · เรียนออนไลน์เท่านั้น",    path: "/dashboard" },
+  student:        { label: "นักเรียน",           badge: "bg-blue-100 text-blue-700",     border: "border-blue-300",   icon: User,         desc: "ดูคอร์ส · จองที่นั่ง · อัปโหลดสลิป",                path: "/dashboard" },
+  teacher:        { label: "ครู",                badge: "bg-green-100 text-green-700",   border: "border-green-300",  icon: GraduationCap,desc: "ดูคอร์ส · ตารางสอน (Admin panel)",               path: "/admin" },
+  admin:          { label: "Admin",              badge: "bg-purple-100 text-purple-700", border: "border-purple-300", icon: Shield,       desc: "จัดการคอร์ส · อนุมัติ · รายได้ · Branding",      path: "/admin/*" },
+  super_admin:    { label: "Super Admin",        badge: "bg-rose-100 text-rose-700",     border: "border-rose-300",   icon: ShieldCheck,  desc: "จัดการทุกสถาบัน · Commission · Payout",          path: "/super-admin/*" },
+  "student-online": { label: "นักเรียนออนไลน์",  badge: "bg-cyan-100 text-cyan-700",     border: "border-cyan-300",   icon: Laptop,       desc: "เรียนคอร์สออนไลน์ · ดูคอร์สของฉัน · ตะกร้า",    path: "/student-online/dashboard" },
+  "teacher-online": { label: "ครูออนไลน์",      badge: "bg-indigo-100 text-indigo-700", border: "border-indigo-300", icon: Laptop,       desc: "สอนคอร์สออนไลน์ · จัดการคอร์ส · ดูรายได้",      path: "/teacher-online/teacher-dashboard" },
 } as const;
 
 const STATUS_DEF = {
@@ -100,8 +101,8 @@ export default function SuperAdminRolesPage() {
   institutions.forEach((i) => { institutionNames[i._id] = i.name; });
 
   const counts = useMemo(() => {
-    const c = { student: 0, teacher: 0, admin: 0, super_admin: 0, online: 0 };
-    users.forEach((u) => { if (u.role in c) c[u.role]++; });
+    const c = { student: 0, teacher: 0, admin: 0, super_admin: 0, "student-online": 0, "teacher-online": 0 };
+    users.forEach((u) => { if (u.role in c) c[u.role as keyof typeof c]++; });
     return c;
   }, [users]);
 
