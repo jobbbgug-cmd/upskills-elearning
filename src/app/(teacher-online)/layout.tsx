@@ -41,7 +41,7 @@ export default async function TeacherOnlineLayout({
         <aside className="md:col-span-1">
           <nav className="space-y-2 sticky top-20">
             <Link
-              href="/dashboard"
+              href="/teacher-dashboard"
               className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-600 hover:bg-purple-50 hover:text-purple-600 rounded-lg transition-colors"
             >
               <BarChart3 className="w-4 h-4" />
