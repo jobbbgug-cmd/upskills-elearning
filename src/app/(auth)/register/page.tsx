@@ -497,7 +497,7 @@ export default function RegisterPage() {
 
                 {/* Channel grid */}
                 <div className="grid grid-cols-3 gap-2">
-                  {CONTACT_CHANNELS.map((ch) => {
+                  {ONLINE_CONTACT_CHANNELS.map((ch) => {
                     const active = form.contactChannel === ch.value;
                     return (
                       <button
