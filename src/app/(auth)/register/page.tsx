@@ -131,9 +131,9 @@ export default function RegisterPage() {
           <div className="grid md:grid-cols-2 gap-8 items-start">
             {/* Left: Visual */}
             <div className="flex items-center justify-center">
-              <div className="w-full aspect-square bg-gradient-to-br from-violet-100 to-indigo-100 rounded-3xl border-4 border-gray-300 flex items-center justify-center">
+              <div className="w-48 h-48 bg-gradient-to-br from-violet-100 to-indigo-100 rounded-2xl border-4 border-gray-300 flex items-center justify-center">
                 <div className="text-center">
-                  <p className="text-2xl md:text-4xl font-bold text-gray-700 text-center">
+                  <p className="text-lg font-bold text-gray-700 text-center">
                     {form.role === "student" ? "เรียน\nออนไลน์" : form.role === "teacher" ? "สอน\nออนไลน์" : "ติดตาม\nลูก"}
                   </p>
                 </div>
