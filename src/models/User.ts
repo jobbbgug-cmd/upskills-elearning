@@ -96,5 +96,10 @@ UserSchema.index({ institutionId: 1, status: 1 });
 UserSchema.index({ institutionId: 1, role: 1 });
 UserSchema.index({ institutionId: 1 });
 
+// Delete cached model to force schema refresh in development
+if (process.env.NODE_ENV === "development" && mongoose.models.User) {
+  delete mongoose.models.User;
+}
+
 export default mongoose.models.User as mongoose.Model<IUserDocument> ||
   mongoose.model<IUserDocument>("User", UserSchema);
