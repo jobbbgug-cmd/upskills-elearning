@@ -7,6 +7,7 @@ interface OnlineRegistration {
   _id?: string;
   name: string;
   email: string;
+  role?: "student" | "teacher";
   contactChannel: string;
   contactId: string;
   status: "pending" | "approved" | "rejected";
@@ -28,6 +29,7 @@ async function initializeModel() {
   const schema = new (await import("mongoose")).Schema({
     name: String,
     email: String,
+    role: { type: String, enum: ["student", "teacher"], default: "student" },
     contactChannel: String,
     contactId: String,
     status: { type: String, default: "pending" },
@@ -67,7 +69,7 @@ export async function POST(req: NextRequest) {
     await initializeModel();
 
     const body = await req.json();
-    const { name, email, contactChannel, contactId } = body;
+    const { name, email, role, contactChannel, contactId } = body;
 
     if (!name || !email || !contactChannel || !contactId) {
       return NextResponse.json(
@@ -79,6 +81,7 @@ export async function POST(req: NextRequest) {
     const registration = await OnlineRegistrationModel.create({
       name,
       email,
+      role: role || "student",
       contactChannel,
       contactId,
       status: "pending",

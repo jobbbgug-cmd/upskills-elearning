@@ -29,6 +29,7 @@ export default function RegisterPage() {
     name: "",
     email: "",
     role: "student" as "student" | "teacher" | "parent",
+    onlineRole: "student" as "student" | "teacher",
     learningType: "online" as "online" | "onsite" | "both" | "",
     gradeLevel: "" as GradeLevel | "",
     teacherId: "",
@@ -96,6 +97,7 @@ export default function RegisterPage() {
           body: JSON.stringify({
             name: form.name,
             email: form.email,
+            role: form.onlineRole,
             contactChannel: form.contactChannel,
             contactId: form.contactId,
           }),
@@ -170,8 +172,8 @@ export default function RegisterPage() {
         </div>
         <div className="bg-white rounded-3xl shadow-xl p-8">
           <div className="text-center mb-8">
-            <h1 className="text-2xl font-bold text-gray-900">เลือกวิธีการเรียน</h1>
-            <p className="text-gray-500 text-sm mt-2">คุณต้องการเรียนแบบไหน</p>
+            <h1 className="text-2xl font-bold text-gray-900">เลือกวิธีการ สอน&เรียน</h1>
+            <p className="text-gray-500 text-sm mt-2">คุณต้องการ สอน&เรียน แบบไหน</p>
           </div>
 
           <div className="space-y-4">
@@ -184,8 +186,8 @@ export default function RegisterPage() {
                   <Laptop className="w-6 h-6 text-blue-600" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-gray-900 text-lg">เรียนออนไลน์</h3>
-                  <p className="text-sm text-gray-600 mt-1">เรียนผ่านระบบออนไลน์ เมื่อไหร่ก็ได้</p>
+                  <h3 className="font-bold text-gray-900 text-lg">คอร์สเรียนออนไลน์</h3>
+                  <p className="text-sm text-gray-600 mt-1">การ สอน&เรียน ผ่านระบบออนไลน์ เรียนย้อนหลังได้ เมื่อไหร่ก็ได้</p>
                 </div>
               </div>
             </button>
@@ -199,8 +201,8 @@ export default function RegisterPage() {
                   <Building2 className="w-6 h-6 text-purple-600" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-gray-900 text-lg">เรียนในสถาบัน</h3>
-                  <p className="text-sm text-gray-600 mt-1">เรียนกับคณะครูในสถาบัน</p>
+                  <h3 className="font-bold text-gray-900 text-lg">เรียนภายใต้สถาบัน</h3>
+                  <p className="text-sm text-gray-600 mt-1">การ สอน&เรียน กับคณะครูในสถาบันทั้ง online และ offline</p>
                 </div>
               </div>
             </button>
@@ -257,6 +259,37 @@ export default function RegisterPage() {
           {/* Online Mode Form */}
           {learningMode === "online" && (
             <>
+              {/* Role Selection */}
+              <div className="space-y-3">
+                <label className="block text-sm font-semibold text-gray-700">
+                  เลือกบทบาท <span className="text-red-500">*</span>
+                </label>
+                <div className="grid grid-cols-2 gap-3">
+                  {([
+                    { value: "student", label: "นักเรียน", icon: User },
+                    { value: "teacher", label: "ครู", icon: GraduationCap },
+                  ] as const).map((r) => {
+                    const Icon = r.icon;
+                    const active = form.onlineRole === r.value;
+                    return (
+                      <button
+                        key={r.value}
+                        type="button"
+                        onClick={() => setForm({ ...form, onlineRole: r.value })}
+                        className={`flex items-center justify-center gap-2 px-4 py-3.5 rounded-2xl border-2 transition-all font-semibold ${
+                          active
+                            ? "border-violet-500 bg-violet-50 text-violet-700"
+                            : "border-gray-300 bg-white text-gray-700 hover:border-gray-400"
+                        }`}
+                      >
+                        <Icon className={`w-5 h-5 ${active ? "text-violet-600" : "text-gray-400"}`} />
+                        {r.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
               {/* Name */}
               <input
                 type="text" required value={form.name}
