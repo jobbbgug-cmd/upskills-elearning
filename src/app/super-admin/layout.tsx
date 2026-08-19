@@ -304,6 +304,7 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
             <>
               {nav("/super-admin/institutions", <Building2 className="w-4 h-4" />, "สถาบันทั้งหมด", undefined, "platform")}
               {nav("/super-admin/trials", <FlaskConical className="w-4 h-4" />, "คำขอทดลองใช้งาน", pendingTrials, "platform")}
+              {nav("/super-admin/online-registrations", <UserCheck className="w-4 h-4" />, "คำขอเรียนออนไลน์", undefined, "platform")}
             </>
           )}
 
