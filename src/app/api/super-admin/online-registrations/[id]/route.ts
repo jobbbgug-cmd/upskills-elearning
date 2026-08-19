@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import bcrypt from "bcryptjs";
 import { connectDB } from "@/lib/mongodb";
 import { getAuthUser } from "@/lib/auth";
 import User from "@/models/User";
@@ -71,11 +72,12 @@ export async function PATCH(
         if (existingUser) {
           console.log("User already exists:", existingUser.email);
         } else {
+          const hashedPassword = await bcrypt.hash(password, 10);
           const newUser = await User.create({
             name: updated.name,
             email: updated.email,
             username,
-            password,
+            password: hashedPassword,
             role: "online",
             status: "approved",
             createdAt: new Date(),
