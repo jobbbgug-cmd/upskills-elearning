@@ -108,46 +108,74 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="w-full max-w-md">
+    <div className="w-full max-w-6xl mx-auto">
       <div className="flex justify-center mb-8">
         <Image src="/logo.png" alt="UPSkills" width={260} height={90} className="object-contain" priority />
       </div>
 
-      <div className="bg-white rounded-3xl shadow-xl p-10">
-        <div className="text-center mb-7">
-          <h1 className="text-2xl font-bold text-gray-900">สมัครสมาชิก</h1>
-          <p className="text-violet-500 text-sm mt-1.5">Admin จะส่ง Username/Password ให้ทางช่องทางที่เลือก</p>
+      <div className="bg-white rounded-3xl shadow-xl p-8 md:p-12">
+        {/* Header */}
+        <div className="text-center mb-10">
+          <h1 className="text-3xl font-bold text-gray-900">สมัครสมาชิก</h1>
+          <p className="text-gray-500 text-sm mt-2">Admin จะส่ง Username/Password ให้ทางช่องทางที่เลือก</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded">
+            <p className="text-red-700 text-sm font-medium">{error}</p>
+          </div>
+        )}
 
-          {/* Role */}
-          <div className="grid grid-cols-3 gap-3">
-            {([
-              { value: "student", label: "นักเรียน", icon: User, desc: "ผู้เรียน" },
-              { value: "parent", label: "ผู้ปกครอง", icon: Heart, desc: "ผู้ปกครอง" },
-              { value: "teacher", label: "ครู/อาจารย์", icon: GraduationCap, desc: "ผู้สอน" },
-            ] as const).map((r) => {
-              const Icon = r.icon;
-              const active = form.role === r.value;
-              return (
-                <button key={r.value} type="button" onClick={() => setForm({ ...form, role: r.value })}
-                  className={`flex flex-col items-center gap-1 p-3.5 rounded-2xl border-2 transition-all ${active ? "border-violet-500 bg-violet-50" : "border-gray-200 hover:border-gray-300"}`}
-                >
-                  <Icon className={`w-5 h-5 ${active ? "text-violet-600" : "text-gray-400"}`} />
-                  <span className={`text-sm font-semibold ${active ? "text-violet-700" : "text-gray-600"}`}>{r.label}</span>
-                </button>
-              );
-            })}
+        <form onSubmit={handleSubmit} className="space-y-8">
+          {/* Role Selection with Visual */}
+          <div className="grid md:grid-cols-2 gap-8 items-start">
+            {/* Left: Visual */}
+            <div className="flex items-center justify-center">
+              <div className="w-full aspect-square bg-gradient-to-br from-violet-100 to-indigo-100 rounded-3xl border-4 border-gray-300 flex items-center justify-center">
+                <div className="text-center">
+                  <p className="text-2xl md:text-4xl font-bold text-gray-700 text-center">
+                    {form.role === "student" ? "เรียน\nออนไลน์" : form.role === "teacher" ? "สอน\nออนไลน์" : "ติดตาม\nลูก"}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Right: Role Buttons */}
+            <div className="space-y-3 flex flex-col">
+              <p className="text-sm font-semibold text-gray-600 mb-2">เรียนในสถาบัน</p>
+              {([
+                { value: "student", label: "นักเรียน", icon: User },
+                { value: "parent", label: "ผู้ปกครอง", icon: Heart },
+                { value: "teacher", label: "ครู/อาจารย์", icon: GraduationCap },
+              ] as const).map((r) => {
+                const Icon = r.icon;
+                const active = form.role === r.value;
+                return (
+                  <button
+                    key={r.value}
+                    type="button"
+                    onClick={() => setForm({ ...form, role: r.value })}
+                    className={`flex items-center gap-3 w-full px-6 py-4 rounded-2xl border-2 transition-all font-semibold ${
+                      active
+                        ? "border-violet-500 bg-violet-50 text-violet-700 shadow-md"
+                        : "border-gray-300 bg-white text-gray-700 hover:border-gray-400"
+                    }`}
+                  >
+                    <Icon className={`w-5 h-5 ${active ? "text-violet-600" : "text-gray-400"}`} />
+                    {r.label}
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
           {/* Learning Type — student only */}
           {form.role === "student" && (
-            <div className="space-y-2">
+            <div className="space-y-3">
               <label className="block text-sm font-semibold text-gray-700">
                 ประเภทการเรียน <span className="text-red-500">*</span>
               </label>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-3 gap-3">
                 {([
                   { value: "online", label: "คอร์สออนไลน์", emoji: "💻" },
                   { value: "onsite", label: "คอร์ส Onsite", emoji: "🏫" },
@@ -163,7 +191,7 @@ export default function RegisterPage() {
                         active ? "border-violet-500 bg-violet-50" : "border-gray-200 hover:border-gray-300 bg-white"
                       }`}
                     >
-                      <span className="text-xl">{type.emoji}</span>
+                      <span className="text-2xl">{type.emoji}</span>
                       <span className={`text-xs font-semibold ${active ? "text-violet-700" : "text-gray-600"}`}>
                         {type.label}
                       </span>
@@ -266,7 +294,7 @@ export default function RegisterPage() {
           )}
 
           {/* Contact channel */}
-          <div className="space-y-2">
+          <div className="space-y-3">
             <label className="block text-sm font-semibold text-gray-700">
               ช่องทางรับ Username / Password <span className="text-red-500">*</span>
             </label>
@@ -283,11 +311,7 @@ export default function RegisterPage() {
                       active ? "border-violet-500 bg-violet-50" : "border-gray-200 hover:border-gray-300 bg-white"
                     }`}
                   >
-                    {ch.logo ? (
-                      <img src={ch.logo} alt={ch.label} className="w-7 h-7 object-contain" />
-                    ) : (
-                      <span className="text-xl leading-none">{ch.emoji}</span>
-                    )}
+                    <span className="text-lg">{ch.emoji}</span>
                     <span className={`text-xs font-semibold ${active ? "text-violet-700" : "text-gray-600"}`}>
                       {ch.label}
                     </span>
@@ -295,57 +319,39 @@ export default function RegisterPage() {
                 );
               })}
             </div>
-
-            {/* Contact ID input — shown after selecting channel */}
-            {form.contactChannel && (
-              <div className="flex items-center gap-2 bg-violet-50 border-2 border-violet-200 rounded-2xl px-4 py-3">
-                {selectedChannel?.logo ? (
-                  <img src={selectedChannel.logo} alt={selectedChannel.label} className="w-5 h-5 object-contain shrink-0" />
-                ) : (
-                  <span className="text-lg shrink-0">{selectedChannel?.emoji}</span>
-                )}
-                <input
-                  required
-                  value={form.contactId}
-                  onChange={(e) => setForm({ ...form, contactId: e.target.value })}
-                  placeholder={selectedChannel?.placeholder}
-                  className="flex-1 bg-transparent text-sm text-gray-700 placeholder-violet-300 outline-none"
-                />
-              </div>
-            )}
-
-            {/* Helper */}
-            {!form.contactChannel && (
-              <div className="flex items-center gap-2 text-xs text-gray-400 bg-gray-50 rounded-xl px-3 py-2">
-                <ChevronDown className="w-3.5 h-3.5" />
-                เลือกช่องทางที่ต้องการรับข้อมูลเข้าใช้งาน
-              </div>
-            )}
           </div>
 
-          {error && (
-            <div className="bg-red-50 text-red-600 text-sm p-3 rounded-xl border border-red-100">{error}</div>
+          {/* Contact ID input */}
+          {selectedChannel && (
+            <input
+              type="text"
+              value={form.contactId}
+              onChange={(e) => setForm({ ...form, contactId: e.target.value })}
+              placeholder={selectedChannel.placeholder}
+              className="w-full bg-gray-100 rounded-2xl px-4 py-3.5 text-sm text-gray-700 placeholder-gray-400 outline-none focus:ring-2 focus:ring-violet-400"
+            />
           )}
 
+          {/* Submit Button */}
           <button
-            type="submit" disabled={loading}
-            className="w-full py-3.5 rounded-2xl text-white font-semibold text-sm transition-opacity disabled:opacity-60"
+            type="submit"
+            disabled={loading}
+            className="w-full py-4 rounded-2xl text-white font-bold text-base transition-all disabled:opacity-50"
             style={{ background: "linear-gradient(90deg,#7c3aed,#6d28d9)" }}
           >
-            {loading ? "กำลังส่งคำขอ..." : "ส่งคำขอสมัครสมาชิก"}
+            {loading ? "กำลังประมวลผล..." : "สมัครสมาชิก"}
           </button>
+
+          {/* Already have account */}
+          <div className="text-center pt-4 border-t border-gray-200">
+            <p className="text-gray-600 text-sm">
+              มีบัญชีอยู่แล้ว?{" "}
+              <Link href="/login" className="text-violet-600 font-semibold hover:text-violet-700">
+                เข้าสู่ระบบ
+              </Link>
+            </p>
+          </div>
         </form>
-
-        <p className="text-center text-sm text-gray-500 mt-6">
-          มีบัญชีแล้ว?{" "}
-          <Link href="/login" className="font-medium hover:underline" style={{ color: "#7c3aed" }}>เข้าสู่ระบบ</Link>
-        </p>
-      </div>
-
-      <div className="text-center mt-6">
-        <Link href="/" className="inline-flex items-center gap-2 text-sm font-medium" style={{ color: "#7c3aed" }}>
-          <ArrowLeft className="w-4 h-4" />กลับหน้าแรก
-        </Link>
       </div>
     </div>
   );
