@@ -1,401 +1,321 @@
 "use client";
-
 import { useState, useEffect } from "react";
-import { Mail, Phone, Search, Trash2, CheckCircle, Clock, Eye, EyeOff, Copy, Check } from "lucide-react";
+import { Check, X, Search, Trash2, Eye } from "lucide-react";
+import ConfirmDialog from "@/components/ui/ConfirmDialog";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 interface OnlineRegistration {
   _id: string;
   name: string;
   email: string;
+  role: "student" | "teacher";
   contactChannel: string;
   contactId: string;
   status: "pending" | "approved" | "rejected";
   createdAt: string;
 }
 
-function genPassword(len = 10) {
-  const c = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789@#";
-  return Array.from({ length: len }, () => c[Math.floor(Math.random() * c.length)]).join("");
-}
+const STATUS_BADGES = {
+  pending: { label: "รออนุมัติ", cls: "bg-yellow-100 text-yellow-700" },
+  approved: { label: "อนุมัติแล้ว", cls: "bg-green-100 text-green-700" },
+  rejected: { label: "ปฏิเสธ", cls: "bg-red-100 text-red-700" },
+};
 
 export default function OnlineRegistrationsPage() {
   const [registrations, setRegistrations] = useState<OnlineRegistration[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [filter, setFilter] = useState<"all" | "pending" | "approved" | "rejected">("pending");
-  const [approvalModal, setApprovalModal] = useState<{ open: boolean; id: string; email: string; password: string }>({ open: false, id: "", email: "", password: "" });
-  const [showPassword, setShowPassword] = useState(false);
-  const [copied, setCopied] = useState(false);
-  const [approving, setApproving] = useState(false);
-  const [successModal, setSuccessModal] = useState<{ open: boolean; username: string; password: string }>({ open: false, username: "", password: "" });
-  const [successCopied, setSuccessCopied] = useState(false);
+  const [filterStatus, setFilterStatus] = useState<"all" | "pending" | "approved" | "rejected">("all");
+  const [filterRole, setFilterRole] = useState<"all" | "student" | "teacher">("all");
+  const [updating, setUpdating] = useState<string | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState({ open: false, id: "", name: "" });
+  const [showApproveModal, setShowApproveModal] = useState<OnlineRegistration | null>(null);
+  const [approveForm, setApproveForm] = useState({ username: "", password: "" });
 
-  useEffect(() => {
-    fetchRegistrations();
-  }, []);
-
-  const fetchRegistrations = async () => {
+  const load = async () => {
+    setLoading(true);
     try {
       const res = await fetch("/api/super-admin/online-registrations");
-      if (res.ok) {
-        const data = await res.json();
-        setRegistrations(Array.isArray(data) ? data : []);
-      }
+      if (res.ok) setRegistrations(await res.json());
     } catch (error) {
-      console.error("Failed to fetch registrations:", error);
-    } finally {
-      setLoading(false);
+      console.error("Error loading registrations:", error);
     }
+    setLoading(false);
   };
 
-  const handleApproveClick = (id: string, email: string) => {
-    setApprovalModal({ open: true, id, email, password: "" });
-  };
+  useEffect(() => { load(); }, []);
 
-  const handleApprove = async () => {
-    if (!approvalModal.password) {
-      alert("กรุณากำหนดรหัสผ่าน");
+  const filtered = registrations.filter((r) => {
+    const matchSearch = r.name.toLowerCase().includes(search.toLowerCase()) || r.email.toLowerCase().includes(search.toLowerCase());
+    const matchStatus = filterStatus === "all" || r.status === filterStatus;
+    const matchRole = filterRole === "all" || r.role === filterRole;
+    return matchSearch && matchStatus && matchRole;
+  });
+
+  const handleApprove = async (id: string) => {
+    if (!approveForm.username || !approveForm.password) {
+      alert("กรุณากรอก username และ password");
       return;
     }
-    setApproving(true);
+
+    setUpdating(id);
     try {
-      const res = await fetch(`/api/super-admin/online-registrations/${approvalModal.id}`, {
+      const res = await fetch(`/api/super-admin/online-registrations/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           status: "approved",
-          password: approvalModal.password,
-          username: approvalModal.email,
+          username: approveForm.username,
+          password: approveForm.password,
         }),
       });
       if (res.ok) {
-        setSuccessModal({ open: true, username: approvalModal.email, password: approvalModal.password });
-        setApprovalModal({ open: false, id: "", email: "", password: "" });
-        fetchRegistrations();
+        await load();
+        setShowApproveModal(null);
+        setApproveForm({ username: "", password: "" });
       }
     } catch (error) {
-      console.error("Failed to approve:", error);
-    } finally {
-      setApproving(false);
+      console.error("Error approving registration:", error);
     }
+    setUpdating(null);
   };
 
   const handleReject = async (id: string) => {
+    setUpdating(id);
     try {
       const res = await fetch(`/api/super-admin/online-registrations/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: "rejected" }),
       });
-      if (res.ok) {
-        fetchRegistrations();
-      }
+      if (res.ok) await load();
     } catch (error) {
-      console.error("Failed to reject:", error);
+      console.error("Error rejecting registration:", error);
     }
+    setUpdating(null);
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("คุณแน่ใจหรือว่าต้องการลบ?")) return;
+    setUpdating(id);
     try {
-      const res = await fetch(`/api/super-admin/online-registrations/${id}`, {
-        method: "DELETE",
-      });
+      const res = await fetch(`/api/super-admin/online-registrations/${id}`, { method: "DELETE" });
       if (res.ok) {
-        fetchRegistrations();
+        await load();
+        setDeleteConfirm({ open: false, id: "", name: "" });
       }
     } catch (error) {
-      console.error("Failed to delete:", error);
+      console.error("Error deleting registration:", error);
     }
+    setUpdating(null);
   };
 
-  const filtered = registrations.filter((reg) => {
-    const matchFilter = filter === "all" || reg.status === filter;
-    const matchSearch = reg.name.toLowerCase().includes(search.toLowerCase()) ||
-                       reg.email.toLowerCase().includes(search.toLowerCase());
-    return matchFilter && matchSearch;
-  });
-
-  if (loading) {
-    return (
-      <div className="space-y-6">
-        <h1 className="text-2xl font-bold">คำขอสมัครสมาชิกเรียนออนไลน์</h1>
-        <div className="flex items-center justify-center h-96">
-          <p className="text-gray-500">กำลังโหลด...</p>
-        </div>
-      </div>
-    );
-  }
+  if (loading) return <LoadingSpinner />;
 
   return (
     <div className="space-y-6">
+      {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold">คำขอสมัครสมาชิกเรียนออนไลน์</h1>
-        <p className="text-sm text-gray-600 mt-1">รวม {registrations.length} คำขอ</p>
+        <h1 className="text-3xl font-bold text-gray-900">สมัครเรียนออนไลน์</h1>
+        <p className="text-sm text-gray-600 mt-1">รายการสมัครเรียนออนไลน์จากผู้ใช้</p>
       </div>
 
-      {/* Search and Filter */}
-      <div className="bg-white rounded-lg border border-gray-200 p-4 space-y-4">
-        <div className="flex gap-3 flex-wrap">
-          <div className="relative flex-1 min-w-72">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+      {/* Filters */}
+      <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Search */}
+          <div className="relative">
+            <Search className="absolute left-3 top-3 w-4 h-4 text-gray-400" />
             <input
               type="text"
-              placeholder="ค้นหาชื่อหรืออีเมล..."
+              placeholder="ค้นหา ชื่อ หรือ อีเมล"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-600"
+              className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500"
             />
           </div>
-        </div>
 
-        {/* Filter Buttons */}
-        <div className="flex gap-2 flex-wrap">
-          {([
-            { value: "all" as const, label: "ทั้งหมด", bgActive: "bg-gray-600", bgInactive: "bg-gray-100" },
-            { value: "pending" as const, label: "รอตรวจสอบ", bgActive: "bg-yellow-600", bgInactive: "bg-yellow-50" },
-            { value: "approved" as const, label: "อนุมัติแล้ว", bgActive: "bg-green-600", bgInactive: "bg-green-50" },
-            { value: "rejected" as const, label: "ปฏิเสธ", bgActive: "bg-red-600", bgInactive: "bg-red-50" },
-          ] as const).map((f) => (
-            <button
-              key={f.value}
-              onClick={() => setFilter(f.value)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                filter === f.value
-                  ? `${f.bgActive} text-white`
-                  : `${f.bgInactive} text-gray-700 hover:text-gray-900`
-              }`}
-            >
-              {f.label}
-            </button>
-          ))}
+          {/* Status Filter */}
+          <select
+            value={filterStatus}
+            onChange={(e) => setFilterStatus(e.target.value as any)}
+            className="px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500"
+          >
+            <option value="all">สถานะทั้งหมด</option>
+            <option value="pending">รออนุมัติ</option>
+            <option value="approved">อนุมัติแล้ว</option>
+            <option value="rejected">ปฏิเสธ</option>
+          </select>
+
+          {/* Role Filter */}
+          <select
+            value={filterRole}
+            onChange={(e) => setFilterRole(e.target.value as any)}
+            className="px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500"
+          >
+            <option value="all">บทบาททั้งหมด</option>
+            <option value="student">นักเรียน</option>
+            <option value="teacher">ครู</option>
+          </select>
         </div>
       </div>
 
-      {/* Registrations Table */}
-      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+      {/* Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="bg-white rounded-xl border border-gray-200 p-4">
+          <p className="text-sm text-gray-600">ทั้งหมด</p>
+          <p className="text-2xl font-bold text-gray-900">{registrations.length}</p>
+        </div>
+        <div className="bg-white rounded-xl border border-gray-200 p-4">
+          <p className="text-sm text-gray-600">รออนุมัติ</p>
+          <p className="text-2xl font-bold text-yellow-600">{registrations.filter(r => r.status === "pending").length}</p>
+        </div>
+        <div className="bg-white rounded-xl border border-gray-200 p-4">
+          <p className="text-sm text-gray-600">อนุมัติแล้ว</p>
+          <p className="text-2xl font-bold text-green-600">{registrations.filter(r => r.status === "approved").length}</p>
+        </div>
+        <div className="bg-white rounded-xl border border-gray-200 p-4">
+          <p className="text-sm text-gray-600">ปฏิเสธ</p>
+          <p className="text-2xl font-bold text-red-600">{registrations.filter(r => r.status === "rejected").length}</p>
+        </div>
+      </div>
+
+      {/* Table */}
+      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="w-full">
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
-                <th className="text-left py-3 px-4 font-semibold">ชื่อ</th>
-                <th className="text-left py-3 px-4 font-semibold">อีเมล</th>
-                <th className="text-left py-3 px-4 font-semibold">ช่องทางติดต่อ</th>
-                <th className="text-left py-3 px-4 font-semibold">รายละเอียด</th>
-                <th className="text-left py-3 px-4 font-semibold">สถานะ</th>
-                <th className="text-left py-3 px-4 font-semibold">วันที่</th>
-                <th className="text-right py-3 px-4 font-semibold">จัดการ</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">ชื่อ</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">อีเมล</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">บทบาท</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">ช่องทาง</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">สถานะ</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">วันที่สมัคร</th>
+                <th className="px-6 py-4 text-center text-sm font-semibold text-gray-700">การดำเนินการ</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-gray-200">
               {filtered.map((reg) => (
-                <tr key={reg._id} className="border-b border-gray-100 hover:bg-gray-50">
-                  <td className="py-3 px-4 font-medium">{reg.name}</td>
-                  <td className="py-3 px-4 text-gray-600">{reg.email}</td>
-                  <td className="py-3 px-4">
-                    <span className="text-sm bg-gray-100 px-2 py-1 rounded">
-                      {reg.contactChannel}
+                <tr key={reg._id} className="hover:bg-gray-50">
+                  <td className="px-6 py-4 text-sm text-gray-900">{reg.name}</td>
+                  <td className="px-6 py-4 text-sm text-gray-600">{reg.email}</td>
+                  <td className="px-6 py-4 text-sm">
+                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${reg.role === "teacher" ? "bg-green-100 text-green-700" : "bg-blue-100 text-blue-700"}`}>
+                      {reg.role === "teacher" ? "ครู" : "นักเรียน"}
                     </span>
                   </td>
-                  <td className="py-3 px-4 text-sm text-gray-600">{reg.contactId}</td>
-                  <td className="py-3 px-4">
-                    <span
-                      className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        reg.status === "approved"
-                          ? "bg-green-100 text-green-700"
-                          : reg.status === "pending"
-                            ? "bg-yellow-100 text-yellow-700"
-                            : "bg-red-100 text-red-700"
-                      }`}
-                    >
-                      {reg.status === "approved"
-                        ? "อนุมัติแล้ว"
-                        : reg.status === "pending"
-                          ? "รอตรวจสอบ"
-                          : "ปฏิเสธ"}
+                  <td className="px-6 py-4 text-sm text-gray-600">{reg.contactChannel} ({reg.contactId})</td>
+                  <td className="px-6 py-4 text-sm">
+                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${STATUS_BADGES[reg.status].cls}`}>
+                      {STATUS_BADGES[reg.status].label}
                     </span>
                   </td>
-                  <td className="py-3 px-4 text-gray-600">
-                    {new Date(reg.createdAt).toLocaleDateString("th-TH")}
+                  <td className="px-6 py-4 text-sm text-gray-600">
+                    {new Date(reg.createdAt).toLocaleDateString("th-TH", { year: "numeric", month: "short", day: "numeric" })}
                   </td>
-                  <td className="py-3 px-4 text-right space-x-2">
-                    {reg.status === "pending" && (
-                      <>
-                        <button
-                          onClick={() => handleApproveClick(reg._id, reg.email)}
-                          className="inline-flex items-center gap-1 px-3 py-1.5 text-xs bg-green-100 text-green-700 rounded hover:bg-green-200 transition-colors"
-                        >
-                          <CheckCircle className="w-3 h-3" />
-                          อนุมัติ
-                        </button>
-                        <button
-                          onClick={() => handleReject(reg._id)}
-                          className="inline-flex items-center gap-1 px-3 py-1.5 text-xs bg-red-100 text-red-700 rounded hover:bg-red-200 transition-colors"
-                        >
-                          ปฏิเสธ
-                        </button>
-                      </>
-                    )}
-                    <button
-                      onClick={() => handleDelete(reg._id)}
-                      className="inline-flex items-center gap-1 px-3 py-1.5 text-xs bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors"
-                    >
-                      <Trash2 className="w-3 h-3" />
-                    </button>
+                  <td className="px-6 py-4">
+                    <div className="flex justify-center gap-2">
+                      {reg.status === "pending" && (
+                        <>
+                          <button
+                            onClick={() => setShowApproveModal(reg)}
+                            disabled={updating === reg._id}
+                            className="p-2 text-green-600 hover:bg-green-50 rounded-lg disabled:opacity-50"
+                            title="อนุมัติ"
+                          >
+                            <Check className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => handleReject(reg._id)}
+                            disabled={updating === reg._id}
+                            className="p-2 text-red-600 hover:bg-red-50 rounded-lg disabled:opacity-50"
+                            title="ปฏิเสธ"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </>
+                      )}
+                      <button
+                        onClick={() => setDeleteConfirm({ open: true, id: reg._id, name: reg.name })}
+                        disabled={updating === reg._id}
+                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg disabled:opacity-50"
+                        title="ลบ"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
+
+        {filtered.length === 0 && (
+          <div className="text-center py-12">
+            <p className="text-gray-600">ไม่มีข้อมูล</p>
+          </div>
+        )}
       </div>
 
-      {filtered.length === 0 && (
-        <div className="bg-white rounded-lg border border-gray-200 p-6 text-center">
-          <p className="text-gray-500">ไม่พบคำขอสมัครสมาชิก</p>
-        </div>
-      )}
+      {/* Approve Modal */}
+      {showApproveModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 max-w-md w-full mx-4 space-y-4">
+            <h2 className="text-lg font-semibold text-gray-900">อนุมัติการสมัครของ {showApproveModal.name}</h2>
+            <p className="text-sm text-gray-600">กรุณากำหนด username และ password สำหรับบัญชีนี้</p>
 
-      {/* Approval Modal */}
-      {approvalModal.open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
-          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md">
-            <div className="px-6 py-5 border-b border-gray-100">
-              <h2 className="text-lg font-bold text-gray-900">อนุมัติคำขอเรียนออนไลน์</h2>
-              <p className="text-xs text-gray-400 mt-0.5">กำหนดรหัสผ่านเพื่อสร้าง User ในระบบ</p>
-            </div>
-
-            <div className="px-6 py-5 space-y-4">
+            <div className="space-y-3">
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Username</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Username</label>
                 <input
                   type="text"
-                  value={approvalModal.email}
-                  readOnly
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm text-gray-600 bg-gray-50"
+                  placeholder="ป้อน username"
+                  value={approveForm.username}
+                  onChange={(e) => setApproveForm({ ...approveForm, username: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500"
                 />
-                <p className="text-xs text-gray-400 mt-1">ใช้อีเมลเป็น Username</p>
               </div>
-
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Password</label>
-                <div className="flex gap-2">
-                  <div className="relative flex-1">
-                    <input
-                      type={showPassword ? "text" : "password"}
-                      value={approvalModal.password}
-                      onChange={(e) => setApprovalModal({ ...approvalModal, password: e.target.value })}
-                      placeholder="กำหนดรหัสผ่าน"
-                      className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-400 pr-10"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                    >
-                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    </button>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const pwd = genPassword();
-                      setApprovalModal({ ...approvalModal, password: pwd });
-                      setShowPassword(true);
-                    }}
-                    className="px-4 py-2.5 text-xs font-semibold rounded-xl whitespace-nowrap bg-green-100 text-green-700 hover:bg-green-200 transition-colors"
-                  >
-                    Gen
-                  </button>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Role</label>
-                <div className="px-4 py-2.5 border border-gray-300 rounded-xl text-sm text-gray-900 bg-gray-50">
-                  Online (เรียนออนไลน์)
-                </div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                <input
+                  type="password"
+                  placeholder="ป้อน password"
+                  value={approveForm.password}
+                  onChange={(e) => setApproveForm({ ...approveForm, password: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500"
+                />
               </div>
             </div>
 
-            <div className="flex gap-3 px-6 py-5 border-t border-gray-100">
+            <div className="flex gap-3">
               <button
-                onClick={handleApprove}
-                disabled={approving || !approvalModal.password}
-                className="flex-1 py-2.5 text-white font-semibold rounded-xl bg-green-600 hover:bg-green-700 disabled:opacity-50 transition-colors text-sm"
-              >
-                {approving ? "กำลังประมวลผล..." : "บันทึก"}
-              </button>
-              <button
-                onClick={() => setApprovalModal({ open: false, id: "", email: "", password: "" })}
-                className="flex-1 py-2.5 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 transition-colors text-sm"
+                onClick={() => setShowApproveModal(null)}
+                className="flex-1 px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50"
               >
                 ยกเลิก
               </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Success Modal */}
-      {successModal.open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
-          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md">
-            <div className="px-6 py-5 text-center border-b border-gray-100">
-              <h2 className="text-2xl font-bold text-gray-900">ยินดีต้อนรับสู่ UPSkills! 🎉</h2>
-              <p className="text-xs text-gray-400 mt-1">อนุมัติสำเร็จ</p>
-            </div>
-
-            <div className="px-6 py-6 space-y-4">
-              <div className="bg-gray-50 rounded-2xl p-4 space-y-3">
-                <div>
-                  <p className="text-xs text-gray-500 font-semibold mb-1">ชื่อผู้ใช้:</p>
-                  <p className="text-sm font-mono text-gray-900">{successModal.username}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500 font-semibold mb-1">รหัสผ่าน:</p>
-                  <p className="text-sm font-mono text-gray-900">{successModal.password}</p>
-                </div>
-                <div className="border-t border-gray-200 pt-3">
-                  <p className="text-xs text-gray-500 font-semibold mb-1">เข้าสู่ระบบ:</p>
-                  <p className="text-sm font-mono text-blue-600">{typeof window !== "undefined" ? `${window.location.origin}/login` : "http://localhost:3000/login"}</p>
-                </div>
-              </div>
-
               <button
-                onClick={() => {
-                  const text = `ยินดีต้อนรับสู่ UPSkills! 🎉\nชื่อผู้ใช้: ${successModal.username}\nรหัสผ่าน: ${successModal.password}\nเข้าสู่ระบบ: ${typeof window !== "undefined" ? `${window.location.origin}/login` : "http://localhost:3000/login"}`;
-                  navigator.clipboard.writeText(text);
-                  setSuccessCopied(true);
-                  setTimeout(() => setSuccessCopied(false), 2000);
-                }}
-                className="w-full py-2.5 text-white font-semibold rounded-xl bg-blue-600 hover:bg-blue-700 transition-colors text-sm flex items-center justify-center gap-2"
+                onClick={() => handleApprove(showApproveModal._id)}
+                disabled={updating === showApproveModal._id || !approveForm.username || !approveForm.password}
+                className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 disabled:opacity-50"
               >
-                {successCopied ? (
-                  <>
-                    <Check className="w-4 h-4" />
-                    คัดลอกแล้ว
-                  </>
-                ) : (
-                  <>
-                    <Copy className="w-4 h-4" />
-                    คัดลอกข้อมูล
-                  </>
-                )}
-              </button>
-            </div>
-
-            <div className="px-6 py-5 border-t border-gray-100">
-              <button
-                onClick={() => setSuccessModal({ open: false, username: "", password: "" })}
-                className="w-full py-2.5 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 transition-colors text-sm"
-              >
-                ปิด
+                {updating === showApproveModal._id ? "กำลังประมวลผล..." : "อนุมัติ"}
               </button>
             </div>
           </div>
         </div>
       )}
+
+      {/* Delete Confirmation */}
+      <ConfirmDialog
+        open={deleteConfirm.open}
+        onOpenChange={(open) => setDeleteConfirm({ ...deleteConfirm, open })}
+        title="ยืนยันการลบ"
+        description={`ลบการสมัครของ ${deleteConfirm.name}?`}
+        onConfirm={() => handleDelete(deleteConfirm.id)}
+        loading={updating === deleteConfirm.id}
+      />
     </div>
   );
 }
