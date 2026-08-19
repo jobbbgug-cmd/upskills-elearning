@@ -1,91 +1,93 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { getAuthUser } from "@/lib/auth";
 import { connectDB } from "@/lib/mongodb";
-import Institution from "@/models/Institution";
 import User from "@/models/User";
+import Course from "@/models/Course";
 import Booking from "@/models/Booking";
-import mongoose from "mongoose";
+import Institution from "@/models/Institution";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
     const auth = await getAuthUser();
-    if (!auth || auth.role !== "super_admin")
+    if (!auth || auth.role !== "super_admin") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     await connectDB();
 
-    const now = new Date();
-    const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 5, 1);
-
-    const [monthlyRevenue, topInstitutions, expiringPlans, newUsersPerMonth] = await Promise.all([
-      // Monthly revenue (last 6 months)
-      Booking.aggregate([
-        { $match: { status: "confirmed", createdAt: { $gte: sixMonthsAgo } } },
-        { $lookup: { from: "courses", localField: "courseId", foreignField: "_id", as: "course" } },
-        { $unwind: "$course" },
-        { $group: {
-          _id: { year: { $year: "$createdAt" }, month: { $month: "$createdAt" } },
-          revenue: { $sum: "$course.price" },
-          count:   { $sum: 1 },
-        }},
-        { $sort: { "_id.year": 1, "_id.month": 1 } },
-      ]) as unknown as { _id: { year: number; month: number }; revenue: number; count: number }[],
-
-      // Top 5 institutions by confirmed bookings revenue
-      Booking.aggregate([
-        { $match: { status: "confirmed" } },
-        { $lookup: { from: "courses", localField: "courseId", foreignField: "_id", as: "course" } },
-        { $unwind: "$course" },
-        { $group: {
-          _id: "$institutionId",
-          revenue:  { $sum: "$course.price" },
-          bookings: { $sum: 1 },
-        }},
-        { $sort: { revenue: -1 } },
-        { $limit: 5 },
-        { $lookup: { from: "institutions", localField: "_id", foreignField: "_id", as: "institution" } },
-        { $unwind: { path: "$institution", preserveNullAndEmptyArrays: true } },
-        { $project: { name: "$institution.name", slug: "$institution.slug", plan: "$institution.plan", revenue: 1, bookings: 1 } },
-      ]) as unknown as { _id: mongoose.Types.ObjectId; name: string; slug: string; plan: string; revenue: number; bookings: number }[],
-
-      // Institutions with plans expiring in next 30 days
-      Institution.find({
-        planExpiresAt: { $gte: now, $lte: new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000) },
-        isActive: true,
-      }).select("name slug plan planExpiresAt").lean() as unknown as Promise<{
-        _id: mongoose.Types.ObjectId; name: string; slug: string; plan: string; planExpiresAt: Date;
-      }[]>,
-
-      // New users per month (last 6 months)
-      User.aggregate([
-        { $match: { role: { $ne: "super_admin" }, createdAt: { $gte: sixMonthsAgo } } },
-        { $group: {
-          _id: { year: { $year: "$createdAt" }, month: { $month: "$createdAt" } },
-          count: { $sum: 1 },
-        }},
-        { $sort: { "_id.year": 1, "_id.month": 1 } },
-      ]) as unknown as { _id: { year: number; month: number }; count: number }[],
+    // Fetch all data in parallel
+    const [users, courses, bookings, institutions] = await Promise.all([
+      User.find({}),
+      Course.find({ isActive: true }),
+      Booking.find({}),
+      Institution.find({ isActive: true }),
     ]);
 
-    const MONTH_TH = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
+    // Calculate metrics
+    const totalUsers = users.length;
+    const activeUsers = users.filter((u: any) => u.status === "approved").length;
 
-    const revenueChart = monthlyRevenue.map((m) => ({
-      label: `${MONTH_TH[m._id.month - 1]} ${m._id.year}`,
-      revenue: m.revenue,
-      count: m.count,
-    }));
+    const totalCourses = courses.length;
+    const activeCourses = courses.filter((c: any) => c.isActive).length;
 
-    const usersChart = newUsersPerMonth.map((m) => ({
-      label: `${MONTH_TH[m._id.month - 1]} ${m._id.year}`,
-      count: m.count,
-    }));
+    const totalBookings = bookings.length;
+    const confirmedBookings = bookings.filter((b: any) => b.status === "confirmed").length;
+
+    const totalRevenue = bookings
+      .filter((b: any) => b.status === "confirmed")
+      .reduce((sum: number, b: any) => {
+        const course = courses.find((c: any) => c._id?.toString() === b.courseId?.toString());
+        return sum + (course?.price || 0);
+      }, 0);
+
+    const totalInstitutions = institutions.length;
+
+    // Users by role
+    const usersByRole: Record<string, number> = {};
+    users.forEach((u: any) => {
+      const role = u.role || "unknown";
+      usersByRole[role] = (usersByRole[role] || 0) + 1;
+    });
+
+    // Courses by type
+    const coursesByType: Record<string, number> = {};
+    courses.forEach((c: any) => {
+      const type = c.type || "online";
+      coursesByType[type] = (coursesByType[type] || 0) + 1;
+    });
+
+    // Bookings trend (last 7 days)
+    const bookingsTrend: Array<{ date: string; count: number }> = [];
+    const today = new Date();
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date(today);
+      date.setDate(date.getDate() - i);
+      const dateStr = date.toLocaleDateString("th-TH");
+      const count = bookings.filter((b: any) => {
+        const bookingDate = b.createdAt ? new Date(b.createdAt) : null;
+        return bookingDate?.toLocaleDateString("th-TH") === dateStr;
+      }).length;
+      bookingsTrend.push({ date: dateStr, count });
+    }
 
     return NextResponse.json({
-      revenueChart,
-      usersChart,
-      topInstitutions: JSON.parse(JSON.stringify(topInstitutions)),
-      expiringPlans:   JSON.parse(JSON.stringify(expiringPlans)),
+      totalUsers,
+      activeUsers,
+      totalCourses,
+      activeCourses,
+      totalBookings,
+      confirmedBookings,
+      totalRevenue: Math.round(totalRevenue),
+      totalInstitutions,
+      usersByRole,
+      coursesByType,
+      bookingsTrend,
     });
-  } catch {
-    return NextResponse.json({ error: "เกิดข้อผิดพลาด" }, { status: 500 });
+  } catch (error) {
+    console.error("[analytics] Error:", error);
+    return NextResponse.json(
+      { error: "เกิดข้อผิดพลาด" },
+      { status: 500 }
+    );
   }
 }
