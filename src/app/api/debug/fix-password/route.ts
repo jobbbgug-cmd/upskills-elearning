@@ -15,22 +15,30 @@ export async function POST(req: NextRequest) {
     }
 
     await connectDB();
-    const user = await User.findOne({ email });
+    console.log("Searching for user with email:", email);
+    const user = await User.findOne({ email: email.toLowerCase() });
+    console.log("User found:", user ? user.email : "not found");
 
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
+    console.log("Hashing password...");
     const hashedPassword = await bcrypt.hash(password, 10);
-    await User.updateOne({ _id: user._id }, { password: hashedPassword });
+    console.log("Password hashed, updating user...");
+
+    const updated = await User.updateOne({ _id: user._id }, { password: hashedPassword });
+    console.log("Update result:", updated);
 
     return NextResponse.json({
       success: true,
       message: "Password updated and hashed",
       email,
+      updated: updated.modifiedCount,
     });
   } catch (error) {
     console.error("Error fixing password:", error);
+    console.error("Error details:", (error as any).message);
     return NextResponse.json(
       { error: "Failed to fix password" },
       { status: 500 }
