@@ -12,8 +12,9 @@ export interface IUserDocument extends Document {
   institutionId?: mongoose.Types.ObjectId;
   name: string;
   email: string;
+  username?: string;
   password: string;
-  role: "student" | "teacher" | "parent" | "admin" | "owner" | "super_admin";
+  role: "student" | "teacher" | "parent" | "admin" | "owner" | "super_admin" | "online";
   status: "pending" | "approved" | "rejected";
   gradeLevel?: string;
   profileImage?: string;
@@ -58,8 +59,9 @@ const UserSchema = new Schema<IUserDocument>(
     institutionId:  { type: Schema.Types.ObjectId, ref: "Institution", default: null },
     name:           { type: String, required: true, trim: true },
     email:          { type: String, required: true, unique: true, lowercase: true, trim: true },
+    username:       { type: String, default: "" },
     password:       { type: String, default: "" },
-    role:           { type: String, enum: ["student", "teacher", "parent", "admin", "owner", "super_admin"], default: "student" },
+    role:           { type: String, enum: ["student", "teacher", "parent", "admin", "owner", "super_admin", "online"], default: "student" },
     status:         { type: String, enum: ["pending", "approved", "rejected"], default: "pending" },
     gradeLevel:     { type: String },
     profileImage:   { type: String, default: "" },
