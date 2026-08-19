@@ -3,12 +3,12 @@ import { useState, useEffect, useMemo } from "react";
 import {
   User, GraduationCap, Shield, ShieldCheck,
   ChevronDown, Search, Plus, X, Eye, EyeOff,
-  Copy, Check, Pencil, Trash2, ChevronUp, ChevronsUpDown, Building2,
+  Copy, Check, Pencil, Trash2, ChevronUp, ChevronsUpDown, Building2, Laptop,
 } from "lucide-react";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import LoadingSpinner from "@/components/LoadingSpinner";
 
-type Role = "student" | "teacher" | "admin" | "super_admin";
+type Role = "student" | "teacher" | "admin" | "super_admin" | "online";
 type SortKey = "name" | "email" | "role" | "status" | "createdAt";
 type SortDir = "asc" | "desc";
 
@@ -33,6 +33,7 @@ const ROLE_DEF = {
   teacher:     { label: "ครู",          badge: "bg-green-100 text-green-700",  border: "border-green-300",  icon: GraduationCap,desc: "ดูคอร์ส · ตารางสอน (Admin panel)",         path: "/admin" },
   admin:       { label: "Admin",        badge: "bg-purple-100 text-purple-700",border: "border-purple-300", icon: Shield,       desc: "จัดการคอร์ส · อนุมัติ · รายได้ · Branding",path: "/admin/*" },
   super_admin: { label: "Super Admin",  badge: "bg-rose-100 text-rose-700",    border: "border-rose-300",   icon: ShieldCheck,  desc: "จัดการทุกสถาบัน · Commission · Payout",    path: "/super-admin/*" },
+  online:      { label: "Online",       badge: "bg-orange-100 text-orange-700",border: "border-orange-300", icon: Laptop,       desc: "ดูคอร์สออนไลน์ · เรียนออนไลน์เท่านั้น",    path: "/dashboard" },
 } as const;
 
 const STATUS_DEF = {
@@ -99,7 +100,7 @@ export default function SuperAdminRolesPage() {
   institutions.forEach((i) => { institutionNames[i._id] = i.name; });
 
   const counts = useMemo(() => {
-    const c = { student: 0, teacher: 0, admin: 0, super_admin: 0 };
+    const c = { student: 0, teacher: 0, admin: 0, super_admin: 0, online: 0 };
     users.forEach((u) => { if (u.role in c) c[u.role]++; });
     return c;
   }, [users]);
