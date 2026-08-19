@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
-import { Check, X, Search, Trash2, Eye } from "lucide-react";
+import { Check, X, Search, Trash2, Copy, RefreshCw } from "lucide-react";
+import { useRouter } from "next/navigation";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import LoadingSpinner from "@/components/LoadingSpinner";
 
@@ -21,7 +22,13 @@ const STATUS_BADGES = {
   rejected: { label: "ปฏิเสธ", cls: "bg-red-100 text-red-700" },
 };
 
+function generateRandomPassword(length = 10) {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789@#";
+  return Array.from({ length }, () => chars[Math.floor(Math.random() * chars.length)]).join("");
+}
+
 export default function OnlineRegistrationsPage() {
+  const router = useRouter();
   const [registrations, setRegistrations] = useState<OnlineRegistration[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -30,7 +37,10 @@ export default function OnlineRegistrationsPage() {
   const [updating, setUpdating] = useState<string | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState({ open: false, id: "", name: "" });
   const [showApproveModal, setShowApproveModal] = useState<OnlineRegistration | null>(null);
-  const [approveForm, setApproveForm] = useState({ username: "", password: "" });
+  const [approveForm, setApproveForm] = useState({ password: "" });
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [successData, setSuccessData] = useState({ username: "", password: "" });
+  const [copiedToClipboard, setCopiedToClipboard] = useState(false);
 
   const load = async () => {
     setLoading(true);
@@ -52,9 +62,9 @@ export default function OnlineRegistrationsPage() {
     return matchSearch && matchStatus && matchRole;
   });
 
-  const handleApprove = async (id: string) => {
-    if (!approveForm.username || !approveForm.password) {
-      alert("กรุณากรอก username และ password");
+  const handleApprove = async (id: string, email: string) => {
+    if (!approveForm.password) {
+      alert("กรุณากรอก password");
       return;
     }
 
@@ -65,17 +75,20 @@ export default function OnlineRegistrationsPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           status: "approved",
-          username: approveForm.username,
+          username: email,
           password: approveForm.password,
         }),
       });
       if (res.ok) {
-        await load();
+        setSuccessData({ username: email, password: approveForm.password });
+        setShowSuccessModal(true);
         setShowApproveModal(null);
-        setApproveForm({ username: "", password: "" });
+        setApproveForm({ password: "" });
+        await load();
       }
     } catch (error) {
       console.error("Error approving registration:", error);
+      alert("เกิดข้อผิดพลาด: " + (error as Error).message);
     }
     setUpdating(null);
   };
@@ -107,6 +120,13 @@ export default function OnlineRegistrationsPage() {
       console.error("Error deleting registration:", error);
     }
     setUpdating(null);
+  };
+
+  const copyToClipboard = () => {
+    const text = `ยินดีต้อนรับสู่ UPSkills! 🎉\nชื่อผู้ใช้: ${successData.username}\nรหัสผ่าน: ${successData.password}\nเข้าสู่ระบบ: http://localhost:3000/login`;
+    navigator.clipboard.writeText(text);
+    setCopiedToClipboard(true);
+    setTimeout(() => setCopiedToClipboard(false), 2000);
   };
 
   if (loading) return <LoadingSpinner />;
@@ -218,7 +238,10 @@ export default function OnlineRegistrationsPage() {
                       {reg.status === "pending" && (
                         <>
                           <button
-                            onClick={() => setShowApproveModal(reg)}
+                            onClick={() => {
+                              setShowApproveModal(reg);
+                              setApproveForm({ password: "" });
+                            }}
                             disabled={updating === reg._id}
                             className="p-2 text-green-600 hover:bg-green-50 rounded-lg disabled:opacity-50"
                             title="อนุมัติ"
@@ -260,49 +283,110 @@ export default function OnlineRegistrationsPage() {
 
       {/* Approve Modal */}
       {showApproveModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl p-6 max-w-md w-full mx-4 space-y-4">
-            <h2 className="text-lg font-semibold text-gray-900">อนุมัติการสมัครของ {showApproveModal.name}</h2>
-            <p className="text-sm text-gray-600">กรุณากำหนด username และ password สำหรับบัญชีนี้</p>
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl p-8 max-w-md w-full space-y-6">
+            <div className="text-center">
+              <h2 className="text-xl font-semibold text-gray-900">อนุมัติการสมัคร</h2>
+              <p className="text-sm text-gray-600 mt-1">กรุณากำหนดรหัสผ่าน</p>
+            </div>
 
-            <div className="space-y-3">
+            <div className="space-y-4 bg-gray-50 p-4 rounded-lg">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Username</label>
-                <input
-                  type="text"
-                  placeholder="ป้อน username"
-                  value={approveForm.username}
-                  onChange={(e) => setApproveForm({ ...approveForm, username: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500"
-                />
+                <label className="block text-sm font-medium text-gray-700 mb-2">ชื่อผู้ใช้ (Username)</label>
+                <div className="px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-900 font-medium">
+                  {showApproveModal.email}
+                </div>
+                <p className="text-xs text-gray-500 mt-1">ดึงจากอีเมลอัตโนมัติ</p>
               </div>
+
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
-                <input
-                  type="password"
-                  placeholder="ป้อน password"
-                  value={approveForm.password}
-                  onChange={(e) => setApproveForm({ ...approveForm, password: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500"
-                />
+                <label className="block text-sm font-medium text-gray-700 mb-2">รหัสผ่าน (Password)</label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={approveForm.password}
+                    onChange={(e) => setApproveForm({ password: e.target.value })}
+                    className="flex-1 px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500 text-sm"
+                    placeholder="ป้อนรหัสผ่าน"
+                  />
+                  <button
+                    onClick={() => setApproveForm({ password: generateRandomPassword() })}
+                    className="px-3 py-2 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors flex items-center gap-1 text-sm font-medium"
+                    title="สุ่มรหัสผ่าน"
+                  >
+                    <RefreshCw className="w-4 h-4" />
+                    สุ่ม
+                  </button>
+                </div>
               </div>
             </div>
 
             <div className="flex gap-3">
               <button
                 onClick={() => setShowApproveModal(null)}
-                className="flex-1 px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50"
+                className="flex-1 px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
               >
                 ยกเลิก
               </button>
               <button
-                onClick={() => handleApprove(showApproveModal._id)}
-                disabled={updating === showApproveModal._id || !approveForm.username || !approveForm.password}
-                className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 disabled:opacity-50"
+                onClick={() => handleApprove(showApproveModal._id, showApproveModal.email)}
+                disabled={updating === showApproveModal._id || !approveForm.password}
+                className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 {updating === showApproveModal._id ? "กำลังประมวลผล..." : "อนุมัติ"}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Success Modal */}
+      {showSuccessModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl p-8 max-w-sm w-full space-y-6 text-center">
+            <div className="text-5xl">🎉</div>
+            
+            <div>
+              <h2 className="text-xl font-semibold text-gray-900">บันทึกข้อมูลสำเร็จ</h2>
+              <p className="text-sm text-gray-600 mt-1">ยินดีต้อนรับสู่ UPSkills!</p>
+            </div>
+
+            <div className="bg-gray-50 p-4 rounded-lg space-y-3 text-left">
+              <div className="text-sm">
+                <p className="text-gray-600">ชื่อผู้ใช้:</p>
+                <p className="font-mono text-gray-900 break-all">{successData.username}</p>
+              </div>
+              <div className="text-sm">
+                <p className="text-gray-600">รหัสผ่าน:</p>
+                <p className="font-mono text-gray-900">{successData.password}</p>
+              </div>
+              <div className="text-sm">
+                <p className="text-gray-600">เข้าสู่ระบบ:</p>
+                <p className="font-mono text-blue-600">http://localhost:3000/login</p>
+              </div>
+            </div>
+
+            <button
+              onClick={copyToClipboard}
+              className={`w-full px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2 ${
+                copiedToClipboard
+                  ? "bg-green-100 text-green-700"
+                  : "bg-violet-100 text-violet-600 hover:bg-violet-200"
+              }`}
+            >
+              <Copy className="w-4 h-4" />
+              {copiedToClipboard ? "คัดลอกสำเร็จ" : "คัดลอกข้อมูลทั้งหมด"}
+            </button>
+
+            <button
+              onClick={() => {
+                setShowSuccessModal(false);
+                router.push("/super-admin/roles");
+              }}
+              className="w-full px-4 py-2 bg-violet-600 text-white rounded-lg text-sm font-medium hover:bg-violet-700 transition-colors"
+            >
+              ไปหน้า Roles
+            </button>
           </div>
         </div>
       )}
