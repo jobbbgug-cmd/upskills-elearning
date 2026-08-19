@@ -19,6 +19,7 @@ async function initializeModel() {
   const schema = new (await import("mongoose")).Schema({
     name: String,
     email: String,
+    role: { type: String, enum: ["student", "teacher"], default: "student" },
     contactChannel: String,
     contactId: String,
     status: { type: String, default: "pending" },
@@ -67,7 +68,7 @@ export async function PATCH(
     // If approving, create user with appropriate online role
     if (status === "approved" && username && password) {
       try {
-        const userRole = updated.role === "teacher" ? "teacher_online" : "online";
+        const userRole = updated.role === "teacher" ? "teacher-online" : "student-online";
         console.log("Creating user with:", { name: updated.name, email: updated.email, username, role: userRole });
         const existingUser = await User.findOne({ email: updated.email });
         if (existingUser) {
