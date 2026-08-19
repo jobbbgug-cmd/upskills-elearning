@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
 import { getAuthUser } from "@/lib/auth";
-import { ObjectId } from "mongodb";
+import User from "@/models/User";
 
 let OnlineRegistrationModel: any;
 
@@ -66,26 +66,18 @@ export async function PATCH(
     // If approving, create user with "online" role
     if (status === "approved" && username && password) {
       try {
-        const User = (await import("mongoose")).models.User ||
-          (await import("mongoose")).model("User", new (await import("mongoose")).Schema({
-            name: String,
-            email: String,
-            username: String,
-            password: String,
-            role: { type: String, default: "student" },
-            status: { type: String, default: "pending" },
-            createdAt: { type: Date, default: Date.now },
-          }));
-
-        await User.create({
-          name: updated.name,
-          email: updated.email,
-          username,
-          password,
-          role: "online",
-          status: "approved",
-          createdAt: new Date(),
-        });
+        const existingUser = await User.findOne({ email: updated.email });
+        if (!existingUser) {
+          await User.create({
+            name: updated.name,
+            email: updated.email,
+            username,
+            password,
+            role: "online",
+            status: "approved",
+            createdAt: new Date(),
+          });
+        }
       } catch (userError) {
         console.error("Error creating user:", userError);
       }
