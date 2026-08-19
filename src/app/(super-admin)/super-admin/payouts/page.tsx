@@ -63,7 +63,7 @@ export default function PayoutsPage() {
               {payouts.map((payout) => (
                 <tr key={payout._id} className="border-b border-gray-100 hover:bg-gray-50">
                   <td className="py-3 px-4 font-medium">{payout.institutionId}</td>
-                  <td className="py-3 px-4 text-right">฿{payout.amount.toLocaleString()}</td>
+                  <td className="py-3 px-4 text-right">฿{(payout.amount || 0).toLocaleString()}</td>
                   <td className="py-3 px-4">
                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                       payout.status === "paid" ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"
