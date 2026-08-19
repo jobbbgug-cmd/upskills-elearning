@@ -308,16 +308,6 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
             </>
           )}
 
-              {expandedGroups.has("platform") && (
-                <>
-                  {nav("/super-admin", <LayoutDashboard className="w-4 h-4" />, "ภาพรวม", undefined, "platform")}
-                  {nav("/super-admin/analytics", <BarChart2 className="w-4 h-4" />, "Analytics", undefined, "platform")}
-                  {nav("/super-admin/institutions", <Building2 className="w-4 h-4" />, "สถาบันทั้งหมด", undefined, "platform")}
-                  {nav("/super-admin/trials", <FlaskConical className="w-4 h-4" />, "คำขอทดลองใช้งาน", undefined, "platform")}
-                  {nav("/super-admin/payouts", <Receipt className="w-4 h-4" />, "Commission & Payout", undefined, "platform")}
-                </>
-              )}
-
           {/* Phase 5-6 features */}
           <div className="pt-4 pb-1">{section("features", "ฟีเจอร์แพลตฟอร์ม")}</div>
           {expandedGroups.has("features") && (
