@@ -79,13 +79,19 @@ export default function OnlineRegistrationsPage() {
           password: approveForm.password,
         }),
       });
-      if (res.ok) {
-        setSuccessData({ username: email, password: approveForm.password });
-        setShowSuccessModal(true);
-        setShowApproveModal(null);
-        setApproveForm({ password: "" });
-        await load();
+
+      const data = await res.json();
+      console.log("Approve response:", { status: res.status, data });
+
+      if (!res.ok) {
+        throw new Error(data.error || `API Error: ${res.status}`);
       }
+
+      setSuccessData({ username: email, password: approveForm.password });
+      setShowSuccessModal(true);
+      setShowApproveModal(null);
+      setApproveForm({ password: "" });
+      await load();
     } catch (error) {
       console.error("Error approving registration:", error);
       alert("เกิดข้อผิดพลาด: " + (error as Error).message);

@@ -70,24 +70,31 @@ export async function PATCH(
       try {
         const userRole = updated.role === "teacher" ? "teacher-online" : "student-online";
         console.log("Creating user with:", { name: updated.name, email: updated.email, username, role: userRole });
+
         const existingUser = await User.findOne({ email: updated.email });
         if (existingUser) {
           console.log("User already exists:", existingUser.email);
-        } else {
-          const hashedPassword = await bcrypt.hash(password, 10);
-          const newUser = await User.create({
-            name: updated.name,
-            email: updated.email,
-            username,
-            password: hashedPassword,
-            role: userRole,
-            status: "approved",
-            createdAt: new Date(),
-          });
-          console.log("User created successfully:", newUser._id, newUser.email);
+          return NextResponse.json({ ...updated.toObject(), userMessage: "User already exists" });
         }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const newUser = await User.create({
+          name: updated.name,
+          email: updated.email,
+          username,
+          password: hashedPassword,
+          role: userRole,
+          status: "approved",
+          createdAt: new Date(),
+        });
+        console.log("User created successfully:", newUser._id, newUser.email);
+        return NextResponse.json({ ...updated.toObject(), userCreated: true, userId: newUser._id });
       } catch (userError) {
         console.error("Error creating user:", userError);
+        return NextResponse.json(
+          { error: "Failed to create user: " + (userError instanceof Error ? userError.message : String(userError)) },
+          { status: 500 }
+        );
       }
     }
 
