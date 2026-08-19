@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Mail, Phone, Search, Trash2, CheckCircle, Clock } from "lucide-react";
+import { Mail, Phone, Search, Trash2, CheckCircle, Clock, Eye, EyeOff, Copy, Check } from "lucide-react";
 
 interface OnlineRegistration {
   _id: string;
@@ -13,11 +13,20 @@ interface OnlineRegistration {
   createdAt: string;
 }
 
+function genPassword(len = 10) {
+  const c = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789@#";
+  return Array.from({ length: len }, () => c[Math.floor(Math.random() * c.length)]).join("");
+}
+
 export default function OnlineRegistrationsPage() {
   const [registrations, setRegistrations] = useState<OnlineRegistration[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<"all" | "pending" | "approved" | "rejected">("pending");
+  const [approvalModal, setApprovalModal] = useState<{ open: boolean; id: string; email: string; password: string }>({ open: false, id: "", email: "", password: "" });
+  const [showPassword, setShowPassword] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [approving, setApproving] = useState(false);
 
   useEffect(() => {
     fetchRegistrations();
@@ -37,18 +46,34 @@ export default function OnlineRegistrationsPage() {
     }
   };
 
-  const handleApprove = async (id: string) => {
+  const handleApproveClick = (id: string, email: string) => {
+    setApprovalModal({ open: true, id, email, password: "" });
+  };
+
+  const handleApprove = async () => {
+    if (!approvalModal.password) {
+      alert("กรุณากำหนดรหัสผ่าน");
+      return;
+    }
+    setApproving(true);
     try {
-      const res = await fetch(`/api/super-admin/online-registrations/${id}`, {
+      const res = await fetch(`/api/super-admin/online-registrations/${approvalModal.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: "approved" }),
+        body: JSON.stringify({
+          status: "approved",
+          password: approvalModal.password,
+          username: approvalModal.email,
+        }),
       });
       if (res.ok) {
+        setApprovalModal({ open: false, id: "", email: "", password: "" });
         fetchRegistrations();
       }
     } catch (error) {
       console.error("Failed to approve:", error);
+    } finally {
+      setApproving(false);
     }
   };
 
@@ -194,7 +219,7 @@ export default function OnlineRegistrationsPage() {
                     {reg.status === "pending" && (
                       <>
                         <button
-                          onClick={() => handleApprove(reg._id)}
+                          onClick={() => handleApproveClick(reg._id, reg.email)}
                           className="inline-flex items-center gap-1 px-3 py-1.5 text-xs bg-green-100 text-green-700 rounded hover:bg-green-200 transition-colors"
                         >
                           <CheckCircle className="w-3 h-3" />
@@ -225,6 +250,90 @@ export default function OnlineRegistrationsPage() {
       {filtered.length === 0 && (
         <div className="bg-white rounded-lg border border-gray-200 p-6 text-center">
           <p className="text-gray-500">ไม่พบคำขอสมัครสมาชิก</p>
+        </div>
+      )}
+
+      {/* Approval Modal */}
+      {approvalModal.open && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md">
+            <div className="px-6 py-5 border-b border-gray-100">
+              <h2 className="text-lg font-bold text-gray-900">อนุมัติคำขอเรียนออนไลน์</h2>
+              <p className="text-xs text-gray-400 mt-0.5">กำหนดรหัสผ่านเพื่อสร้าง User ในระบบ</p>
+            </div>
+
+            <div className="px-6 py-5 space-y-4">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Username</label>
+                <input
+                  type="text"
+                  value={approvalModal.email}
+                  readOnly
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm text-gray-600 bg-gray-50"
+                />
+                <p className="text-xs text-gray-400 mt-1">ใช้อีเมลเป็น Username</p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Password</label>
+                <div className="flex gap-2">
+                  <div className="relative flex-1">
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      value={approvalModal.password}
+                      onChange={(e) => setApprovalModal({ ...approvalModal, password: e.target.value })}
+                      placeholder="กำหนดรหัสผ่าน"
+                      className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-400 pr-10"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    >
+                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const pwd = genPassword();
+                      setApprovalModal({ ...approvalModal, password: pwd });
+                      setShowPassword(true);
+                    }}
+                    className="px-4 py-2.5 text-xs font-semibold rounded-xl whitespace-nowrap bg-green-100 text-green-700 hover:bg-green-200 transition-colors"
+                  >
+                    Gen
+                  </button>
+                </div>
+                {approvalModal.password && (
+                  <p className="text-xs mt-2 font-mono px-3 py-1.5 rounded-lg bg-green-50 text-green-700">{approvalModal.password}</p>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Role</label>
+                <div className="px-4 py-2.5 border border-gray-300 rounded-xl text-sm text-gray-900 bg-gray-50">
+                  Online (เรียนออนไลน์)
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-3 px-6 py-5 border-t border-gray-100">
+              <button
+                onClick={handleApprove}
+                disabled={approving || !approvalModal.password}
+                className="flex-1 py-2.5 text-white font-semibold rounded-xl bg-green-600 hover:bg-green-700 disabled:opacity-50 transition-colors text-sm"
+              >
+                {approving ? "กำลังประมวลผล..." : "อนุมัติ"}
+              </button>
+              <button
+                onClick={() => setApprovalModal({ open: false, id: "", email: "", password: "" })}
+                className="flex-1 py-2.5 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 transition-colors text-sm"
+              >
+                ยกเลิก
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

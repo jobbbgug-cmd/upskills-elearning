@@ -41,7 +41,7 @@ export async function PATCH(
     await initializeModel();
 
     const body = await req.json();
-    const { status } = body;
+    const { status, username, password } = body;
 
     if (!status || !["pending", "approved", "rejected"].includes(status)) {
       return NextResponse.json(
@@ -61,6 +61,34 @@ export async function PATCH(
         { error: "Registration not found" },
         { status: 404 }
       );
+    }
+
+    // If approving, create user with "online" role
+    if (status === "approved" && username && password) {
+      try {
+        const User = (await import("mongoose")).models.User ||
+          (await import("mongoose")).model("User", new (await import("mongoose")).Schema({
+            name: String,
+            email: String,
+            username: String,
+            password: String,
+            role: { type: String, default: "student" },
+            status: { type: String, default: "pending" },
+            createdAt: { type: Date, default: Date.now },
+          }));
+
+        await User.create({
+          name: updated.name,
+          email: updated.email,
+          username,
+          password,
+          role: "online",
+          status: "approved",
+          createdAt: new Date(),
+        });
+      } catch (userError) {
+        console.error("Error creating user:", userError);
+      }
     }
 
     return NextResponse.json(updated);
