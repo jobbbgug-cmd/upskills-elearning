@@ -30,7 +30,7 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const auth = await getAuthUser();
-    if (!auth || (auth.role !== "admin" && auth.role !== "owner")) {
+    if (!auth || (auth.role !== "admin" && auth.role !== "owner" && auth.role !== "teacher-online" && auth.role !== "teacher_online")) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -53,6 +53,7 @@ export async function POST(req: NextRequest) {
       whatYouWillLearn: whatYouWillLearn || "",
       courses: courseIds,
       instructor: auth.name || "Admin",
+      createdBy: auth.userId,
       institutionId: auth.institutionId,
       isActive: true,
     });

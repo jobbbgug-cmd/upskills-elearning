@@ -16,11 +16,12 @@ interface LearningPathItem {
   createdAt: string;
 }
 
-async function getLearningPaths(userId?: string): Promise<LearningPathItem[]> {
+async function getLearningPaths(userId: string): Promise<LearningPathItem[]> {
   try {
     await connectDB();
     const paths = await LearningPath.find({
       isActive: true,
+      createdBy: userId,
     })
       .select("title description coverImage instructor difficulty courses createdAt")
       .sort({ createdAt: -1 })
@@ -99,7 +100,7 @@ export default async function ManagePathsPage() {
                       {path.courses.length} คอร์ส
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-600">
-                      {path.difficulty === "easy" ? "ผู้เริ่มต้น" : path.difficulty === "intermediate" ? "ระดับกลาง" : "ขั้นสูง"}
+                      {path.difficulty === "easy" ? "ผู้เริ่มต้น" : path.difficulty === "intermediate" ? "ระดับกลาง" : path.difficulty === "hard" ? "ขั้นสูง" : path.difficulty}
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-600">
                       {new Date(path.createdAt).toLocaleDateString("th-TH")}
