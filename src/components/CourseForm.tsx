@@ -45,9 +45,10 @@ interface CourseFormProps {
   courseType?: "online" | "onsite" | "live online";
   teacherMode?: boolean;
   teacherName?: string;
+  redirectUrl?: string;
 }
 
-export default function CourseForm({ course, mode, courseType, teacherMode = false, teacherName = "" }: CourseFormProps) {
+export default function CourseForm({ course, mode, courseType, teacherMode = false, teacherName = "", redirectUrl = "/admin/courses" }: CourseFormProps) {
   const router = useRouter();
   const fileRef    = useRef<HTMLInputElement>(null);
 
@@ -238,7 +239,7 @@ export default function CourseForm({ course, mode, courseType, teacherMode = fal
       } else {
         setError("");
         setToast({ message: mode === "create" ? "สร้างคอร์สสำเร็จ!" : "บันทึกสำเร็จ!", type: "success" });
-        setTimeout(() => router.push("/admin/courses"), 1500);
+        setTimeout(() => router.push(redirectUrl), 1500);
       }
     } finally {
       setLoading(false);
