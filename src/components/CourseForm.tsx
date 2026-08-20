@@ -447,18 +447,16 @@ export default function CourseForm({ course, mode, courseType, teacherMode = fal
       </div>
 
       {/* Grade levels */}
-      <div>
-        <label className="block text-sm font-semibold text-gray-700 mb-3">ระดับชั้นที่เหมาะสม</label>
-        <div className="flex flex-wrap gap-2">
-          <button
-            type="button"
-            disabled
-            className="px-3 py-1.5 rounded-lg text-sm font-medium border-2 bg-indigo-600 border-indigo-600 text-white cursor-not-allowed opacity-90"
-          >
-            ทั่วไป
-          </button>
-          <p className="text-xs text-gray-500 w-full mt-2">บังคับใช้เฉพาะระดับชั้น "ทั่วไป"</p>
-        </div>
+      <div className="flex items-center gap-4">
+        <label className="text-sm font-semibold text-gray-700 whitespace-nowrap">ระดับชั้นที่เหมาะสม</label>
+        <button
+          type="button"
+          disabled
+          className="px-3 py-1.5 rounded-lg text-sm font-medium border-2 bg-indigo-600 border-indigo-600 text-white cursor-not-allowed opacity-90 whitespace-nowrap"
+        >
+          ทั่วไป
+        </button>
+        <p className="text-xs text-gray-500 whitespace-nowrap">บังคับใช้เฉพาะระดับชั้น "ทั่วไป"</p>
       </div>
 
       {/* What you will learn */}
