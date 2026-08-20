@@ -170,7 +170,7 @@ export default function LoginPage() {
             redirectPath = "/admin";
             break;
           case "admin":
-            redirectPath = "/admin/dashboard";
+            redirectPath = "/admin";
             break;
           case "super_admin":
             redirectPath = "/super-admin-dashboard";
