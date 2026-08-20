@@ -336,13 +336,6 @@ export default function ContentForm({ content, mode, defaultType, lockType, redi
                     <Trash2 className="w-4 h-4" />
                   </button>
                 </div>
-                <input
-                  type="text"
-                  value={lesson.section || ""}
-                  onChange={(e) => setLessons(lessons.map((l, i) => i === idx ? { ...l, section: e.target.value } : l))}
-                  className={`${inputClass} text-xs`}
-                  placeholder="หมวดเนื้อหา (เช่น บทที่ 1, Introduction)"
-                />
               </div>
             ))}
           </div>
