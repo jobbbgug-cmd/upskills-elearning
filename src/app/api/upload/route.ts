@@ -22,6 +22,13 @@ export async function POST(req: NextRequest) {
     const ext = file.name.split(".").pop() ?? "jpg";
     const filename = `uploads/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
 
+    if (process.env.NODE_ENV === "development" || !process.env.BLOB_READ_WRITE_TOKEN) {
+      const buffer = await file.arrayBuffer();
+      const base64 = Buffer.from(buffer).toString("base64");
+      const dataUrl = `data:${file.type};base64,${base64}`;
+      return NextResponse.json({ url: dataUrl });
+    }
+
     const blob = await put(filename, file, { access: "public" });
 
     return NextResponse.json({ url: blob.url });
