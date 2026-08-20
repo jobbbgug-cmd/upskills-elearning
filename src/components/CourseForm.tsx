@@ -440,9 +440,15 @@ export default function CourseForm({ course, mode, courseType, teacherMode = fal
             <option value="hard">ยาก</option>
           </select>
         </div>
-        <div className="flex items-center gap-3 pt-6">
-          <input type="checkbox" id="isActive" checked={form.isActive} onChange={(e) => setForm({ ...form, isActive: e.target.checked })} className="w-4 h-4 rounded text-indigo-600" />
-          <label htmlFor="isActive" className="text-sm font-medium text-gray-700">เปิดให้จองได้</label>
+        <div className="flex items-start gap-3 pt-6">
+          <input type="checkbox" id="isActive" checked={form.isActive} onChange={(e) => setForm({ ...form, isActive: e.target.checked })} className="w-4 h-4 rounded text-indigo-600 mt-1" />
+          <div>
+            <label htmlFor="isActive" className="text-sm font-medium text-gray-700 block">เปิดให้จองได้</label>
+            <p className="text-xs text-gray-500 mt-1">
+              ✓ ติ๊ก: คอร์สจะแสดงให้ลูกค้าเห็นและสามารถซื้อได้<br/>
+              ✗ ไม่ติ๊ก: คอร์สจะซ่อนจากลูกค้า ลูกค้าจะไม่เห็นและไม่สามารถซื้อได้
+            </p>
+          </div>
         </div>
       </div>
 
