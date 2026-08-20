@@ -10,9 +10,10 @@ interface ContentFormProps {
   mode: "create" | "edit";
   defaultType?: "online" | "live online" | "onsite";
   lockType?: boolean;
+  redirectUrl?: string;
 }
 
-export default function ContentForm({ content, mode, defaultType, lockType }: ContentFormProps) {
+export default function ContentForm({ content, mode, defaultType, lockType, redirectUrl = "/admin/content" }: ContentFormProps) {
   const router = useRouter();
   const [name, setName] = useState(content?.name ?? "");
   const [description, setDescription] = useState(content?.description ?? "");
@@ -59,7 +60,7 @@ export default function ContentForm({ content, mode, defaultType, lockType }: Co
         setToast({ message: msg, type: "error" });
       } else {
         setToast({ message: mode === "create" ? "สร้างเนื้อหาสำเร็จ!" : "บันทึกสำเร็จ!", type: "success" });
-        setTimeout(() => router.push("/admin/content"), 1200);
+        setTimeout(() => router.push(redirectUrl), 1200);
       }
     } finally {
       setLoading(false);
@@ -362,7 +363,7 @@ export default function ContentForm({ content, mode, defaultType, lockType }: Co
         </button>
         <button
           type="button"
-          onClick={() => router.push("/admin/content")}
+          onClick={() => router.push(redirectUrl)}
           className="px-6 py-3 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 transition-colors"
         >
           ยกเลิก
