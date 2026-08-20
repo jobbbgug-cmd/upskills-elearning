@@ -96,8 +96,8 @@ export default function BannerSlider({ banners, institutionNames = {}, user = nu
                     {user && (
                       <Link
                         href={
-                          user.role === "student-online" || user.role === "online" ? "/student-online/dashboard" :
-                          user.role === "teacher-online" || user.role === "teacher_online" ? "/teacher-online/teacher-dashboard" :
+                          user.role === "student-online" || user.role === "online" ? "/student-dashboard" :
+                          user.role === "teacher-online" || user.role === "teacher_online" ? "/teacher-dashboard" :
                           user.role === "admin" || user.role === "super_admin" ? "/admin" :
                           user.role === "owner" ? "/owner/dashboard" :
                           "/dashboard"

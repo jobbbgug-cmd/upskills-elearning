@@ -256,7 +256,7 @@ export default function Navbar() {
                 <span className="text-sm text-gray-600">สวัสดี, {user.name}</span>
                 {(user.role === "student-online" || user.role === "online") && (
                   <Link
-                    href="/student-online/dashboard"
+                    href="/student-dashboard"
                     className="flex items-center gap-1.5 text-sm px-3 py-2 rounded-lg text-indigo-600 hover:bg-indigo-50 transition-colors font-medium"
                   >
                     <LayoutDashboard className="w-4 h-4" />
@@ -265,7 +265,7 @@ export default function Navbar() {
                 )}
                 {(user.role === "teacher-online" || user.role === "teacher_online") && (
                   <Link
-                    href="/teacher-online/teacher-dashboard"
+                    href="/teacher-dashboard"
                     className="flex items-center gap-1.5 text-sm px-3 py-2 rounded-lg text-indigo-600 hover:bg-indigo-50 transition-colors font-medium"
                   >
                     <LayoutDashboard className="w-4 h-4" />

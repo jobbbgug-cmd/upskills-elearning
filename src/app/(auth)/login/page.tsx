@@ -157,11 +157,11 @@ export default function LoginPage() {
         switch(role) {
           case "student-online":
           case "online":
-            redirectPath = "/student-online/dashboard";
+            redirectPath = "/student-dashboard";
             break;
           case "teacher-online":
           case "teacher_online":
-            redirectPath = "/teacher-online/teacher-dashboard";
+            redirectPath = "/teacher-dashboard";
             break;
           case "student":
             redirectPath = "/dashboard";

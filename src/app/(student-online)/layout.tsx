@@ -41,28 +41,28 @@ export default async function StudentOnlineLayout({
         <aside className="md:col-span-1">
           <nav className="space-y-2 sticky top-20">
             <Link
-              href="/student-online/dashboard"
+              href="/student-dashboard/dashboard"
               className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-600 hover:bg-purple-50 hover:text-purple-600 rounded-lg transition-colors"
             >
               <BookOpen className="w-4 h-4" />
               ภาพรวม
             </Link>
             <Link
-              href="/student-online/my-courses"
+              href="/student-dashboard/my-courses"
               className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-600 hover:bg-purple-50 hover:text-purple-600 rounded-lg transition-colors"
             >
               <BookOpen className="w-4 h-4" />
               คอร์สของฉัน
             </Link>
             <Link
-              href="/student-online/cart"
+              href="/student-dashboard/cart"
               className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-600 hover:bg-purple-50 hover:text-purple-600 rounded-lg transition-colors"
             >
               <ShoppingCart className="w-4 h-4" />
               ตะกร้าสินค้า
             </Link>
             <Link
-              href="/student-online/invoices"
+              href="/student-dashboard/invoices"
               className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-600 hover:bg-purple-50 hover:text-purple-600 rounded-lg transition-colors"
             >
               <FileText className="w-4 h-4" />
