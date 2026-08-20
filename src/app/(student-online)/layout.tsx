@@ -3,6 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { getAuthUser } from "@/lib/auth";
 import { LogOut, ShoppingCart, BookOpen, FileText, Menu } from "lucide-react";
+import LogoutButton from "@/components/LogoutButton";
 
 export default async function StudentOnlineLayout({
   children,
@@ -24,13 +25,7 @@ export default async function StudentOnlineLayout({
           </Link>
           <div className="flex items-center gap-4">
             <span className="text-sm text-gray-600">นักเรียน {auth.name}</span>
-            <Link
-              href="/api/auth/logout"
-              className="flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-            >
-              <LogOut className="w-4 h-4" />
-              ออกจากระบบ
-            </Link>
+            <LogoutButton />
           </div>
         </div>
       </div>
