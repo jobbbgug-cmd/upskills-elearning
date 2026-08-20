@@ -95,7 +95,13 @@ export default function BannerSlider({ banners, institutionNames = {}, user = nu
                     ) : null}
                     {user && (
                       <Link
-                        href={user.role === "admin" || user.role === "super_admin" ? "/admin" : user.role === "owner" ? "/owner/dashboard" : "/dashboard"}
+                        href={
+                          user.role === "student-online" || user.role === "online" ? "/student-online/dashboard" :
+                          user.role === "teacher-online" || user.role === "teacher_online" ? "/teacher-online/teacher-dashboard" :
+                          user.role === "admin" || user.role === "super_admin" ? "/admin" :
+                          user.role === "owner" ? "/owner/dashboard" :
+                          "/dashboard"
+                        }
                         className="inline-block px-10 py-4 rounded-2xl font-semibold text-white text-base shadow-lg transition-opacity hover:opacity-90"
                         style={{ background: "linear-gradient(90deg,#3b82f6,#1d4ed8)" }}
                       >
