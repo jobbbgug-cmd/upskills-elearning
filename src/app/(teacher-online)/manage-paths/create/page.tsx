@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, X, ArrowLeft } from "lucide-react";
+import { Plus, X, ArrowLeft, Upload } from "lucide-react";
 import Link from "next/link";
 
 interface Course {
@@ -14,9 +14,12 @@ interface Course {
 
 export default function CreatePathPage() {
   const router = useRouter();
+  const coverRef = useRef<HTMLInputElement>(null);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [difficulty, setDifficulty] = useState("medium");
+  const [coverImage, setCoverImage] = useState("");
+  const [uploadingCover, setUploadingCover] = useState(false);
   const [courses, setCourses] = useState<Course[]>([]);
   const [selectedCourses, setSelectedCourses] = useState<string[]>([]);
   const [search, setSearch] = useState("");
@@ -50,6 +53,26 @@ export default function CreatePathPage() {
     setSelectedCourses(selectedCourses.filter(id => id !== courseId));
   };
 
+  const handleCoverUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingCover(true);
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      const res = await fetch("/api/upload", { method: "POST", body: fd });
+      const data = await res.json();
+      if (res.ok) {
+        setCoverImage(data.url);
+      } else {
+        alert(data.error || "อัปโหลดล้มเหลว");
+      }
+    } finally {
+      setUploadingCover(false);
+      e.target.value = "";
+    }
+  };
+
   const handleSave = async () => {
     if (!title.trim() || !description.trim() || selectedCourses.length === 0) {
       alert("กรุณากรอกข้อมูลให้ครบถ้วนและเลือกคอร์สอย่างน้อย 1 คอร์ส");
@@ -65,6 +88,7 @@ export default function CreatePathPage() {
           title,
           description,
           difficulty,
+          coverImage,
           courseIds: selectedCourses,
         }),
       });
@@ -128,6 +152,36 @@ export default function CreatePathPage() {
               <option value="medium">ระดับกลาง</option>
               <option value="hard">ขั้นสูง</option>
             </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-1.5">รูปปก</label>
+            <div className="flex gap-4 items-start">
+              <div className="w-32 h-40 rounded-lg border-2 border-dashed border-purple-300 bg-purple-50 flex items-center justify-center overflow-hidden flex-shrink-0">
+                {coverImage ? (
+                  <img src={coverImage} alt="cover" className="w-full h-full object-cover" />
+                ) : (
+                  <Upload className="w-6 h-6 text-purple-400" />
+                )}
+              </div>
+              <div className="flex-1">
+                <input
+                  ref={coverRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleCoverUpload}
+                  className="hidden"
+                />
+                <button
+                  type="button"
+                  onClick={() => coverRef.current?.click()}
+                  disabled={uploadingCover}
+                  className="px-4 py-2.5 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 font-medium text-sm transition-colors disabled:opacity-50"
+                >
+                  {uploadingCover ? "กำลังอัปโหลด..." : "เลือกรูปปก"}
+                </button>
+              </div>
+            </div>
           </div>
 
           <div>

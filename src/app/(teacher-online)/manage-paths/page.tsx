@@ -23,7 +23,7 @@ async function getLearningPaths(userId: string): Promise<LearningPathItem[]> {
       isActive: true,
       createdBy: userId,
     })
-      .select("title description coverImage instructor difficulty courses createdAt")
+      .select("_id title description coverImage instructor difficulty courses createdAt")
       .sort({ createdAt: -1 })
       .populate("courses", "title")
       .lean();
@@ -91,9 +91,20 @@ export default async function ManagePathsPage() {
                 {paths.map((path) => (
                   <tr key={path._id} className="border-b border-gray-200 hover:bg-gray-50 transition-colors">
                     <td className="px-6 py-4">
-                      <div>
-                        <p className="font-medium text-gray-900">{path.title}</p>
-                        <p className="text-sm text-gray-500 mt-1 line-clamp-1">{path.description}</p>
+                      <div className="flex items-center gap-3">
+                        {path.coverImage ? (
+                          <img
+                            src={path.coverImage}
+                            alt={path.title}
+                            className="w-12 h-12 rounded object-cover flex-shrink-0"
+                          />
+                        ) : (
+                          <div className="w-12 h-12 rounded bg-gray-200 flex-shrink-0" />
+                        )}
+                        <div>
+                          <p className="font-medium text-gray-900">{path.title}</p>
+                          <p className="text-sm text-gray-500 mt-1 line-clamp-1">{path.description}</p>
+                        </div>
                       </div>
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-600">
