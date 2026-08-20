@@ -10,7 +10,7 @@ export default async function TeacherOnlineLayout({
   children: React.ReactNode;
 }) {
   const auth = await getAuthUser();
-  if (!auth || auth.role !== "teacher_online") {
+  if (!auth || (auth.role !== "teacher-online" && auth.role !== "teacher_online")) {
     redirect("/login");
   }
 
@@ -41,21 +41,21 @@ export default async function TeacherOnlineLayout({
         <aside className="md:col-span-1">
           <nav className="space-y-2 sticky top-20">
             <Link
-              href="/teacher-dashboard"
+              href="/teacher-online/teacher-dashboard"
               className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-600 hover:bg-purple-50 hover:text-purple-600 rounded-lg transition-colors"
             >
               <BarChart3 className="w-4 h-4" />
               ภาพรวม
             </Link>
             <Link
-              href="/my-sales"
+              href="/teacher-online/my-sales"
               className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-600 hover:bg-purple-50 hover:text-purple-600 rounded-lg transition-colors"
             >
               <Users className="w-4 h-4" />
               คอร์สของฉัน
             </Link>
             <Link
-              href="/invoice-requests"
+              href="/teacher-online/invoice-requests"
               className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-600 hover:bg-purple-50 hover:text-purple-600 rounded-lg transition-colors"
             >
               <FileText className="w-4 h-4" />
@@ -67,28 +67,28 @@ export default async function TeacherOnlineLayout({
                 คอร์สและเนื้อหา
               </p>
               <Link
-                href="/manage-courses"
+                href="/teacher-online/manage-courses"
                 className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-600 hover:bg-purple-50 hover:text-purple-600 rounded-lg transition-colors"
               >
                 <BookOpen className="w-4 h-4" />
                 จัดการคอร์ส
               </Link>
               <Link
-                href="/manage-content"
+                href="/teacher-online/manage-content"
                 className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-600 hover:bg-purple-50 hover:text-purple-600 rounded-lg transition-colors"
               >
                 <FileText className="w-4 h-4" />
                 เนื้อหาการเรียน
               </Link>
               <Link
-                href="/manage-paths"
+                href="/teacher-online/manage-paths"
                 className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-600 hover:bg-purple-50 hover:text-purple-600 rounded-lg transition-colors"
               >
                 <Layers className="w-4 h-4" />
                 เส้นทางการเรียน
               </Link>
               <Link
-                href="/manage-certificates"
+                href="/teacher-online/manage-certificates"
                 className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-600 hover:bg-purple-50 hover:text-purple-600 rounded-lg transition-colors"
               >
                 <Award className="w-4 h-4" />
