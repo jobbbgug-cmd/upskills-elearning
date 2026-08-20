@@ -79,10 +79,12 @@ export interface ICourse {
   gradeLevels: GradeLevel[];
   instructor: string;
   instructorId?: string;
+  createdBy?: string;
   category: string;
   type?: "online" | "live online" | "onsite";
   sessions: ISession[];
   price: number;
+  originalPrice?: number;
   isActive: boolean;
   enrollmentCount?: number;
   duration?: number;
