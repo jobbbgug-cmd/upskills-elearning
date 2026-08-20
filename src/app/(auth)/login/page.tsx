@@ -185,8 +185,8 @@ export default function LoginPage() {
             redirectPath = "/";
         }
 
-        router.push(redirectPath);
-        router.refresh();
+        // Use window.location for full page reload to ensure cookie is set
+        window.location.href = redirectPath;
       }
     } catch {
       setError("เกิดข้อผิดพลาด กรุณาลองใหม่");
