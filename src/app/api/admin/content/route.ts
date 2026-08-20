@@ -29,6 +29,7 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const auth = await getAuthUser();
+    console.log("[POST /api/admin/content] Auth object:", JSON.stringify(auth));
     if (!auth || (auth.role !== "admin" && auth.role !== "super_admin" && auth.role !== "teacher" && auth.role !== "teacher-online" && auth.role !== "teacher_online")) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -37,9 +38,9 @@ export async function POST(req: NextRequest) {
     const institutionId = await resolveInstitutionId(req, auth.institutionId);
     if (institutionId) body.institutionId = institutionId;
     body.createdBy = auth.userId;
-    console.log("[POST /api/admin/content] Creating content with body:", { name: body.name, createdBy: body.createdBy, userId: auth.userId, role: auth.role });
+    console.log("[POST /api/admin/content] About to create - auth.userId:", auth.userId, "body.createdBy:", body.createdBy);
     const content = await CourseContent.create(body);
-    console.log("[POST /api/admin/content] Saved to DB - content._id:", content._id, "createdBy in DB:", content.createdBy);
+    console.log("[POST /api/admin/content] Created doc:", { _id: content._id.toString(), createdBy: content.createdBy, name: content.name });
     return NextResponse.json({ content }, { status: 201 });
   } catch (err) {
     console.error("[POST /api/admin/content] Error:", err);
