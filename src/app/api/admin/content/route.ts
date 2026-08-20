@@ -7,7 +7,7 @@ import CourseContent from "@/models/CourseContent";
 export async function GET(req: NextRequest) {
   try {
     const auth = await getAuthUser();
-    if (!auth || (auth.role !== "admin" && auth.role !== "super_admin" && auth.role !== "teacher")) {
+    if (!auth || (auth.role !== "admin" && auth.role !== "super_admin" && auth.role !== "teacher" && auth.role !== "teacher-online" && auth.role !== "teacher_online")) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
     await connectDB();
@@ -25,7 +25,7 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const auth = await getAuthUser();
-    if (!auth || (auth.role !== "admin" && auth.role !== "super_admin" && auth.role !== "teacher")) {
+    if (!auth || (auth.role !== "admin" && auth.role !== "super_admin" && auth.role !== "teacher" && auth.role !== "teacher-online" && auth.role !== "teacher_online")) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
     const body = await req.json();

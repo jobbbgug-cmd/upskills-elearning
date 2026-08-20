@@ -8,7 +8,7 @@ import { tenantFilter } from "@/lib/tenant";
 export async function GET() {
   try {
     const auth = await getAuthUser();
-    if (!auth || (auth.role !== "admin" && auth.role !== "teacher")) {
+    if (!auth || (auth.role !== "admin" && auth.role !== "teacher" && auth.role !== "teacher-online" && auth.role !== "teacher_online")) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 

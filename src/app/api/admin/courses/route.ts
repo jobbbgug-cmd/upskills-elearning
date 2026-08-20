@@ -7,14 +7,14 @@ import { getAuthUser } from "@/lib/auth";
 export async function GET(req: NextRequest) {
   try {
     const auth = await getAuthUser();
-    if (!auth || (auth.role !== "admin" && auth.role !== "teacher")) {
+    if (!auth || (auth.role !== "admin" && auth.role !== "teacher" && auth.role !== "teacher-online" && auth.role !== "teacher_online")) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     await connectDB();
 
     const tenantClause = auth.institutionId ? { institutionId: auth.institutionId } : {};
-    const filter = auth.role === "teacher" ? { ...tenantClause, instructorId: auth.userId } : tenantClause;
+    const filter = (auth.role === "teacher" || auth.role === "teacher-online" || auth.role === "teacher_online") ? { ...tenantClause, instructorId: auth.userId } : tenantClause;
 
     const courses = await Course.find(filter).sort({ createdAt: -1 }).lean();
 
@@ -37,7 +37,7 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const auth = await getAuthUser();
-    if (!auth || (auth.role !== "admin" && auth.role !== "teacher")) {
+    if (!auth || (auth.role !== "admin" && auth.role !== "teacher" && auth.role !== "teacher-online" && auth.role !== "teacher_online")) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 

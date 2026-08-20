@@ -7,7 +7,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
   try {
     const { id } = await params;
     const auth = await getAuthUser();
-    if (!auth || (auth.role !== "admin" && auth.role !== "teacher")) {
+    if (!auth || (auth.role !== "admin" && auth.role !== "teacher" && auth.role !== "teacher-online" && auth.role !== "teacher_online")) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -20,7 +20,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     }
 
     // Teacher can only edit their own courses
-    if (auth.role === "teacher" && course.instructorId !== auth.userId) {
+    if ((auth.role === "teacher" || auth.role === "teacher-online" || auth.role === "teacher_online") && course.instructorId !== auth.userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -47,7 +47,7 @@ export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ 
   try {
     const { id } = await params;
     const auth = await getAuthUser();
-    if (!auth || (auth.role !== "admin" && auth.role !== "teacher")) {
+    if (!auth || (auth.role !== "admin" && auth.role !== "teacher" && auth.role !== "teacher-online" && auth.role !== "teacher_online")) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -59,7 +59,7 @@ export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ 
     }
 
     // Teacher can only delete their own courses
-    if (auth.role === "teacher" && course.instructorId !== auth.userId) {
+    if ((auth.role === "teacher" || auth.role === "teacher-online" || auth.role === "teacher_online") && course.instructorId !== auth.userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
