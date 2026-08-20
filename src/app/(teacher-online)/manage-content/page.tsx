@@ -1,6 +1,6 @@
 "use client";
 
-import { Plus } from "lucide-react";
+import { Plus, FileText } from "lucide-react";
 import Link from "next/link";
 
 export default function ManageContentPage() {
@@ -22,7 +22,8 @@ export default function ManageContentPage() {
 
       {/* Empty State */}
       <div className="bg-white rounded-2xl border border-gray-200 p-12 text-center">
-        <p className="text-gray-500 mb-4">ยังไม่มีเนื้อหาใดๆ</p>
+        <FileText className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+        <p className="text-gray-500 mb-6">คุณยังไม่มีเนื้อหาใดๆ</p>
         <Link
           href="/manage-content/create/online"
           className="inline-flex items-center gap-2 px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
