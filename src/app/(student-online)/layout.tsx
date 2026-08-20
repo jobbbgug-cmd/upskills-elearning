@@ -30,47 +30,46 @@ export default async function StudentOnlineLayout({
         </div>
       </div>
 
-      {/* Sidebar + Main */}
-      <div className="max-w-7xl mx-auto px-4 py-8 grid grid-cols-1 md:grid-cols-5 gap-8">
-        {/* Sidebar */}
-        <aside className="md:col-span-1">
-          <nav className="space-y-2 sticky top-20">
-            <Link
-              href="/student-dashboard/dashboard"
-              className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-600 hover:bg-purple-50 hover:text-purple-600 rounded-lg transition-colors"
-            >
-              <BookOpen className="w-4 h-4" />
-              ภาพรวม
-            </Link>
-            <Link
-              href="/student-dashboard/my-courses"
-              className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-600 hover:bg-purple-50 hover:text-purple-600 rounded-lg transition-colors"
-            >
-              <BookOpen className="w-4 h-4" />
-              คอร์สของฉัน
-            </Link>
-            <Link
-              href="/student-dashboard/cart"
-              className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-600 hover:bg-purple-50 hover:text-purple-600 rounded-lg transition-colors"
-            >
-              <ShoppingCart className="w-4 h-4" />
-              ตะกร้าสินค้า
-            </Link>
-            <Link
-              href="/student-dashboard/invoices"
-              className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-600 hover:bg-purple-50 hover:text-purple-600 rounded-lg transition-colors"
-            >
-              <FileText className="w-4 h-4" />
-              ใบกำกับภาษี
-            </Link>
-          </nav>
-        </aside>
+      {/* Sidebar */}
+      <aside className="hidden md:block fixed left-0 top-16 h-[calc(100vh-64px)] w-64 bg-white border-r border-gray-200 overflow-y-auto">
+        <nav className="space-y-2 p-4 sticky top-0">
+          <Link
+            href="/student-dashboard"
+            className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-600 hover:bg-purple-50 hover:text-purple-600 rounded-lg transition-colors"
+          >
+            <BookOpen className="w-4 h-4" />
+            ภาพรวม
+          </Link>
+          <Link
+            href="/student-dashboard/my-courses"
+            className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-600 hover:bg-purple-50 hover:text-purple-600 rounded-lg transition-colors"
+          >
+            <BookOpen className="w-4 h-4" />
+            คอร์สของฉัน
+          </Link>
+          <Link
+            href="/student-dashboard/cart"
+            className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-600 hover:bg-purple-50 hover:text-purple-600 rounded-lg transition-colors"
+          >
+            <ShoppingCart className="w-4 h-4" />
+            ตะกร้าสินค้า
+          </Link>
+          <Link
+            href="/student-dashboard/invoices"
+            className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-600 hover:bg-purple-50 hover:text-purple-600 rounded-lg transition-colors"
+          >
+            <FileText className="w-4 h-4" />
+            ใบกำกับภาษี
+          </Link>
+        </nav>
+      </aside>
 
-        {/* Main Content */}
-        <main className="md:col-span-4">
+      {/* Main Content */}
+      <main className="md:ml-64 px-4 py-8">
+        <div className="max-w-5xl mx-auto">
           {children}
-        </main>
-      </div>
+        </div>
+      </main>
     </div>
   );
 }
