@@ -150,7 +150,42 @@ export default function LoginPage() {
       if (!res.ok) {
         setError(data.error ?? "เกิดข้อผิดพลาด");
       } else {
-        router.push("/");
+        // Redirect based on user role
+        const role = data.user?.role;
+        let redirectPath = "/";
+
+        switch(role) {
+          case "student-online":
+          case "online":
+            redirectPath = "/student-online/dashboard";
+            break;
+          case "teacher-online":
+          case "teacher_online":
+            redirectPath = "/teacher-online/teacher-dashboard";
+            break;
+          case "student":
+            redirectPath = "/dashboard";
+            break;
+          case "teacher":
+            redirectPath = "/admin";
+            break;
+          case "admin":
+            redirectPath = "/admin/dashboard";
+            break;
+          case "super_admin":
+            redirectPath = "/super-admin-dashboard";
+            break;
+          case "parent":
+            redirectPath = "/parent/dashboard";
+            break;
+          case "owner":
+            redirectPath = "/owner/dashboard";
+            break;
+          default:
+            redirectPath = "/";
+        }
+
+        router.push(redirectPath);
         router.refresh();
       }
     } catch {
