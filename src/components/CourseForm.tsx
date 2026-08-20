@@ -73,6 +73,9 @@ export default function CourseForm({ course, mode, courseType, teacherMode = fal
     difficulty: (course as any)?.difficulty ?? "medium",
   });
 
+  const [discountType, setDiscountType] = useState<"percentage" | "fixed">("percentage");
+  const [discountValue, setDiscountValue] = useState(0);
+
   const [contentId, setContentId] = useState<string>(course?.contentId ?? "");
   const [contentOptions, setContentOptions] = useState<ContentOption[]>([]);
 
@@ -343,28 +346,75 @@ export default function CourseForm({ course, mode, courseType, teacherMode = fal
             ))}
           </select>
         </div>
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1.5">ราคาเต็ม (บาท)</label>
-            <input
-              type="number"
-              min={0}
-              value={form.originalPrice === 0 ? "" : form.originalPrice}
-              onChange={(e) => setForm({ ...form, originalPrice: e.target.value === "" ? 0 : Number(e.target.value) })}
-              className={inputClass}
-              placeholder="ราคาปกติ"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1.5">ราคาหลังหักส่วนลด (บาท)</label>
-            <input
-              type="number"
-              min={0}
-              value={form.price === 0 ? "" : form.price}
-              onChange={(e) => setForm({ ...form, price: e.target.value === "" ? 0 : Number(e.target.value) })}
-              className={inputClass}
-              placeholder="ราคาขาย"
-            />
+
+        {/* Discount Calculator */}
+        <div className="border-t border-gray-200 pt-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">ส่วนลด</h3>
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1.5">ราคาเต็ม (บาท)</label>
+                <input
+                  type="number"
+                  min={0}
+                  value={form.originalPrice === 0 ? "" : form.originalPrice}
+                  onChange={(e) => setForm({ ...form, originalPrice: e.target.value === "" ? 0 : Number(e.target.value) })}
+                  className={inputClass}
+                  placeholder="ราคาปกติ"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1.5">ประเภทส่วนลด</label>
+                <select
+                  value={discountType}
+                  onChange={(e) => {
+                    setDiscountType(e.target.value as "percentage" | "fixed");
+                    setDiscountValue(0);
+                  }}
+                  className={inputClass}
+                >
+                  <option value="percentage">% ส่วนลดแบบเปอร์เซ็นต์</option>
+                  <option value="fixed">จำนวน ส่วนลดแบบเงินสด</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Discount Input */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+                  {discountType === "percentage" ? "ส่วนลด (%)" : "ส่วนลด (บาท)"}
+                </label>
+                <input
+                  type="number"
+                  min={0}
+                  max={discountType === "percentage" ? 100 : form.originalPrice}
+                  value={discountValue === 0 ? "" : discountValue}
+                  onChange={(e) => {
+                    const val = e.target.value === "" ? 0 : Number(e.target.value);
+                    setDiscountValue(val);
+                    // Auto-calculate price
+                    if (form.originalPrice > 0) {
+                      const discountedPrice = discountType === "percentage"
+                        ? form.originalPrice * (1 - val / 100)
+                        : form.originalPrice - val;
+                      setForm({ ...form, price: Math.max(0, Math.round(discountedPrice)) });
+                    }
+                  }}
+                  className={inputClass}
+                  placeholder={discountType === "percentage" ? "เช่น 10" : "เช่น 100"}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1.5">ราคาหลังหักส่วนลด (บาท)</label>
+                <input
+                  type="number"
+                  min={0}
+                  value={form.price === 0 ? "" : form.price}
+                  onChange={(e) => setForm({ ...form, price: e.target.value === "" ? 0 : Number(e.target.value) })}
+                  className={inputClass}
+                  placeholder="ราคาขาย"
+                />
           </div>
         </div>
         <div>
