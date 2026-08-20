@@ -116,6 +116,25 @@ export default function BannerSlider({ banners, institutionNames = {}, user = nu
         </div>
       ))}
 
+      {/* Dashboard button for logged-in users */}
+      {user && (
+        <div className="absolute top-20 right-8 z-20">
+          <Link
+            href={
+              user.role === "student-online" || user.role === "online" ? "/student-online/dashboard" :
+              user.role === "teacher-online" || user.role === "teacher_online" ? "/teacher-online/teacher-dashboard" :
+              user.role === "admin" || user.role === "super_admin" ? "/admin" :
+              user.role === "owner" ? "/owner/dashboard" :
+              "/dashboard"
+            }
+            className="inline-block px-6 py-3 rounded-xl font-semibold text-white text-sm shadow-lg transition-opacity hover:opacity-90"
+            style={{ background: "linear-gradient(90deg,#3b82f6,#1d4ed8)" }}
+          >
+            จัดการหลังบ้าน
+          </Link>
+        </div>
+      )}
+
       {/* Arrows */}
       {banners.length > 1 && (
         <>
