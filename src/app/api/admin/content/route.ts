@@ -20,7 +20,14 @@ export async function GET(req: NextRequest) {
     const contents = await CourseContent.find(filter)
       .sort({ createdAt: -1 })
       .select("_id name description type institutionId createdBy createdAt");
-    console.log("[GET /api/admin/content] Found", contents.length, "contents");
+    console.log("[GET /api/admin/content] Found", contents.length, "contents with filter");
+
+    // Debug: also check all content
+    const allContents = await CourseContent.find({})
+      .sort({ createdAt: -1 })
+      .select("_id name createdBy");
+    console.log("[GET /api/admin/content] Total content in DB:", allContents.length);
+    allContents.forEach(c => console.log("  - id:", c._id, "createdBy:", c.createdBy));
     return NextResponse.json({ contents });
   } catch (err) {
     console.error(err);
