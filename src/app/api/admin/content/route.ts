@@ -16,9 +16,11 @@ export async function GET(req: NextRequest) {
     const filter = (auth.role === "teacher" || auth.role === "teacher-online" || auth.role === "teacher_online")
       ? { ...baseFilter, createdBy: auth.userId }
       : baseFilter;
+    console.log("[GET /api/admin/content] Filter:", JSON.stringify(filter), "userId:", auth.userId, "role:", auth.role);
     const contents = await CourseContent.find(filter)
       .sort({ createdAt: -1 })
       .select("_id name description type institutionId createdBy createdAt");
+    console.log("[GET /api/admin/content] Found", contents.length, "contents");
     return NextResponse.json({ contents });
   } catch (err) {
     console.error(err);
@@ -39,7 +41,9 @@ export async function POST(req: NextRequest) {
     if (auth.role === "teacher" || auth.role === "teacher-online" || auth.role === "teacher_online") {
       body.createdBy = auth.userId;
     }
+    console.log("[POST /api/admin/content] Creating content with createdBy:", body.createdBy, "userId:", auth.userId, "role:", auth.role);
     const content = await CourseContent.create(body);
+    console.log("[POST /api/admin/content] Created content:", content._id, "with createdBy:", content.createdBy);
     return NextResponse.json({ content }, { status: 201 });
   } catch (err) {
     console.error(err);
