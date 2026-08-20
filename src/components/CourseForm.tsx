@@ -415,8 +415,11 @@ export default function CourseForm({ course, mode, courseType, teacherMode = fal
                   className={inputClass}
                   placeholder="ราคาขาย"
                 />
+              </div>
+            </div>
           </div>
         </div>
+
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-1.5">เวลาในการเรียน (นาที)</label>
           <input
