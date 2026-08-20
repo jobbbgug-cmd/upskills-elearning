@@ -2,6 +2,7 @@ import mongoose, { Schema, Document } from "mongoose";
 
 export interface ICourseContentDocument extends Document {
   institutionId?: mongoose.Types.ObjectId;
+  createdBy?: string;
   name: string;
   description: string;
   type?: "online" | "live online" | "onsite";
@@ -40,6 +41,7 @@ const LessonSchema = new Schema(
 const CourseContentSchema = new Schema<ICourseContentDocument>(
   {
     institutionId: { type: Schema.Types.ObjectId, ref: "Institution", default: null },
+    createdBy: { type: String, default: null },
     name: { type: String, required: true, trim: true },
     description: { type: String, default: "" },
     type: { type: String, enum: ["online", "live online", "onsite"], default: "online" },

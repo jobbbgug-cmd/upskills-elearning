@@ -12,7 +12,11 @@ export async function GET(req: NextRequest) {
     }
     await connectDB();
     const institutionId = await resolveInstitutionId(req, auth.institutionId);
-    const contents = await CourseContent.find(tenantFilter(institutionId))
+    const baseFilter = tenantFilter(institutionId);
+    const filter = (auth.role === "teacher" || auth.role === "teacher-online" || auth.role === "teacher_online")
+      ? { ...baseFilter, createdBy: auth.userId }
+      : baseFilter;
+    const contents = await CourseContent.find(filter)
       .sort({ createdAt: -1 })
       .select("_id name description type institutionId createdAt");
     return NextResponse.json({ contents });
@@ -32,6 +36,9 @@ export async function POST(req: NextRequest) {
     await connectDB();
     const institutionId = await resolveInstitutionId(req, auth.institutionId);
     if (institutionId) body.institutionId = institutionId;
+    if (auth.role === "teacher" || auth.role === "teacher-online" || auth.role === "teacher_online") {
+      body.createdBy = auth.userId;
+    }
     const content = await CourseContent.create(body);
     return NextResponse.json({ content }, { status: 201 });
   } catch (err) {
