@@ -50,6 +50,7 @@ export default async function EditContentPage({
           <ContentForm
             mode="edit"
             content={JSON.parse(JSON.stringify(content))}
+            lockType={true}
             teacherMode={true}
             redirectUrl="/manage-content"
           />

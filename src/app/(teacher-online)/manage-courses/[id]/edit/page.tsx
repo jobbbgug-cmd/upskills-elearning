@@ -50,7 +50,6 @@ export default async function EditCoursePage({
           <CourseForm
             mode="edit"
             course={JSON.parse(JSON.stringify(course))}
-            courseType="online"
             teacherMode={true}
             teacherName={auth.name}
             redirectUrl="/manage-courses"
