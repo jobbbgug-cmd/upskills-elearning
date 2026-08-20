@@ -74,7 +74,13 @@ export default async function HomePage() {
                 ดูคอร์สทั้งหมด
               </Link>
               {user ? (
-                <Link href={user.role === "admin" || user.role === "super_admin" ? "/admin" : user.role === "owner" ? "/owner/dashboard" : "/dashboard"}
+                <Link href={
+                  user.role === "student-online" || user.role === "online" ? "/student-online/dashboard" :
+                  user.role === "teacher-online" || user.role === "teacher_online" ? "/teacher-online/teacher-dashboard" :
+                  user.role === "admin" || user.role === "super_admin" ? "/admin" :
+                  user.role === "owner" ? "/owner/dashboard" :
+                  "/dashboard"
+                }
                   className="bg-indigo-500 text-white font-semibold px-8 py-3.5 rounded-xl hover:bg-indigo-400 transition-colors border border-indigo-400">
                   ไปที่ Dashboard
                 </Link>
