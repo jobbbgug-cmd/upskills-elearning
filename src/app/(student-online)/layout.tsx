@@ -18,15 +18,13 @@ export default async function StudentOnlineLayout({
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 sticky top-0 z-40 py-4 flex items-center justify-between">
-        <div className="px-4 md:pl-64 md:pr-8 flex-1 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <Image src="/logo.png" alt="UPSkills" width={120} height={40} className="object-contain" />
-          </Link>
-          <div className="flex items-center gap-4">
-            <span className="text-sm text-gray-600">นักเรียน {auth.name}</span>
-            <LogoutButton />
-          </div>
+      <div className="bg-white border-b border-gray-200 sticky top-0 z-40 py-4 px-4 md:px-0 flex items-center justify-between md:pl-64 md:pr-8">
+        <Link href="/" className="flex items-center gap-2">
+          <Image src="/logo.png" alt="UPSkills" width={120} height={40} className="object-contain" />
+        </Link>
+        <div className="flex items-center gap-4">
+          <span className="text-sm text-gray-600">นักเรียน {auth.name}</span>
+          <LogoutButton />
         </div>
       </div>
 
