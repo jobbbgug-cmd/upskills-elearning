@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { getAuthUser } from "@/lib/auth";
-import { LogOut, BookOpen, FileText, Award, Menu, Layers, BarChart3 } from "lucide-react";
+import { LogOut, BookOpen, FileText, Award, Menu, Layers, BarChart3, TrendingUp } from "lucide-react";
 import LogoutButton from "@/components/LogoutButton";
 
 export default async function TeacherOnlineLayout({
@@ -45,6 +45,13 @@ export default async function TeacherOnlineLayout({
           >
             <BarChart3 className="w-4 h-4" />
             ภาพรวม
+          </Link>
+          <Link
+            href="/sales"
+            className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-600 hover:bg-purple-50 hover:text-purple-600 rounded-lg transition-colors"
+          >
+            <TrendingUp className="w-4 h-4" />
+            รายได้
           </Link>
           <Link
             href="/invoice-requests"
