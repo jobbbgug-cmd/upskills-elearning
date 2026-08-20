@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
       : baseFilter;
     const contents = await CourseContent.find(filter)
       .sort({ createdAt: -1 })
-      .select("_id name description type institutionId createdAt");
+      .select("_id name description type institutionId createdBy createdAt");
     return NextResponse.json({ contents });
   } catch (err) {
     console.error(err);

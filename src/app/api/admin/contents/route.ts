@@ -14,7 +14,10 @@ export async function GET() {
 
     await connectDB();
 
-    const filter = { ...tenantFilter(auth.institutionId) };
+    const baseFilter = { ...tenantFilter(auth.institutionId) };
+    const filter = (auth.role === "teacher" || auth.role === "teacher-online" || auth.role === "teacher_online")
+      ? { ...baseFilter, createdBy: auth.userId }
+      : baseFilter;
     const contents = await CourseContent.find(filter).sort({ createdAt: -1 }).lean();
 
     let institutionName = "";
