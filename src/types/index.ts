@@ -110,7 +110,7 @@ export interface IUser {
   _id: string;
   name: string;
   email: string;
-  role: "student" | "teacher" | "parent" | "admin" | "super_admin" | "owner";
+  role: "student" | "teacher" | "parent" | "admin" | "super_admin" | "owner" | "student-online" | "teacher-online" | "teacher_online" | "online";
   status: "pending" | "approved" | "rejected";
   gradeLevel?: GradeLevel;
   profileImage?: string;
