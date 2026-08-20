@@ -14,7 +14,7 @@ export async function GET(req: NextRequest) {
     await connectDB();
 
     const tenantClause = auth.institutionId ? { institutionId: auth.institutionId } : {};
-    const filter = (auth.role === "teacher" || auth.role === "teacher-online" || auth.role === "teacher_online") ? { ...tenantClause, instructorId: auth.userId } : tenantClause;
+    const filter = (auth.role === "teacher" || auth.role === "teacher-online" || auth.role === "teacher_online") ? { ...tenantClause, createdBy: auth.userId } : tenantClause;
 
     const courses = await Course.find(filter).sort({ createdAt: -1 }).lean();
 
@@ -88,6 +88,7 @@ export async function POST(req: NextRequest) {
       sessions: sessions || [],
       instructor: instructor || auth.name || "",
       instructorId: auth.userId,
+      createdBy: auth.userId,
       institutionId: auth.institutionId || null,
       isActive: isActive !== false,
       contentId: contentId || null,

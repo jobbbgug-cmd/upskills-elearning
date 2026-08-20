@@ -20,7 +20,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     }
 
     // Teacher can only edit their own courses
-    if ((auth.role === "teacher" || auth.role === "teacher-online" || auth.role === "teacher_online") && course.instructorId !== auth.userId) {
+    if ((auth.role === "teacher" || auth.role === "teacher-online" || auth.role === "teacher_online") && course.createdBy !== auth.userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
