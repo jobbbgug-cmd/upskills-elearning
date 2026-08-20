@@ -73,8 +73,19 @@ export default function CourseForm({ course, mode, courseType, teacherMode = fal
     difficulty: (course as any)?.difficulty ?? "medium",
   });
 
-  const [discountType, setDiscountType] = useState<"percentage" | "fixed">("percentage");
-  const [discountValue, setDiscountValue] = useState(0);
+  // Initialize discount from course data
+  const initializeDiscount = () => {
+    if (course && course.originalPrice && course.price && course.originalPrice > course.price) {
+      const discountAmount = course.originalPrice - course.price;
+      const discountPercent = (discountAmount / course.originalPrice) * 100;
+      return { type: "percentage" as const, value: Math.round(discountPercent) };
+    }
+    return { type: "percentage" as const, value: 0 };
+  };
+
+  const initialDiscount = initializeDiscount();
+  const [discountType, setDiscountType] = useState<"percentage" | "fixed">(initialDiscount.type);
+  const [discountValue, setDiscountValue] = useState(initialDiscount.value);
 
   const [contentId, setContentId] = useState<string>(course?.contentId ?? "");
   const [contentOptions, setContentOptions] = useState<ContentOption[]>([]);
