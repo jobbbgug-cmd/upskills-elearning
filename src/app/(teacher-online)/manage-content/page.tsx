@@ -9,6 +9,7 @@ interface ContentItem {
   name: string;
   description: string;
   type: string;
+  ebookCoverUrl: string;
   createdAt: string;
 }
 
@@ -93,9 +94,20 @@ export default function ManageContentPage() {
                 {contents.map((content) => (
                   <tr key={content._id} className="border-b border-gray-200 hover:bg-gray-50 transition-colors">
                     <td className="px-6 py-4">
-                      <div>
-                        <p className="font-medium text-gray-900">{content.name}</p>
-                        <p className="text-sm text-gray-500 mt-1 line-clamp-2">{content.description}</p>
+                      <div className="flex items-center gap-3">
+                        {content.ebookCoverUrl ? (
+                          <img
+                            src={content.ebookCoverUrl}
+                            alt={content.name}
+                            className="w-12 h-12 rounded object-cover flex-shrink-0"
+                          />
+                        ) : (
+                          <div className="w-12 h-12 rounded bg-gray-200 flex-shrink-0" />
+                        )}
+                        <div>
+                          <p className="font-medium text-gray-900">{content.name}</p>
+                          <p className="text-sm text-gray-500 mt-1 line-clamp-2">{content.description}</p>
+                        </div>
                       </div>
                     </td>
                     <td className="px-6 py-4">
