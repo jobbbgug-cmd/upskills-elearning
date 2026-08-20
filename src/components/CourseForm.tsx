@@ -56,7 +56,7 @@ export default function CourseForm({ course, mode, courseType, teacherMode = fal
     title: course?.title ?? "",
     description: course?.description ?? "",
     coverImage: course?.coverImage ?? "",
-    gradeLevels: course?.gradeLevels ?? [] as GradeLevel[],
+    gradeLevels: ["ทั่วไป"] as GradeLevel[],
     instructor: course?.instructor ?? (teacherMode ? teacherName : ""),
     category: course?.category && typeof course.category === "object" ? (course.category as any)._id : (course?.category as string) ?? "",
     price: course?.price ?? 0,
@@ -183,12 +183,6 @@ export default function CourseForm({ course, mode, courseType, teacherMode = fal
     e.preventDefault();
     if (!form.description?.trim()) {
       const msg = "กรุณาระบุคำอธิบายคอร์ส";
-      setError(msg);
-      setToast({ message: msg, type: "error" });
-      return;
-    }
-    if (form.gradeLevels.length === 0) {
-      const msg = "กรุณาเลือกระดับชั้นอย่างน้อย 1 ระดับ";
       setError(msg);
       setToast({ message: msg, type: "error" });
       return;
@@ -454,22 +448,16 @@ export default function CourseForm({ course, mode, courseType, teacherMode = fal
 
       {/* Grade levels */}
       <div>
-        <label className="block text-sm font-semibold text-gray-700 mb-3">ระดับชั้นที่เหมาะสม *</label>
+        <label className="block text-sm font-semibold text-gray-700 mb-3">ระดับชั้นที่เหมาะสม</label>
         <div className="flex flex-wrap gap-2">
-          {GRADE_LEVELS.map((g) => (
-            <button
-              key={g}
-              type="button"
-              onClick={() => toggleGrade(g)}
-              className={`px-3 py-1.5 rounded-lg text-sm font-medium border-2 transition-colors ${
-                form.gradeLevels.includes(g)
-                  ? "bg-indigo-600 border-indigo-600 text-white"
-                  : "bg-white border-gray-200 text-gray-600 hover:border-indigo-300"
-              }`}
-            >
-              {g}
-            </button>
-          ))}
+          <button
+            type="button"
+            disabled
+            className="px-3 py-1.5 rounded-lg text-sm font-medium border-2 bg-indigo-600 border-indigo-600 text-white cursor-not-allowed opacity-90"
+          >
+            ทั่วไป
+          </button>
+          <p className="text-xs text-gray-500 w-full mt-2">บังคับใช้เฉพาะระดับชั้น "ทั่วไป"</p>
         </div>
       </div>
 
