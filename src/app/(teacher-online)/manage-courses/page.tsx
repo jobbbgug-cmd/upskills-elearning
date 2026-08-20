@@ -9,7 +9,7 @@ interface Course {
   title: string;
   description: string;
   price: number;
-  category: string;
+  category: { _id: string; name: string } | null;
   isActive: boolean;
   createdAt: string;
 }
@@ -95,7 +95,7 @@ export default function ManageCoursesPage() {
                         <p className="text-sm text-gray-500 mt-1 line-clamp-1">{course.description}</p>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-600">{course.category || "-"}</td>
+                    <td className="px-6 py-4 text-sm text-gray-600">{course.category?.name || "-"}</td>
                     <td className="px-6 py-4 text-sm font-medium text-gray-900">
                       ฿{course.price.toLocaleString("th-TH")}
                     </td>
