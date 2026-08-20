@@ -23,6 +23,7 @@ export interface ICourseDocument extends Document {
   type: "online" | "onsite" | "live online";
   sessions: ISessionDocument[];
   price: number;
+  originalPrice?: number;
   isActive: boolean;
   qrCodeImage: string;
   bankAccount: string;
@@ -88,6 +89,7 @@ const CourseSchema = new Schema<ICourseDocument>(
     category: {type: Schema.Types.ObjectId,ref: "Category",required: true,},type: {type: String,enum: ["online", "onsite", "live online"],default: "online",},
     sessions: [SessionSchema],
     price: { type: Number, default: 0 },
+    originalPrice: { type: Number, default: null },
     isActive: { type: Boolean, default: true },
     qrCodeImage: { type: String, default: "" },
     bankAccount: { type: String, default: "" },

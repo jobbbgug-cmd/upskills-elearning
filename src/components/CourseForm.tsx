@@ -60,6 +60,7 @@ export default function CourseForm({ course, mode, courseType, teacherMode = fal
     instructor: course?.instructor ?? (teacherMode ? teacherName : ""),
     category: course?.category && typeof course.category === "object" ? (course.category as any)._id : (course?.category as string) ?? "",
     price: course?.price ?? 0,
+    originalPrice: course?.originalPrice ?? 0,
     isActive: course?.isActive ?? true,
     linkDigital: course?.linkDigital ?? "",
     linkClip: course?.linkClip ?? "",
@@ -342,15 +343,29 @@ export default function CourseForm({ course, mode, courseType, teacherMode = fal
             ))}
           </select>
         </div>
-        <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1.5">ราคา (บาท)</label>
-          <input
-            type="number"
-            min={0}
-            value={form.price === 0 ? "" : form.price}
-            onChange={(e) => setForm({ ...form, price: e.target.value === "" ? 0 : Number(e.target.value) })}
-            className={inputClass}
-          />
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-1.5">ราคาเต็ม (บาท)</label>
+            <input
+              type="number"
+              min={0}
+              value={form.originalPrice === 0 ? "" : form.originalPrice}
+              onChange={(e) => setForm({ ...form, originalPrice: e.target.value === "" ? 0 : Number(e.target.value) })}
+              className={inputClass}
+              placeholder="ราคาปกติ"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-1.5">ราคาหลังหักส่วนลด (บาท)</label>
+            <input
+              type="number"
+              min={0}
+              value={form.price === 0 ? "" : form.price}
+              onChange={(e) => setForm({ ...form, price: e.target.value === "" ? 0 : Number(e.target.value) })}
+              className={inputClass}
+              placeholder="ราคาขาย"
+            />
+          </div>
         </div>
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-1.5">เวลาในการเรียน (นาที)</label>
