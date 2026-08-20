@@ -412,14 +412,9 @@ export default function CourseForm({ course, mode, courseType, teacherMode = fal
               </div>
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-1.5">ราคาหลังหักส่วนลด (บาท)</label>
-                <input
-                  type="number"
-                  min={0}
-                  value={form.price === 0 ? "" : form.price}
-                  onChange={(e) => setForm({ ...form, price: e.target.value === "" ? 0 : Number(e.target.value) })}
-                  className={inputClass}
-                  placeholder="ราคาขาย"
-                />
+                <div className="px-4 py-2.5 border border-gray-300 rounded-xl text-sm bg-gray-50 text-gray-600">
+                  {form.price === 0 ? "-" : form.price.toLocaleString("th-TH")} บาท
+                </div>
               </div>
             </div>
           </div>
