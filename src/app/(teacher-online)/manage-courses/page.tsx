@@ -9,6 +9,7 @@ interface Course {
   title: string;
   description: string;
   price: number;
+  coverImage: string;
   category: { _id: string; name: string } | null;
   isActive: boolean;
   createdAt: string;
@@ -90,9 +91,20 @@ export default function ManageCoursesPage() {
                 {courses.map((course) => (
                   <tr key={course._id} className="border-b border-gray-200 hover:bg-gray-50 transition-colors">
                     <td className="px-6 py-4">
-                      <div>
-                        <p className="font-medium text-gray-900">{course.title}</p>
-                        <p className="text-sm text-gray-500 mt-1 line-clamp-1">{course.description}</p>
+                      <div className="flex items-center gap-3">
+                        {course.coverImage ? (
+                          <img
+                            src={course.coverImage}
+                            alt={course.title}
+                            className="w-12 h-12 rounded object-cover flex-shrink-0"
+                          />
+                        ) : (
+                          <div className="w-12 h-12 rounded bg-gray-200 flex-shrink-0" />
+                        )}
+                        <div>
+                          <p className="font-medium text-gray-900">{course.title}</p>
+                          <p className="text-sm text-gray-500 mt-1 line-clamp-1">{course.description}</p>
+                        </div>
                       </div>
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-600">{course.category?.name || "-"}</td>
