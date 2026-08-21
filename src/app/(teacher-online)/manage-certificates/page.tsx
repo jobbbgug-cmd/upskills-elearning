@@ -543,7 +543,9 @@ export default function ManageCertificatesPage() {
       {/* Certificate List */}
       <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden flex">
         {loading ? (
-          <LoadingSpinner />
+          <div className="w-full flex items-center justify-center min-h-96">
+            <LoadingSpinner />
+          </div>
         ) : filtered.length === 0 ? (
           <div className="w-full text-center py-16 text-gray-400">
             <Award className="w-12 h-12 mx-auto mb-3 opacity-30" />

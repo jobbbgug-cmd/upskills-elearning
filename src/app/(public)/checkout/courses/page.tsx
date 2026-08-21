@@ -1,0 +1,231 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import Image from "next/image";
+import { AlertCircle, ChevronRight, ArrowLeft, Trash2 } from "lucide-react";
+import { useCart } from "@/context/CartContext";
+import { useRouter } from "next/navigation";
+import ContactInfoModal from "@/components/ContactInfoModal";
+
+interface ContactInfo {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  address: string;
+  taxId: string;
+  needsTaxInvoice: boolean;
+}
+
+export default function CheckoutMultipleCoursesPage() {
+  const router = useRouter();
+  const { items, removeFromCart, getTotalPrice } = useCart();
+  const [modalOpen, setModalOpen] = useState(false);
+  const [contactInfo, setContactInfo] = useState<ContactInfo | null>(null);
+  const [discountCode, setDiscountCode] = useState("");
+
+  const totalPrice = getTotalPrice();
+
+  const handlePayment = () => {
+    // Navigate to multi-course payment page
+    router.push("/checkout/payment");
+  };
+
+  useEffect(() => {
+    // Load contact info from localStorage
+    const savedContactInfo = localStorage.getItem("contactInfo");
+    if (savedContactInfo) {
+      try {
+        setContactInfo(JSON.parse(savedContactInfo));
+      } catch (error) {
+        console.error("Failed to parse saved contact info:", error);
+      }
+    }
+
+    // If no items, redirect back to courses
+    if (items.length === 0) {
+      router.push("/courses");
+    }
+  }, [items, router]);
+
+  if (items.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <div className="bg-white border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-3">
+              <Image
+                src="/logo.png"
+                alt="UPSkills"
+                width={150}
+                height={80}
+                className="object-contain"
+              />
+              <h1 className="text-2xl font-bold text-gray-900">สรุปรายการคำสั่งซื้อ</h1>
+            </div>
+            <Link
+              href="/courses"
+              className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-900 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span className="font-medium">กลับ</span>
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Left Column: Product Info */}
+          <div className="lg:col-span-2">
+            {/* Info Box */}
+            <div className="bg-blue-50 border-2 border-dashed border-blue-300 rounded-lg p-4 mb-8 flex items-start gap-3">
+              <AlertCircle className="w-5 h-5 text-purple-600 flex-shrink-0 mt-0.5" />
+              <div className="flex-1">
+                {contactInfo ? (
+                  <div className="text-sm text-gray-700 space-y-1">
+                    <p className="font-semibold mb-3">ข้อมูลติดต่อ / ขอใบกำกับภาษี</p>
+                    <p><span className="font-medium">ชื่อ - สกุล</span> : {contactInfo.firstName} {contactInfo.lastName}</p>
+                    <p><span className="font-medium">อีเมล</span> : {contactInfo.email}</p>
+                    <p><span className="font-medium">เบอร์โทรศัพท์</span> : {contactInfo.phone}</p>
+                    <p><span className="font-medium">ที่อยู่</span> : {contactInfo.address}</p>
+                    {contactInfo.taxId && <p><span className="font-medium">เลขประจำตัวผู้เสียภาษี</span> : {contactInfo.taxId}</p>}
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-700">
+                    <span className="font-semibold">*กรุณากรอกข้อมูล</span> เพื่อออกใบเสร็จรับเงินหรือใบกำกับภาษี ก่อนการสั่งซื้อ
+                  </p>
+                )}
+              </div>
+              <button
+                onClick={() => setModalOpen(true)}
+                className="bg-purple-600 text-white px-6 py-2 rounded-full text-sm font-semibold hover:bg-purple-700 transition-colors flex-shrink-0"
+              >
+                {contactInfo ? "แก้ไข" : "เพิ่มข้อมูล"}
+              </button>
+            </div>
+
+            {/* Order Items Section */}
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold text-gray-900">รายการสั่งซื้อ</h2>
+                <span className="text-sm text-gray-600">{items.length} รายการ</span>
+              </div>
+
+              {/* Product Cards */}
+              <div className="space-y-4">
+                {items.map((item) => {
+                  const price = item.course.price || 0;
+                  return (
+                    <div key={item.courseId} className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                      <div className="flex gap-6">
+                        {/* Product Image */}
+                        <div className="flex-shrink-0">
+                          <div className="w-40 h-28 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-lg overflow-hidden flex items-center justify-center">
+                            {item.course.coverImage ? (
+                              <img src={item.course.coverImage} alt={item.course.title} className="w-full h-full object-cover" />
+                            ) : (
+                              <span className="text-3xl">📚</span>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Product Details */}
+                        <div className="flex-1 flex flex-col justify-between">
+                          <div>
+                            <div className="flex items-start justify-between mb-2">
+                              <h3 className="text-lg font-bold text-gray-900">{item.course.title}</h3>
+                              <button
+                                onClick={() => removeFromCart(item.courseId)}
+                                className="text-gray-400 hover:text-red-600 transition-colors"
+                              >
+                                <Trash2 className="w-5 h-5" />
+                              </button>
+                            </div>
+                            <p className="text-sm text-gray-600 line-clamp-2">{item.course.description}</p>
+                          </div>
+
+                          {/* Price */}
+                          <div className="flex items-center gap-3">
+                            <span className="text-2xl font-bold text-purple-600">
+                              ฿{price.toLocaleString()}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          {/* Right Column: Summary */}
+          <div className="lg:col-span-1">
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 sticky top-24">
+              <h3 className="text-lg font-bold text-gray-900 mb-6">สรุปยอดที่ต้องชำระ</h3>
+
+              {/* Price Breakdown */}
+              <div className="space-y-4 mb-6 pb-6 border-b border-gray-200">
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">ยอดรวม (จำนวน {items.length} รายการ)</span>
+                  <span className="font-medium text-gray-900">฿{totalPrice.toLocaleString()}</span>
+                </div>
+              </div>
+
+              {/* Total */}
+              <div className="mb-6">
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600 font-medium">ยอดชำระทั้งหมด</span>
+                  <span className="text-3xl font-bold text-purple-600">
+                    ฿{totalPrice.toLocaleString()}
+                  </span>
+                </div>
+              </div>
+
+              {/* Discount Code */}
+              <div className="mb-6">
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    placeholder="กรอกคูปองส่วนลด"
+                    value={discountCode}
+                    onChange={(e) => setDiscountCode(e.target.value)}
+                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-purple-600"
+                  />
+                  <button className="bg-purple-600 text-white px-6 py-2 rounded-full text-sm font-semibold hover:bg-purple-700 transition-colors">
+                    ใช้คูปอง
+                  </button>
+                </div>
+              </div>
+
+              {/* Proceed to Payment */}
+              <button onClick={handlePayment} className="w-full bg-purple-600 text-white py-3 rounded-full font-semibold hover:bg-purple-700 transition-colors flex items-center justify-center gap-2">
+                เลือกวิธีชำระเงินต่อไป
+                <ChevronRight className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Contact Info Modal */}
+      <ContactInfoModal
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        onSave={(data) => {
+          setContactInfo(data);
+          localStorage.setItem("contactInfo", JSON.stringify(data));
+        }}
+        initialData={contactInfo || undefined}
+      />
+    </div>
+  );
+}

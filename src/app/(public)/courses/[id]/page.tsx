@@ -11,17 +11,18 @@ import Badge from "@/components/ui/Badge";
 import CourseBooking from "./CourseBooking";
 import VideoPlayerSection from "@/components/VideoPlayerSection";
 import BuyCourseButton from "@/components/BuyCourseButton";
+import AddToCartButton from "@/components/AddToCartButton";
 import {
   BookOpen, Users, Calendar, Clock, Video,
-  FileText, Play, Download, Lock, ChevronDown, TrendingUp, BarChart3,
+  FileText, Play, Download, Lock, ChevronDown, TrendingUp, BarChart3, ChevronLeft,
 } from "lucide-react";
 
-async function getCourseWithContent(id: string): Promise<{ course: ICourse & { categoryName?: string }; content: ICourseContent | null } | null> {
+async function getCourseWithContent(id: string): Promise<{ course: ICourse & { categoryName?: string; hasCertificates?: boolean }; content: ICourseContent | null } | null> {
   await connectDB();
   try {
     const raw = await Course.findById(id).lean();
     if (!raw) return null;
-    const course = JSON.parse(JSON.stringify(raw)) as ICourse & { categoryName?: string };
+    const course = JSON.parse(JSON.stringify(raw)) as ICourse & { categoryName?: string; hasCertificates?: boolean };
 
     // Fetch category name if category exists
     if (course.category) {
@@ -37,6 +38,15 @@ async function getCourseWithContent(id: string): Promise<{ course: ICourse & { c
           course.categoryName = course.category;
         }
       }
+    }
+
+    // Check if course has certificates
+    try {
+      const Certificate = await import("@/models/Certificate").then(m => m.default);
+      const certCount = await Certificate.countDocuments({ courseId: id });
+      course.hasCertificates = certCount > 0;
+    } catch {
+      course.hasCertificates = false;
     }
 
     let content: ICourseContent | null = null;
@@ -138,8 +148,30 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
     Object.values(myBookings).some((b) => b.status === "confirmed");
   const isTeacherOrAdmin = isAdminOrTeacher;
 
+  // Determine back button URL based on course type
+  const getBackUrl = () => {
+    const courseType = course.type || "online";
+    if (courseType === "live online") {
+      return "/courses?tab=live-online";
+    } else if (courseType === "onsite") {
+      return "/courses?tab=onsite";
+    } else {
+      return "/courses?tab=online";
+    }
+  };
+
   return (
     <div className="py-10 relative">
+      {/* Back Button */}
+      <div className="max-w-[1200px] mx-auto px-4 mb-6">
+        <a
+          href={getBackUrl()}
+          className="inline-flex items-center gap-2 text-indigo-600 hover:text-indigo-700 font-medium transition-colors"
+        >
+          <ChevronLeft className="w-4 h-4" />
+          กลับไปยังคอร์ส
+        </a>
+      </div>
 
       {/* ── Page Sidebar (fixed to viewport) ── */}
       <div className="fixed right-4 top-20 w-[460px] z-40 hidden lg:block">
@@ -161,9 +193,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
               {/* Buttons */}
               <div className="space-y-3">
                 <BuyCourseButton courseId={course._id} />
-                <button className="w-full border-2 border-purple-600 text-purple-600 font-semibold py-3 rounded-xl hover:bg-purple-50 transition-colors flex items-center justify-center gap-2">
-                  🛒 เพิ่มลงตะกร้า
-                </button>
+                <AddToCartButton course={course} />
               </div>
 
               {/* Divider */}
@@ -217,15 +247,83 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
               {/* Divider */}
               <div className="border-t border-gray-200"></div>
 
-              {/* Certificate section */}
+              {/* Certificate section - always show */}
               <div className="space-y-2">
                 <div className="flex items-start gap-2">
                   <span className="text-2xl">📜</span>
                   <div>
                     <h4 className="font-semibold text-gray-900">Certificate of Completion</h4>
-                    <p className="text-xs text-gray-600">คอร์สนี้มีใบรับรองหลังเรียนจบ</p>
+                    <p className="text-xs text-gray-600">
+                      {course.hasCertificates
+                        ? "คอร์สนี้มีใบรับรองหลังเรียนจบ"
+                        : "คอร์สนี้ไม่มีใบรับรองหลังเรียนจบ"}
+                    </p>
                   </div>
                 </div>
+
+                {/* Certificate Preview or No Certificate Message */}
+                {course.hasCertificates ? (
+                  <div className="relative flex-shrink-0" style={{ width: '100%', height: '280px' }}>
+                    <div className="absolute inset-0 bg-gradient-to-br from-gray-50 to-gray-100 flex flex-col relative rounded-lg overflow-hidden" style={{ backgroundImage: 'radial-gradient(circle at 20% 50%, rgba(200,200,220,0.1), transparent), radial-gradient(circle at 80% 80%, rgba(200,200,220,0.1), transparent)' }}>
+                      {/* Logo area */}
+                      <div className="h-8 flex items-center justify-start px-4 pt-2">
+                        <img src="/logo.png" alt="UPSkills" className="h-5 object-contain" />
+                      </div>
+
+                      {/* Main content area */}
+                      <div className="flex-1 flex flex-col justify-center items-center px-6 py-2 text-center relative pb-12">
+                        <h1 className="text-2xl font-bold text-blue-900" style={{ fontFamily: 'Georgia, serif' }}>CERTIFICATE</h1>
+                        <p className="text-sm text-yellow-600 font-semibold tracking-widest mb-2">OF APPRECIATION</p>
+
+                        <p className="text-[10px] text-gray-800 mb-1 font-medium">This Certificate is Presented To</p>
+
+                        <h2 className="text-lg text-yellow-600 mb-2" style={{ fontStyle: 'italic', fontFamily: 'Brush Script MT, cursive' }}>
+                          Student Name
+                        </h2>
+
+                        <div className="w-24 border-t border-gray-400 mb-2"></div>
+
+                        <p className="text-[9px] text-gray-700 max-w-xs leading-relaxed font-normal whitespace-pre-wrap mb-2 line-clamp-2">
+                          For completing the course {course.title}
+                        </p>
+
+                        {/* Signature lines */}
+                        <div className="w-full flex justify-between px-2 mt-auto">
+                          <div className="text-center">
+                            <div className="border-t border-gray-400 w-10 mb-0.5"></div>
+                            <span className="text-[8px] text-gray-700 font-semibold">Head of Event</span>
+                          </div>
+                          <div className="text-center">
+                            <div className="border-t border-gray-400 w-10 mb-0.5"></div>
+                            <span className="text-[8px] text-gray-700 font-semibold">Manager</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Decorative medal badge */}
+                      <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2">
+                        <div className="relative flex flex-col items-center">
+                          <div className="w-10 h-10 rounded-full border-2 border-blue-700 flex items-center justify-center bg-gradient-to-br from-yellow-300 to-yellow-500 shadow-lg">
+                            <div className="w-8 h-8 rounded-full border border-yellow-200 flex items-center justify-center">
+                              <svg className="w-5 h-5 text-yellow-600" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                              </svg>
+                            </div>
+                          </div>
+                          <div className="flex gap-0.5 mt-0.5">
+                            <div className="w-1.5 h-3 bg-blue-700"></div>
+                            <div className="w-1.5 h-3 bg-yellow-500"></div>
+                            <div className="w-1.5 h-3 bg-blue-700"></div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="p-4 border border-gray-200 rounded-lg bg-gray-50 text-center">
+                    <p className="text-sm text-gray-600">ไม่มีใบรับรองสำหรับคอร์สนี้</p>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -297,7 +395,6 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
             icon={<BookOpen className="w-5 h-5 text-blue-500" />}
             title="คอร์สนี้ได้เรียนอะไรบ้าง"
             accentColor="blue"
-            locked={!hasPaidAccess}
           >
             <div className="prose prose-sm max-w-none text-gray-700" dangerouslySetInnerHTML={{ __html: (course as any).whatYouWillLearn }} />
           </ContentSection>
@@ -315,7 +412,6 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
             icon={<FileText className="w-5 h-5 text-blue-500" />}
             title="รายละเอียดคอร์สเรียน"
             accentColor="blue"
-            locked={!hasPaidAccess}
           >
             <div className="prose prose-sm max-w-none text-gray-700" dangerouslySetInnerHTML={{ __html: (course as any).courseDetails }} />
           </ContentSection>
@@ -333,7 +429,6 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
             icon={<Play className="w-5 h-5 text-purple-500" />}
             title="รายละเอียดบทเรียน"
             accentColor="purple"
-            locked={!hasPaidAccess}
           >
             <>
           <style>{`
@@ -607,30 +702,15 @@ function ContentSection({
   locked?: boolean;
   children: React.ReactNode;
 }) {
-  const borderMap = {
-    red: "border-red-200",
-    blue: "border-blue-200",
-    purple: "border-purple-200",
-    pink: "border-pink-200",
-    amber: "border-amber-200",
-  };
-  const headerMap = {
-    red: "bg-red-50",
-    blue: "bg-blue-50",
-    purple: "bg-purple-50",
-    pink: "bg-pink-50",
-    amber: "bg-amber-50",
-  };
-
   return (
-    <div className={`border ${borderMap[accentColor]} rounded-2xl overflow-hidden`}>
-      <div className={`${headerMap[accentColor]} px-4 py-3 flex items-center gap-2`}>
+    <div className="space-y-4">
+      <div className="flex items-center gap-3 mb-2">
         {icon}
-        <h3 className="font-semibold text-gray-900 text-sm flex-1">{title}</h3>
+        <h3 className="font-bold text-gray-900 text-lg flex-1">{title}</h3>
         {locked && <Lock className="w-4 h-4 text-gray-400" />}
         {!locked && action}
       </div>
-      <div className="p-4 bg-white">
+      <div>
         {locked ? <LockedOverlay /> : children}
       </div>
     </div>

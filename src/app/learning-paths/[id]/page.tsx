@@ -142,7 +142,7 @@ export default function LearningPathDetail() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <p className="text-gray-500 mb-4">ไม่พบเส้นทางการเรียน</p>
-          <Link href="/courses?tab=online" className="text-indigo-600 hover:text-indigo-700 font-medium">
+          <Link href="/courses?tab=paths" className="text-indigo-600 hover:text-indigo-700 font-medium">
             กลับไปหน้าเส้นทาง
           </Link>
         </div>
@@ -159,7 +159,7 @@ export default function LearningPathDetail() {
       {/* Back Button */}
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <Link href="/courses?tab=online" className="flex items-center gap-2 text-indigo-600 hover:text-indigo-700 font-medium text-sm">
+          <Link href="/courses?tab=paths" className="flex items-center gap-2 text-indigo-600 hover:text-indigo-700 font-medium text-sm">
             <ArrowLeft className="w-4 h-4" />
             กลับไป
           </Link>
