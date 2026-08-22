@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { AlertCircle, ChevronRight, ArrowLeft } from "lucide-react";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import ContactInfoModal from "@/components/ContactInfoModal";
 
 interface Course {
@@ -37,7 +37,9 @@ interface ContactInfo {
 
 export default function CheckoutPage() {
   const params = useParams();
+  const searchParams = useSearchParams();
   const id = params.id as string;
+  const referrer = searchParams.get("referrer") || "/";
 
   const [path, setPath] = useState<LearningPath | null>(null);
   const [loading, setLoading] = useState(true);
@@ -84,8 +86,8 @@ export default function CheckoutPage() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <p className="text-gray-500 mb-4">ไม่พบเส้นทางการเรียน</p>
-          <Link href="/courses?tab=paths" className="text-indigo-600 hover:text-indigo-700 font-medium">
-            กลับไปหน้าเส้นทาง
+          <Link href="/" className="text-indigo-600 hover:text-indigo-700 font-medium">
+            กลับไปหน้าแรก
           </Link>
         </div>
       </div>
@@ -114,7 +116,7 @@ export default function CheckoutPage() {
               <h1 className="text-2xl font-bold text-gray-900">สรุปรายการคำสั่งซื้อ</h1>
             </div>
             <Link
-              href="/courses?tab=paths"
+              href={referrer}
               className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-900 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
             >
               <ArrowLeft className="w-4 h-4" />

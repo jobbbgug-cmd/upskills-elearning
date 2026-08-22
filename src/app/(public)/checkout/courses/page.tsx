@@ -43,9 +43,9 @@ export default function CheckoutMultipleCoursesPage() {
       }
     }
 
-    // If no items, redirect back to courses
+    // If no items, redirect back to home
     if (items.length === 0) {
-      router.push("/courses");
+      router.push("/");
     }
   }, [items, router]);
 
@@ -70,7 +70,7 @@ export default function CheckoutMultipleCoursesPage() {
               <h1 className="text-2xl font-bold text-gray-900">สรุปรายการคำสั่งซื้อ</h1>
             </div>
             <Link
-              href="/courses"
+              href="/"
               className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-900 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
             >
               <ArrowLeft className="w-4 h-4" />

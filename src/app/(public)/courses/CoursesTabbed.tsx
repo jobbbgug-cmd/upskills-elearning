@@ -192,8 +192,12 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
   }, [activeTab]);
 
   const handleAddToCart = (course: ICourse | LearningPath) => {
-    addToCart(course as ICourse);
-    setToast({ message: "เพิ่มลงตะกร้าแล้ว!", type: "success" });
+    const wasAdded = addToCart(course as ICourse);
+    if (wasAdded) {
+      setToast({ message: "เพิ่มลงตะกร้าแล้ว!", type: "success" });
+    } else {
+      setToast({ message: "เพิ่มรายการนี้ลงตะกร้าแล้ว ไม่สามารถเพิ่มซ้ำได้", type: "error" });
+    }
     setTimeout(() => setToast(null), 3000);
   };
 
@@ -648,7 +652,7 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
                             <button onClick={(e) => {
                               e.preventDefault();
                               e.stopPropagation();
-                              router.push(`/checkout/courses/${course._id}`);
+                              router.push(`/checkout/courses/${course._id}?referrer=${encodeURIComponent(`/courses?tab=${activeTab}`)}`);
                             }} className="flex-1 w-full py-2 bg-indigo-600 text-white rounded-lg font-semibold text-sm hover:bg-indigo-700 transition-colors">
                               ซื้อเลย
                             </button>
@@ -759,6 +763,7 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
                           <button
                             onClick={(e) => {
                               e.preventDefault();
+                              e.stopPropagation();
                               handleAddToCart(path);
                             }}
                             className="p-2 border-2 border-indigo-600 text-indigo-600 rounded hover:bg-indigo-50 transition-colors"
@@ -769,6 +774,7 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
                           <button
                             onClick={(e) => {
                               e.preventDefault();
+                              e.stopPropagation();
                               router.push(`/checkout/learning-paths/${path._id}`);
                             }}
                             className="flex-1 px-12 py-2 bg-indigo-600 text-white rounded font-semibold text-lg hover:bg-indigo-700 transition-colors"
@@ -1164,7 +1170,7 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
                       <button onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
-                        router.push(`/checkout/courses/${course._id}`);
+                        router.push(`/checkout/courses/${course._id}?referrer=${encodeURIComponent(`/courses?tab=${activeTab}`)}`);
                       }} className="flex-1 w-full py-2 bg-indigo-600 text-white rounded-lg font-semibold text-sm hover:bg-indigo-700 transition-colors">
                         ซื้อเลย
                       </button>

@@ -3,7 +3,10 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { ArrowRight } from "lucide-react";
+import { useCart } from "@/context/CartContext";
+import DuplicateItemModal from "./DuplicateItemModal";
 
 interface LearningPath {
   _id: string;
@@ -16,8 +19,11 @@ interface LearningPath {
 }
 
 export default function LearningPathsShowcase() {
+  const router = useRouter();
+  const { addToCart } = useCart();
   const [paths, setPaths] = useState<LearningPath[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showDuplicateModal, setShowDuplicateModal] = useState(false);
 
   useEffect(() => {
     const fetchPaths = async () => {
@@ -159,7 +165,14 @@ export default function LearningPathsShowcase() {
                   {/* Action Buttons */}
                   <div className="flex items-center gap-2">
                     <button
-                      onClick={(e) => e.preventDefault()}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        const wasAdded = addToCart(path as any);
+                        if (!wasAdded) {
+                          setShowDuplicateModal(true);
+                        }
+                      }}
                       className="p-2 border-2 border-indigo-600 text-indigo-600 rounded hover:bg-indigo-50 transition-colors flex-shrink-0"
                       title="ใส่ตะกร้า"
                     >
@@ -170,7 +183,11 @@ export default function LearningPathsShowcase() {
                       </svg>
                     </button>
                     <button
-                      onClick={(e) => e.preventDefault()}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        router.push(`/checkout/learning-paths/${path._id}?referrer=${encodeURIComponent("/")}`);
+                      }}
                       className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded font-semibold text-sm hover:bg-indigo-700 transition-colors"
                     >
                       ซื้อเส้นทางนี้
@@ -181,6 +198,12 @@ export default function LearningPathsShowcase() {
           ))}
         </div>
       </div>
+
+      <DuplicateItemModal
+        isOpen={showDuplicateModal}
+        onClose={() => setShowDuplicateModal(false)}
+        itemName="เส้นทางการเรียน"
+      />
     </section>
   );
 }

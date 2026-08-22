@@ -102,7 +102,7 @@ export default function ShoppingCart({ isOpen, onClose }: ShoppingCartProps) {
                         {/* Price and Remove */}
                         <div className="flex items-center justify-between">
                           <p className="font-bold text-red-600 text-sm">
-                            ฿{item.course.price || 0}
+                            ฿{(item.course.price || 0).toLocaleString()}
                           </p>
                           <button
                             onClick={() => removeFromCart(item.courseId)}
@@ -125,7 +125,7 @@ export default function ShoppingCart({ isOpen, onClose }: ShoppingCartProps) {
             <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 flex-shrink-0 space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-sm text-gray-600">ยอดรวม ({items.length} รายการ)</span>
-                <span className="text-2xl font-bold text-red-600">฿{totalPrice}</span>
+                <span className="text-2xl font-bold text-red-600">฿{totalPrice.toLocaleString()}</span>
               </div>
 
               <button onClick={handleCheckout} className="w-full py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-semibold text-sm text-center block">

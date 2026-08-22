@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { ShoppingCart, ArrowRight } from "lucide-react";
 import { useCart } from "@/context/CartContext";
+import DuplicateItemModal from "./DuplicateItemModal";
 
 interface Category {
   _id: string;
@@ -31,12 +32,16 @@ export default function CategoriesAndCourses() {
   const router = useRouter();
   const { addToCart } = useCart();
   const [categories, setCategories] = useState<Category[]>([]);
+  const [showDuplicateModal, setShowDuplicateModal] = useState(false);
   const [courses, setCourses] = useState<Course[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   const handleAddToCart = (course: Course) => {
-    addToCart(course as any);
+    const wasAdded = addToCart(course as any);
+    if (!wasAdded) {
+      setShowDuplicateModal(true);
+    }
   };
 
   useEffect(() => {
@@ -215,7 +220,7 @@ export default function CategoriesAndCourses() {
                     <button onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
-                      router.push(`/checkout/courses/${course._id}`);
+                      router.push(`/checkout/courses/${course._id}?referrer=${encodeURIComponent("/")}`);
                     }} className="flex-1 py-2 bg-indigo-600 text-white rounded-lg font-semibold text-sm hover:bg-indigo-700 transition-colors">
                       ซื้อเลย
                     </button>
@@ -237,6 +242,12 @@ export default function CategoriesAndCourses() {
             <p className="text-gray-500 font-medium">ไม่พบคอร์สในหมวดหมู่นี้</p>
           </div>
         )}
+
+        <DuplicateItemModal
+          isOpen={showDuplicateModal}
+          onClose={() => setShowDuplicateModal(false)}
+          itemName="คอร์ส"
+        />
       </div>
     </section>
   );

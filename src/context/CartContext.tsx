@@ -11,7 +11,7 @@ export interface CartItem {
 
 interface CartContextType {
   items: CartItem[];
-  addToCart: (course: ICourse) => void;
+  addToCart: (course: ICourse) => boolean;
   removeFromCart: (courseId: string) => void;
   toggleItem: (courseId: string) => void;
   clearCart: () => void;
@@ -40,12 +40,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem("cart", JSON.stringify(items));
   }, [items]);
 
-  const addToCart = (course: ICourse) => {
-    setItems((prev) => {
-      const existing = prev.find((item) => item.courseId === course._id);
-      if (existing) return prev;
-      return [...prev, { courseId: course._id, course, selected: true }];
-    });
+  const addToCart = (course: ICourse): boolean => {
+    const itemExists = items.some((item) => item.courseId === course._id);
+    if (itemExists) {
+      return false;
+    }
+    setItems((prev) => [...prev, { courseId: course._id, course, selected: true }]);
+    return true;
   };
 
   const removeFromCart = (courseId: string) => {
