@@ -18,8 +18,7 @@ export async function GET(
 
     const order = await Order.findById(id)
       .populate("courseId", "title coverImage price")
-      .populate("learningPathId", "title coverImage price")
-      .lean();
+      .populate("learningPathId", "title coverImage price");
 
     if (!order) {
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
@@ -30,7 +29,7 @@ export async function GET(
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    return NextResponse.json({ order });
+    return NextResponse.json({ order: order.toObject() });
   } catch (error) {
     console.error("Failed to fetch order:", error);
     return NextResponse.json({ error: "Failed to fetch order" }, { status: 500 });
@@ -74,7 +73,7 @@ export async function PATCH(
 
     await order.save();
 
-    return NextResponse.json({ order });
+    return NextResponse.json({ order: order.toObject() });
   } catch (error) {
     console.error("Failed to update order:", error);
     return NextResponse.json({ error: "Failed to update order" }, { status: 500 });
