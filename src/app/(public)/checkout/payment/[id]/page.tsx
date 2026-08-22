@@ -26,6 +26,7 @@ export default function PaymentPage() {
   const [showQRModal, setShowQRModal] = useState(false);
   const [showBankModal, setShowBankModal] = useState(false);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [appliedCoupon, setAppliedCoupon] = useState<any>(null);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -57,6 +58,16 @@ export default function PaymentPage() {
     };
 
     if (id) fetchProduct();
+
+    // Retrieve applied coupon from localStorage
+    const savedCoupon = localStorage.getItem("appliedCoupon");
+    if (savedCoupon) {
+      try {
+        setAppliedCoupon(JSON.parse(savedCoupon));
+      } catch (error) {
+        console.error("Failed to parse saved coupon:", error);
+      }
+    }
   }, [id]);
 
   const handlePayment = async () => {
@@ -190,8 +201,18 @@ export default function PaymentPage() {
 
   const price = product.price || 0;
   const discountType = product.discountType || "percentage";
-  const discount = discountType === "percentage" ? (price * (product.discount || 0) / 100) : (product.discount || 0);
-  const finalPrice = price - discount;
+  const productDiscount = discountType === "percentage" ? (price * (product.discount || 0) / 100) : (product.discount || 0);
+
+  // Calculate coupon discount
+  let couponDiscount = 0;
+  if (appliedCoupon) {
+    const discountBase = price - productDiscount;
+    couponDiscount = appliedCoupon.type === "percent"
+      ? (discountBase * (appliedCoupon.value || 0) / 100)
+      : (appliedCoupon.value || 0);
+  }
+
+  const finalPrice = price - productDiscount - couponDiscount;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -347,10 +368,16 @@ export default function PaymentPage() {
                   <span className="text-gray-600">ราคาสินค้า</span>
                   <span className="text-gray-900">฿{price.toLocaleString()}</span>
                 </div>
-                {discount > 0 && (
-                  <div className="flex justify-between text-green-600">
-                    <span>ส่วนลด</span>
-                    <span>-฿{discount.toLocaleString()}</span>
+                {productDiscount > 0 && (
+                  <div className="flex justify-between text-gray-600">
+                    <span>ส่วนลดจากสินค้า</span>
+                    <span>-฿{productDiscount.toLocaleString()}</span>
+                  </div>
+                )}
+                {couponDiscount > 0 && (
+                  <div className="flex justify-between text-green-600 bg-green-50 p-2 rounded">
+                    <span>ส่วนลดคูปอง ({appliedCoupon?.code})</span>
+                    <span>-฿{couponDiscount.toLocaleString()}</span>
                   </div>
                 )}
               </div>

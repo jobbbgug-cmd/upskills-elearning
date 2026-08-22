@@ -38,6 +38,9 @@ export default function CheckoutPage() {
   const [course, setCourse] = useState<Course | null>(null);
   const [loading, setLoading] = useState(true);
   const [discountCode, setDiscountCode] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState<any>(null);
+  const [couponError, setCouponError] = useState("");
+  const [applyingCoupon, setApplyingCoupon] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [contactInfo, setContactInfo] = useState<ContactInfo | null>(null);
 
@@ -90,9 +93,69 @@ export default function CheckoutPage() {
 
   const price = course.price || 0;
   const discountType = course.discountType || "percentage";
-  const discount = discountType === "percentage" ? (price * (course.discount || 0) / 100) : (course.discount || 0);
-  const finalPrice = price - discount;
+  const courseDiscount = discountType === "percentage" ? (price * (course.discount || 0) / 100) : (course.discount || 0);
+
+  // Calculate coupon discount
+  let couponDiscount = 0;
+  if (appliedCoupon) {
+    const discountBase = price - courseDiscount;
+    couponDiscount = appliedCoupon.type === "percent"
+      ? (discountBase * (appliedCoupon.value || 0) / 100)
+      : (appliedCoupon.value || 0);
+  }
+
+  const finalPrice = price - courseDiscount - couponDiscount;
   const originalPrice = price;
+
+  const handleApplyCoupon = async () => {
+    if (!discountCode.trim()) {
+      setCouponError("กรุณากรอกรหัสคูปอง");
+      return;
+    }
+
+    setApplyingCoupon(true);
+    setCouponError("");
+
+    try {
+      const res = await fetch(`/api/teacher-online/coupons?type=coupon`);
+      const coupons = await res.json();
+
+      const coupon = coupons.find((c: any) => c.code === discountCode.toUpperCase().trim());
+
+      if (!coupon) {
+        setCouponError("รหัสคูปองไม่ถูกต้องหรือหมดอายุแล้ว");
+        setAppliedCoupon(null);
+        return;
+      }
+
+      if (!coupon.isActive) {
+        setCouponError("คูปองนี้ไม่สามารถใช้งานได้");
+        setAppliedCoupon(null);
+        return;
+      }
+
+      if (coupon.expiresAt && new Date(coupon.expiresAt) < new Date()) {
+        setCouponError("คูปองนี้หมดอายุแล้ว");
+        setAppliedCoupon(null);
+        return;
+      }
+
+      if (coupon.maxUses && coupon.usedCount >= coupon.maxUses) {
+        setCouponError("คูปองนี้ได้ใช้ครบจำนวนแล้ว");
+        setAppliedCoupon(null);
+        return;
+      }
+
+      setAppliedCoupon(coupon);
+      localStorage.setItem("appliedCoupon", JSON.stringify(coupon));
+      setCouponError("");
+    } catch (error) {
+      setCouponError("เกิดข้อผิดพลาดในการตรวจสอบคูปอง");
+      setAppliedCoupon(null);
+    } finally {
+      setApplyingCoupon(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -186,9 +249,9 @@ export default function CheckoutPage() {
                       <span className="text-3xl font-bold text-purple-600">
                         ฿{finalPrice.toLocaleString()}
                       </span>
-                      {discount > 0 && (
+                      {(courseDiscount > 0 || couponDiscount > 0) && (
                         <span className="text-lg text-gray-400 line-through">
-                          ฿{originalPrice.toLocaleString()}
+                          ฿{(price - courseDiscount).toLocaleString()}
                         </span>
                       )}
                     </div>
@@ -216,10 +279,16 @@ export default function CheckoutPage() {
                   <span className="text-gray-600">ยอดรวม (จำนวน 1 รายการ)</span>
                   <span className="font-medium text-gray-900">฿{price.toLocaleString()}</span>
                 </div>
-                {discount > 0 && (
+                {courseDiscount > 0 && (
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">ส่วนลด</span>
-                    <span className="font-medium text-gray-900">-฿{discount.toLocaleString()}</span>
+                    <span className="text-gray-600">ส่วนลดจากคอร์ส</span>
+                    <span className="font-medium text-gray-900">-฿{courseDiscount.toLocaleString()}</span>
+                  </div>
+                )}
+                {couponDiscount > 0 && (
+                  <div className="flex justify-between text-sm bg-green-50 p-2 rounded">
+                    <span className="text-green-700 font-medium">ส่วนลดคูปอง ({appliedCoupon?.code})</span>
+                    <span className="font-medium text-green-700">-฿{couponDiscount.toLocaleString()}</span>
                   </div>
                 )}
               </div>
@@ -236,18 +305,38 @@ export default function CheckoutPage() {
 
               {/* Discount Code */}
               <div className="mb-6">
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    placeholder="กรอกคูปองส่วนลด"
-                    value={discountCode}
-                    onChange={(e) => setDiscountCode(e.target.value)}
-                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-purple-600"
-                  />
-                  <button className="bg-purple-600 text-white px-6 py-2 rounded-full text-sm font-semibold hover:bg-purple-700 transition-colors">
-                    ใช้คูปอง
-                  </button>
-                </div>
+                {appliedCoupon ? (
+                  <div className="bg-green-50 border border-green-300 rounded-lg p-3 mb-3">
+                    <p className="text-sm font-semibold text-green-700">✓ ใช้คูปองสำเร็จ</p>
+                    <p className="text-sm text-green-600">{appliedCoupon.code}</p>
+                    <p className="text-sm text-green-600 mt-1">
+                      ลด {appliedCoupon.type === "percent" ? `${appliedCoupon.value}%` : `฿${appliedCoupon.value.toLocaleString()}`}
+                    </p>
+                  </div>
+                ) : (
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      placeholder="กรอกคูปองส่วนลด"
+                      value={discountCode}
+                      onChange={(e) => {
+                        setDiscountCode(e.target.value);
+                        setCouponError("");
+                      }}
+                      className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-purple-600"
+                    />
+                    <button
+                      onClick={handleApplyCoupon}
+                      disabled={applyingCoupon}
+                      className="bg-purple-600 text-white px-6 py-2 rounded-full text-sm font-semibold hover:bg-purple-700 transition-colors disabled:opacity-50"
+                    >
+                      {applyingCoupon ? "กำลังตรวจสอบ..." : "ใช้คูปอง"}
+                    </button>
+                  </div>
+                )}
+                {couponError && (
+                  <p className="text-sm text-red-600 mt-2">{couponError}</p>
+                )}
               </div>
 
               {/* Proceed to Payment */}
