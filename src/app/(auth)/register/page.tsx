@@ -228,12 +228,12 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="w-full max-w-6xl mx-auto">
+    <div className="w-full max-w-md mx-auto">
       <div className="flex justify-center mb-8">
-        <Image src="/logo.png" alt="UPSkills" width={260} height={90} className="object-contain" priority />
+        <Image src="/logo.png" alt="UPSkills" width={200} height={70} className="object-contain" priority />
       </div>
 
-      <div className="bg-white rounded-3xl shadow-xl p-8 md:p-12">
+      <div className="bg-white rounded-3xl shadow-xl p-8">
         {/* Header with back button */}
         <div className="text-center mb-10">
           {(learningMode === "online" || learningMode === "institution") && (

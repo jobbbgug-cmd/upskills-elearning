@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { ShoppingCart, ArrowRight } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import DuplicateItemModal from "./DuplicateItemModal";
+import LoginPromptModal from "./LoginPromptModal";
 
 interface Category {
   _id: string;
@@ -33,11 +34,31 @@ export default function CategoriesAndCourses() {
   const { addToCart } = useCart();
   const [categories, setCategories] = useState<Category[]>([]);
   const [showDuplicateModal, setShowDuplicateModal] = useState(false);
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
   const [courses, setCourses] = useState<Course[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  // Check authentication on mount
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const res = await fetch("/api/auth/me");
+        setIsAuthenticated(res.ok);
+      } catch (error) {
+        setIsAuthenticated(false);
+      }
+    };
+    checkAuth();
+  }, []);
 
   const handleAddToCart = (course: Course) => {
+    if (!isAuthenticated) {
+      setShowLoginPrompt(true);
+      return;
+    }
+
     const wasAdded = addToCart(course as any);
     if (!wasAdded) {
       setShowDuplicateModal(true);
@@ -247,6 +268,11 @@ export default function CategoriesAndCourses() {
           isOpen={showDuplicateModal}
           onClose={() => setShowDuplicateModal(false)}
           itemName="คอร์ส"
+        />
+
+        <LoginPromptModal
+          isOpen={showLoginPrompt}
+          onClose={() => setShowLoginPrompt(false)}
         />
       </div>
     </section>

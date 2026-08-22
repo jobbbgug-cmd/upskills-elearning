@@ -27,6 +27,9 @@ export default function PaymentPage() {
   const [showBankModal, setShowBankModal] = useState(false);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [appliedCoupon, setAppliedCoupon] = useState<any>(null);
+  const [qrCodeUrl, setQrCodeUrl] = useState<string>("");
+  const [bankDetails, setBankDetails] = useState<any>(null);
+  const [slipPreview, setSlipPreview] = useState<string>("");
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -70,13 +73,30 @@ export default function PaymentPage() {
     }
   }, [id]);
 
+  const fetchSystemSettings = async () => {
+    try {
+      const res = await fetch("/api/public/payment-info");
+      const data = await res.json();
+      setQrCodeUrl(data.qrCodeUrl || "");
+      setBankDetails({
+        bankAccountName: data.bankAccountName || "",
+        bankName: data.bankName || "",
+        bankAccountNumber: data.bankAccountNumber || "",
+      });
+    } catch (error) {
+      console.error("Failed to fetch payment info:", error);
+    }
+  };
+
   const handlePayment = async () => {
     if (selectedPayment === "promptpay") {
+      await fetchSystemSettings();
       setShowQRModal(true);
       return;
     }
 
     if (selectedPayment === "bank-transfer") {
+      await fetchSystemSettings();
       setShowBankModal(true);
       return;
     }
@@ -430,21 +450,27 @@ export default function PaymentPage() {
 
             {/* Bank Details */}
             <div className="mb-6 bg-blue-50 rounded-lg p-4 space-y-3">
-              <div>
-                <p className="text-xs text-gray-600 mb-1">ชื่อบัญชี</p>
-                <p className="text-sm font-semibold text-gray-900">UPSkills Co., Ltd.</p>
-              </div>
-              <div>
-                <p className="text-xs text-gray-600 mb-1">ธนาคาร</p>
-                <p className="text-sm font-semibold text-gray-900">ธนาคารกรุงเทพ (Bangkok Bank)</p>
-              </div>
-              <div>
-                <p className="text-xs text-gray-600 mb-1">เลขที่บัญชี</p>
-                <p className="text-sm font-semibold text-gray-900 font-mono">123-456-7890</p>
-              </div>
+              {bankDetails ? (
+                <>
+                  <div>
+                    <p className="text-xs text-gray-600 mb-1">ชื่อบัญชี</p>
+                    <p className="text-sm font-semibold text-gray-900">{bankDetails.bankAccountName || "ไม่มีข้อมูล"}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-600 mb-1">ธนาคาร</p>
+                    <p className="text-sm font-semibold text-gray-900">{bankDetails.bankName || "ไม่มีข้อมูล"}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-600 mb-1">เลขที่บัญชี</p>
+                    <p className="text-sm font-semibold text-gray-900 font-mono">{bankDetails.bankAccountNumber || "ไม่มีข้อมูล"}</p>
+                  </div>
+                </>
+              ) : (
+                <p className="text-sm text-gray-500">กำลังโหลดข้อมูลบัญชี...</p>
+              )}
               <div className="border-t border-blue-200 pt-3">
                 <p className="text-xs text-gray-600 mb-1">จำนวนเงินที่ต้องโอน</p>
-                <p className="text-lg font-bold text-purple-600">฿{(product?.price || 0).toLocaleString()}</p>
+                <p className="text-lg font-bold text-purple-600">฿{finalPrice.toLocaleString()}</p>
               </div>
             </div>
 
@@ -455,34 +481,59 @@ export default function PaymentPage() {
 
             {/* File Upload */}
             <div className="mb-6 border-2 border-dashed border-gray-300 rounded-lg p-4">
-              <label className="cursor-pointer">
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => {
-                    if (e.target.files?.[0]) {
-                      setUploadedFile(e.target.files[0]);
-                    }
-                  }}
-                  className="hidden"
-                />
-                <div className="flex flex-col items-center gap-2">
-                  <Upload className="w-6 h-6 text-gray-400" />
-                  <div className="text-center">
-                    {uploadedFile ? (
-                      <>
-                        <p className="text-sm font-medium text-gray-900">{uploadedFile.name}</p>
-                        <p className="text-xs text-gray-500">คลิกเพื่อเปลี่ยน</p>
-                      </>
-                    ) : (
-                      <>
-                        <p className="text-sm font-medium text-gray-900">แนบสลิป/ใบเสร็จ</p>
-                        <p className="text-xs text-gray-500">คลิกเพื่อเลือกไฟล์</p>
-                      </>
-                    )}
+              {slipPreview ? (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-center bg-gray-50 rounded p-3">
+                    <img src={slipPreview} alt="Slip preview" className="max-w-full max-h-64 object-contain" />
                   </div>
+                  <label className="cursor-pointer block">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        if (e.target.files?.[0]) {
+                          setUploadedFile(e.target.files[0]);
+                          const reader = new FileReader();
+                          reader.onload = (event) => {
+                            setSlipPreview(event.target?.result as string);
+                          };
+                          reader.readAsDataURL(e.target.files[0]);
+                        }
+                      }}
+                      className="hidden"
+                    />
+                    <div className="flex flex-col items-center gap-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">
+                      <Upload className="w-4 h-4" />
+                      คลิกเพื่อเปลี่ยนสลิป
+                    </div>
+                  </label>
                 </div>
-              </label>
+              ) : (
+                <label className="cursor-pointer block">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      if (e.target.files?.[0]) {
+                        setUploadedFile(e.target.files[0]);
+                        const reader = new FileReader();
+                        reader.onload = (event) => {
+                          setSlipPreview(event.target?.result as string);
+                        };
+                        reader.readAsDataURL(e.target.files[0]);
+                      }
+                    }}
+                    className="hidden"
+                  />
+                  <div className="flex flex-col items-center gap-2">
+                    <Upload className="w-6 h-6 text-gray-400" />
+                    <div className="text-center">
+                      <p className="text-sm font-medium text-gray-900">แนบสลิป/ใบเสร็จ</p>
+                      <p className="text-xs text-gray-500">คลิกเพื่อเลือกไฟล์</p>
+                    </div>
+                  </div>
+                </label>
+              )}
             </div>
 
             {/* Buttons */}
@@ -491,6 +542,7 @@ export default function PaymentPage() {
                 onClick={() => {
                   setShowBankModal(false);
                   setUploadedFile(null);
+                  setSlipPreview("");
                 }}
                 className="flex-1 px-4 py-2 border-2 border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-colors"
               >
@@ -511,7 +563,7 @@ export default function PaymentPage() {
       {/* PromptPay QR Code Modal */}
       {showQRModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg p-8 max-w-md w-full">
+          <div className="bg-white rounded-lg p-8 max-w-2xl w-full">
             {/* Header */}
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-bold text-gray-900">ชำระเงินผ่าน PromptPay</h2>
@@ -519,6 +571,7 @@ export default function PaymentPage() {
                 onClick={() => {
                   setShowQRModal(false);
                   setUploadedFile(null);
+                  setSlipPreview("");
                 }}
                 className="text-gray-400 hover:text-gray-600"
               >
@@ -526,49 +579,81 @@ export default function PaymentPage() {
               </button>
             </div>
 
-            {/* QR Code Section */}
-            <div className="mb-6">
-              <p className="text-sm text-gray-600 mb-4">สแกน QR Code นี้เพื่อชำระเงิน</p>
-              <div className="bg-gray-100 rounded-lg p-4 flex items-center justify-center mb-4">
-                <div className="w-48 h-48 bg-gradient-to-br from-gray-300 to-gray-400 rounded-lg flex items-center justify-center">
-                  <span className="text-6xl">📱</span>
+            {/* Main Content - Two Columns */}
+            <div className="grid grid-cols-2 gap-6 mb-6">
+              {/* Left Column - QR Code */}
+              <div>
+                <p className="text-sm text-gray-600 mb-4">สแกน QR Code นี้เพื่อชำระเงิน</p>
+                <div className="bg-gray-100 rounded-lg p-4 flex items-center justify-center mb-4">
+                  {qrCodeUrl ? (
+                    <img src={qrCodeUrl} alt="PromptPay QR Code" className="w-40 h-40 object-contain" />
+                  ) : (
+                    <div className="w-40 h-40 bg-gradient-to-br from-gray-300 to-gray-400 rounded-lg flex items-center justify-center">
+                      <span className="text-4xl text-gray-500">⏳</span>
+                    </div>
+                  )}
                 </div>
+                <p className="text-sm text-gray-700 text-center font-semibold">
+                  ยอดชำระ: <span className="text-2xl font-bold text-purple-600">฿{finalPrice.toLocaleString()}</span>
+                </p>
               </div>
-              <p className="text-xs text-gray-500 text-center">
-                ยอดชำระ: <span className="font-bold">฿{(product?.price || 0).toLocaleString()}</span>
-              </p>
-            </div>
 
-            {/* File Upload */}
-            <div className="mb-6 border-2 border-dashed border-gray-300 rounded-lg p-4">
-              <label className="cursor-pointer">
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => {
-                    if (e.target.files?.[0]) {
-                      setUploadedFile(e.target.files[0]);
-                    }
-                  }}
-                  className="hidden"
-                />
-                <div className="flex flex-col items-center gap-2">
-                  <Upload className="w-6 h-6 text-gray-400" />
-                  <div className="text-center">
-                    {uploadedFile ? (
-                      <>
-                        <p className="text-sm font-medium text-gray-900">{uploadedFile.name}</p>
-                        <p className="text-xs text-gray-500">คลิกเพื่อเปลี่ยน</p>
-                      </>
-                    ) : (
-                      <>
+              {/* Right Column - Slip Upload */}
+              <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 flex flex-col">
+                {slipPreview ? (
+                  <div className="space-y-3 flex-1 flex flex-col">
+                    <div className="flex items-center justify-center bg-gray-50 rounded p-2 flex-1">
+                      <img src={slipPreview} alt="Slip preview" className="max-w-full max-h-56 object-contain" />
+                    </div>
+                    <label className="cursor-pointer block">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => {
+                          if (e.target.files?.[0]) {
+                            setUploadedFile(e.target.files[0]);
+                            const reader = new FileReader();
+                            reader.onload = (event) => {
+                              setSlipPreview(event.target?.result as string);
+                            };
+                            reader.readAsDataURL(e.target.files[0]);
+                          }
+                        }}
+                        className="hidden"
+                      />
+                      <div className="flex flex-col items-center gap-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">
+                        <Upload className="w-4 h-4" />
+                        คลิกเพื่อเปลี่ยนสลิป
+                      </div>
+                    </label>
+                  </div>
+                ) : (
+                  <label className="cursor-pointer block flex-1 flex flex-col">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        if (e.target.files?.[0]) {
+                          setUploadedFile(e.target.files[0]);
+                          const reader = new FileReader();
+                          reader.onload = (event) => {
+                            setSlipPreview(event.target?.result as string);
+                          };
+                          reader.readAsDataURL(e.target.files[0]);
+                        }
+                      }}
+                      className="hidden"
+                    />
+                    <div className="flex flex-col items-center justify-center gap-2 flex-1">
+                      <Upload className="w-6 h-6 text-gray-400" />
+                      <div className="text-center">
                         <p className="text-sm font-medium text-gray-900">แนบสลิป/ใบเสร็จ</p>
                         <p className="text-xs text-gray-500">คลิกเพื่อเลือกไฟล์</p>
-                      </>
-                    )}
-                  </div>
-                </div>
-              </label>
+                      </div>
+                    </div>
+                  </label>
+                )}
+              </div>
             </div>
 
             {/* Buttons */}
@@ -577,6 +662,7 @@ export default function PaymentPage() {
                 onClick={() => {
                   setShowQRModal(false);
                   setUploadedFile(null);
+                  setSlipPreview("");
                 }}
                 className="flex-1 px-4 py-2 border-2 border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-colors"
               >

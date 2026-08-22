@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { ArrowRight } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import DuplicateItemModal from "./DuplicateItemModal";
+import LoginPromptModal from "./LoginPromptModal";
 
 interface LearningPath {
   _id: string;
@@ -24,6 +25,21 @@ export default function LearningPathsShowcase() {
   const [paths, setPaths] = useState<LearningPath[]>([]);
   const [loading, setLoading] = useState(true);
   const [showDuplicateModal, setShowDuplicateModal] = useState(false);
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  // Check authentication on mount
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const res = await fetch("/api/auth/me");
+        setIsAuthenticated(res.ok);
+      } catch (error) {
+        setIsAuthenticated(false);
+      }
+    };
+    checkAuth();
+  }, []);
 
   useEffect(() => {
     const fetchPaths = async () => {
@@ -168,6 +184,10 @@ export default function LearningPathsShowcase() {
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
+                        if (!isAuthenticated) {
+                          setShowLoginPrompt(true);
+                          return;
+                        }
                         const wasAdded = addToCart(path as any);
                         if (!wasAdded) {
                           setShowDuplicateModal(true);
@@ -203,6 +223,11 @@ export default function LearningPathsShowcase() {
         isOpen={showDuplicateModal}
         onClose={() => setShowDuplicateModal(false)}
         itemName="เส้นทางการเรียน"
+      />
+
+      <LoginPromptModal
+        isOpen={showLoginPrompt}
+        onClose={() => setShowLoginPrompt(false)}
       />
     </section>
   );

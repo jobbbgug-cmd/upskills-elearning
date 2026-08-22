@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { getAuthUser } from "@/lib/auth";
-import { LogOut, ShoppingCart, BookOpen, FileText, Menu, BarChart3 } from "lucide-react";
+import { LogOut, ShoppingCart, BookOpen, FileText, Menu, Package } from "lucide-react";
 import LogoutButton from "@/components/LogoutButton";
 
 export default async function StudentOnlineLayout({
@@ -61,18 +61,18 @@ export default async function StudentOnlineLayout({
             ตะกร้าสินค้า
           </Link>
           <Link
+            href="/purchases"
+            className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-600 hover:bg-purple-50 hover:text-purple-600 rounded-lg transition-colors"
+          >
+            <Package className="w-4 h-4" />
+            การซื้อของฉัน
+          </Link>
+          <Link
             href="/student-dashboard/invoices"
             className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-600 hover:bg-purple-50 hover:text-purple-600 rounded-lg transition-colors"
           >
             <FileText className="w-4 h-4" />
             ใบกำกับภาษี
-          </Link>
-          <Link
-            href="/my-sales"
-            className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-600 hover:bg-purple-50 hover:text-purple-600 rounded-lg transition-colors"
-          >
-            <BarChart3 className="w-4 h-4" />
-            การขายของฉัน
           </Link>
         </nav>
       </aside>
