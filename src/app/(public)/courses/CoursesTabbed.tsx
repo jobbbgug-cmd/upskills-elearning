@@ -570,13 +570,8 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
                   <h2 className="text-2xl font-bold text-gray-900 mb-6">คอร์สเรียน Online</h2>
                   <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-6">
                     {onlineCourses.slice(0, 6).map((course) => (
-
-
-
-
-<div key={course._id} className="bg-white rounded-xl overflow-hidden hover:shadow-lg transition-shadow group">
-                      <Link href={`/courses/${course._id}`}>
-                        <div className="relative h-40 bg-gradient-to-br from-indigo-100 to-purple-100 overflow-hidden cursor-pointer">
+                      <div key={course._id} onClick={() => router.push(`/courses/${course._id}`)} className="bg-white rounded-xl overflow-hidden hover:shadow-lg transition-shadow group flex flex-col cursor-pointer">
+                        <div className="relative h-40 bg-gradient-to-br from-indigo-100 to-purple-100 overflow-hidden">
                           {course.coverImage ? (
                             <Image
                               src={course.coverImage}
@@ -590,81 +585,84 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
                             </div>
                           )}
                         </div>
-                      </Link>
 
-                      <div className="px-4 pt-2 pb-1 flex items-center gap-2 min-w-0">
-                        <span className="text-xs font-semibold text-gray-700 whitespace-nowrap">
-                          {(course.type || "online") === "online" ? "คอร์สเรียน" : course.type === "live online" ? "คอร์สเรียน Live" : "คอร์สเรียน Onsite"}
-                        </span>
-                        {(course as any).categoryName && (
-                          <span className="text-xs font-medium bg-gray-100 text-gray-700 px-3 py-1 rounded-full truncate">
-                            {(course as any).categoryName}
+                        <div className="px-4 pt-2 pb-1 flex items-center gap-2 min-w-0">
+                          <span className="text-xs font-semibold text-gray-700 whitespace-nowrap">
+                            {(course.type || "online") === "online" ? "คอร์สเรียน" : course.type === "live online" ? "คอร์สเรียน Live" : "คอร์สเรียน Onsite"}
                           </span>
-                        )}
-                      </div>
-
-                      <div className="px-4 pb-1">
-                        <h3 className="font-bold text-gray-900 line-clamp-2 text-sm group-hover:text-indigo-600 transition-colors">
-                          {course.title}
-                        </h3>
-                      </div>
-
-                      <div className="px-4 py-1">
-                        <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-xs font-bold text-indigo-600 flex-shrink-0">
-                            {course.instructor?.[0] || "U"}
-                          </div>
-                          <span className="text-xs text-gray-600 truncate">{course.instructor}</span>
-                        </div>
-                      </div>
-
-                      <div className="px-4 py-1 flex items-center justify-between text-xs text-gray-500">
-                        <div className="flex items-center gap-1">
-                          <span>👥</span>
-                          <span>{course.enrollmentCount || 0}</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <span>⏱️</span>
-                          <span>{course.duration || 0} นาที</span>
-                        </div>
-                      </div>
-
-                      <div className="px-4 py-1">
-                        <div className="flex items-baseline gap-2">
-                          <span className="text-3xl font-bold text-red-600">
-                            {(course.price || 0) === 0 ? "ฟรี" : `฿${course.price || "0"}`}
-                          </span>
-                          {(course.price || 0) > 0 && (
-                            <span className="text-lg text-gray-400 line-through">
-                              ฿{Math.round((course.price as number) * 1.3)}
+                          {(course as any).categoryName && (
+                            <span className="text-xs font-medium bg-gray-100 text-gray-700 px-3 py-1 rounded-full truncate">
+                              {(course as any).categoryName}
                             </span>
                           )}
                         </div>
-                      </div>
 
-                      <div className="px-4 py-3 flex gap-2">
-                        <button
-                          onClick={() => handleAddToCart(course)}
-                          className="w-12 py-2 border-2 border-indigo-600 text-indigo-600 rounded-lg font-semibold text-sm hover:bg-indigo-50 transition-colors flex items-center justify-center flex-shrink-0"
-                          title="ใส่ตะกร้า"
-                        >
-                          <ShoppingCart className="w-5 h-5" />
-                        </button>
-                        {(course.type || "online") === "online" ? (
-                          <Link href={`/checkout/courses/${course._id}`} className="flex-1">
-                            <button className="w-full py-2 bg-indigo-600 text-white rounded-lg font-semibold text-sm hover:bg-indigo-700 transition-colors">
+                        <div className="px-4 pb-1">
+                          <h3 className="font-bold text-gray-900 line-clamp-2 text-sm group-hover:text-indigo-600 transition-colors">
+                            {course.title}
+                          </h3>
+                        </div>
+
+                        <div className="px-4 py-1">
+                          <div className="flex items-center gap-2">
+                            <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-xs font-bold text-indigo-600 flex-shrink-0">
+                              {course.instructor?.[0] || "U"}
+                            </div>
+                            <span className="text-xs text-gray-600 truncate">{course.instructor}</span>
+                          </div>
+                        </div>
+
+                        <div className="px-4 py-1 flex items-center justify-between text-xs text-gray-500">
+                          <div className="flex items-center gap-1">
+                            <span>👥</span>
+                            <span>{course.enrollmentCount || 0}</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <span>⏱️</span>
+                            <span>{course.duration || 0} นาที</span>
+                          </div>
+                        </div>
+
+                        <div className="px-4 py-1">
+                          <div className="flex items-baseline gap-2">
+                            <span className="text-3xl font-bold text-red-600">
+                              {(course.price || 0) === 0 ? "ฟรี" : `฿${course.price || "0"}`}
+                            </span>
+                            {(course.price || 0) > 0 && (
+                              <span className="text-lg text-gray-400 line-through">
+                                ฿{Math.round((course.price as number) * 1.3)}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="px-4 py-3 flex gap-2">
+                          <button
+                            onClick={() => handleAddToCart(course)}
+                            className="w-12 py-2 border-2 border-indigo-600 text-indigo-600 rounded-lg font-semibold text-sm hover:bg-indigo-50 transition-colors flex items-center justify-center flex-shrink-0"
+                            title="ใส่ตะกร้า"
+                          >
+                            <ShoppingCart className="w-5 h-5" />
+                          </button>
+                          {(course.type || "online") === "online" ? (
+                            <button onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              router.push(`/checkout/courses/${course._id}`);
+                            }} className="flex-1 w-full py-2 bg-indigo-600 text-white rounded-lg font-semibold text-sm hover:bg-indigo-700 transition-colors">
                               ซื้อเลย
                             </button>
-                          </Link>
-                        ) : (
-                          <Link href={`/courses/${course._id}`} className="flex-1">
-                            <button className="w-full py-2 bg-indigo-600 text-white rounded-lg font-semibold text-sm hover:bg-indigo-700 transition-colors">
+                          ) : (
+                            <button onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              router.push(`/courses/${course._id}`);
+                            }} className="flex-1 w-full py-2 bg-indigo-600 text-white rounded-lg font-semibold text-sm hover:bg-indigo-700 transition-colors">
                               จองที่นั่ง
                             </button>
-                          </Link>
-                        )}
+                          )}
+                        </div>
                       </div>
-                    </div>
                   ))}
                   </div>
                   <div className="flex justify-center mt-6">
@@ -802,16 +800,14 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
                   <h2 className="text-2xl font-bold text-gray-900 mb-6">คอร์สเรียน Live</h2>
                   <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-6 mb-6">
                     {liveCourses.slice(0, 3).map((course) => (
-                      <div key={course._id} className="bg-white rounded-xl overflow-hidden hover:shadow-lg transition-shadow group">
-                        <Link href={`/courses/${course._id}`}>
-                          <div className="relative h-40 bg-gradient-to-br from-indigo-100 to-purple-100 overflow-hidden cursor-pointer">
-                            {course.coverImage ? (
-                              <Image src={course.coverImage} alt={course.title} fill className="object-cover group-hover:scale-105 transition-transform" />
-                            ) : (
-                              <div className="flex items-center justify-center h-full"><span className="text-4xl">📚</span></div>
-                            )}
-                          </div>
-                        </Link>
+                      <div key={course._id} onClick={() => router.push(`/courses/${course._id}`)} className="bg-white rounded-xl overflow-hidden hover:shadow-lg transition-shadow group flex flex-col cursor-pointer">
+                        <div className="relative h-40 bg-gradient-to-br from-indigo-100 to-purple-100 overflow-hidden">
+                          {course.coverImage ? (
+                            <Image src={course.coverImage} alt={course.title} fill className="object-cover group-hover:scale-105 transition-transform" />
+                          ) : (
+                            <div className="flex items-center justify-center h-full"><span className="text-4xl">📚</span></div>
+                          )}
+                        </div>
                         <div className="px-4 pt-2 pb-1 flex items-center gap-2 min-w-0">
                           <span className="text-xs font-semibold text-gray-700 whitespace-nowrap">คอร์สเรียน Live</span>
                           {(course as any).categoryName && (
@@ -843,9 +839,11 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
                           <button onClick={() => handleAddToCart(course)} className="w-12 py-2 border-2 border-indigo-600 text-indigo-600 rounded-lg font-semibold text-sm hover:bg-indigo-50 transition-colors flex items-center justify-center flex-shrink-0" title="ใส่ตะกร้า">
                             <ShoppingCart className="w-5 h-5" />
                           </button>
-                          <Link href={`/courses/${course._id}`} className="flex-1">
-                            <button className="w-full py-2 bg-indigo-600 text-white rounded-lg font-semibold text-sm hover:bg-indigo-700 transition-colors">จองที่นั่ง</button>
-                          </Link>
+                          <button onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            router.push(`/courses/${course._id}`);
+                          }} className="flex-1 w-full py-2 bg-indigo-600 text-white rounded-lg font-semibold text-sm hover:bg-indigo-700 transition-colors">จองที่นั่ง</button>
                         </div>
                       </div>
                     ))}
@@ -867,16 +865,14 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
                   <h2 className="text-2xl font-bold text-gray-900 mb-6">คอร์สเรียน Onsite</h2>
                   <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-6 mb-6">
                     {onsiteCourses.slice(0, 3).map((course) => (
-                      <div key={course._id} className="bg-white rounded-xl overflow-hidden hover:shadow-lg transition-shadow group">
-                        <Link href={`/courses/${course._id}`}>
-                          <div className="relative h-40 bg-gradient-to-br from-indigo-100 to-purple-100 overflow-hidden cursor-pointer">
-                            {course.coverImage ? (
-                              <Image src={course.coverImage} alt={course.title} fill className="object-cover group-hover:scale-105 transition-transform" />
-                            ) : (
-                              <div className="flex items-center justify-center h-full"><span className="text-4xl">📚</span></div>
-                            )}
-                          </div>
-                        </Link>
+                      <div key={course._id} onClick={() => router.push(`/courses/${course._id}`)} className="bg-white rounded-xl overflow-hidden hover:shadow-lg transition-shadow group flex flex-col cursor-pointer">
+                        <div className="relative h-40 bg-gradient-to-br from-indigo-100 to-purple-100 overflow-hidden">
+                          {course.coverImage ? (
+                            <Image src={course.coverImage} alt={course.title} fill className="object-cover group-hover:scale-105 transition-transform" />
+                          ) : (
+                            <div className="flex items-center justify-center h-full"><span className="text-4xl">📚</span></div>
+                          )}
+                        </div>
                         <div className="px-4 pt-2 pb-1 flex items-center gap-2 min-w-0">
                           <span className="text-xs font-semibold text-gray-700 whitespace-nowrap">คอร์สเรียน Onsite</span>
                           {(course as any).categoryName && (
@@ -908,9 +904,11 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
                           <button onClick={() => handleAddToCart(course)} className="w-12 py-2 border-2 border-indigo-600 text-indigo-600 rounded-lg font-semibold text-sm hover:bg-indigo-50 transition-colors flex items-center justify-center flex-shrink-0" title="ใส่ตะกร้า">
                             <ShoppingCart className="w-5 h-5" />
                           </button>
-                          <Link href={`/courses/${course._id}`} className="flex-1">
-                            <button className="w-full py-2 bg-indigo-600 text-white rounded-lg font-semibold text-sm hover:bg-indigo-700 transition-colors">จองที่นั่ง</button>
-                          </Link>
+                          <button onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            router.push(`/courses/${course._id}`);
+                          }} className="flex-1 w-full py-2 bg-indigo-600 text-white rounded-lg font-semibold text-sm hover:bg-indigo-700 transition-colors">จองที่นั่ง</button>
                         </div>
                       </div>
                     ))}
@@ -1088,9 +1086,8 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
           <>
             <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-6 mb-8">
               {paginatedCourses.map((course) => (
-                <div key={course._id} className="bg-white rounded-xl overflow-hidden hover:shadow-lg transition-shadow group">
-                  <Link href={`/courses/${course._id}`}>
-                    <div className="relative h-40 bg-gradient-to-br from-indigo-100 to-purple-100 overflow-hidden cursor-pointer">
+                <div key={course._id} onClick={() => router.push(`/courses/${course._id}`)} className="bg-white rounded-xl overflow-hidden hover:shadow-lg transition-shadow group flex flex-col cursor-pointer">
+                  <div className="relative h-40 bg-gradient-to-br from-indigo-100 to-purple-100 overflow-hidden">
                       {course.coverImage ? (
                         <Image
                           src={course.coverImage}
@@ -1103,8 +1100,7 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
                           <span className="text-4xl">📚</span>
                         </div>
                       )}
-                    </div>
-                  </Link>
+                  </div>
 
                   <div className="px-4 pt-2 pb-1 flex items-center gap-2 min-w-0">
                     <span className="text-xs font-semibold text-gray-700 whitespace-nowrap">
@@ -1165,17 +1161,21 @@ export default function CoursesTabbed({ courses }: CourseTabbedProps) {
                       <ShoppingCart className="w-5 h-5" />
                     </button>
                     {activeTab === "online" ? (
-                      <Link href={`/checkout/courses/${course._id}`} className="flex-1">
-                        <button className="w-full py-2 bg-indigo-600 text-white rounded-lg font-semibold text-sm hover:bg-indigo-700 transition-colors">
-                          ซื้อเลย
-                        </button>
-                      </Link>
+                      <button onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        router.push(`/checkout/courses/${course._id}`);
+                      }} className="flex-1 w-full py-2 bg-indigo-600 text-white rounded-lg font-semibold text-sm hover:bg-indigo-700 transition-colors">
+                        ซื้อเลย
+                      </button>
                     ) : (
-                      <Link href={`/courses/${course._id}`} className="flex-1">
-                        <button className="w-full py-2 bg-indigo-600 text-white rounded-lg font-semibold text-sm hover:bg-indigo-700 transition-colors">
-                          จองที่นั่ง
-                        </button>
-                      </Link>
+                      <button onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        router.push(`/courses/${course._id}`);
+                      }} className="flex-1 w-full py-2 bg-indigo-600 text-white rounded-lg font-semibold text-sm hover:bg-indigo-700 transition-colors">
+                        จองที่นั่ง
+                      </button>
                     )}
                   </div>
                 </div>
