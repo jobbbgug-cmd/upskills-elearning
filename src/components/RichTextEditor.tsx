@@ -83,7 +83,8 @@ export default function RichTextEditor({ value, onChange, placeholder = "เข�
       </div>
       <EditorContent
         editor={editor}
-        className="prose prose-sm max-w-none p-4 min-h-64 focus:outline-none [&_.ProseMirror]:focus:outline-none"
+        onClick={() => editor.chain().focus().run()}
+        className="prose prose-sm max-w-none p-4 min-h-64 focus:outline-none [&_.ProseMirror]:focus:outline-none cursor-text"
       />
     </div>
   );
