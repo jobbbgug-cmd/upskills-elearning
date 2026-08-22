@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
 
     // Save order to database
     const order = await Order.create({
-      userId: auth.userId || auth.id,
+      userId: auth.userId,
       courseId: orderData.courseId || undefined,
       learningPathId: orderData.learningPathId || undefined,
       type: orderData.type || "course",
@@ -65,7 +65,7 @@ export async function POST(req: NextRequest) {
     console.log("Order created:", order._id);
 
     return NextResponse.json({ orderId: order._id.toString() }, { status: 201 });
-  } catch (err) {
+  } catch (err: unknown) {
     console.error("Order creation error:", err);
     return NextResponse.json({ error: "Failed to create order" }, { status: 500 });
   }
